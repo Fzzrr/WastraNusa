@@ -45,8 +45,8 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
     <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold text-[#3d5446] text-sm">Ringkasan Pesanan</h3>
-        <span className="text-[11px] text-[#3d5446]">
-          {items.length} produk
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f0ede6] text-[#5c7365]">
+          {items.length} Produk
         </span>
       </div>
 
@@ -72,8 +72,8 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
               <p className="text-xs font-bold text-[#3d5446] truncate">
                 {item.name}
               </p>
-              <p className="text-[10px] text-[#3d5446] mt-0.5">
-                {item.variant || 'Default'} - x{item.quantity}
+              <p className="text-[11px] text-[#726759] mt-0.5 truncate">
+                {item.variant || 'Default'} • {item.quantity}x
               </p>
             </div>
             <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
@@ -111,15 +111,14 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
       <hr className="border-[#f0ede6] my-5" />
 
       <div>
-        <div className="flex justify-between items-center mb-1">
+        <div className="flex justify-between items-center">
           <span className="text-sm font-bold text-[#3d5446]">
             Total Pembayaran
           </span>
-          <span className="text-sm font-bold text-[#3d5446]">
+          <span className="text-base font-extrabold text-[#3d5446]">
             Rp {(totals.total || 0).toLocaleString('id-ID')}
           </span>
         </div>
-        <p className="text-[10px] text-[#3d5446]">Sudah termasuk pajak</p>
       </div>
     </div>
   );

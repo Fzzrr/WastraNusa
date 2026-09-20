@@ -16,8 +16,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
-import { PaymentDeadlineBadge } from './payment-deadline-badge';
-
 interface MyOrderDetailMainProps {
   orderId: string;
 }
@@ -36,7 +34,7 @@ function getStatusBadgeColor(status: string) {
 }
 
 export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
-  const { data: order, isLoading, isError, refetch } = useOrderDetail(orderId);
+  const { data: order, isLoading, isError } = useOrderDetail(orderId);
   const cancelOrderMutation = useCancelOrder();
 
   if (isLoading) {
@@ -58,13 +56,10 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
         <div className="mb-3 rounded-full bg-[#fdf6f2] p-4 text-[#c4826b]">
           <XCircle className="h-8 w-8" />
         </div>
-        <p className="text-sm font-medium">Gagal memuat detail pesanan.</p>
-        <Button
-          className="mt-4 rounded-full bg-[#3c5043] px-4 hover:bg-[#2d3d32]"
-          asChild
-        >
-          <Link href="/profile/my-order">Kembali ke daftar pesanan</Link>
-        </Button>
+        <p className="text-sm font-medium">Gagal memuat pesanan.</p>
+        <p className="mt-1 text-xs text-[#a29582]">
+          Terjadi kesalahan saat mengambil detail pesanan.
+        </p>
       </div>
     );
   }
@@ -76,9 +71,7 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
           <h2 className="m-0 text-[18px] font-bold text-[#5c7365]">
             Detail Pesanan
           </h2>
-          <p className="text-xs text-[#8f9b94]">
-            {order.orderNumber} - {order.orderDate}
-          </p>
+          <p className="text-xs text-[#8f9b94]">{order.orderDate}</p>
         </div>
         <Button
           variant="outline"
@@ -106,20 +99,7 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
             >
               {order.orderStatus}
             </Badge>
-            <span className="text-xs text-[#8f9b94]">
-              Pembayaran: {order.paymentStatusLabel}
-            </span>
           </div>
-          {order.paymentDeadlineAt && (
-            <div className="mt-3">
-              <PaymentDeadlineBadge
-                deadlineAt={order.paymentDeadlineAt}
-                onExpire={() => {
-                  void refetch();
-                }}
-              />
-            </div>
-          )}
           {order.canCancel && (
             <Button
               variant="outline"

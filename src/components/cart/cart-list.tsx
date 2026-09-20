@@ -50,9 +50,9 @@ export function CartList({
           <Checkbox id="all" checked={isAllSelected} onChange={onToggleAll} />
           <label
             htmlFor="all"
-            className="text-sm font-bold text-[#455c4d] cursor-pointer"
+            className="cursor-pointer text-sm font-bold text-[#455c4d]"
           >
-            Pilih Semua ({items.length} produk)
+            Pilih semua
           </label>
         </div>
         {selectedIds.length > 0 && (

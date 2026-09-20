@@ -1,5 +1,6 @@
 'use client';
 
+import { Clock } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface PaymentDeadlineBadgeProps {
@@ -73,18 +74,6 @@ export function PaymentDeadlineBadge({
     }
   }, [deadlineAt, onExpire, remainingMs]);
 
-  const formattedDeadline = useMemo(() => {
-    if (!deadlineAt) return null;
-
-    return new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(deadlineAt));
-  }, [deadlineAt]);
-
   if (!deadlineAt) {
     return null;
   }
@@ -98,10 +87,14 @@ export function PaymentDeadlineBadge({
   }
 
   return (
-    <div className="rounded-lg border border-[#e7dbc9] bg-[#fff8ed] px-3 py-2 text-xs text-[#8a6a3f]">
-      Sisa waktu bayar:{' '}
-      <span className="font-semibold">{formatRemainingTime(remainingMs)}</span>
-      {formattedDeadline ? ` • Batas: ${formattedDeadline}` : ''}
+    <div className="rounded-lg border border-[#e7dbc9] bg-[#fff8ed] px-3 py-2 text-xs text-[#8a6a3f] flex items-center gap-2">
+      <Clock className="size-3.5 shrink-0 text-[#8a6a3f]" />
+      <span>
+        Sisa waktu bayar:{' '}
+        <span className="font-semibold">
+          {formatRemainingTime(remainingMs)}
+        </span>
+      </span>
     </div>
   );
 }
