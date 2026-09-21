@@ -60,7 +60,7 @@ describe('CartList', { tags: ['frontend'] }, () => {
   it('renders the item count and every product', () => {
     setup();
 
-    expect(screen.getByText('Pilih Semua (2 produk)')).toBeTruthy();
+    expect(screen.getByText('Pilih Semua (2)')).toBeTruthy();
     expect(screen.getByText('Batik Kawung')).toBeTruthy();
     expect(screen.getByText('Tenun Ikat')).toBeTruthy();
   });
