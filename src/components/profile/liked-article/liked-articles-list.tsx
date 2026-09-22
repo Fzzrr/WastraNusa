@@ -79,7 +79,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
 
             <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium text-[#8f9b94]">
               {article.readMinutes ? (
-                <span>{article.readMinutes} mnt baca</span>
+                <span>{article.readMinutes} mnt</span>
               ) : null}
               <span className="inline-flex items-center gap-1">
                 <Heart className="h-3.5 w-3.5" />

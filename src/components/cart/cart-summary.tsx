@@ -51,11 +51,8 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
 
   return (
     <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-[#3d5446] text-sm">Ringkasan Pesanan</h3>
-        <span className="text-[11px] text-[#3d5446]">
-          {totals.count} produk
-        </span>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-bold text-[#3d5446]">Ringkasan Pesanan</h3>
       </div>
 
       <hr className="border-[#f0ede6] mb-5" />
@@ -80,14 +77,11 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-[#3d5446] truncate">
+                  <p className="truncate text-xs font-bold text-[#3d5446]">
                     {item.name}
                   </p>
-                  <p className="text-[10px] text-[#3d5446] mt-0.5">
+                  <p className="mt-0.5 text-[10px] text-[#3d5446]">
                     {item.variant || 'M'} - x{item.quantity}
-                  </p>
-                  <p className="text-[10px] text-[#8e8476] mt-0.5">
-                    ID: {item.productId}
                   </p>
                 </div>
                 <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
@@ -105,12 +99,6 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
           <span>Subtotal</span>
           <span className="font-bold">
             Rp {(totals.subtotal || 0).toLocaleString('id-ID')}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span>Biaya Layanan</span>
-          <span className="font-bold">
-            Rp {(totals.serviceFee || 0).toLocaleString('id-ID')}
           </span>
         </div>
       </div>
@@ -133,10 +121,6 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
           Checkout
         </Button>
       </div>
-
-      <p className="text-center text-[10px] mt-3 text-[#3d5446]">
-        {totals.count} produk terpilih untuk dibeli
-      </p>
     </div>
   );
 }

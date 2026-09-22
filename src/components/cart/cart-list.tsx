@@ -47,13 +47,15 @@ export function CartList({
       {/* Header Pilih Semua */}
       <div className="bg-white rounded-xl border border-[#e8e2d5] p-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-3">
-          <Checkbox id="all" checked={isAllSelected} onChange={onToggleAll} />
-          <label
-            htmlFor="all"
-            className="text-sm font-bold text-[#455c4d] cursor-pointer"
-          >
-            Pilih Semua ({items.length} produk)
-          </label>
+          <Checkbox
+            id="all"
+            aria-label="Pilih Semua"
+            checked={isAllSelected}
+            onChange={onToggleAll}
+          />
+          <span className="cursor-pointer text-sm font-bold text-[#455c4d]">
+            Pilih Semua ({items.length})
+          </span>
         </div>
         {selectedIds.length > 0 && (
           <Button

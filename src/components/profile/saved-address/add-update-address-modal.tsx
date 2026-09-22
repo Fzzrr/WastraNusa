@@ -3,19 +3,29 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   type CustomerAddress,
   useCreateAddress,
   useUpdateAddress,
 } from '@/hooks/use-address';
+import { cn } from '@/lib/utils';
 import {
   type CreateAddressInput,
   createAddressSchema,
   updateAddressSchema,
 } from '@/schemas/address.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { kabupaten, kecamatan, provinsi } from 'daftar-wilayah-indonesia';
 import { Check, MapPin, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { type Resolver, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface AddUpdateAddressModalProps {
@@ -23,6 +33,8 @@ interface AddUpdateAddressModalProps {
   onClose: () => void;
   initialData?: CustomerAddress | null;
 }
+
+const ALL_PROVINCES = provinsi();
 
 const EMPTY_DEFAULTS: CreateAddressInput = {
   label: '',
@@ -54,6 +66,8 @@ export default function AddUpdateAddressModal({
     register,
     handleSubmit,
     reset,
+    control,
+    setValue,
     formState: { errors },
   } = useForm<CreateAddressInput>({
     resolver: zodResolver(
@@ -61,6 +75,58 @@ export default function AddUpdateAddressModal({
     ) as Resolver<CreateAddressInput>,
     defaultValues: EMPTY_DEFAULTS,
   });
+
+  const watchedProvince = useWatch({ control, name: 'province' });
+  const watchedCity = useWatch({ control, name: 'city' });
+  const watchedDistrict = useWatch({ control, name: 'district' });
+
+  // Resolve selected province object from library
+  const selectedProvince = useMemo(() => {
+    if (!watchedProvince) return null;
+    return (
+      ALL_PROVINCES.find(
+        (p) => p.nama.toLowerCase() === watchedProvince.toLowerCase(),
+      ) ?? null
+    );
+  }, [watchedProvince]);
+
+  // Cities / Kabupaten list for the selected province
+  const cityOptions = useMemo(() => {
+    if (!selectedProvince) return [];
+    const list = kabupaten(selectedProvince.kode);
+    // Retain custom or legacy city name if not found in list
+    if (
+      watchedCity &&
+      !list.some((c) => c.nama.toLowerCase() === watchedCity.toLowerCase())
+    ) {
+      return [{ kode: 'custom-city', nama: watchedCity }, ...list];
+    }
+    return list;
+  }, [selectedProvince, watchedCity]);
+
+  // Resolve selected city object from library
+  const selectedCity = useMemo(() => {
+    if (!watchedCity || !cityOptions.length) return null;
+    return (
+      cityOptions.find(
+        (c) => c.nama.toLowerCase() === watchedCity.toLowerCase(),
+      ) ?? null
+    );
+  }, [watchedCity, cityOptions]);
+
+  // Districts / Kecamatan list for the selected city
+  const districtOptions = useMemo(() => {
+    if (!selectedCity || selectedCity.kode === 'custom-city') return [];
+    const list = kecamatan(selectedCity.kode);
+    // Retain custom or legacy district name if not found in list
+    if (
+      watchedDistrict &&
+      !list.some((d) => d.nama.toLowerCase() === watchedDistrict.toLowerCase())
+    ) {
+      return [{ kode: 'custom-district', nama: watchedDistrict }, ...list];
+    }
+    return list;
+  }, [selectedCity, watchedDistrict]);
 
   // Sync form values when modal opens
   useEffect(() => {
@@ -236,10 +302,42 @@ export default function AddUpdateAddressModal({
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
                   Provinsi <span className="text-red-400">*</span>
                 </label>
-                <Input
-                  {...register('province')}
-                  placeholder="Jawa Barat"
-                  className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                <Controller
+                  control={control}
+                  name="province"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value || undefined}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue('city', '', { shouldValidate: true });
+                        setValue('district', '', { shouldValidate: true });
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30',
+                          !field.value && 'text-[#b0b8b3]',
+                        )}
+                        aria-invalid={!!errors.province}
+                      >
+                        <SelectValue placeholder="Pilih Provinsi" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
+                        <SelectGroup>
+                          {ALL_PROVINCES.map((p) => (
+                            <SelectItem
+                              key={p.kode}
+                              value={p.nama}
+                              className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
+                            >
+                              {p.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 {errors.province && (
                   <p className="mt-1 text-xs text-red-500">
@@ -251,10 +349,48 @@ export default function AddUpdateAddressModal({
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
                   Kota / Kabupaten <span className="text-red-400">*</span>
                 </label>
-                <Input
-                  {...register('city')}
-                  placeholder="Bandung"
-                  className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                <Controller
+                  control={control}
+                  name="city"
+                  render={({ field }) => (
+                    <Select
+                      disabled={!watchedProvince || cityOptions.length === 0}
+                      value={field.value || undefined}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue('district', '', { shouldValidate: true });
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                          !field.value && 'text-[#b0b8b3]',
+                        )}
+                        aria-invalid={!!errors.city}
+                      >
+                        <SelectValue
+                          placeholder={
+                            !watchedProvince
+                              ? 'Pilih Provinsi terlebih dahulu'
+                              : 'Pilih Kota / Kabupaten'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
+                        <SelectGroup>
+                          {cityOptions.map((c) => (
+                            <SelectItem
+                              key={c.kode}
+                              value={c.nama}
+                              className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
+                            >
+                              {c.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 {errors.city && (
                   <p className="mt-1 text-xs text-red-500">
@@ -270,10 +406,47 @@ export default function AddUpdateAddressModal({
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
                   Kecamatan <span className="text-red-400">*</span>
                 </label>
-                <Input
-                  {...register('district')}
-                  placeholder="Coblong"
-                  className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                <Controller
+                  control={control}
+                  name="district"
+                  render={({ field }) => (
+                    <Select
+                      disabled={!watchedCity || districtOptions.length === 0}
+                      value={field.value || undefined}
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                      }}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                          !field.value && 'text-[#b0b8b3]',
+                        )}
+                        aria-invalid={!!errors.district}
+                      >
+                        <SelectValue
+                          placeholder={
+                            !watchedCity
+                              ? 'Pilih Kota/Kab dahulu'
+                              : 'Pilih Kecamatan'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
+                        <SelectGroup>
+                          {districtOptions.map((d) => (
+                            <SelectItem
+                              key={d.kode}
+                              value={d.nama}
+                              className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
+                            >
+                              {d.nama}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
                 />
                 {errors.district && (
                   <p className="mt-1 text-xs text-red-500">

@@ -384,17 +384,6 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               </section>
             );
           })}
-
-          <Card className="mt-10 rounded-xl border border-[#ddd2c0] bg-[#f7f3e9] p-5">
-            <h3 className="text-lg font-bold text-[#355645]">
-              Sumber & Referensi
-            </h3>
-            <div className="mt-3 space-y-1.5 text-sm leading-7 text-[#5c6b62]">
-              {article.references.map((reference) => (
-                <p key={reference}>{reference}</p>
-              ))}
-            </div>
-          </Card>
         </article>
 
         <aside className="space-y-4">

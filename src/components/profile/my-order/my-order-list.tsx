@@ -102,68 +102,70 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
       {filteredOrders.map((order) => (
         <div key={order.id} className="flex flex-col gap-3.5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Badge
-                variant="secondary"
-                className={`rounded border-none px-2.5 py-0.5 text-[11px] font-semibold hover:bg-opacity-80 ${getStatusBadgeColor(
-                  order.status,
-                )} hover:${getStatusBadgeColor(order.status).split(' ')[0]}`}
-              >
-                {order.status}
-              </Badge>
-              <div className="text-[13px] font-medium text-[#726759]">
-                {order.id} <span className="font-bold text-[#4d6356]">•</span>{' '}
-                {order.date}
-              </div>
-            </div>
+            <Badge
+              variant="secondary"
+              className={`rounded border-none px-2.5 py-0.5 text-[11px] font-semibold hover:bg-opacity-80 ${getStatusBadgeColor(
+                order.status,
+              )} hover:${getStatusBadgeColor(order.status).split(' ')[0]}`}
+            >
+              {order.status}
+            </Badge>
             <div className="text-[14px] font-bold text-[#4d6356]">
               {order.totalPrice}
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5">
             {order.products.map((product, index) => (
               <div
                 key={index}
-                className="flex items-center gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4"
+                className="flex items-center justify-between gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4 transition-colors hover:border-[#dfd7ca]"
               >
-                <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
-                  {product.imageURL ? (
-                    <Image
-                      src={product.imageURL}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <>
-                      <Hexagon
-                        size={24}
-                        strokeWidth={1.5}
-                        className="text-[#c4b9a3]"
+                <div className="flex items-center gap-4 min-w-0 flex-1">
+                  <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
+                    {product.imageURL ? (
+                      <Image
+                        src={product.imageURL}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
                       />
-                      <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
-                        {product.category.substring(0, 4)}
-                      </span>
-                    </>
-                  )}
+                    ) : (
+                      <>
+                        <Hexagon
+                          size={24}
+                          strokeWidth={1.5}
+                          className="text-[#c4b9a3]"
+                        />
+                        <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
+                          {product.category.substring(0, 4)}
+                        </span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+                    <div className="flex flex-wrap gap-1.5 mb-0.5">
+                      <Badge
+                        variant="secondary"
+                        className="rounded border-none bg-[#f4efe6] px-2 py-0 text-[10px] font-medium text-[#c4826b] hover:bg-[#f4efe6]"
+                      >
+                        {product.category}
+                      </Badge>
+                    </div>
+                    <h3 className="w-full truncate text-[15px] font-bold leading-none text-[#4d6356]">
+                      {product.name}
+                    </h3>
+                    <p className="text-[12px] leading-relaxed text-[#8f9b94] mt-0.5">
+                      {product.location}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                  <div className="flex flex-wrap gap-1.5 mb-0.5">
-                    <Badge
-                      variant="secondary"
-                      className="rounded border-none bg-[#f4efe6] px-2 py-0 text-[10px] font-medium text-[#c4826b] hover:bg-[#f4efe6]"
-                    >
-                      {product.category}
-                    </Badge>
-                  </div>
-                  <h3 className="w-full truncate text-[15px] font-bold leading-none text-[#4d6356]">
-                    {product.name}
-                  </h3>
-                  <p className="text-[12px] leading-relaxed text-[#8f9b94] mt-0.5">
-                    {product.location} • {product.quantity} produk
-                  </p>
+                <div className="shrink-0 text-right flex flex-col items-end justify-center">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f4efe6] text-[#5c7365] border border-[#ece7dd]">
+                    {product.quantity} produk
+                  </span>
                 </div>
               </div>
             ))}

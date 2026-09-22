@@ -60,7 +60,7 @@ describe('CartList', { tags: ['frontend'] }, () => {
   it('renders the item count and every product', () => {
     setup();
 
-    expect(screen.getByText('Pilih Semua (2 produk)')).toBeTruthy();
+    expect(screen.getByText('Pilih Semua (2)')).toBeTruthy();
     expect(screen.getByText('Batik Kawung')).toBeTruthy();
     expect(screen.getByText('Tenun Ikat')).toBeTruthy();
   });
@@ -68,9 +68,9 @@ describe('CartList', { tags: ['frontend'] }, () => {
   it('marks the select-all checkbox as checked when all items are selected', () => {
     setup({ selectedIds: ['item-1', 'item-2'] });
 
-    const allCheckbox = screen.getByLabelText(
-      /Pilih Semua/,
-    ) as HTMLInputElement;
+    const allCheckbox = screen.getByRole('checkbox', {
+      name: /Pilih Semua/,
+    }) as HTMLInputElement;
     expect(allCheckbox.checked).toBe(true);
   });
 
@@ -91,7 +91,7 @@ describe('CartList', { tags: ['frontend'] }, () => {
   it('fires onToggleAll when the select-all checkbox is clicked', () => {
     const props = setup();
 
-    fireEvent.click(screen.getByLabelText(/Pilih Semua/));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Pilih Semua/ }));
 
     expect(props.onToggleAll).toHaveBeenCalledTimes(1);
   });

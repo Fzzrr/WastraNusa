@@ -179,7 +179,6 @@ export function CartMain() {
       (acc, curr) => acc + curr.price * curr.quantity,
       0,
     );
-    const serviceFee = selectedIds.length > 0 ? 5000 : 0;
 
     const formattedItems = selectedItems.map((item) => ({
       cartItemId: item.id,
@@ -195,8 +194,8 @@ export function CartMain() {
     return {
       totals: {
         subtotal,
-        serviceFee,
-        total: subtotal + serviceFee,
+        serviceFee: 0,
+        total: subtotal,
         count: selectedIds.length,
       },
       selectedItemsForSummary: formattedItems,
@@ -205,14 +204,9 @@ export function CartMain() {
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-8">
+      <div className="mb-8 flex items-center gap-2">
         <ShoppingCart className="text-brand" />
-        <h1 className="text-2xl font-bold text-[#3d5446]">
-          Keranjang Belanja{' '}
-          <span className="text-[#8e8476] font-normal text-lg">
-            ({items.length} produk)
-          </span>
-        </h1>
+        <h1 className="text-2xl font-bold text-[#3d5446]">Keranjang Belanja</h1>
       </div>
 
       {isLoading ? (

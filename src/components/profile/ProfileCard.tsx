@@ -51,7 +51,7 @@ export default function ProfileCard() {
           ) : (
             <p className="m-0 text-[12px] text-muted-foreground flex items-center justify-center md:justify-start gap-1">
               <MapPin size={13} />
-              Bergabung: {joinDate || 'Januari 2024'}
+              {joinDate || 'Januari 2024'}
             </p>
           )}
         </div>
