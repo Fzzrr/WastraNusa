@@ -68,12 +68,14 @@ export default function AddUpdateAddressModal({
     reset,
     control,
     setValue,
-    formState: { errors },
+    clearErrors,
+    formState: { errors, touchedFields, submitCount },
   } = useForm<CreateAddressInput>({
     resolver: zodResolver(
       isEdit ? updateAddressSchema : createAddressSchema,
     ) as Resolver<CreateAddressInput>,
     defaultValues: EMPTY_DEFAULTS,
+    mode: 'onTouched',
   });
 
   const watchedProvince = useWatch({ control, name: 'province' });
@@ -308,18 +310,32 @@ export default function AddUpdateAddressModal({
                   render={({ field }) => (
                     <Select
                       value={field.value || undefined}
+                      onOpenChange={(open) => {
+                        if (!open && !field.value) {
+                          field.onBlur();
+                          setValue('province', '', {
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
                       onValueChange={(val) => {
                         field.onChange(val);
+                        clearErrors('province');
                         setValue('city', '', { shouldValidate: true });
                         setValue('district', '', { shouldValidate: true });
                       }}
                     >
                       <SelectTrigger
                         className={cn(
-                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30',
+                          'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30',
                           !field.value && 'text-[#b0b8b3]',
                         )}
-                        aria-invalid={!!errors.province}
+                        aria-invalid={
+                          !watchedProvince &&
+                          (touchedFields.province || submitCount > 0) &&
+                          !!errors.province
+                        }
                       >
                         <SelectValue placeholder="Pilih Provinsi" />
                       </SelectTrigger>
@@ -339,11 +355,13 @@ export default function AddUpdateAddressModal({
                     </Select>
                   )}
                 />
-                {errors.province && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.province.message}
-                  </p>
-                )}
+                {!watchedProvince &&
+                  (touchedFields.province || submitCount > 0) &&
+                  errors.province && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.province.message}
+                    </p>
+                  )}
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
@@ -356,17 +374,31 @@ export default function AddUpdateAddressModal({
                     <Select
                       disabled={!watchedProvince || cityOptions.length === 0}
                       value={field.value || undefined}
+                      onOpenChange={(open) => {
+                        if (!open && !field.value) {
+                          field.onBlur();
+                          setValue('city', '', {
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
                       onValueChange={(val) => {
                         field.onChange(val);
+                        clearErrors(['city', 'district']);
                         setValue('district', '', { shouldValidate: true });
                       }}
                     >
                       <SelectTrigger
                         className={cn(
-                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                          'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
                           !field.value && 'text-[#b0b8b3]',
                         )}
-                        aria-invalid={!!errors.city}
+                        aria-invalid={
+                          !watchedCity &&
+                          (touchedFields.city || submitCount > 0) &&
+                          !!errors.city
+                        }
                       >
                         <SelectValue
                           placeholder={
@@ -392,11 +424,13 @@ export default function AddUpdateAddressModal({
                     </Select>
                   )}
                 />
-                {errors.city && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.city.message}
-                  </p>
-                )}
+                {!watchedCity &&
+                  (touchedFields.city || submitCount > 0) &&
+                  errors.city && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.city.message}
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -413,16 +447,30 @@ export default function AddUpdateAddressModal({
                     <Select
                       disabled={!watchedCity || districtOptions.length === 0}
                       value={field.value || undefined}
+                      onOpenChange={(open) => {
+                        if (!open && !field.value) {
+                          field.onBlur();
+                          setValue('district', '', {
+                            shouldTouch: true,
+                            shouldValidate: true,
+                          });
+                        }
+                      }}
                       onValueChange={(val) => {
                         field.onChange(val);
+                        clearErrors('district');
                       }}
                     >
                       <SelectTrigger
                         className={cn(
-                          'h-11 w-full rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                          'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
                           !field.value && 'text-[#b0b8b3]',
                         )}
-                        aria-invalid={!!errors.district}
+                        aria-invalid={
+                          !watchedDistrict &&
+                          (touchedFields.district || submitCount > 0) &&
+                          !!errors.district
+                        }
                       >
                         <SelectValue
                           placeholder={
@@ -448,11 +496,13 @@ export default function AddUpdateAddressModal({
                     </Select>
                   )}
                 />
-                {errors.district && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.district.message}
-                  </p>
-                )}
+                {!watchedDistrict &&
+                  (touchedFields.district || submitCount > 0) &&
+                  errors.district && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {errors.district.message}
+                    </p>
+                  )}
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">

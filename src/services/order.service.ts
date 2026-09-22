@@ -466,6 +466,7 @@ export const orderService = {
           province?: string;
           clothingType?: string;
           imageURL?: string | null;
+          unitPrice?: number;
         }> | null;
 
         let products;
@@ -497,6 +498,9 @@ export const orderService = {
               location: item.province || order.product.province,
               quantity: item.quantity as number,
               imageURL: item.imageURL || null,
+              unitPrice: formatOrderCurrency(
+                item.unitPrice ?? Number(order.productPrice),
+              ),
             };
 
             // If metadata is incomplete, enrich from database
@@ -519,6 +523,9 @@ export const orderService = {
                       }
                     ).imageURL ||
                     null,
+                  unitPrice: formatOrderCurrency(
+                    item.unitPrice ?? Number(order.productPrice),
+                  ),
                 };
               }
             }
@@ -534,6 +541,7 @@ export const orderService = {
               location: order.product.province,
               quantity: order.quantity,
               imageURL: order.product.imageURL,
+              unitPrice: formatOrderCurrency(Number(order.productPrice)),
             },
           ];
         }

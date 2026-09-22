@@ -148,6 +148,7 @@ export const orderRepository = {
         quantity: true,
         productId: true,
         variantId: true,
+        productPrice: true,
         customerNotes: true,
         product: {
           select: {

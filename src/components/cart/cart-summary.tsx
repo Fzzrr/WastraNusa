@@ -90,18 +90,8 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
               </div>
             ))}
           </div>
-          <hr className="border-[#f0ede6] mb-5" />
         </>
       )}
-
-      <div className="space-y-3 text-[11px] text-[#3d5446]">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span className="font-bold">
-            Rp {(totals.subtotal || 0).toLocaleString('id-ID')}
-          </span>
-        </div>
-      </div>
 
       <hr className="border-[#f0ede6] my-5" />
 

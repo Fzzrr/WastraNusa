@@ -1,6 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import type { LikedArticle } from '@/types/profile';
-import { BookmarkX, ChevronRight, Eye, Heart, Hexagon } from 'lucide-react';
+import {
+  BookmarkX,
+  ChevronRight,
+  Clock3,
+  Eye,
+  Heart,
+  Hexagon,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -79,7 +86,10 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
 
             <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium text-[#8f9b94]">
               {article.readMinutes ? (
-                <span>{article.readMinutes} mnt</span>
+                <span className="inline-flex items-center gap-1">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  {article.readMinutes}
+                </span>
               ) : null}
               <span className="inline-flex items-center gap-1">
                 <Heart className="h-3.5 w-3.5" />
