@@ -205,7 +205,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     ['Pulau Asal', product.island],
     ['Provinsi', product.province],
     [
-      'Terakhir Diperbarui',
+      'Tanggal Diunggah',
       new Date(product.updatedAt).toLocaleDateString('id-ID'),
     ],
   ];

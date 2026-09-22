@@ -31,7 +31,7 @@ export function CatalogDetailContent({
 }: CatalogDetailContentProps) {
   return (
     <Card className="rounded-2xl border border-[#d9d0c2] bg-[#f7f3ea] p-0">
-      <div className="inline-flex items-center gap-2 border-b border-[#ddd4c5] p-3">
+      <div className="inline-flex items-center gap-2 p-3">
         {[
           { key: 'deskripsi', label: 'Deskripsi' },
           { key: 'spesifikasi', label: 'Spesifikasi' },
@@ -41,7 +41,7 @@ export function CatalogDetailContent({
             type="button"
             variant="ghost"
             className={cn(
-              'rounded-none border-b-2 border-transparent px-2 pb-2 text-sm text-[#54685c]',
+              'h-auto rounded-full px-4 py-1.5 text-sm font-medium text-[#54685c] transition-all hover:bg-[#ece5d8]',
               activeTab === tab.key && 'border-[#2f5f49] text-[#2f5f49]',
             )}
             onClick={() => onTabChange(tab.key as DetailTab)}
@@ -54,23 +54,6 @@ export function CatalogDetailContent({
       {activeTab === 'deskripsi' ? (
         <div className="flex flex-col gap-4 p-5">
           <h3 className="text-3xl font-bold text-[#2f5b49]">Tentang Produk</h3>
-          <p className="text-[15px] leading-7 text-[#445c50]">
-            {product.description ||
-              'Deskripsi produk belum tersedia. Data ini akan dilengkapi oleh admin Catalog.'}
-          </p>
-
-          <div className="grid gap-3 md:grid-cols-2">
-            <Card className="rounded-xl border border-[#ddd4c5] bg-[#efe8dc] px-4 py-3">
-              <p className="text-xs text-[#9f9687]">Artikel Referensi</p>
-              <p className="font-semibold text-[#355847]">
-                {product.articleTitle}
-              </p>
-            </Card>
-            <Card className="rounded-xl border border-[#ddd4c5] bg-[#efe8dc] px-4 py-3">
-              <p className="text-xs text-[#9f9687]">SKU Produk</p>
-              <p className="font-semibold text-[#355847]">{product.sku}</p>
-            </Card>
-          </div>
 
           <div>
             <h4 className="text-xl font-bold text-[#315745]">

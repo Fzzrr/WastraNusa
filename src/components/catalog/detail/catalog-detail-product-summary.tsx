@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
-import { CircleCheck, Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, ShoppingCart } from 'lucide-react';
 
 import { formatRupiah } from '../utils';
 
@@ -68,22 +68,6 @@ export function CatalogDetailProductSummary({
       <h1 className="mt-2 text-5xl font-bold tracking-tight text-[#2f5b49]">
         {product.name}
       </h1>
-
-      <p className="mt-2 text-sm text-[#5f665e]">
-        SKU <span className="font-semibold text-[#ca724e]">{product.sku}</span>{' '}
-        · {product.island}, {product.province}
-      </p>
-      <p className="mt-2 inline-flex items-center gap-1.5 text-[#598a66]">
-        <CircleCheck className="size-4" />
-        {isOutOfStock ? 'Stok habis' : `Total stok: ${product.stock}`}
-      </p>
-      {hasVariantOptions ? (
-        <p className="mt-1 text-sm text-[#5f665e]">
-          {selectedVariantStock > 0
-            ? `Stok varian dipilih: ${selectedVariantStock}`
-            : 'Varian dipilih sedang habis'}
-        </p>
-      ) : null}
 
       <Card className="mt-4 rounded-2xl border border-[#ddd4c5] bg-[#efe9de] px-5 py-4">
         <h2 className="text-4xl font-extrabold tracking-tight text-[#2f5f49]">
@@ -185,7 +169,7 @@ export function CatalogDetailProductSummary({
           </Button>
         </Card>
         <span className="text-sm text-[#6c6962]">
-          Maks. {selectedVariantStock} unit
+          Stok tersedia: {selectedVariantStock} unit
         </span>
       </div>
 
