@@ -469,9 +469,12 @@ export const orderService = {
           unitPrice?: number;
         }> | null;
 
+        const fallbackUnitPrice =
+          Number(order.totalAmount) / Math.max(order.quantity, 1);
+
         let products;
-        if (checkoutItems && checkoutItems.length > 1) {
-          // Multiple items - build from checkout_items with enrichment
+        if (checkoutItems && checkoutItems.length > 0) {
+          // Build from checkout_items with enrichment when a snapshot exists.
           products = [];
           for (const item of checkoutItems) {
             if (
@@ -499,7 +502,7 @@ export const orderService = {
               quantity: item.quantity as number,
               imageURL: item.imageURL || null,
               unitPrice: formatOrderCurrency(
-                item.unitPrice ?? Number(order.productPrice),
+                item.unitPrice ?? fallbackUnitPrice,
               ),
             };
 
@@ -524,7 +527,7 @@ export const orderService = {
                     ).imageURL ||
                     null,
                   unitPrice: formatOrderCurrency(
-                    item.unitPrice ?? Number(order.productPrice),
+                    item.unitPrice ?? fallbackUnitPrice,
                   ),
                 };
               }
@@ -541,7 +544,7 @@ export const orderService = {
               location: order.product.province,
               quantity: order.quantity,
               imageURL: order.product.imageURL,
-              unitPrice: formatOrderCurrency(Number(order.productPrice)),
+              unitPrice: formatOrderCurrency(fallbackUnitPrice),
             },
           ];
         }

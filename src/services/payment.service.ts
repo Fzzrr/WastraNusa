@@ -325,7 +325,7 @@ export const paymentService = {
 
     const customerNotes = [
       input.customerNotes,
-      resolvedItems.length > 1
+      resolvedItems.length > 0
         ? `checkout_items=${JSON.stringify(itemSnapshot)}`
         : null,
       checkoutCartItemIds.length > 0
