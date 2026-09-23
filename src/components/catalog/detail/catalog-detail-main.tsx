@@ -195,6 +195,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     );
   }
 
+  const selectedColorVariant = colorVariants.find(
+    (variant) => variant.name === effectiveSelectedColor,
+  );
+  const activeImageURL = selectedColorVariant?.imageURL ?? product.imageURL;
   const safeQuantity =
     selectedVariantStock > 0
       ? Math.min(Math.max(quantity, 1), selectedVariantStock)
@@ -331,7 +335,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
         <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
           <CatalogDetailGallery
             category={product.clothingType}
-            imageURL={product.imageURL}
+            imageURL={activeImageURL}
           />
           <CatalogDetailProductSummary
             product={product}
