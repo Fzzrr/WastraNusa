@@ -1,23 +1,19 @@
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { auth } from './auth';
+import { getSessionUser } from './auth';
 
 export async function requireUser() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
+  const user = await getSessionUser();
+  if (!user) {
     return redirect('/login?session_expired=true');
   }
-  return session.user;
+  return user;
 }
 
 export async function requireAdmin() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) {
-    return redirect('/login?session_expired=true');
-  }
-  if (session.user.role !== 'admin') {
+  const user = await requireUser();
+  if (user.role !== 'admin') {
     return redirect('/');
   }
-  return session.user;
+  return user;
 }

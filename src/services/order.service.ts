@@ -5,6 +5,7 @@ import {
   PaymentTransactionStatus,
 } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
+import { formatIDR } from '@/lib/utils';
 import { orderRepository } from '@/repositories/order.repository';
 
 type UiOrderStatus =
@@ -67,19 +68,22 @@ function formatOrderDate(date: Date): string {
   }).format(new Date(date));
 }
 
-function formatOrderCurrency(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(amount);
-}
-
 function mapToPaymentStatusLabel(paymentStatus: string) {
   if (paymentStatus === 'paid') return 'Lunas';
   if (paymentStatus === 'failed') return 'Gagal';
   if (paymentStatus === 'refunded') return 'Refund';
   return 'Belum Bayar';
+}
+
+function isValidCheckoutItem<
+  T extends { productId?: string; quantity?: number },
+>(item: T): item is T & { productId: string; quantity: number } {
+  return (
+    typeof item.productId === 'string' &&
+    Boolean(item.productId) &&
+    typeof item.quantity === 'number' &&
+    item.quantity > 0
+  );
 }
 
 function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
@@ -119,19 +123,11 @@ function extractReservedItemsFromOrder(order: {
   }> | null;
 
   if (checkoutItems && checkoutItems.length > 0) {
-    return checkoutItems
-      .filter(
-        (item) =>
-          typeof item.productId === 'string' &&
-          item.productId &&
-          typeof item.quantity === 'number' &&
-          item.quantity > 0,
-      )
-      .map((item) => ({
-        productId: item.productId as string,
-        variantId: item.variantId ?? null,
-        quantity: item.quantity as number,
-      }));
+    return checkoutItems.filter(isValidCheckoutItem).map((item) => ({
+      productId: item.productId as string,
+      variantId: item.variantId ?? null,
+      quantity: item.quantity as number,
+    }));
   }
 
   return [
@@ -313,13 +309,7 @@ async function mapAdminOrder(order: {
   }>;
 
   if (checkoutItems && checkoutItems.length > 0) {
-    const validCheckoutItems = checkoutItems.filter(
-      (item) =>
-        typeof item.productId === 'string' &&
-        item.productId &&
-        typeof item.quantity === 'number' &&
-        item.quantity > 0,
-    );
+    const validCheckoutItems = checkoutItems.filter(isValidCheckoutItem);
 
     // Map each item, filling in missing data from database if needed
     products = await Promise.all(
@@ -340,7 +330,7 @@ async function mapAdminOrder(order: {
             location: item.province,
             category: item.clothingType,
             quantity: item.quantity as number,
-            unitPrice: formatOrderCurrency(itemUnitPrice),
+            unitPrice: formatIDR(itemUnitPrice),
           };
         }
 
@@ -356,7 +346,7 @@ async function mapAdminOrder(order: {
           category:
             dbProduct?.clothingType || item.clothingType || 'Unknown Category',
           quantity: item.quantity as number,
-          unitPrice: formatOrderCurrency(itemUnitPrice),
+          unitPrice: formatIDR(itemUnitPrice),
         };
       }),
     );
@@ -374,7 +364,7 @@ async function mapAdminOrder(order: {
         location: order.product.province,
         category: order.product.clothingType,
         quantity: order.quantity,
-        unitPrice: formatOrderCurrency(singleProductPrice),
+        unitPrice: formatIDR(singleProductPrice),
       },
     ];
   }
@@ -389,7 +379,7 @@ async function mapAdminOrder(order: {
     },
     products,
     totalAmount,
-    totalAmountLabel: formatOrderCurrency(totalAmount),
+    totalAmountLabel: formatIDR(totalAmount),
     orderStatus: effectiveOrderStatus,
     orderStatusLabel: mapToUiOrderStatus(order),
     paymentStatus: order.paymentStatus,
@@ -477,14 +467,7 @@ export const orderService = {
           // Build from checkout_items with enrichment when a snapshot exists.
           products = [];
           for (const item of checkoutItems) {
-            if (
-              !(
-                typeof item.productId === 'string' &&
-                item.productId &&
-                typeof item.quantity === 'number' &&
-                item.quantity > 0
-              )
-            ) {
+            if (!isValidCheckoutItem(item)) {
               continue;
             }
 
@@ -501,9 +484,7 @@ export const orderService = {
               location: item.province || order.product.province,
               quantity: item.quantity as number,
               imageURL: item.imageURL || null,
-              unitPrice: formatOrderCurrency(
-                item.unitPrice ?? fallbackUnitPrice,
-              ),
+              unitPrice: formatIDR(item.unitPrice ?? fallbackUnitPrice),
             };
 
             // If metadata is incomplete, enrich from database
@@ -526,9 +507,7 @@ export const orderService = {
                       }
                     ).imageURL ||
                     null,
-                  unitPrice: formatOrderCurrency(
-                    item.unitPrice ?? fallbackUnitPrice,
-                  ),
+                  unitPrice: formatIDR(item.unitPrice ?? fallbackUnitPrice),
                 };
               }
             }
@@ -544,7 +523,7 @@ export const orderService = {
               location: order.product.province,
               quantity: order.quantity,
               imageURL: order.product.imageURL,
-              unitPrice: formatOrderCurrency(fallbackUnitPrice),
+              unitPrice: formatIDR(fallbackUnitPrice),
             },
           ];
         }
@@ -553,7 +532,7 @@ export const orderService = {
           orderId: order.id,
           id: order.orderNumber || order.id,
           date: formatOrderDate(order.createdAt),
-          totalPrice: formatOrderCurrency(Number(order.totalAmount)),
+          totalPrice: formatIDR(Number(order.totalAmount)),
           status: uiStatus,
           paymentStatus: order.paymentStatus,
           paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
@@ -614,14 +593,7 @@ export const orderService = {
       // Multiple items - build from checkout_items with enrichment
       products = [];
       for (const item of checkoutItems) {
-        if (
-          !(
-            typeof item.productId === 'string' &&
-            item.productId &&
-            typeof item.quantity === 'number' &&
-            item.quantity > 0
-          )
-        ) {
+        if (!isValidCheckoutItem(item)) {
           continue;
         }
 
@@ -644,7 +616,7 @@ export const orderService = {
           category: item.clothingType || order.product.clothingType,
           location: item.province || order.product.province,
           quantity: item.quantity as number,
-          unitPrice: formatOrderCurrency(itemUnitPrice),
+          unitPrice: formatIDR(itemUnitPrice),
           imageURL: item.imageURL || null,
         };
 
@@ -659,7 +631,7 @@ export const orderService = {
               category: item.clothingType || productDetail.clothingType,
               location: item.province || productDetail.province,
               quantity: item.quantity as number,
-              unitPrice: formatOrderCurrency(itemUnitPrice),
+              unitPrice: formatIDR(itemUnitPrice),
               imageURL:
                 item.imageURL ||
                 (
@@ -683,7 +655,7 @@ export const orderService = {
           category: order.product.clothingType,
           location: order.product.province,
           quantity: order.quantity,
-          unitPrice: formatOrderCurrency(Number(order.productPrice)),
+          unitPrice: formatIDR(Number(order.productPrice)),
           imageURL: order.product.imageURL,
         },
       ];
@@ -700,9 +672,9 @@ export const orderService = {
       paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
       canCancel: canCancelPendingOrder(order),
       totals: {
-        subtotal: formatOrderCurrency(Number(order.subtotal)),
-        shippingCost: formatOrderCurrency(Number(order.shippingCost)),
-        totalAmount: formatOrderCurrency(Number(order.totalAmount)),
+        subtotal: formatIDR(Number(order.subtotal)),
+        shippingCost: formatIDR(Number(order.shippingCost)),
+        totalAmount: formatIDR(Number(order.totalAmount)),
       },
       products,
       shipping: {

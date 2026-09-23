@@ -1,5 +1,6 @@
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
+import { formatIDR } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
 import {
   type CreateArticleInput,
@@ -15,12 +16,6 @@ import type { LikedArticlesResponse } from '@/types/profile';
 
 const formatCount = (value: number) =>
   new Intl.NumberFormat('en-US').format(value);
-const formatRupiah = (value: number) =>
-  new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value);
 
 export const articleService = {
   getArticles: async (
@@ -186,7 +181,7 @@ export const articleService = {
         slug: product.slug,
         name: product.name,
         location: [product.province, product.island].filter(Boolean).join(', '),
-        price: formatRupiah(Number(product.price)),
+        price: formatIDR(Number(product.price)),
         ...(product.imageURL ? { imageURL: product.imageURL } : {}),
       })),
       discussionCount: 0,

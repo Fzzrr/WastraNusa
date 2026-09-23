@@ -11,6 +11,7 @@ import {
   useDeleteProductInventory,
   useProductInventories,
 } from '@/hooks/use-product-inventory';
+import { formatIDR } from '@/lib/utils';
 import { type ProductInventoryItem } from '@/types/product';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -48,14 +49,6 @@ function TableRowSkeleton() {
       </td>
     </tr>
   );
-}
-
-function formatPrice(value: number) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(value);
 }
 
 function getStatusBadgeClass(status: ProductInventoryItem['status']) {
@@ -206,7 +199,7 @@ export function AdminProductInventoryContent() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-right text-sm font-semibold text-[#3d3a34]">
-                          {formatPrice(product.price)}
+                          {formatIDR(product.price)}
                         </td>
                         <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {product.stock}

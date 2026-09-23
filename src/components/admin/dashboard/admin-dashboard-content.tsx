@@ -195,14 +195,18 @@ function PopularArticlesCard({
                     {article.category} / {article.region}
                   </p>
                 </div>
-                <div className="flex items-center gap-4 whitespace-nowrap text-xs text-[#8f8377]">
-                  <span className="inline-flex items-center gap-1">
-                    <Eye className="size-3.5" />
+                <div className="flex items-center gap-3 whitespace-nowrap text-xs font-semibold text-[#6b6053]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                      <Eye className="size-3" />
+                    </span>
                     {article.views.toLocaleString('id-ID')}
                   </span>
-                  <span className="inline-flex items-center gap-1">
-                    <Clock3 className="size-3.5" />
-                    {article.readTimeMinutes} min
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                      <Clock3 className="size-3" />
+                    </span>
+                    {article.readTimeMinutes}
                   </span>
                 </div>
               </Link>

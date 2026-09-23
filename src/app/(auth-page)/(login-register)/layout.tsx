@@ -7,7 +7,7 @@ type LayoutProps = {
 
 export default function AuthLayout({ children }: LayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#e8e0d0] font-segoe">
+    <div className="flex min-h-screen bg-[#e8e0d0]">
       {/* Left: form panel — form sits slightly above center, left-aligned with padding */}
       <div className="flex w-full flex-col lg:w-[60%] relative">
         {/* Logo top-left - Absolute positioning to avoid impacting flex center */}

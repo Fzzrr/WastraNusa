@@ -84,19 +84,25 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
               {article.excerpt}
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 text-[12px] font-medium text-[#8f9b94]">
+            <div className="flex flex-wrap items-center gap-3 text-[12px] font-semibold text-[#4f6658]">
               {article.readMinutes ? (
-                <span className="inline-flex items-center gap-1">
-                  <Clock3 className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                    <Clock3 className="size-3" />
+                  </span>
                   {article.readMinutes}
                 </span>
               ) : null}
-              <span className="inline-flex items-center gap-1">
-                <Heart className="h-3.5 w-3.5" />
+              <span className="inline-flex items-center gap-1.5">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                  <Heart className="size-3" />
+                </span>
                 {article.likes}
               </span>
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
+              <span className="inline-flex items-center gap-1.5">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                  <Eye className="size-3" />
+                </span>
                 {article.views}
               </span>
             </div>

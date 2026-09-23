@@ -1,6 +1,4 @@
-export function formatRupiah(value: number) {
-  return `Rp ${value.toLocaleString('id-ID')}`;
-}
+import { formatIDR } from '@/lib/utils';
 
 export function getVariantResolvedPrice(
   variant: { price: number | null } | null | undefined,
@@ -34,8 +32,8 @@ export function formatVariantPriceRange(
   const { min, max } = getVariantPriceRange(variants, fallbackPrice);
 
   if (min === max) {
-    return formatRupiah(min);
+    return formatIDR(min);
   }
 
-  return `${formatRupiah(min)} - ${formatRupiah(max)}`;
+  return `${formatIDR(min)} - ${formatIDR(max)}`;
 }

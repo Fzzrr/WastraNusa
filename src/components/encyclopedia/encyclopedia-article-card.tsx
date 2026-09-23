@@ -63,13 +63,17 @@ export function EncyclopediaArticleCard({
           {article.excerpt}
         </p>
 
-        <div className="mt-4 flex items-center justify-between text-xs text-[#a29582]">
-          <span className="inline-flex items-center gap-1">
-            <Heart className="h-3.5 w-3.5" />
+        <div className="mt-4 flex items-center gap-4 text-xs font-semibold text-[#4f6658]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+              <Heart className="size-3.5" />
+            </span>
             {article.likes}
           </span>
-          <span className="inline-flex items-center gap-1">
-            <Eye className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-1.5">
+            <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+              <Eye className="size-3.5" />
+            </span>
             {article.views}
           </span>
         </div>

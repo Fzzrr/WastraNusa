@@ -47,7 +47,8 @@ export function Header({ homeHref = '/' }: HeaderProps) {
   const showSearch =
     pathname === '/' ||
     pathname.startsWith('/catalog') ||
-    pathname.startsWith('/encyclopedia');
+    pathname.startsWith('/encyclopedia') ||
+    pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const visibleMenuItems = menuItems.filter(

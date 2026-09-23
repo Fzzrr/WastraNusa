@@ -1,16 +1,11 @@
-import { headers } from 'next/headers';
-
 import { ApiError } from '../error';
-import { auth } from './auth';
+import { getSessionUser } from './auth';
 
 /**
  * Centralized authentication helpers for API routes
  */
 export const AuthHelper = {
-  async getUser() {
-    const session = await auth.api.getSession({ headers: await headers() });
-    return session?.user ?? null;
-  },
+  getUser: getSessionUser,
 
   async requireUser() {
     const user = await this.getUser();

@@ -8,7 +8,7 @@ interface LayoutProps {
 
 export default function ForgotResetPasswordLayout({ children }: LayoutProps) {
   return (
-    <div className="relative min-h-screen bg-[#e8e0d0] flex flex-col font-segoe">
+    <div className="relative min-h-screen bg-[#e8e0d0] flex flex-col">
       {/* Logo - Absolute positioning to avoid impacting flex center */}
       <div className="absolute left-8 top-6 z-10 md:left-10">
         <Link href="/" className="flex items-center gap-2.5 w-fit">

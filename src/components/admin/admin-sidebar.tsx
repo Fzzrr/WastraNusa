@@ -1,19 +1,10 @@
 'use client';
 
+import { useAdminSidebar } from '@/components/admin/admin-sidebar-context';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
-} from '@/components/ui/sidebar';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import { type DashboardData, type DashboardNavItem } from '@/types/dashboard';
@@ -45,35 +36,30 @@ const ADMIN_NAVIGATION = [
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
-  const buttonClassName = cn(
-    'h-10 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    'data-[active=true]:bg-[#4b6f5f] data-[active=true]:text-[#C0653B]',
+  const className = cn(
+    'flex h-10 items-center gap-2 rounded-xl px-3 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+    item.active && 'bg-[#4b6f5f] text-[#C0653B]',
+    item.disabled && 'pointer-events-none opacity-50',
   );
 
+  if (item.href && !item.disabled) {
+    return (
+      <Link href={item.href} className={className}>
+        <Icon className="size-4" />
+        <span>{item.title}</span>
+      </Link>
+    );
+  }
+
   return (
-    <SidebarMenuItem>
-      {item.href && !item.disabled ? (
-        <SidebarMenuButton
-          asChild
-          isActive={item.active}
-          className={buttonClassName}
-        >
-          <Link href={item.href}>
-            <Icon />
-            <span>{item.title}</span>
-          </Link>
-        </SidebarMenuButton>
-      ) : (
-        <SidebarMenuButton disabled className={buttonClassName}>
-          <Icon />
-          <span>{item.title}</span>
-        </SidebarMenuButton>
-      )}
-    </SidebarMenuItem>
+    <button type="button" disabled className={className}>
+      <Icon className="size-4" />
+      <span>{item.title}</span>
+    </button>
   );
 }
 
-export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
+function AdminSidebarContent({ data }: { data: Partial<DashboardData> }) {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
@@ -103,10 +89,10 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
   };
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r-0">
-      <SidebarHeader className="gap-4 px-4 py-5">
+    <div className="flex h-full flex-col">
+      <div className="px-4 py-5">
         <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
-          <div className="flex size-10 items-center text-white justify-center rounded-xl bg-[#416d59] text-sm font-semibold text-sidebar-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-[#416d59] text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
             W
           </div>
           <div className="min-w-0">
@@ -116,22 +102,17 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
             <p className="text-xs text-sidebar-foreground/75">Admin Panel</p>
           </div>
         </div>
-      </SidebarHeader>
+      </div>
 
-      <SidebarContent className="px-3">
-        <SidebarGroup className="gap-2 py-0">
-          <SidebarMenu className="space-y-2">
-            {ADMIN_NAVIGATION.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <SidebarNavigationItem
-                  key={item.title}
-                  item={{ ...item, active: isActive }}
-                />
-              );
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
+      <div className="flex-1 overflow-y-auto px-3">
+        <nav className="space-y-2">
+          {ADMIN_NAVIGATION.map((item) => (
+            <SidebarNavigationItem
+              key={item.title}
+              item={{ ...item, active: pathname === item.href }}
+            />
+          ))}
+        </nav>
 
         {(outOfStockCount > 0 ||
           criticalStockCount > 0 ||
@@ -146,51 +127,63 @@ export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
             </AlertDescription>
           </Alert>
         )}
-      </SidebarContent>
+      </div>
 
-      <SidebarFooter className="px-3 pb-4">
-        <SidebarGroup className="gap-3 py-0">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link
-                  href="/"
-                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                >
-                  <UserRound className="size-4" />
-                  <span>Halaman Pengguna</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Button
-                  variant="ghost"
-                  className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                  onClick={handleSignOut}
-                >
-                  <LogOut className="size-4" />
-                  <span>Sign Out</span>
-                </Button>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-          <SidebarSeparator className="bg-white/10" />
-          <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
-            <Avatar size="sm" className="size-9">
-              <AvatarFallback className="bg-[#d2a36d] font-semibold text-sidebar-foreground">
-                {adminName.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-sidebar-foreground">
-                {adminName}
-              </p>
-              <p className="text-xs text-sidebar-foreground/75">{adminRole}</p>
-            </div>
+      <div className="space-y-3 px-3 pb-4">
+        <nav className="space-y-2">
+          <Link
+            href="/"
+            className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          >
+            <UserRound className="size-4" />
+            <span>Halaman Pengguna</span>
+          </Link>
+          <Button
+            variant="ghost"
+            className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            onClick={handleSignOut}
+          >
+            <LogOut className="size-4" />
+            <span>Sign Out</span>
+          </Button>
+        </nav>
+        <div className="h-px bg-white/10" />
+        <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
+          <Avatar size="sm" className="size-9">
+            <AvatarFallback className="bg-[#d2a36d] font-semibold text-sidebar-foreground">
+              {adminName.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-sidebar-foreground">
+              {adminName}
+            </p>
+            <p className="text-xs text-sidebar-foreground/75">{adminRole}</p>
           </div>
-        </SidebarGroup>
-      </SidebarFooter>
-    </Sidebar>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AdminSidebar({ data }: { data: Partial<DashboardData> }) {
+  const { open, setOpen } = useAdminSidebar();
+
+  return (
+    <>
+      <aside className="sticky top-0 hidden h-screen w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
+        <AdminSidebarContent data={data} />
+      </aside>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="left"
+          showCloseButton={false}
+          className="w-[var(--sidebar-width)] max-w-[85%] border-0 bg-sidebar p-0 text-sidebar-foreground"
+        >
+          <AdminSidebarContent data={data} />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

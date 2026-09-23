@@ -232,22 +232,30 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               {article.title}
             </h1>
 
-            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#ded4c4]">
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-[#ded4c4]">
               <span className="inline-flex items-center gap-1.5">
-                <UserRound className="h-3.5 w-3.5" />
+                <span className="flex size-6 items-center justify-center rounded-full bg-white/15 text-[#f8f3e8]">
+                  <UserRound className="size-3.5" />
+                </span>
                 {article.author}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="h-3.5 w-3.5" />
+                <span className="flex size-6 items-center justify-center rounded-full bg-white/15 text-[#f8f3e8]">
+                  <CalendarDays className="size-3.5" />
+                </span>
                 {article.publishedAt}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Clock3 className="h-3.5 w-3.5" />
-                {article.readMinutes ?? 8} menit baca
+                <span className="flex size-6 items-center justify-center rounded-full bg-white/15 text-[#f8f3e8]">
+                  <Clock3 className="size-3.5" />
+                </span>
+                {article.readMinutes ?? 8}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5" />
-                {article.views} ditonton
+                <span className="flex size-6 items-center justify-center rounded-full bg-white/15 text-[#f8f3e8]">
+                  <Eye className="size-3.5" />
+                </span>
+                {article.views}
               </span>
             </div>
           </div>

@@ -6,15 +6,15 @@ interface EncyclopediaStatsProps {
 }
 
 const STAT_ICONS: Record<string, LucideIcon> = {
-  'Total Artikel': BookOpen,
-  'Pulau Tercakup': Map,
-  'Provinsi Tercakup': MapPin,
-  'Jenis Wastra': Layers,
+  Artikel: BookOpen,
+  Pulau: Map,
+  Provinsi: MapPin,
+  Wastra: Layers,
 };
 
 export function EncyclopediaStats({ stats }: EncyclopediaStatsProps) {
   return (
-    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#d8d0c1] pt-5 sm:grid-cols-4">
+    <div className="mt-7 flex flex-wrap gap-x-10 gap-y-4 border-t border-[#d8d0c1] pt-5">
       {stats.map((stat) => {
         const Icon = STAT_ICONS[stat.label] ?? BookOpen;
 
@@ -26,14 +26,14 @@ export function EncyclopediaStats({ stats }: EncyclopediaStatsProps) {
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#2f5b49]/10 text-[#2f5b49] transition-colors duration-300 group-hover:bg-[#2f5b49] group-hover:text-[#f3ede2]">
               <Icon className="h-5 w-5" />
             </span>
-            <div>
-              <p className="text-2xl font-extrabold leading-none tracking-tight text-[#2f5b49]">
+            <p className="flex items-center gap-1.5">
+              <span className="text-2xl font-extrabold leading-none tracking-tight text-[#2f5b49]">
                 {stat.value}
-              </p>
-              <p className="mt-1.5 text-xs font-medium text-[#586f62]">
+              </span>
+              <span className="text-sm font-medium text-[#586f62]">
                 {stat.label}
-              </p>
-            </div>
+              </span>
+            </p>
           </div>
         );
       })}

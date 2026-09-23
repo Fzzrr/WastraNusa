@@ -4,10 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.font-segoe {
-  font-family: 'Segoe UI', system-ui, sans-serif;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -137,7 +133,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-medium;
   }
   html {
     @apply font-sans;

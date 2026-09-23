@@ -1,5 +1,6 @@
 'use client';
 
+import { formatIDR } from '@/lib/utils';
 import type { CheckoutSelectedItem } from '@/types/checkout';
 import { Package } from 'lucide-react';
 import Image from 'next/image';
@@ -75,7 +76,7 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
               </p>
             </div>
             <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
-              Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+              {formatIDR(item.price * item.quantity)}
             </span>
           </div>
         ))}
@@ -86,23 +87,19 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
       <div className="space-y-3 text-[11px] text-[#3d5446]">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span className="font-bold">
-            Rp {(totals.subtotal || 0).toLocaleString('id-ID')}
-          </span>
+          <span className="font-bold">{formatIDR(totals.subtotal || 0)}</span>
         </div>
         <div className="flex justify-between items-start gap-4">
           <span className="leading-tight shrink">
             Ongkos Kirim ({totals.shippingName || '-'})
           </span>
           <span className="font-bold whitespace-nowrap">
-            Rp {(totals.shippingFee || 0).toLocaleString('id-ID')}
+            {formatIDR(totals.shippingFee || 0)}
           </span>
         </div>
         <div className="flex justify-between">
           <span>Biaya Layanan</span>
-          <span className="font-bold">
-            Rp {(totals.serviceFee || 0).toLocaleString('id-ID')}
-          </span>
+          <span className="font-bold">{formatIDR(totals.serviceFee || 0)}</span>
         </div>
       </div>
 
@@ -114,7 +111,7 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
             Total Pembayaran
           </span>
           <span className="text-base font-extrabold text-[#3d5446]">
-            Rp {(totals.total || 0).toLocaleString('id-ID')}
+            {formatIDR(totals.total || 0)}
           </span>
         </div>
       </div>
