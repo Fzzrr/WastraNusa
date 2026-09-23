@@ -89,9 +89,6 @@ export function CatalogDetailProductSummary({
         <h2 className="text-4xl font-extrabold tracking-tight text-[#2f5f49]">
           {formatRupiah(selectedVariantPrice)}
         </h2>
-        <p className="text-sm text-[#6d6a62]">
-          Harga sudah termasuk PPN · Belum termasuk ongkos kirim
-        </p>
       </Card>
 
       <p className="mt-4 max-w-3xl text-[15px] leading-7 text-[#3e5348]">
