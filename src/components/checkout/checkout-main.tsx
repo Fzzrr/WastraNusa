@@ -122,11 +122,11 @@ export function CheckoutMain() {
     <>
       <div className="mb-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[#8e8476]">
         <span className="text-brand">Keranjang</span>
-        <span className="text-[#d8cfbf]">/</span>
+        <span className="text-[#d8cfbf]">&gt;</span>
         <span className="text-[#3d5446] border-b-2 border-brand pb-1">
           Pengiriman
         </span>
-        <span className="text-[#d8cfbf]">/</span>
+        <span className="text-[#d8cfbf]">&gt;</span>
         <span className="text-[#d8cfbf]">Pembayaran</span>
       </div>
 
@@ -157,7 +157,7 @@ export function CheckoutMain() {
               onSelect={setSelectedShippingId}
             />
 
-            <div className="mt-10 pt-6 border-t border-[#e8e2d5] flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
               <Link href="/cart">
                 <Button
                   variant="ghost"

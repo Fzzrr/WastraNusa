@@ -27,7 +27,7 @@ export function LikedArticlesMain() {
         </h2>
         {!isPending ? (
           <span className="rounded-full bg-[#eef3ef] px-3 py-1 text-xs font-semibold text-[#5c7365]">
-            {totalItems} Artikel
+            {totalItems}
           </span>
         ) : null}
       </div>

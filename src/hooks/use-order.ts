@@ -25,6 +25,7 @@ export interface OrderItem {
     location: string;
     quantity: number;
     imageURL: string | null;
+    unitPrice: string;
   }>;
   actions: 'Detail'[];
 }

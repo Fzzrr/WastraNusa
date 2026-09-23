@@ -50,8 +50,6 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
         </span>
       </div>
 
-      <hr className="border-[#f0ede6] mb-5" />
-
       <div className="space-y-4 mb-6 max-h-[240px] overflow-y-auto pr-2">
         {items.map((item) => (
           <div key={item.cartItemId} className="flex gap-4 items-center">
@@ -73,7 +71,7 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
                 {item.name}
               </p>
               <p className="text-[11px] text-[#726759] mt-0.5 truncate">
-                {item.variant || 'Default'} • {item.quantity}x
+                {item.variant || 'Default'} {' | '} x {item.quantity} barang
               </p>
             </div>
             <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
