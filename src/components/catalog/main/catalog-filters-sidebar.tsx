@@ -35,23 +35,6 @@ function capitalizeFirstLetter(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function formatStatusLabel(value: string): string {
-  const statusLabels: Record<string, string> = {
-    active: 'Aktif',
-    inactive: 'Tidak Aktif',
-    out_of_stock: 'Stok Habis',
-  };
-
-  if (statusLabels[value]) {
-    return statusLabels[value];
-  }
-
-  return value
-    .split('_')
-    .map((word) => capitalizeFirstLetter(word))
-    .join(' ');
-}
-
 type CatalogFiltersSidebarProps = {
   totalProducts: number;
   categories: ProductFilterOption[];
@@ -84,9 +67,7 @@ export function CatalogFiltersSidebar({
   totalProducts,
   categories,
   islands,
-  sizes,
   genders,
-  statuses,
   selectedCategory,
   selectedIsland,
   selectedSize,
@@ -98,9 +79,7 @@ export function CatalogFiltersSidebar({
   selectedPricePreset,
   onCategoryChange,
   onIslandChange,
-  onSizeChange,
   onGenderChange,
-  onStatusChange,
   onInStockOnlyChange,
   onMinPriceChange,
   onMaxPriceChange,
@@ -108,6 +87,19 @@ export function CatalogFiltersSidebar({
   onResetFilters,
 }: CatalogFiltersSidebarProps) {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  // Tambahkan di sekitar baris 111:
+  const [openSections, setOpenSections] = useState({
+    category: false,
+    price: false,
+    island: false,
+    gender: false,
+    stock: false,
+  });
+
+  const toggleSection = (key: keyof typeof openSections) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const hasPriceFilter =
     selectedPricePreset !== 'all' ||
@@ -174,265 +166,267 @@ export function CatalogFiltersSidebar({
         <div className="overflow-hidden">
           <div className="flex flex-col gap-3 pt-3 xl:pt-0">
             <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Kategori Produk</h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
+              <button
+                type="button"
+                onClick={() => toggleSection('category')}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                <span>Kategori Produk</span>
+                <ChevronDown
                   className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                    !selectedCategory
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                    'h-4 w-4 transition-transform duration-200',
+                    openSections.category && 'rotate-180',
                   )}
-                  onClick={() => onCategoryChange(undefined)}
-                >
-                  <span>Semua Produk</span>
-                  <Badge
-                    variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
-                  >
-                    {totalProducts}
-                  </Badge>
-                </button>
-
-                {categories.map((category) => (
+                />
+              </button>
+              {openSections.category && (
+                <div className="flex flex-col gap-1.5">
                   <button
-                    key={category.name}
                     type="button"
                     className={cn(
                       'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                      selectedCategory === category.name
+                      !selectedCategory
                         ? 'bg-[#2f5f49] text-[#edf4ec]'
                         : 'text-[#4f6659] hover:bg-[#ece5d8]',
                     )}
-                    onClick={() => onCategoryChange(category.name)}
+                    onClick={() => onCategoryChange(undefined)}
                   >
-                    <span>{category.name}</span>
+                    <span>Semua Produk</span>
                     <Badge
                       variant="secondary"
                       className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
                     >
-                      {category.count}
+                      {totalProducts}
                     </Badge>
                   </button>
-                ))}
-              </div>
+
+                  {categories.map((category) => (
+                    <button
+                      key={category.name}
+                      type="button"
+                      className={cn(
+                        'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                        selectedCategory === category.name
+                          ? 'bg-[#2f5f49] text-[#edf4ec]'
+                          : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      )}
+                      onClick={() => onCategoryChange(category.name)}
+                    >
+                      <span>{category.name}</span>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      >
+                        {category.count}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Rentang Harga</h3>
-              <div className="flex flex-col gap-2 text-sm text-[#52685b]">
-                {PRICE_RANGES.map((item) => (
-                  <label
-                    key={item.key}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <input
-                      type="radio"
-                      name="price-range"
-                      checked={selectedPricePreset === item.key}
-                      onChange={() => onPricePresetChange(item.key)}
+              <button
+                type="button"
+                onClick={() => toggleSection('price')}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                <span>Rentang Harga</span>
+                <ChevronDown
+                  className={cn(
+                    'h-4 w-4 transition-transform duration-200',
+                    openSections.price && 'rotate-180',
+                  )}
+                />
+              </button>
+              {openSections.price && (
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2 text-sm text-[#52685b]">
+                    {PRICE_RANGES.map((item) => (
+                      <label
+                        key={item.key}
+                        className="inline-flex items-center gap-2"
+                      >
+                        <input
+                          type="radio"
+                          name="price-range"
+                          checked={selectedPricePreset === item.key}
+                          onChange={() => onPricePresetChange(item.key)}
+                        />
+                        {item.label}
+                      </label>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      value={minPriceInput}
+                      onChange={(event) => onMinPriceChange(event.target.value)}
+                      placeholder="Min"
+                      className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
                     />
-                    {item.label}
-                  </label>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  value={minPriceInput}
-                  onChange={(event) => onMinPriceChange(event.target.value)}
-                  placeholder="Min"
-                  className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
-                />
-                <Input
-                  value={maxPriceInput}
-                  onChange={(event) => onMaxPriceChange(event.target.value)}
-                  placeholder="Max"
-                  className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
-                />
-              </div>
+                    <Input
+                      value={maxPriceInput}
+                      onChange={(event) => onMaxPriceChange(event.target.value)}
+                      placeholder="Max"
+                      className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
+                    />
+                  </div>
+                </div>
+              )}
             </Card>
 
             <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Ukuran</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant={!selectedSize ? 'default' : 'outline'}
-                  size="xs"
+              <button
+                type="button"
+                onClick={() => toggleSection('island')}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                <span>Asal Daerah</span>
+                <ChevronDown
                   className={cn(
-                    'rounded-md',
-                    !selectedSize
-                      ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                      : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
+                    'h-4 w-4 transition-transform duration-200',
+                    openSections.island && 'rotate-180',
                   )}
-                  onClick={() => onSizeChange(undefined)}
-                >
-                  Semua Ukuran
-                </Button>
-                {sizes.map((size) => (
-                  <Button
-                    key={size.name}
-                    type="button"
-                    variant={selectedSize === size.name ? 'default' : 'outline'}
-                    size="xs"
-                    className={cn(
-                      'rounded-md',
-                      selectedSize === size.name
-                        ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                        : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                    )}
-                    onClick={() => onSizeChange(size.name)}
-                  >
-                    {size.name} ({size.count})
-                  </Button>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Asal Daerah</h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                    !selectedIsland
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
-                  )}
-                  onClick={() => onIslandChange(undefined)}
-                >
-                  <span>Semua Pulau</span>
-                  <Badge
-                    variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
-                  >
-                    {islands.reduce((total, island) => total + island.count, 0)}
-                  </Badge>
-                </button>
-
-                {islands.map((island) => (
+                />
+              </button>
+              {openSections.island && (
+                <div className="flex flex-col gap-1.5">
                   <button
-                    key={island.name}
                     type="button"
                     className={cn(
                       'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                      selectedIsland === island.name
+                      !selectedIsland
                         ? 'bg-[#2f5f49] text-[#edf4ec]'
                         : 'text-[#4f6659] hover:bg-[#ece5d8]',
                     )}
-                    onClick={() => onIslandChange(island.name)}
+                    onClick={() => onIslandChange(undefined)}
                   >
-                    <span>{island.name}</span>
+                    <span>Semua Pulau</span>
                     <Badge
                       variant="secondary"
                       className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
                     >
-                      {island.count}
+                      {islands.reduce(
+                        (total, island) => total + island.count,
+                        0,
+                      )}
                     </Badge>
                   </button>
-                ))}
-              </div>
+
+                  {islands.map((island) => (
+                    <button
+                      key={island.name}
+                      type="button"
+                      className={cn(
+                        'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                        selectedIsland === island.name
+                          ? 'bg-[#2f5f49] text-[#edf4ec]'
+                          : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      )}
+                      onClick={() => onIslandChange(island.name)}
+                    >
+                      <span>{island.name}</span>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      >
+                        {island.count}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Gender</h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
+              <button
+                type="button"
+                onClick={() => toggleSection('gender')}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                <span>Gender</span>
+                <ChevronDown
                   className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                    !selectedGender
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                    'h-4 w-4 transition-transform duration-200',
+                    openSections.gender && 'rotate-180',
                   )}
-                  onClick={() => onGenderChange(undefined)}
-                >
-                  <span>Semua Gender</span>
-                  <Badge
-                    variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
-                  >
-                    {genders.reduce((total, gender) => total + gender.count, 0)}
-                  </Badge>
-                </button>
-
-                {genders.map((gender) => (
+                />
+              </button>
+              {openSections.gender && (
+                <div className="flex flex-col gap-1.5">
                   <button
-                    key={gender.name}
                     type="button"
                     className={cn(
                       'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
-                      selectedGender === gender.name
+                      !selectedGender
                         ? 'bg-[#2f5f49] text-[#edf4ec]'
                         : 'text-[#4f6659] hover:bg-[#ece5d8]',
                     )}
-                    onClick={() => onGenderChange(gender.name)}
+                    onClick={() => onGenderChange(undefined)}
                   >
-                    <span>{capitalizeFirstLetter(gender.name)}</span>
+                    <span>Semua Gender</span>
                     <Badge
                       variant="secondary"
                       className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
                     >
-                      {gender.count}
+                      {genders.reduce(
+                        (total, gender) => total + gender.count,
+                        0,
+                      )}
                     </Badge>
                   </button>
-                ))}
-              </div>
+
+                  {genders.map((gender) => (
+                    <button
+                      key={gender.name}
+                      type="button"
+                      className={cn(
+                        'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                        selectedGender === gender.name
+                          ? 'bg-[#2f5f49] text-[#edf4ec]'
+                          : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      )}
+                      onClick={() => onGenderChange(gender.name)}
+                    >
+                      <span>{capitalizeFirstLetter(gender.name)}</span>
+                      <Badge
+                        variant="secondary"
+                        className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      >
+                        {gender.count}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
+              )}
             </Card>
 
             <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Status Produk</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="xs"
-                  variant={!selectedStatus ? 'default' : 'outline'}
+              <button
+                type="button"
+                onClick={() => toggleSection('stock')}
+                className="flex w-full items-center justify-between text-left text-sm font-bold"
+              >
+                <span>Ketersediaan</span>
+                <ChevronDown
                   className={cn(
-                    'rounded-md',
-                    !selectedStatus
-                      ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                      : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
+                    'h-4 w-4 transition-transform duration-200',
+                    openSections.stock && 'rotate-180',
                   )}
-                  onClick={() => onStatusChange(undefined)}
-                >
-                  Semua Status
-                </Button>
-                {statuses.map((status) => (
-                  <Button
-                    key={status.name}
-                    type="button"
-                    size="xs"
-                    variant={
-                      selectedStatus === status.name ? 'default' : 'outline'
+                />
+              </button>
+              {openSections.stock && (
+                <label className="inline-flex items-center gap-2 text-sm text-[#52685b]">
+                  <input
+                    type="checkbox"
+                    checked={inStockOnly}
+                    onChange={(event) =>
+                      onInStockOnlyChange(event.target.checked)
                     }
-                    className={cn(
-                      'rounded-md',
-                      selectedStatus === status.name
-                        ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                        : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                    )}
-                    onClick={() => onStatusChange(status.name)}
-                  >
-                    {formatStatusLabel(status.name)} ({status.count})
-                  </Button>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Ketersediaan</h3>
-              <label className="inline-flex items-center gap-2 text-sm text-[#52685b]">
-                <input
-                  type="checkbox"
-                  checked={inStockOnly}
-                  onChange={(event) =>
-                    onInStockOnlyChange(event.target.checked)
-                  }
-                />
-                Hanya tampilkan produk yang tersedia
-              </label>
+                  />
+                  Hanya tampilkan produk yang tersedia
+                </label>
+              )}
             </Card>
 
             <Button
