@@ -164,7 +164,7 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
 
                 <div className="shrink-0 text-right flex flex-col items-end justify-center">
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f4efe6] text-[#5c7365] border border-[#ece7dd]">
-                    {product.quantity} barang x {product.unitPrice}
+                    {product.quantity}
                   </span>
                 </div>
               </div>
