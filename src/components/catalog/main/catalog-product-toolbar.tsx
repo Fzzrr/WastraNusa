@@ -51,7 +51,7 @@ export function CatalogProductToolbar({
             <span className="rounded-md bg-[#2f5f49]/10 px-1.5 py-0.5 font-bold text-[#2f5b49]">
               {productCount}
             </span>{' '}
-            produk
+            Produk
           </p>
         </div>
 

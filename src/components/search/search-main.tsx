@@ -56,14 +56,27 @@ export function SearchMain({ query }: SearchMainProps) {
       </div>
 
       {normalizedQuery ? (
-        <p className="mt-2 text-sm text-[#5f7366]">
-          {isPending ? 'Mencari…' : `Menampilkan ${totalResults} hasil untuk `}
-          {!isPending ? (
-            <span className="font-semibold text-[#2f5b49]">
-              &ldquo;{query.trim()}&rdquo;
-            </span>
-          ) : null}
-        </p>
+        <div className="mt-3 inline-flex items-center gap-2.5 rounded-xl border border-[#e2dac9] bg-[#efeadf] py-1.5 pr-4 pl-1.5">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#2f5f49] text-[#edf3eb]">
+            <Search className="size-4" />
+          </span>
+          <p className="text-sm text-[#5b6f63]">
+            {isPending ? (
+              'Mencari…'
+            ) : (
+              <>
+                Menampilkan{' '}
+                <span className="rounded-md bg-[#2f5f49]/10 px-1.5 py-0.5 font-bold text-[#2f5b49]">
+                  {totalResults}
+                </span>{' '}
+                hasil untuk{' '}
+                <span className="font-semibold text-[#2f5b49]">
+                  &ldquo;{query.trim()}&rdquo;
+                </span>
+              </>
+            )}
+          </p>
+        </div>
       ) : (
         <p className="mt-2 text-sm text-[#5f7366]">
           Masukkan kata kunci untuk mencari produk dan artikel ensiklopedia.
