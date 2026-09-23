@@ -357,22 +357,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                           </div>
                         )}
 
-                        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
-                          <span className="rounded-full border border-white/40 bg-[#f6efe3]/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6b5a49] backdrop-blur-sm">
-                            {visualLabel}
-                          </span>
-                        </div>
-
                         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#433528]/85 via-[#433528]/20 to-transparent" />
-                      </div>
-
-                      <div className="space-y-1 px-3 py-2.5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b775e]">
-                          Visual Section
-                        </p>
-                        <p className="text-xs leading-5 text-[#5b5f59]">
-                          {visualCaption}
-                        </p>
                       </div>
                     </Card>
                   ) : null}
