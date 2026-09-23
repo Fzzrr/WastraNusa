@@ -72,6 +72,13 @@ export function IslandCards() {
     return imagesByIsland;
   }, [data?.items]);
 
+  const islandMapImages: Record<string, string> = {
+    Jawa: '/islands_images/jawa.png',
+    Bali: '/islands_images/bali.png',
+    Sumatera: '/islands_images/sumatera.png',
+    'Nusa Tenggara': '/islands_images/nusatenggara.png',
+  };
+
   return (
     <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
       <Badge
@@ -142,9 +149,13 @@ export function IslandCards() {
                     href={`/encyclopedia?island=${encodeURIComponent(island.name)}`}
                   >
                     <Card className="group relative overflow-hidden rounded-2xl border border-[#ddd4c6] transition-all duration-500 ease-out hover:-translate-y-1 hover:border-[#c7b59b] hover:shadow-[0_22px_42px_-24px_rgba(20,28,22,0.65)]">
-                      {islandImages.get(island.name) ? (
+                      {islandMapImages[island.name] ||
+                      islandImages.get(island.name) ? (
                         <Image
-                          src={islandImages.get(island.name)!}
+                          src={
+                            islandMapImages[island.name] ||
+                            islandImages.get(island.name)!
+                          }
                           alt={island.name}
                           fill
                           sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
