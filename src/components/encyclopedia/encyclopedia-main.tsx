@@ -22,7 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
 import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Grid3x3, Menu, X } from 'lucide-react';
+import { Grid3x3, Home, Menu, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -159,21 +159,21 @@ export function EncyclopediaMain({
       value: String(
         data?.meta.stats?.totalArticles ?? data?.meta.totalItems ?? 0,
       ),
-      label: 'Total Artikel',
+      label: 'Artikel',
     },
     {
       value: String(
         data?.meta.stats?.totalIslands ?? Math.max(islands.length - 1, 0),
       ),
-      label: 'Pulau Tercakup',
+      label: 'Pulau',
     },
     {
       value: String(data?.meta.stats?.totalProvinces ?? 0),
-      label: 'Provinsi Tercakup',
+      label: 'Provinsi',
     },
     {
       value: String(data?.meta.stats?.totalWastraTypes ?? 0),
-      label: 'Jenis Wastra',
+      label: 'Wastra',
     },
   ];
 
@@ -250,7 +250,11 @@ export function EncyclopediaMain({
             <Breadcrumb className="mb-2">
               <BreadcrumbList className="text-[#6e8276] text-sm font-medium">
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/" className="hover:text-[#2f5b49]">
+                  <BreadcrumbLink
+                    href="/"
+                    className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+                  >
+                    <Home className="size-3.5" />
                     Beranda
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -262,11 +266,11 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-[#2f5b49]">
+            <h1 className="mt-2 text-4xl font-bold tracking-tight text-[#2f5b49] sm:text-5xl">
               Ensiklopedia Budaya Wastra
             </h1>
-            <div className="mt-3 h-1 w-16 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
-            <p className="mt-3 text-sm max-w-2xl text-medium leading-relaxed text-[#4d6759]">
+            <div className="mt-3 h-1.5 w-20 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
+            <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#4d6759]">
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
@@ -317,7 +321,7 @@ export function EncyclopediaMain({
                 </p>
               ) : (
                 <p className="text-left text-sm font-semibold text-[#4e6659]">
-                  Menampilkan {data?.meta.totalItems ?? articles.length} artikel
+                  Menampilkan {data?.meta.totalItems ?? articles.length} Artikel
                 </p>
               )}
               <div className="flex gap-1.5 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-0.5">

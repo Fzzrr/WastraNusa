@@ -1,10 +1,8 @@
 ﻿import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
+import { cn, formatIDR } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
-
-import { formatRupiah } from '../utils';
 
 export type DetailTab = 'deskripsi' | 'spesifikasi';
 
@@ -94,7 +92,7 @@ export function CatalogDetailContent({
             ['Nama Produk', product.name],
             ['Kategori', product.clothingType],
             ['Asal', `${product.province}, ${product.island}`],
-            ['Harga', formatRupiah(displayPrice)],
+            ['Harga', formatIDR(displayPrice)],
             ['Total Stok', `${product.stock} unit`],
             ['Berat', `${product.weight} gram`],
             ['Gender', product.gender],

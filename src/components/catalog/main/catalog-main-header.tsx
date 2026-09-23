@@ -6,7 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { type LucideIcon, Map, Package } from 'lucide-react';
+import { Home, type LucideIcon, Map, Package } from 'lucide-react';
 
 type CatalogMainHeaderProps = {
   totalProducts: number;
@@ -50,7 +50,11 @@ export function CatalogMainHeader({
         <Breadcrumb>
           <BreadcrumbList className="text-[#66786d] text-sm font-medium">
             <BreadcrumbItem>
-              <BreadcrumbLink href="/" className="hover:text-[#2f5b49]">
+              <BreadcrumbLink
+                href="/"
+                className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+              >
+                <Home className="size-3.5" />
                 Beranda
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -63,15 +67,15 @@ export function CatalogMainHeader({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="mt-3 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-3xl font-medium tracking-tight text-[#2f5b49]">
+            <h1 className="text-4xl font-bold tracking-tight text-[#2f5b49] sm:text-5xl">
               Katalog Produk Wastra
             </h1>
-            <div className="mt-2.5 h-1 w-16 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#4f6458]">
-              Jelajahi koleksi kain tradisional Indonesia — tenun, batik, dan
-              songket — langsung dari pengrajin lokal terpercaya.
+            <div className="mt-3 h-1.5 w-20 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[#4f6458]">
+              Jelajahi ragam kain tradisional Indonesia, mulai dari tenun,
+              batik, hingga songket, hasil karya pengrajin lokal terpercaya.
             </p>
           </div>
 
@@ -88,14 +92,14 @@ export function CatalogMainHeader({
                   <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#2f5b49]/10 text-[#2f5b49] transition-colors duration-300 group-hover:bg-[#2f5b49] group-hover:text-[#f3ede2]">
                     <Icon className="size-5" />
                   </span>
-                  <div>
-                    <p className="text-2xl font-extrabold leading-none tracking-tight text-[#2f5b49]">
+                  <p className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="text-2xl font-extrabold leading-none tracking-tight text-[#2f5b49]">
                       {stat.value}
-                    </p>
-                    <p className="mt-1.5 text-xs font-medium text-[#586f62] whitespace-nowrap">
+                    </span>
+                    <span className="text-xs font-medium text-[#586f62]">
                       {stat.label}
-                    </p>
-                  </div>
+                    </span>
+                  </p>
                 </div>
               );
             })}

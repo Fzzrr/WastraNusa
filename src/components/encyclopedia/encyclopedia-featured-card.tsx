@@ -71,14 +71,18 @@ export function EncyclopediaFeaturedCard({
               {article.excerpt}
             </p>
 
-            <div className="mt-3 flex items-center justify-between text-xs text-[#a09382]">
-              <span className="inline-flex items-center gap-1">
-                <Clock3 className="h-3.5 w-3.5" />
-                {article.readMinutes} menit baca
+            <div className="mt-3 flex items-center gap-4 text-xs font-semibold text-[#4f6658]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                  <Clock3 className="size-3.5" />
+                </span>
+                {article.readMinutes}
               </span>
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-3.5 w-3.5" />
-                {article.views} ditonton
+              <span className="inline-flex items-center gap-1.5">
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                  <Eye className="size-3.5" />
+                </span>
+                {article.views}
               </span>
             </div>
           </div>
@@ -139,18 +143,21 @@ export function EncyclopediaFeaturedCard({
             {article.excerpt}
           </p>
 
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-[#a09382]">
+          <div className="mt-3 flex flex-wrap items-center gap-4 text-xs font-semibold text-[#4f6658]">
             {article.readMinutes && (
-              <span className="inline-flex items-center gap-1">
-                <Clock3 className="h-3.5 w-3.5" />
-                {article.readMinutes} menit baca
+              <span className="inline-flex items-center gap-1.5">
+                <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                  <Clock3 className="size-3.5" />
+                </span>
+                {article.readMinutes}
               </span>
             )}
-            <span className="inline-flex items-center gap-1">
-              <Eye className="h-3.5 w-3.5" />
-              {article.views} ditonton
+            <span className="inline-flex items-center gap-1.5">
+              <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
+                <Eye className="size-3.5" />
+              </span>
+              {article.views}
             </span>
-            <span>{article.topic}</span>
           </div>
 
           <Button

@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { setCheckoutSession } from '@/lib/checkout-session';
+import { formatIDR } from '@/lib/utils';
 import {
   type CheckoutSelectedItem,
   type CheckoutSessionData,
@@ -85,7 +86,7 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
                   </p>
                 </div>
                 <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
-                  Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                  {formatIDR(item.price * item.quantity)}
                 </span>
               </div>
             ))}
@@ -98,7 +99,7 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
       <div className="flex justify-between items-center">
         <span className="text-sm font-bold text-[#3d5446]">Estimasi Total</span>
         <span className="text-sm font-bold text-[#3d5446]">
-          Rp {(totals.total || 0).toLocaleString('id-ID')}
+          {formatIDR(totals.total || 0)}
         </span>
       </div>
 

@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { admin, openAPI } from 'better-auth/plugins';
+import { headers } from 'next/headers';
 import z from 'zod';
 
 export const Gender = z.enum(['male', 'female']);
@@ -88,3 +89,8 @@ export const auth = betterAuth({
   },
   plugins: [admin(), openAPI()],
 });
+
+export async function getSessionUser() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  return session?.user ?? null;
+}

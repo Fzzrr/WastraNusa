@@ -32,7 +32,7 @@ export function EncyclopediaSection() {
       slug: article.slug,
       category: article.motifLabel,
       title: article.title,
-      meta: `${article.region} - ${article.readMinutes ?? 0} mnt`,
+      meta: article.region,
       imageURL: article.imageURL,
     })) ?? [];
 

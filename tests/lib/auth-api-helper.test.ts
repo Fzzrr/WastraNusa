@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth/auth';
+import { getSessionUser } from '@/lib/auth/auth';
 import { AuthHelper } from '@/lib/auth/auth-api-helper';
 import { ApiError } from '@/lib/error';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -6,16 +6,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 // tests/setup.ts mocks the helper itself; unmock it to test the real logic.
 vi.unmock('@/lib/auth/auth-api-helper');
 
-// Mock only the boundaries the helper depends on, not the helper.
-vi.mock('next/headers', () => ({
-  headers: vi.fn(async () => new Headers()),
-}));
-
+// Mock only the boundary the helper depends on, not the helper.
 vi.mock('@/lib/auth/auth', () => ({
-  auth: { api: { getSession: vi.fn() } },
+  getSessionUser: vi.fn(),
 }));
 
-const mockedGetSession = vi.mocked(auth.api.getSession);
+const mockedGetSessionUser = vi.mocked(getSessionUser);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -24,8 +20,9 @@ beforeEach(() => {
 describe('AuthHelper', { tags: ['backend'] }, () => {
   describe('getUser', () => {
     it('returns the user when a session exists', async () => {
-      mockedGetSession.mockResolvedValue({
-        user: { id: 'u1', role: 'user' },
+      mockedGetSessionUser.mockResolvedValue({
+        id: 'u1',
+        role: 'user',
       } as never);
 
       await expect(AuthHelper.getUser()).resolves.toEqual({
@@ -35,7 +32,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
     });
 
     it('returns null when there is no session', async () => {
-      mockedGetSession.mockResolvedValue(null as never);
+      mockedGetSessionUser.mockResolvedValue(null);
 
       await expect(AuthHelper.getUser()).resolves.toBeNull();
     });
@@ -43,8 +40,9 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
 
   describe('requireUser', () => {
     it('returns the user when authenticated', async () => {
-      mockedGetSession.mockResolvedValue({
-        user: { id: 'u1', role: 'user' },
+      mockedGetSessionUser.mockResolvedValue({
+        id: 'u1',
+        role: 'user',
       } as never);
 
       await expect(AuthHelper.requireUser()).resolves.toEqual({
@@ -54,7 +52,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
     });
 
     it('throws 401 when unauthenticated', async () => {
-      mockedGetSession.mockResolvedValue(null as never);
+      mockedGetSessionUser.mockResolvedValue(null);
 
       await expect(AuthHelper.requireUser()).rejects.toThrow(
         new ApiError('Unauthorized access attempt detected', 401),
@@ -64,8 +62,9 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
 
   describe('requireAdmin', () => {
     it('returns the user when the role is admin', async () => {
-      mockedGetSession.mockResolvedValue({
-        user: { id: 'admin1', role: 'admin' },
+      mockedGetSessionUser.mockResolvedValue({
+        id: 'admin1',
+        role: 'admin',
       } as never);
 
       await expect(AuthHelper.requireAdmin()).resolves.toEqual({
@@ -75,8 +74,9 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
     });
 
     it('throws 403 when authenticated but not an admin', async () => {
-      mockedGetSession.mockResolvedValue({
-        user: { id: 'u1', role: 'user' },
+      mockedGetSessionUser.mockResolvedValue({
+        id: 'u1',
+        role: 'user',
       } as never);
 
       await expect(AuthHelper.requireAdmin()).rejects.toThrow(
@@ -85,7 +85,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
     });
 
     it('throws 401 when unauthenticated', async () => {
-      mockedGetSession.mockResolvedValue(null as never);
+      mockedGetSessionUser.mockResolvedValue(null);
 
       await expect(AuthHelper.requireAdmin()).rejects.toThrow(
         new ApiError('Unauthorized access attempt detected', 401),

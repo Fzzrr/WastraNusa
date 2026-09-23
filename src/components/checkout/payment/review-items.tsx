@@ -1,5 +1,6 @@
 'use client';
 
+import { formatIDR } from '@/lib/utils';
 import type {
   CheckoutAddressSelection,
   CheckoutSelectedItem,
@@ -60,7 +61,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
                   </span>
                 )}
                 <span className="text-xs text-[#8e8476]">
-                  {item.quantity} × Rp {item.price.toLocaleString('id-ID')}
+                  {item.quantity} × {formatIDR(item.price)}
                 </span>
               </div>
             </div>
@@ -70,7 +71,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
                 Total
               </span>
               <span className="font-bold text-[#3d5446] text-sm sm:text-base">
-                Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                {formatIDR(item.price * item.quantity)}
               </span>
             </div>
           </div>
@@ -147,7 +148,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
                 </p>
                 {shipping?.price !== undefined && (
                   <span className="text-xs font-bold text-[#3d5446]">
-                    Rp {shipping.price.toLocaleString('id-ID')}
+                    {formatIDR(shipping.price)}
                   </span>
                 )}
               </div>

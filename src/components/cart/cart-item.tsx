@@ -1,6 +1,7 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import { formatIDR } from '@/lib/utils';
 import { Hexagon, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 
@@ -56,7 +57,7 @@ export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
 
         <div className="flex flex-col items-end gap-3 shrink-0">
           <p className="font-bold text-brand text-[15px]">
-            Rp {item.price.toLocaleString('id-ID')}
+            {formatIDR(item.price)}
           </p>
           <div className="flex items-center border border-[#d8cfbf] rounded-lg overflow-hidden h-8 bg-white shadow-sm">
             <button

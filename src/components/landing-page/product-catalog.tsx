@@ -2,6 +2,7 @@
 
 import { CatalogProductCard } from '@/components/catalog/main/catalog-product-card';
 import { CatalogProductGridSkeleton } from '@/components/catalog/main/catalog-product-grid';
+import { CatalogProductToolbar } from '@/components/catalog/main/catalog-product-toolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
@@ -63,22 +64,13 @@ export function ProductCatalog() {
           </Button>
         </div>
 
-        <div className="mt-7 flex flex-wrap items-center gap-2.5 text-sm">
-          <span className="text-[#5f7366]">Urutkan:</span>
-          {SORT_OPTIONS.map((option) => (
-            <Button
-              key={option.value}
-              className={`rounded-md border px-3 py-1.5 text-xs font-semibold transition active:scale-95 ${
-                activeSort === option.value
-                  ? 'border-[#2d5f48] bg-[#2d5f48] text-[#ecf1e8] shadow-sm'
-                  : 'border-[#dad2c4] bg-[#f8f4ec] text-[#4f6658] hover:border-[#a9baa8] hover:bg-[#f0eadd]'
-              }`}
-              type="button"
-              onClick={() => setActiveSort(option.value)}
-            >
-              {option.label}
-            </Button>
-          ))}
+        <div className="mt-7">
+          <CatalogProductToolbar
+            activeSort={activeSort}
+            sortOptions={SORT_OPTIONS}
+            productCount={data?.meta.totalItems ?? products.length}
+            onSortChange={setActiveSort}
+          />
         </div>
 
         {isPending && !data ? <CatalogProductGridSkeleton count={4} /> : null}

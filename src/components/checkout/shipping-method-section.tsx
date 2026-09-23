@@ -1,5 +1,6 @@
 'use client';
 
+import { formatIDR } from '@/lib/utils';
 import { Truck } from 'lucide-react';
 
 // 1. Definisikan tipe untuk masing-masing opsi kurir
@@ -57,7 +58,7 @@ export function ShippingMethodSection({
               </div>
             </div>
             <span className="text-sm font-bold text-[#3d5446]">
-              Rp {opt.price.toLocaleString('id-ID')}
+              {formatIDR(opt.price)}
             </span>
           </label>
         ))}

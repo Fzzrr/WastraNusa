@@ -1,11 +1,9 @@
 ﻿import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, formatIDR } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
 import { CircleCheck, Minus, Plus, ShoppingCart } from 'lucide-react';
-
-import { formatRupiah } from '../utils';
 
 type CatalogDetailProductSummaryProps = {
   product: ProductInventoryItem;
@@ -87,7 +85,7 @@ export function CatalogDetailProductSummary({
 
       <Card className="mt-4 rounded-2xl border border-[#ddd4c5] bg-[#efe9de] px-5 py-4">
         <h2 className="text-4xl font-extrabold tracking-tight text-[#2f5f49]">
-          {formatRupiah(selectedVariantPrice)}
+          {formatIDR(selectedVariantPrice)}
         </h2>
       </Card>
 
