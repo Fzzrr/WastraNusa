@@ -5,7 +5,6 @@ import {
   EncyclopediaArticleListCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
-  EncyclopediaSearchResults,
   EncyclopediaSidebar,
   EncyclopediaStats,
 } from '@/components/encyclopedia';
@@ -245,7 +244,7 @@ export function EncyclopediaMain({
   return (
     <main>
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-4 pt-7 md:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div>
           <div>
             <Breadcrumb className="mb-2">
               <BreadcrumbList className="text-[#6e8276] text-sm font-medium">
@@ -274,14 +273,6 @@ export function EncyclopediaMain({
               Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
               teknik tenun hingga makna filosofi setiap motif kain.
             </p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex items-start">
-            <EncyclopediaSearchResults
-              articles={searchArticles}
-              onArticleClick={handleArticleClick}
-            />
           </div>
         </div>
 

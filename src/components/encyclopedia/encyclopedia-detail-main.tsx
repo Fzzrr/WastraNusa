@@ -329,10 +329,21 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   {section.title}
                 </h2>
 
-                <div className="mt-3">
+                <div className="mt-4 grid gap-6 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_280px] items-stretch">
+                  <div className="space-y-4">
+                    {section.content.split('\n\n').map((paragraph, i) => (
+                      <p
+                        key={i}
+                        className="text-[15px] leading-8 text-[#465d51]"
+                      >
+                        {paragraph.trim()}
+                      </p>
+                    ))}
+                  </div>
+
                   {showVisual ? (
-                    <Card className="md:float-right md:ml-5 lg:ml-5 w-full md:w-60 lg:w-72 overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)] mb-5 md:mb-0">
-                      <div className="relative w-full bg-[#ece1d0] aspect-square">
+                    <Card className="flex flex-col h-full overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)]">
+                      <div className="relative w-full flex-1 min-h-[160px] bg-[#ece1d0]">
                         {section.imageURL ? (
                           <Image
                             src={section.imageURL}
@@ -354,38 +365,10 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                           </div>
                         )}
 
-                        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
-                          <span className="rounded-full border border-white/40 bg-[#f6efe3]/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#6b5a49] backdrop-blur-sm">
-                            {visualLabel}
-                          </span>
-                        </div>
-
                         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#433528]/85 via-[#433528]/20 to-transparent" />
-                      </div>
-
-                      <div className="space-y-1 px-3 py-2.5">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8b775e]">
-                          Visual Section
-                        </p>
-                        <p className="text-xs leading-5 text-[#5b5f59]">
-                          {visualCaption}
-                        </p>
                       </div>
                     </Card>
                   ) : null}
-
-                  <div className="space-y-4">
-                    {section.content.split('\n\n').map((paragraph, i) => (
-                      <p
-                        key={i}
-                        className="text-[15px] leading-8 text-[#465d51]"
-                      >
-                        {paragraph.trim()}
-                      </p>
-                    ))}
-                  </div>
-
-                  <div className="clear-both" />
                 </div>
 
                 {/* border-top now handles separation between sections */}
