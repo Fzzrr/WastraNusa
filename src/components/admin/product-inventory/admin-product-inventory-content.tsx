@@ -4,6 +4,7 @@ import { AdminHeader } from '@/components/admin/admin-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   fetchProductInventories,
@@ -23,6 +24,9 @@ import AddUpdateProductModal from './add-update-product-modal';
 function TableRowSkeleton() {
   return (
     <tr className="border-t border-[#ece7de]">
+      <td className="px-4 py-3">
+        <Skeleton className="size-4 rounded-sm bg-[#eee2d0]" />
+      </td>
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-5 w-40 bg-[#eee2d0]" />
@@ -82,11 +86,18 @@ export function AdminProductInventoryContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] =
     useState<ProductInventoryItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const { data: productData, isLoading } = useProductInventories(page, 10);
-  const { mutate: deleteProduct, isPending: isDeleting } =
-    useDeleteProductInventory();
+  const {
+    mutate: deleteProduct,
+    mutateAsync: deleteProductAsync,
+    isPending: isDeleting,
+  } = useDeleteProductInventory();
   const queryClient = useQueryClient();
+
+  const items = productData?.items ?? [];
+  const isAllSelected = items.length > 0 && selectedIds.length === items.length;
 
   useEffect(() => {
     if (productData?.meta.hasNextPage) {
@@ -113,6 +124,50 @@ export function AdminProductInventoryContent() {
     }
   };
 
+  const toggleSelectAll = () => {
+    setSelectedIds(isAllSelected ? [] : items.map((product) => product.id));
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((current) =>
+      current.includes(id)
+        ? current.filter((selectedId) => selectedId !== id)
+        : [...current, id],
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Apakah Anda yakin ingin menghapus ${selectedIds.length} produk terpilih?`,
+      )
+    ) {
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      selectedIds.map((id) => deleteProductAsync(id)),
+    );
+    const failedCount = results.filter(
+      (result) => result.status === 'rejected',
+    ).length;
+    const succeededCount = results.length - failedCount;
+
+    if (succeededCount > 0) {
+      toast.success(`${succeededCount} produk berhasil dihapus`);
+    }
+    if (failedCount > 0) {
+      toast.error(`${failedCount} produk gagal dihapus`);
+    }
+    setSelectedIds([]);
+  };
+
+  const goToPage = (nextPage: number) => {
+    setPage(nextPage);
+    setSelectedIds([]);
+  };
+
   const handleAdd = () => {
     setEditingProduct(null);
     setIsModalOpen(true);
@@ -132,21 +187,41 @@ export function AdminProductInventoryContent() {
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
-          <div className="flex items-center justify-end gap-3">
+          <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
-              {isLoading ? '...' : productData?.meta.totalItems} produk
+              {isLoading ? '...' : productData?.meta.totalItems} Units
             </p>
-            <Button onClick={handleAdd}>
-              <Plus data-icon="inline-start" />
-              Tambah Produk
-            </Button>
+            <div className="flex items-center gap-3">
+              {selectedIds.length > 0 ? (
+                <Button
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                >
+                  <Trash2 data-icon="inline-start" />
+                  Hapus ({selectedIds.length})
+                </Button>
+              ) : null}
+              <Button onClick={handleAdd}>
+                <Plus data-icon="inline-start" />
+                Tambah Produk
+              </Button>
+            </div>
           </div>
 
           <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
-                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a]">
                   <tr>
+                    <th className="px-4 py-3">
+                      <Checkbox
+                        aria-label="Pilih semua produk"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                        disabled={items.length === 0}
+                      />
+                    </th>
                     <th className="px-4 py-3">Produk</th>
                     <th className="px-4 py-3">Artikel</th>
                     <th className="px-4 py-3">Status</th>
@@ -164,7 +239,7 @@ export function AdminProductInventoryContent() {
                   ) : productData?.items.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         className="py-10 text-center text-[#8f8377]"
                       >
                         Belum ada produk yang tersedia.
@@ -174,16 +249,26 @@ export function AdminProductInventoryContent() {
                     productData?.items.map((product) => (
                       <tr
                         key={product.id}
-                        className="border-t border-[#ece7de]"
+                        onClick={() => handleEdit(product)}
+                        className="cursor-pointer border-t border-[#ece7de] hover:bg-[#f7f4ec]"
                       >
+                        <td
+                          className="px-4 py-3"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Checkbox
+                            aria-label={`Pilih ${product.name}`}
+                            checked={selectedIds.includes(product.id)}
+                            onChange={() => toggleSelectOne(product.id)}
+                          />
+                        </td>
                         <td className="px-4 py-3 text-[#2b2b2b]">
                           <div className="flex flex-col gap-0.5">
                             <p className="text-base font-semibold">
                               {product.name}
                             </p>
                             <p className="line-clamp-1 text-xs text-muted-foreground/80">
-                              {product.sku} · {product.clothingType} ·{' '}
-                              {product.island}
+                              {product.clothingType} · {product.island}
                             </p>
                           </div>
                         </td>
@@ -207,7 +292,10 @@ export function AdminProductInventoryContent() {
                         <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {product.variantCount}
                         </td>
-                        <td className="px-4 py-3">
+                        <td
+                          className="px-4 py-3"
+                          onClick={(event) => event.stopPropagation()}
+                        >
                           <div className="flex items-center justify-center gap-3">
                             <Button
                               size="icon-sm"
@@ -246,9 +334,7 @@ export function AdminProductInventoryContent() {
                   variant="outline"
                   size="icon"
                   className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
-                  onClick={() =>
-                    setPage((currentPage) => Math.max(1, currentPage - 1))
-                  }
+                  onClick={() => goToPage(Math.max(1, page - 1))}
                   disabled={page === 1 || isLoading}
                 >
                   <ChevronLeft className="size-4" />
@@ -258,9 +344,7 @@ export function AdminProductInventoryContent() {
                   size="icon"
                   className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
-                    setPage((currentPage) =>
-                      Math.min(productData.meta.totalPages, currentPage + 1),
-                    )
+                    goToPage(Math.min(productData.meta.totalPages, page + 1))
                   }
                   disabled={page === productData.meta.totalPages || isLoading}
                 >
