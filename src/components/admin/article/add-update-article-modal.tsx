@@ -637,7 +637,7 @@ export default function AddUpdateArticleModal({
               {/* Estimasi Waktu Baca */}
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                  Estimasi Waktu Baca (menit) *
+                  Estimasi Waktu Baca (Menit) *
                 </label>
                 <Input
                   {...register('readMinutes', { valueAsNumber: true })}

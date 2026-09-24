@@ -258,7 +258,7 @@ export function AdminOrderContent() {
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <p className="text-sm text-muted-foreground">
-              {isLoading ? '...' : orderData?.meta.totalItems} pesanan
+              {isLoading ? '...' : orderData?.meta.totalItems} Pesanan
             </p>
 
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -307,7 +307,7 @@ export function AdminOrderContent() {
           <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] ">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
                     <th className="px-4 py-3">Pelanggan</th>
