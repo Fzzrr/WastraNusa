@@ -4,6 +4,7 @@ import { AdminHeader } from '@/components/admin/admin-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   articleKeys,
@@ -32,6 +33,9 @@ import AddUpdateArticleModal from './add-update-article-modal';
 function TableRowSkeleton() {
   return (
     <tr className="border-t border-[#ece7de]">
+      <td className="px-4 py-3">
+        <Skeleton className="size-4 rounded-sm bg-[#eee2d0]" />
+      </td>
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
           <Skeleton className="h-5 w-48 bg-[#eee2d0]" />
@@ -68,11 +72,20 @@ export function AdminArticleContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] =
     useState<EncyclopediaArticleDetail | null>(null);
+  const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
 
   const { data: articlesData, isLoading } = useArticles(page, 10);
-  const { mutate: deleteArticle, isPending: isDeleting } = useDeleteArticle();
+  const {
+    mutate: deleteArticle,
+    mutateAsync: deleteArticleAsync,
+    isPending: isDeleting,
+  } = useDeleteArticle();
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const articles = articlesData?.items ?? [];
+  const isAllSelected =
+    articles.length > 0 && selectedSlugs.length === articles.length;
 
   useEffect(() => {
     if (articlesData?.meta.hasNextPage) {
@@ -108,6 +121,52 @@ export function AdminArticleContent() {
     setIsModalOpen(true);
   };
 
+  const goToPage = (nextPage: number) => {
+    setPage(nextPage);
+    setSelectedSlugs([]);
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedSlugs(
+      isAllSelected ? [] : articles.map((article) => article.slug),
+    );
+  };
+
+  const toggleSelectOne = (slug: string) => {
+    setSelectedSlugs((current) =>
+      current.includes(slug)
+        ? current.filter((selectedSlug) => selectedSlug !== slug)
+        : [...current, slug],
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedSlugs.length === 0) return;
+    if (
+      !window.confirm(
+        `Apakah Anda yakin ingin menghapus ${selectedSlugs.length} artikel terpilih?`,
+      )
+    ) {
+      return;
+    }
+
+    const results = await Promise.allSettled(
+      selectedSlugs.map((slug) => deleteArticleAsync(slug)),
+    );
+    const failedCount = results.filter(
+      (result) => result.status === 'rejected',
+    ).length;
+    const succeededCount = results.length - failedCount;
+
+    if (succeededCount > 0) {
+      toast.success(`${succeededCount} artikel berhasil dihapus`);
+    }
+    if (failedCount > 0) {
+      toast.error(`${failedCount} artikel gagal dihapus`);
+    }
+    setSelectedSlugs([]);
+  };
+
   return (
     <main className="flex flex-col">
       <AdminHeader
@@ -117,11 +176,21 @@ export function AdminArticleContent() {
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">
         <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-end">
-            <div className="flex items-center justify-end gap-3">
-              <p className="text-sm text-muted-foreground">
-                {isLoading ? '...' : articlesData?.meta.totalItems} artikel
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {isLoading ? '...' : articlesData?.meta.totalItems} Artikel
+            </p>
+            <div className="flex items-center gap-3">
+              {selectedSlugs.length > 0 ? (
+                <Button
+                  variant="destructive"
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                >
+                  <Trash2 data-icon="inline-start" />
+                  Hapus ({selectedSlugs.length})
+                </Button>
+              ) : null}
               <Button onClick={handleAdd}>
                 <Plus data-icon="inline-start" />
                 Tambah Artikel
@@ -132,8 +201,16 @@ export function AdminArticleContent() {
           <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left">
-                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] uppercase">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] ">
                   <tr>
+                    <th className="px-4 py-3">
+                      <Checkbox
+                        aria-label="Pilih semua artikel"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                        disabled={articles.length === 0}
+                      />
+                    </th>
                     <th className="px-4 py-3 ">Judul Artikel</th>
                     <th className="px-4 py-3 ">Topik</th>
                     <th className="px-4 py-3">Wilayah</th>
@@ -150,7 +227,7 @@ export function AdminArticleContent() {
                   ) : articlesData?.items.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="py-10 text-center text-[#8f8377]"
                       >
                         Belum ada artikel yang tersedia.
@@ -160,8 +237,19 @@ export function AdminArticleContent() {
                     articlesData?.items.map((article) => (
                       <tr
                         key={article.slug}
-                        className="border-t border-[#ece7de]"
+                        onClick={() => handleEdit(article.slug)}
+                        className="cursor-pointer border-t border-[#ece7de] hover:bg-[#f7f4ec]"
                       >
+                        <td
+                          className="px-4 py-3"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <Checkbox
+                            aria-label={`Pilih ${article.title}`}
+                            checked={selectedSlugs.includes(article.slug)}
+                            onChange={() => toggleSelectOne(article.slug)}
+                          />
+                        </td>
                         <td className="px-4 py-3 text-[#2b2b2b]">
                           <div className="flex flex-col gap-0.5">
                             <p className="text-base font-semibold">
@@ -192,7 +280,10 @@ export function AdminArticleContent() {
                         <td className="px-4 py-3 text-center text-sm font-semibold text-[#3d3a34]">
                           {article.readMinutes}
                         </td>
-                        <td className="px-4 py-3">
+                        <td
+                          className="px-4 py-3"
+                          onClick={(event) => event.stopPropagation()}
+                        >
                           <div className="flex items-center justify-center gap-3">
                             <Button
                               size="icon-sm"
@@ -241,7 +332,7 @@ export function AdminArticleContent() {
                   variant="outline"
                   size="icon"
                   className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => goToPage(Math.max(1, page - 1))}
                   disabled={page === 1 || isLoading}
                 >
                   <ChevronLeft className="size-4" />
@@ -275,7 +366,7 @@ export function AdminArticleContent() {
                                 ? 'bg-[#3d3a34] text-white hover:bg-[#3d3a34]/90'
                                 : 'border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]'
                             }`}
-                            onClick={() => setPage(p)}
+                            onClick={() => goToPage(p)}
                             disabled={isLoading}
                           >
                             {p}
@@ -290,9 +381,7 @@ export function AdminArticleContent() {
                   size="icon"
                   className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
-                    setPage((p) =>
-                      Math.min(articlesData.meta.totalPages, p + 1),
-                    )
+                    goToPage(Math.min(articlesData.meta.totalPages, page + 1))
                   }
                   disabled={page === articlesData.meta.totalPages || isLoading}
                 >
