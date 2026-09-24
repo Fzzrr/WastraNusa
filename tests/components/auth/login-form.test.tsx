@@ -1,7 +1,9 @@
 import { LoginForm } from '@/components/auth/(login-register)/login/login-form';
 import { authClient } from '@/lib/auth/auth-client';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { renderWithProviders as render } from '../../test-utils';
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
 

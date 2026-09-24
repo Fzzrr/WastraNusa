@@ -69,11 +69,11 @@ beforeEach(() => {
 });
 
 describe('CatalogDetailProductSummary', { tags: ['frontend'] }, () => {
-  it('shows total stock and enables purchase when in stock', () => {
+  it('shows available stock and enables purchase when in stock', () => {
     const props = baseProps();
     render(<CatalogDetailProductSummary {...props} />);
 
-    expect(screen.getByText('Total stok: 10')).toBeTruthy();
+    expect(screen.getByText('Stok tersedia: 5 unit')).toBeTruthy();
 
     const addBtn = screen.getByRole('button', {
       name: /tambah ke keranjang/i,
@@ -90,14 +90,14 @@ describe('CatalogDetailProductSummary', { tags: ['frontend'] }, () => {
     expect(props.onBuyNow).toHaveBeenCalledTimes(1);
   });
 
-  it('shows "Stok habis" and disables purchase when out of stock', () => {
+  it('disables purchase when out of stock', () => {
     const props = baseProps({
       product: makeProduct({ stock: 0, status: 'out_of_stock' }),
       selectedVariantStock: 0,
     });
     render(<CatalogDetailProductSummary {...props} />);
 
-    expect(screen.getByText('Stok habis')).toBeTruthy();
+    expect(screen.getByText('Stok tersedia: 0 unit')).toBeTruthy();
 
     const addBtn = screen.getByRole('button', {
       name: /tambah ke keranjang/i,
