@@ -9,9 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Gender, ProductStatus, VariantType } from '@/generated/prisma/enums';
+import { Gender, VariantType } from '@/generated/prisma/enums';
 import {
   useArticleOptions,
+  useClothingTypeOptions,
   useCreateProductInventory,
   useUpdateProductInventory,
 } from '@/hooks/use-product-inventory';
@@ -28,15 +29,13 @@ import {
   Layers,
   type LucideIcon,
   Package,
-  Palette,
   Plus,
-  Ruler,
   Tag,
   Trash2,
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { type UIEvent, useEffect, useState } from 'react';
+import { type UIEvent, useEffect, useRef, useState } from 'react';
 import {
   type Control,
   Controller,
@@ -55,21 +54,13 @@ interface AddUpdateProductModalProps {
   initialData?: ProductInventoryItem | null;
 }
 
-const PRODUCT_STATUS_OPTIONS: { value: ProductStatus; label: string }[] = [
-  { value: ProductStatus.active, label: 'Aktif' },
-  { value: ProductStatus.inactive, label: 'Nonaktif' },
-  { value: ProductStatus.out_of_stock, label: 'Habis' },
-];
-
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: Gender.male, label: 'Laki-laki' },
   { value: Gender.female, label: 'Perempuan' },
+  { value: Gender.unisex, label: 'Unisex' },
 ];
 
-const VARIANT_TYPE_OPTIONS: { value: VariantType; label: string }[] = [
-  { value: VariantType.size, label: 'Ukuran' },
-  { value: VariantType.color, label: 'Warna' },
-];
+const GENDER_NONE = '__none__';
 
 function slugify(text: string): string {
   return text
@@ -91,8 +82,7 @@ function buildProductFormValues(
     sku: initialData?.sku ?? '',
     weight: initialData?.weight ?? 1,
     clothingType: initialData?.clothingType ?? '',
-    gender: initialData?.gender ?? Gender.female,
-    status: initialData?.status ?? ProductStatus.active,
+    gender: initialData?.gender ?? undefined,
     imageURL: initialData?.imageURL ?? '',
     variants: initialData?.variants.map((variant) => ({
       id: variant.id,
@@ -108,7 +98,7 @@ function buildProductFormValues(
         type: VariantType.size,
         price: 0,
         stock: 0,
-        sku: '',
+        sku: 'AUTO',
         imageURL: '',
       },
     ],
@@ -183,6 +173,122 @@ function PriceInput({
   );
 }
 
+function ClothingTypeField({
+  control,
+}: {
+  control: Control<CreateProductInput>;
+}) {
+  const { data: clothingTypeOptions = [] } = useClothingTypeOptions();
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+        setSearch('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <Controller
+      control={control}
+      name="clothingType"
+      render={({ field }) => {
+        const filteredOptions = clothingTypeOptions.filter((type) =>
+          type.toLowerCase().includes(search.trim().toLowerCase()),
+        );
+        const trimmedSearch = search.trim();
+        const hasExactMatch = clothingTypeOptions.some(
+          (type) => type.toLowerCase() === trimmedSearch.toLowerCase(),
+        );
+
+        const select = (value: string) => {
+          field.onChange(value);
+          setIsOpen(false);
+          setSearch('');
+        };
+
+        return (
+          <div ref={containerRef} className="relative">
+            <div
+              onClick={() => setIsOpen(true)}
+              className="flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-2 py-1.5 focus-within:ring-2 focus-within:ring-[#c26a3d]/30"
+            >
+              {field.value ? (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-[#f4ecdd] px-2 py-1 text-sm font-medium text-[#8f5a30]">
+                  {field.value}
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      field.onChange('');
+                    }}
+                    className="rounded-full p-0.5 text-[#a98a63] hover:bg-[#e9dcc8] hover:text-[#8f5a30]"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
+              ) : null}
+              <input
+                value={isOpen ? search : ''}
+                onChange={(event) => setSearch(event.target.value)}
+                onFocus={() => setIsOpen(true)}
+                placeholder={field.value ? '' : 'Pilih atau buat jenis pakaian'}
+                className="min-w-[8rem] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {isOpen ? (
+              <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-xl border border-[#e5ded5] bg-white shadow-lg">
+                <p className="border-b border-[#efe8de] px-3 py-2 text-xs font-medium text-muted-foreground">
+                  Pilih opsi atau buat baru
+                </p>
+                <div className="max-h-48 overflow-y-auto py-1">
+                  {filteredOptions.map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => select(type)}
+                      className="flex w-full items-center px-3 py-2 text-left text-sm text-foreground hover:bg-[#f4ecdd]"
+                    >
+                      {type}
+                    </button>
+                  ))}
+                  {trimmedSearch && !hasExactMatch ? (
+                    <button
+                      type="button"
+                      onClick={() => select(trimmedSearch)}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-foreground hover:bg-[#f4ecdd]"
+                    >
+                      <span className="text-muted-foreground">Buat</span>
+                      <span className="rounded-md bg-[#f4ecdd] px-2 py-0.5 font-medium text-[#8f5a30]">
+                        {trimmedSearch}
+                      </span>
+                    </button>
+                  ) : null}
+                  {filteredOptions.length === 0 && !trimmedSearch ? (
+                    <p className="px-3 py-2 text-sm text-muted-foreground">
+                      Belum ada jenis pakaian.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        );
+      }}
+    />
+  );
+}
+
 function VariantCard({
   control,
   register,
@@ -198,9 +304,7 @@ function VariantCard({
   onRemove: () => void;
   canRemove: boolean;
 }) {
-  const type = useWatch({ control, name: `variants.${index}.type` });
   const imageURL = useWatch({ control, name: `variants.${index}.imageURL` });
-  const TypeIcon = type === VariantType.color ? Palette : Ruler;
   const variantErrors = errors.variants?.[index];
 
   return (
@@ -208,7 +312,7 @@ function VariantCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-lg bg-[#c26a3d]/10 text-[#c26a3d]">
-            <TypeIcon className="size-3.5" />
+            <Layers className="size-3.5" />
           </span>
           <span className="text-sm font-semibold text-foreground">
             Varian {index + 1}
@@ -239,53 +343,6 @@ function VariantCard({
           {variantErrors?.name && (
             <p className="mt-1 text-xs text-red-500">
               {variantErrors.name.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            Tipe Varian *
-          </label>
-          <Controller
-            control={control}
-            name={`variants.${index}.type` as const}
-            render={({ field: variantField }) => (
-              <Select
-                value={variantField.value}
-                onValueChange={variantField.onChange}
-              >
-                <SelectTrigger className="h-10 bg-white text-foreground">
-                  <SelectValue placeholder="Pilih tipe varian" />
-                </SelectTrigger>
-                <SelectContent>
-                  {VARIANT_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          {variantErrors?.type && (
-            <p className="mt-1 text-xs text-red-500">
-              {variantErrors.type.message}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            SKU Varian *
-          </label>
-          <Input
-            {...register(`variants.${index}.sku` as const)}
-            placeholder="BTK-PRG-M"
-          />
-          {variantErrors?.sku && (
-            <p className="mt-1 text-xs text-red-500">
-              {variantErrors.sku.message}
             </p>
           )}
         </div>
@@ -427,7 +484,6 @@ export default function AddUpdateProductModal({
     control,
     handleSubmit,
     reset,
-    getValues,
     setValue,
     formState: { errors },
   } = useForm<CreateProductInput>({
@@ -446,13 +502,21 @@ export default function AddUpdateProductModal({
   const productImageURL = useWatch({ control, name: 'imageURL' });
 
   useEffect(() => {
-    if (isEdit || !nameValue) return;
-    if (!getValues('slug')) {
-      setValue('slug', slugify(nameValue), { shouldValidate: false });
-    }
-  }, [nameValue, isEdit, getValues, setValue]);
+    if (!nameValue) return;
+    const slug = slugify(nameValue);
+    setValue('slug', slug, { shouldValidate: false });
+    setValue('sku', slug.toUpperCase(), { shouldValidate: false });
+  }, [nameValue, setValue]);
 
-  const onSubmit = (data: CreateProductInput) => {
+  const onSubmit = (formData: CreateProductInput) => {
+    const data: CreateProductInput = {
+      ...formData,
+      variants: formData.variants.map((variant, index) => ({
+        ...variant,
+        sku: `${formData.sku}-V${index + 1}`,
+      })),
+    };
+
     if (isEdit && initialData) {
       const updateData: UpdateProductInput = { ...data };
 
@@ -570,7 +634,7 @@ export default function AddUpdateProductModal({
                       onValueChange={field.onChange}
                       disabled={isLoadingArticles}
                     >
-                      <SelectTrigger className="h-11 w-full rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
+                      <SelectTrigger className="h-11 w-full rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground data-[size=default]:h-11">
                         <SelectValue
                           placeholder="Pilih artikel"
                           className="block w-full truncate"
@@ -625,43 +689,6 @@ export default function AddUpdateProductModal({
                   </p>
                 )}
               </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
-                  Slug Produk *
-                </label>
-                <Input
-                  {...register('slug')}
-                  placeholder="batik-parang-premium"
-                  className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7]"
-                />
-                {!isEdit ? (
-                  <p className="mt-1 text-xs text-[#8f8377]">
-                    Terisi otomatis dari nama produk, bisa diubah manual.
-                  </p>
-                ) : null}
-                {errors.slug && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.slug.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
-                  SKU Produk *
-                </label>
-                <Input
-                  {...register('sku')}
-                  placeholder="BTK-PRG-001"
-                  className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7]"
-                />
-                {errors.sku && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.sku.message}
-                  </p>
-                )}
-              </div>
             </div>
           </div>
 
@@ -706,11 +733,7 @@ export default function AddUpdateProductModal({
                 <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
                   Jenis Pakaian *
                 </label>
-                <Input
-                  {...register('clothingType')}
-                  placeholder="Batik"
-                  className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7]"
-                />
+                <ClothingTypeField control={control} />
                 {errors.clothingType && (
                   <p className="mt-1 text-xs text-red-500">
                     {errors.clothingType.message}
@@ -720,17 +743,25 @@ export default function AddUpdateProductModal({
 
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
-                  Gender *
+                  Gender (Opsional)
                 </label>
                 <Controller
                   control={control}
                   name="gender"
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
+                    <Select
+                      value={field.value ?? GENDER_NONE}
+                      onValueChange={(value) =>
+                        field.onChange(value === GENDER_NONE ? null : value)
+                      }
+                    >
+                      <SelectTrigger className="h-11 w-full rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground data-[size=default]:h-11">
                         <SelectValue placeholder="Pilih gender" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value={GENDER_NONE}>
+                          Tidak ditentukan
+                        </SelectItem>
                         {GENDER_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
@@ -743,35 +774,6 @@ export default function AddUpdateProductModal({
                 {errors.gender && (
                   <p className="mt-1 text-xs text-red-500">
                     {errors.gender.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
-                  Status Produk *
-                </label>
-                <Controller
-                  control={control}
-                  name="status"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="h-11 rounded-xl border-[#e5ded5] bg-[#fdfaf7] text-foreground">
-                        <SelectValue placeholder="Pilih status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PRODUCT_STATUS_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.status && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.status.message}
                   </p>
                 )}
               </div>
@@ -835,7 +837,7 @@ export default function AddUpdateProductModal({
                     type: VariantType.size,
                     price: 0,
                     stock: 0,
-                    sku: '',
+                    sku: 'AUTO',
                     imageURL: '',
                   })
                 }
