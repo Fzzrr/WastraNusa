@@ -32,11 +32,8 @@ function makeProduct(
   } as ProductInventoryItem;
 }
 
-const sizeOptions = [
+const variantOptions = [
   { id: 's1', name: 'M', type: 'size', price: null, stock: 5, sku: 'M-1' },
-] as unknown as ProductInventoryItem['variants'];
-
-const colorOptions = [
   { id: 'c1', name: 'Merah', type: 'color', price: null, stock: 4, sku: 'R-1' },
 ] as unknown as ProductInventoryItem['variants'];
 
@@ -47,15 +44,12 @@ function baseProps(
 ): React.ComponentProps<typeof CatalogDetailProductSummary> {
   return {
     product: makeProduct(),
-    sizeOptions,
-    colorOptions,
-    selectedColor: undefined,
-    selectedSize: undefined,
+    variantOptions,
+    selectedVariant: undefined,
     selectedVariantPrice: 150000,
     selectedVariantStock: 5,
     safeQuantity: 1,
-    onColorChange: vi.fn(),
-    onSizeChange: vi.fn(),
+    onVariantChange: vi.fn(),
     onDecreaseQuantity: vi.fn(),
     onIncreaseQuantity: vi.fn(),
     onAddToCart: vi.fn(),
@@ -114,15 +108,15 @@ describe('CatalogDetailProductSummary', { tags: ['frontend'] }, () => {
     expect(props.onAddToCart).not.toHaveBeenCalled();
   });
 
-  it('fires onColorChange and onSizeChange when variant buttons are clicked', () => {
+  it('fires onVariantChange when a variant button is clicked', () => {
     const props = baseProps();
     render(<CatalogDetailProductSummary {...props} />);
 
     fireEvent.click(screen.getByRole('button', { name: /merah/i }));
     fireEvent.click(screen.getByRole('button', { name: 'M (5)' }));
 
-    expect(props.onColorChange).toHaveBeenCalledWith('Merah');
-    expect(props.onSizeChange).toHaveBeenCalledWith('M');
+    expect(props.onVariantChange).toHaveBeenCalledWith('Merah');
+    expect(props.onVariantChange).toHaveBeenCalledWith('M');
   });
 
   it('disables the decrease button at the minimum quantity', () => {

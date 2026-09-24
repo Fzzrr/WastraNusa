@@ -104,57 +104,28 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   const addToCartMutation = useAddToCart();
   const updateCartItemMutation = useUpdateCartItem();
   const router = useRouter();
-  const [selectedSize, setSelectedSize] = useState<string>();
-  const [selectedColor, setSelectedColor] = useState<string>();
+  const [selectedVariantName, setSelectedVariantName] = useState<string>();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<DetailTab>('deskripsi');
   const { data: linkedArticle, isPending: isLinkedArticlePending } =
     useArticleDetail(product?.articleId ?? '');
 
-  const sizeVariants = useMemo(
-    () => product?.variants.filter((variant) => variant.type === 'size') ?? [],
-    [product],
-  );
-  const colorVariants = useMemo(
-    () => product?.variants.filter((variant) => variant.type === 'color') ?? [],
-    [product],
-  );
-  const effectiveSelectedSize = useMemo(() => {
-    if (!selectedSize) {
-      return sizeVariants[0]?.name;
+  const variants = useMemo(() => product?.variants ?? [], [product]);
+  const effectiveSelectedVariantName = useMemo(() => {
+    if (!selectedVariantName) {
+      return variants[0]?.name;
     }
 
-    return sizeVariants.some((variant) => variant.name === selectedSize)
-      ? selectedSize
-      : sizeVariants[0]?.name;
-  }, [selectedSize, sizeVariants]);
-  const effectiveSelectedColor = useMemo(() => {
-    if (!selectedColor) {
-      return colorVariants[0]?.name;
-    }
-
-    return colorVariants.some((variant) => variant.name === selectedColor)
-      ? selectedColor
-      : colorVariants[0]?.name;
-  }, [colorVariants, selectedColor]);
+    return variants.some((variant) => variant.name === selectedVariantName)
+      ? selectedVariantName
+      : variants[0]?.name;
+  }, [selectedVariantName, variants]);
   const selectedVariantId = useMemo(() => {
-    const selectedSizeVariant = sizeVariants.find(
-      (variant) => variant.name === effectiveSelectedSize,
+    return (
+      variants.find((variant) => variant.name === effectiveSelectedVariantName)
+        ?.id ?? null
     );
-    if (selectedSizeVariant) {
-      return selectedSizeVariant.id;
-    }
-
-    const selectedColorVariant = colorVariants.find(
-      (variant) => variant.name === effectiveSelectedColor,
-    );
-    return selectedColorVariant?.id ?? null;
-  }, [
-    colorVariants,
-    effectiveSelectedColor,
-    effectiveSelectedSize,
-    sizeVariants,
-  ]);
+  }, [effectiveSelectedVariantName, variants]);
   const selectedVariantStock = useMemo(() => {
     if (selectedVariantId) {
       return (
@@ -195,10 +166,10 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     );
   }
 
-  const selectedColorVariant = colorVariants.find(
-    (variant) => variant.name === effectiveSelectedColor,
+  const selectedVariant = variants.find(
+    (variant) => variant.name === effectiveSelectedVariantName,
   );
-  const activeImageURL = selectedColorVariant?.imageURL ?? product.imageURL;
+  const activeImageURL = selectedVariant?.imageURL ?? product.imageURL;
   const safeQuantity =
     selectedVariantStock > 0
       ? Math.min(Math.max(quantity, 1), selectedVariantStock)
@@ -294,10 +265,6 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
         return;
       }
 
-      const selectedVariant = selectedVariantId
-        ? product.variants.find((variant) => variant.id === selectedVariantId)
-        : undefined;
-
       setCheckoutSession({
         items: [
           {
@@ -305,8 +272,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             productId: product.id,
             variantId: selectedVariantId,
             name: product.name,
-            variant:
-              effectiveSelectedSize ?? effectiveSelectedColor ?? 'Default',
+            variant: effectiveSelectedVariantName ?? 'Default',
             price: selectedVariantPrice,
             quantity: safeQuantity,
             imageURL: selectedVariant?.imageURL ?? product.imageURL,
@@ -339,15 +305,12 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
           />
           <CatalogDetailProductSummary
             product={product}
-            sizeOptions={sizeVariants}
-            colorOptions={colorVariants}
-            selectedColor={effectiveSelectedColor}
-            selectedSize={effectiveSelectedSize}
+            variantOptions={variants}
+            selectedVariant={effectiveSelectedVariantName}
             selectedVariantPrice={selectedVariantPrice}
             selectedVariantStock={selectedVariantStock}
             safeQuantity={safeQuantity}
-            onColorChange={setSelectedColor}
-            onSizeChange={setSelectedSize}
+            onVariantChange={setSelectedVariantName}
             onDecreaseQuantity={() =>
               setQuantity((value) => Math.max(1, value - 1))
             }

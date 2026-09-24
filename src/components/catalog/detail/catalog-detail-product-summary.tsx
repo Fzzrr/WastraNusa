@@ -7,15 +7,12 @@ import { Minus, Plus, ShoppingCart } from 'lucide-react';
 
 type CatalogDetailProductSummaryProps = {
   product: ProductInventoryItem;
-  sizeOptions: ProductInventoryItem['variants'];
-  colorOptions: ProductInventoryItem['variants'];
-  selectedColor?: string;
-  selectedSize?: string;
+  variantOptions: ProductInventoryItem['variants'];
+  selectedVariant?: string;
   selectedVariantPrice: number;
   selectedVariantStock: number;
   safeQuantity: number;
-  onColorChange: (color?: string) => void;
-  onSizeChange: (size?: string) => void;
+  onVariantChange: (variant?: string) => void;
   onDecreaseQuantity: () => void;
   onIncreaseQuantity: () => void;
   onAddToCart: () => void;
@@ -25,15 +22,12 @@ type CatalogDetailProductSummaryProps = {
 
 export function CatalogDetailProductSummary({
   product,
-  sizeOptions,
-  colorOptions,
-  selectedColor,
-  selectedSize,
+  variantOptions,
+  selectedVariant,
   selectedVariantPrice,
   selectedVariantStock,
   safeQuantity,
-  onColorChange,
-  onSizeChange,
+  onVariantChange,
   onDecreaseQuantity,
   onIncreaseQuantity,
   onAddToCart,
@@ -41,7 +35,7 @@ export function CatalogDetailProductSummary({
   isCartActionPending = false,
 }: CatalogDetailProductSummaryProps) {
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
-  const hasVariantOptions = sizeOptions.length > 0 || colorOptions.length > 0;
+  const hasVariantOptions = variantOptions.length > 0;
   const isSelectedVariantOutOfStock =
     hasVariantOptions && selectedVariantStock <= 0;
   const isPurchaseDisabled = isOutOfStock || isSelectedVariantOutOfStock;
@@ -78,59 +72,27 @@ export function CatalogDetailProductSummary({
           'Deskripsi produk belum tersedia. Silakan cek artikel ensiklopedia untuk konteks budaya produk ini.'}
       </p>
 
-      <div className="mt-4 flex flex-col gap-3">
+      <div className="mt-4 flex flex-col gap-2">
+        <span className="text-sm font-semibold text-[#4d6458]">Varian</span>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-[#4d6458]">
-            Pilihan Warna:
-          </span>
-          {colorOptions.length > 0 ? (
-            colorOptions.map((color) => (
+          {variantOptions.length > 0 ? (
+            variantOptions.map((variant) => (
               <Button
-                key={color.id}
-                type="button"
-                size="sm"
-                variant="outline"
-                className={cn(
-                  'rounded-full border-[#ddd3c2] bg-[#f4efe5] text-[#4f6558]',
-                  selectedColor === color.name && 'bg-[#dfe8dd] text-[#315642]',
-                )}
-                onClick={() => onColorChange(color.name)}
-              >
-                {color.name} ({color.stock})
-              </Button>
-            ))
-          ) : (
-            <span className="text-sm text-[#6f6a5f]">
-              Belum ada varian warna
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-[#4d6458]">Ukuran</span>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {sizeOptions.length > 0 ? (
-            sizeOptions.map((size) => (
-              <Button
-                key={size.id}
+                key={variant.id}
                 type="button"
                 variant="outline"
                 className={cn(
                   'rounded-lg border-[#ddd4c5] bg-[#f5f0e7] text-[#496356]',
-                  selectedSize === size.name &&
+                  selectedVariant === variant.name &&
                     'border-[#2f5f49] bg-[#2f5f49] text-[#edf4ec]',
                 )}
-                onClick={() => onSizeChange(size.name)}
+                onClick={() => onVariantChange(variant.name)}
               >
-                {size.name} ({size.stock})
+                {variant.name} ({variant.stock})
               </Button>
             ))
           ) : (
-            <span className="text-sm text-[#6f6a5f]">
-              Belum ada varian ukuran
-            </span>
+            <span className="text-sm text-[#6f6a5f]">Belum ada varian</span>
           )}
         </div>
       </div>
