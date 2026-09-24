@@ -124,7 +124,7 @@ describe('use-product-inventory hooks', { tags: ['frontend'] }, () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(MOCK_PRODUCT_LIST);
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/products?page=1&limit=10',
+      '/api/products?page=1&limit=10&includeOutOfStock=true',
       expect.any(Object),
     );
   });

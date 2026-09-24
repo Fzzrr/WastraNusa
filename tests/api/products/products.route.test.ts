@@ -116,9 +116,11 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
       island: undefined,
       size: undefined,
       clothingType: undefined,
+      topic: undefined,
       gender: undefined,
       status: undefined,
       inStock: undefined,
+      excludeOutOfStock: true,
       sortBy: undefined,
     });
   });
@@ -137,9 +139,11 @@ describe('GET /api/products', { tags: ['backend'] }, () => {
       island: 'Jawa',
       size: undefined,
       clothingType: 'batik',
+      topic: undefined,
       gender: 'male',
       status: 'active',
       inStock: true,
+      excludeOutOfStock: true,
       sortBy: 'price_desc',
     });
   });

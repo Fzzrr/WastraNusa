@@ -55,7 +55,7 @@ const mapProduct = (product: {
   island?: string | null;
   province: string;
   clothingType: string;
-  gender: 'male' | 'female';
+  gender: 'male' | 'female' | 'unisex' | null;
   status: ProductStatus;
   sold: number;
   variants: {
@@ -142,6 +142,10 @@ const normalizeFilters = (
     gender: filters.gender,
     status: filters.status,
     inStock: typeof filters.inStock === 'boolean' ? filters.inStock : undefined,
+    excludeOutOfStock:
+      typeof filters.excludeOutOfStock === 'boolean'
+        ? filters.excludeOutOfStock
+        : undefined,
     sortBy: PRODUCT_SORT_OPTIONS.includes(filters.sortBy ?? 'newest')
       ? (filters.sortBy ?? 'newest')
       : 'newest',
@@ -264,10 +268,14 @@ export const productService = {
     );
 
     const genders = mapFilterOptions(
-      genderCounts.map((item) => ({
-        name: item.gender,
-        count: item._count.gender,
-      })),
+      genderCounts
+        .filter((item): item is typeof item & { gender: string } =>
+          Boolean(item.gender),
+        )
+        .map((item) => ({
+          name: item.gender,
+          count: item._count.gender,
+        })),
       normalizedFilters.gender,
     );
 
@@ -387,8 +395,8 @@ export const productService = {
       island,
       province,
       clothingType: data.clothingType,
-      gender: data.gender,
-      status: data.status ?? ProductStatus.active,
+      gender: data.gender ?? null,
+      status: ProductStatus.active,
       variants: data.variants?.length
         ? { create: normalizeVariantsForCreate(data.variants) }
         : undefined,
@@ -439,7 +447,6 @@ export const productService = {
       province: nextProvince,
       clothingType: data.clothingType,
       gender: data.gender,
-      status: data.status,
       variants: data.variants
         ? normalizeVariantsForUpdate(data.variants)
         : undefined,
@@ -453,5 +460,9 @@ export const productService = {
     const product = await productRepository.delete(idOrSlug);
     logger.info('Product deleted successfully', { productId: product.id });
     return product;
+  },
+
+  getClothingTypes: async (): Promise<string[]> => {
+    return productRepository.getDistinctClothingTypes();
   },
 };

@@ -32,6 +32,7 @@ function buildProductWhereInput(
     gender,
     status,
     inStock,
+    excludeOutOfStock,
     topic,
   } = filters;
 
@@ -72,6 +73,16 @@ function buildProductWhereInput(
     andConditions.push({
       article: {
         topic,
+      },
+    });
+  }
+
+  if (excludeOutOfStock) {
+    andConditions.push({
+      variants: {
+        some: {
+          stock: { gt: 0 },
+        },
       },
     });
   }
@@ -416,9 +427,6 @@ export const productRepository = {
       distinct: ['clothingType'],
       select: {
         clothingType: true,
-      },
-      where: {
-        status: 'active',
       },
       orderBy: {
         clothingType: 'asc',

@@ -18,6 +18,7 @@ datasource db {
 enum Gender {
   male
   female
+  unisex
 }
 
 enum ArticleStatus {
@@ -201,7 +202,7 @@ model Product {
   island       String
   province     String
   clothingType String
-  gender       Gender
+  gender       Gender?
 
   status ProductStatus @default(active)
   sold   Int           @default(0)
