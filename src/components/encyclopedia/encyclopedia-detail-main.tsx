@@ -296,13 +296,13 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
       <section className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
         <article>
           <Card className="rounded-xl border border-[#e1d8c9] bg-[#f8f3ea] p-4">
-            <p className="inline-flex items-start gap-2 text-sm leading-relaxed text-[#5f6c63] italic">
+            <p className="inline-flex items-start gap-2 text-sm leading-relaxed text-[#5f6c63] italic text-justify">
               <Quote className="mt-0.5 h-4 w-4 shrink-0 text-[#97a694]" />
               {article.excerpt}
             </p>
           </Card>
 
-          <p className="mt-6 text-[15px] leading-8 text-[#3d5449]">
+          <p className="mt-6 text-[15px] leading-8 text-[#3d5449] text-justify">
             {article.intro}
           </p>
 
@@ -334,7 +334,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                     {section.content.split('\n\n').map((paragraph, i) => (
                       <p
                         key={i}
-                        className="text-[15px] leading-8 text-[#465d51]"
+                        className="text-[15px] leading-8 text-[#465d51] text-justify"
                       >
                         {paragraph.trim()}
                       </p>
@@ -342,7 +342,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   </div>
 
                   {showVisual ? (
-                    <Card className="flex flex-col h-full overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] shadow-[0_18px_40px_rgba(85,68,48,0.08)]">
+                    <Card className="flex flex-col h-full overflow-hidden rounded-2xl border border-[#d8ccb9] bg-[#f5f1e8] p-0 shadow-[0_18px_40px_rgba(85,68,48,0.08)]">
                       <div className="relative w-full flex-1 min-h-[160px] bg-[#ece1d0]">
                         {section.imageURL ? (
                           <Image

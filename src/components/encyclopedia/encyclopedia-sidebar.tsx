@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 const MAX_VISIBLE_ISLANDS = 9;
+const MAX_VISIBLE_TOPICS = 8;
 
 interface EncyclopediaSidebarProps {
   islands: IslandFilter[];
@@ -27,9 +28,8 @@ export function EncyclopediaSidebar({
   onResetFilters,
 }: EncyclopediaSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isTopicsExpanded, setIsTopicsExpanded] = useState(false);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-  const [isIslandSectionOpen, setIsIslandSectionOpen] = useState(false);
-  const [isTopicSectionOpen, setIsTopicSectionOpen] = useState(false);
 
   const activeFilterCount = (selectedIsland ? 1 : 0) + (selectedTopic ? 1 : 0);
 
@@ -48,6 +48,20 @@ export function EncyclopediaSidebar({
   const visibleIslands = shouldShowAllIslands
     ? islands
     : islands.slice(0, MAX_VISIBLE_ISLANDS);
+
+  const hasMoreTopics = topics.length > MAX_VISIBLE_TOPICS;
+  const activeTopicIsHidden = useMemo(() => {
+    if (!selectedTopic) {
+      return false;
+    }
+
+    return topics.slice(MAX_VISIBLE_TOPICS).includes(selectedTopic);
+  }, [topics, selectedTopic]);
+
+  const shouldShowAllTopics = isTopicsExpanded || activeTopicIsHidden;
+  const visibleTopics = shouldShowAllTopics
+    ? topics
+    : topics.slice(0, MAX_VISIBLE_TOPICS);
 
   return (
     <aside>
@@ -98,100 +112,76 @@ export function EncyclopediaSidebar({
         <div className="overflow-hidden">
           <div className="space-y-3 pt-3 xl:pt-0">
             {/* Region Filters */}
-            <Card className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <button
-                type="button"
-                onClick={() => setIsIslandSectionOpen((prev) => !prev)}
-                className="mb-3 flex w-full items-center justify-between text-sm font-bold text-[#587061]"
-              >
-                <span className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filter Pulau
-                </span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    isIslandSectionOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {isIslandSectionOpen && (
-                <div className="mt-3">
-                  <ul className="space-y-1.5">
-                    {visibleIslands.map((island) => (
-                      <li key={island.name}>
-                        <Button
-                          variant="ghost"
-                          className={`flex h-auto w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
+            <Card className="gap-2 rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#587061]">
+                <Filter className="h-4 w-4" />
+                Filter Pulau
+              </div>
+              <div>
+                <ul className="space-y-1.5">
+                  {visibleIslands.map((island) => (
+                    <li key={island.name}>
+                      <Button
+                        variant="ghost"
+                        className={`flex h-auto w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm font-medium ${
+                          island.active
+                            ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                            : 'text-[#4c6457] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                        }`}
+                        onClick={() => onIslandClick?.(island.name)}
+                      >
+                        <span>{island.name}</span>
+                        <Badge
+                          variant="secondary"
+                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                             island.active
-                              ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                              : 'text-[#4c6457] hover:translate-x-0.5 hover:bg-[#ece5d8] active:scale-[0.98]'
+                              ? 'bg-white/20 text-[#f4f7f1]'
+                              : 'bg-[#e5decf] text-[#839386]'
                           }`}
-                          onClick={() => onIslandClick?.(island.name)}
                         >
-                          <span>{island.name}</span>
-                          <Badge
-                            variant="secondary"
-                            className={`rounded-full px-2 py-0.5 text-xs font-normal ${
-                              island.active
-                                ? 'bg-white/20 text-[#f4f7f1]'
-                                : 'bg-[#e5decf] text-[#839386]'
-                            }`}
-                          >
-                            {island.count}
-                          </Badge>
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
+                          {island.count}
+                        </Badge>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
 
-                  {hasMoreIslands ? (
-                    <Button
-                      variant="ghost"
-                      className="mt-2 h-auto w-full justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62] transition hover:bg-[#ece5d8] hover:text-[#5d6f62] aria-expanded:bg-transparent aria-expanded:text-[#5d6f62] aria-expanded:hover:bg-[#ece5d8] aria-expanded:hover:text-[#5d6f62]"
-                      onClick={() => setIsExpanded((value) => !value)}
-                      aria-expanded={shouldShowAllIslands}
-                    >
-                      <span>
-                        {shouldShowAllIslands
-                          ? 'Sembunyikan lainnya'
-                          : 'Tampilkan lainnya'}
-                      </span>
-                      {shouldShowAllIslands ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
-                    </Button>
-                  ) : null}
-                </div>
-              )}
+                {hasMoreIslands ? (
+                  <Button
+                    variant="ghost"
+                    className="mt-2 h-auto w-full cursor-pointer justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllIslands}
+                  >
+                    <span>
+                      {shouldShowAllIslands
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllIslands ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : null}
+              </div>
             </Card>
 
             {/* Topics */}
-            <Card className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <button
-                type="button"
-                onClick={() => setIsTopicSectionOpen((prev) => !prev)}
-                className="mb-3 flex w-full items-center justify-between text-sm font-bold text-[#587061]"
-              >
-                <span>Topic</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${
-                    isTopicSectionOpen ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {isTopicSectionOpen && (
+            <Card className="gap-2 rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
+              <div className="text-sm font-bold text-[#587061]">Topic</div>
+              <div>
                 <div className="flex flex-wrap gap-2">
-                  {topics.map((topic) => (
+                  {visibleTopics.map((topic) => (
                     <Button
                       key={topic}
                       variant="outline"
                       size="sm"
-                      className={`h-auto rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
+                      className={`h-auto cursor-pointer rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold ${
                         selectedTopic === topic
-                          ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                          : 'bg-[#efeadf] text-[#5d6f62] hover:border-[#bfae8e] hover:bg-[#e4decf]'
+                          ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                          : 'bg-[#efeadf] text-[#5d6f62] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
                       }`}
                       onClick={() => onTopicClick?.(topic)}
                     >
@@ -199,13 +189,33 @@ export function EncyclopediaSidebar({
                     </Button>
                   ))}
                 </div>
-              )}
+
+                {hasMoreTopics ? (
+                  <Button
+                    variant="ghost"
+                    className="mt-2 h-auto w-full cursor-pointer justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsTopicsExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllTopics}
+                  >
+                    <span>
+                      {shouldShowAllTopics
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllTopics ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : null}
+              </div>
             </Card>
 
             {/* Reset Button */}
             <Button
               variant="outline"
-              className="w-full rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62] transition-all duration-200 hover:border-[#c0b39a] hover:bg-[#eee8db] hover:shadow-sm active:scale-[0.99]"
+              className="w-full cursor-pointer rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62]"
               onClick={onResetFilters}
             >
               Reset Semua Filter

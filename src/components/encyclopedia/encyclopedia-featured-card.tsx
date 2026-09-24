@@ -18,7 +18,7 @@ export function EncyclopediaFeaturedCard({
 }: EncyclopediaFeaturedCardProps) {
   if (viewMode === 'list') {
     return (
-      <Card className="group overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#c0b39a] hover:shadow-[0_18px_36px_-26px_rgba(47,91,73,0.55)]">
+      <Card className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2]">
         <div className="flex items-start gap-4 p-4">
           {/* Image */}
           <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-dashed border-[#ded3c1] bg-[#ece1d0]">
@@ -29,7 +29,7 @@ export function EncyclopediaFeaturedCard({
                 fill
                 unoptimized
                 sizes="128px"
-                className="object-cover object-center transition duration-700 ease-out group-hover:scale-110"
+                className="object-cover object-center"
               />
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -46,18 +46,18 @@ export function EncyclopediaFeaturedCard({
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
-              <Badge className="rounded bg-[#2f5f49] px-2 py-0.5 text-[#edf3e8] hover:bg-[#2f5f49]/90">
+              <Badge className="rounded bg-[#2f5f49] px-2 py-0.5 text-[#edf3e8]">
                 Unggulan
               </Badge>
               <Badge
                 variant="outline"
-                className="rounded border-0 bg-[#ece6d9] px-2 py-0.5 text-[#b5a996] hover:bg-[#ece6d9]/90"
+                className="rounded border-0 bg-[#ece6d9] px-2 py-0.5 text-[#b5a996]"
               >
                 {article.region}
               </Badge>
               <Badge
                 variant="outline"
-                className="rounded border-0 bg-[#efe2d8] px-2 py-0.5 text-[#c17f61] hover:bg-[#efe2d8]/90"
+                className="rounded border-0 bg-[#efe2d8] px-2 py-0.5 text-[#c17f61]"
               >
                 {article.topic}
               </Badge>
@@ -92,16 +92,16 @@ export function EncyclopediaFeaturedCard({
   }
 
   return (
-    <Card className="group overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#c0b39a] hover:shadow-[0_26px_52px_-30px_rgba(47,91,73,0.55)]">
+    <Card className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2] p-0">
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)]">
         {/* Image Placeholder */}
-        <div className="relative min-h-[185px] overflow-hidden border-b border-dashed border-[#dacfbf] bg-[#ece1d0] md:min-h-[220px] md:border-b-0 md:border-r">
+        <div className="relative min-h-[185px] overflow-hidden border-b border-dashed border-[#dacfbf] bg-[#ece1d0] md:min-h-[220px] md:rounded-r-2xl md:border-b-0 md:border-r">
           {article.imageURL ? (
             <Image
               src={article.imageURL}
               alt={article.title}
               fill
-              className="object-cover transition duration-700 ease-out group-hover:scale-105"
+              className="object-cover"
             />
           ) : (
             <div className="absolute inset-0 grid place-items-center">
@@ -118,18 +118,18 @@ export function EncyclopediaFeaturedCard({
         {/* Content */}
         <div className="p-5">
           <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
-            <Badge className="rounded bg-[#2f5f49] px-2 py-1 text-[#edf3e8] hover:bg-[#2f5f49]/90">
+            <Badge className="rounded bg-[#2f5f49] px-2 py-1 text-[#edf3e8]">
               Unggulan
             </Badge>
             <Badge
               variant="outline"
-              className="rounded border-0 bg-[#ece6d9] px-2 py-1 text-[#aea28f] hover:bg-[#ece6d9]/90"
+              className="rounded border-0 bg-[#ece6d9] px-2 py-1 text-[#aea28f]"
             >
               {article.region}
             </Badge>
             <Badge
               variant="outline"
-              className="rounded border-0 bg-[#efe2d8] px-2 py-1 text-[#c17f61] hover:bg-[#efe2d8]/90"
+              className="rounded border-0 bg-[#efe2d8] px-2 py-1 text-[#c17f61]"
             >
               {article.topic}
             </Badge>
@@ -162,11 +162,11 @@ export function EncyclopediaFeaturedCard({
 
           <Button
             variant="outline"
-            className="group/btn mt-4 inline-flex items-center gap-1 rounded-xl border-[#98ab9e] px-4 py-2 text-sm font-bold text-[#2f5f49] transition hover:border-[#2f5f49] hover:bg-[#2f5f49] hover:text-[#edf3e8] active:scale-95"
+            className="mt-4 inline-flex cursor-pointer items-center gap-1 rounded-xl border-[#98ab9e] px-4 py-2 text-sm font-bold text-[#2f5f49] hover:bg-[#2f5f49] hover:text-[#eef3ea]"
             onClick={() => onReadMore?.(article)}
           >
             Baca Selengkapnya
-            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </div>

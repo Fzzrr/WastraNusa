@@ -13,9 +13,11 @@ export function EncyclopediaArticleCard({
   article,
   onClick,
 }: EncyclopediaArticleCardProps) {
+  const region = article.region.replace(/^(Kabupaten|Kota)\s+/i, '');
+
   return (
     <Card
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#c0b39a] hover:shadow-[0_22px_42px_-26px_rgba(47,91,73,0.55)]"
+      className="h-full cursor-pointer overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-0 shadow-sm"
       onClick={() => onClick?.(article)}
     >
       {/* Image Placeholder */}
@@ -26,7 +28,7 @@ export function EncyclopediaArticleCard({
             alt={article.title}
             fill
             unoptimized
-            className="object-cover transition duration-700 ease-out group-hover:scale-110"
+            className="object-cover"
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center">
@@ -39,23 +41,23 @@ export function EncyclopediaArticleCard({
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
           <Badge
             variant="outline"
-            className="rounded border-0 bg-[#ece6d9] px-2 py-0.5 text-[#b5a996] hover:bg-[#ece6d9]/90"
+            className="rounded border-0 bg-[#ece6d9] px-2 py-0.5 text-[#b5a996]"
           >
-            {article.region}
+            {region}
           </Badge>
           <Badge
             variant="outline"
-            className="rounded border-0 bg-[#efe2d8] px-2 py-0.5 text-[#c17f61] hover:bg-[#efe2d8]/90"
+            className="rounded border-0 bg-[#efe2d8] px-2 py-0.5 text-[#c17f61]"
           >
             {article.topic}
           </Badge>
         </div>
 
-        <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-[#315746] transition-colors duration-300 group-hover:text-[#2f5f49]">
+        <h3 className="mt-2 line-clamp-2 text-2xl font-bold leading-tight text-[#315746]">
           {article.title}
         </h3>
 
@@ -63,7 +65,7 @@ export function EncyclopediaArticleCard({
           {article.excerpt}
         </p>
 
-        <div className="mt-4 flex items-center gap-4 text-xs font-semibold text-[#4f6658]">
+        <div className="mt-auto flex items-center gap-4 pt-4 text-xs font-semibold text-[#4f6658]">
           <span className="inline-flex items-center gap-1.5">
             <span className="flex size-6 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
               <Heart className="size-3.5" />

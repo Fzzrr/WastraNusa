@@ -2,7 +2,6 @@
 
 import {
   EncyclopediaArticleCard,
-  EncyclopediaArticleListCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
   EncyclopediaSidebar,
@@ -16,12 +15,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
 import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Grid3x3, Home, Menu, X } from 'lucide-react';
+import { Home, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -134,7 +132,6 @@ export function EncyclopediaMain({
   const [selectedIsland, setSelectedIsland] = useState(initialIsland);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const [searchTerm, setSearchTerm] = useState(initialSearch ?? '');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
@@ -315,34 +312,6 @@ export function EncyclopediaMain({
                   Menampilkan {data?.meta.totalItems ?? articles.length} Artikel
                 </p>
               )}
-              <div className="flex gap-1.5 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-0.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
-                    viewMode === 'grid'
-                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                  }`}
-                  onClick={() => setViewMode('grid')}
-                  title="Grid view"
-                >
-                  <Grid3x3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
-                    viewMode === 'list'
-                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                  }`}
-                  onClick={() => setViewMode('list')}
-                  title="List view"
-                >
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           )}
 
@@ -379,37 +348,22 @@ export function EncyclopediaMain({
               {!isPending && !error && featuredArticle ? (
                 <EncyclopediaFeaturedCard
                   article={featuredArticle}
-                  viewMode={viewMode}
                   onReadMore={handleArticleClick}
                 />
               ) : null}
 
               {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
-              <div
-                className={`mt-4 ${
-                  viewMode === 'grid'
-                    ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
-                    : 'space-y-3'
-                }`}
-              >
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {!isPending &&
                   !error &&
-                  displayedArticles.map((article) =>
-                    viewMode === 'list' ? (
-                      <EncyclopediaArticleListCard
-                        key={article.slug}
-                        article={article}
-                        onClick={handleArticleClick}
-                      />
-                    ) : (
-                      <EncyclopediaArticleCard
-                        key={article.slug}
-                        article={article}
-                        onClick={handleArticleClick}
-                      />
-                    ),
-                  )}
+                  displayedArticles.map((article) => (
+                    <EncyclopediaArticleCard
+                      key={article.slug}
+                      article={article}
+                      onClick={handleArticleClick}
+                    />
+                  ))}
 
                 {!isPending &&
                   !error &&
