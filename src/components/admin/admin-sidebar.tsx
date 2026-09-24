@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import { type DashboardData, type DashboardNavItem } from '@/types/dashboard';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
   LayoutDashboard,
@@ -62,6 +63,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
 function AdminSidebarContent({ data }: { data: Partial<DashboardData> }) {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
 
   const stockAlerts = data.stockAlerts ?? [];
@@ -82,6 +84,7 @@ function AdminSidebarContent({ data }: { data: Partial<DashboardData> }) {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
+          queryClient.clear();
           router.push('/login');
         },
       },

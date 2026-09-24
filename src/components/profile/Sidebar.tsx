@@ -2,17 +2,20 @@
 
 import { Badge } from '@/components/ui/badge';
 import { authClient } from '@/lib/auth/auth-client';
+import { useQueryClient } from '@tanstack/react-query';
 import { BookOpen, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
+          queryClient.clear();
           router.push('/login');
         },
       },
