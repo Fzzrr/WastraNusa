@@ -25,6 +25,54 @@ function getIslandCardBackground(index: number) {
   return `radial-gradient(circle at 80% 15%, rgba(255, 235, 190, 0.35) 0%, rgba(0, 0, 0, 0) 42%), linear-gradient(165deg, ${start} 0%, ${mid} 52%, ${end} 100%)`;
 }
 
+function IslandCardImage({
+  images,
+  alt,
+  index,
+}: {
+  images: string[];
+  alt: string;
+  index: number;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setActiveIndex((current) => (current + 1) % images.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  if (images.length === 0) {
+    return (
+      <div
+        className="absolute inset-0 transition duration-700 ease-out group-hover:scale-110"
+        style={{ backgroundImage: getIslandCardBackground(index) }}
+      />
+    );
+  }
+
+  return (
+    <>
+      {images.map((src, imageIndex) => (
+        <Image
+          key={src}
+          src={src}
+          alt={alt}
+          fill
+          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className={`object-cover transition duration-700 ease-out group-hover:scale-110 ${
+            imageIndex === activeIndex ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      ))}
+    </>
+  );
+}
+
 export function IslandCards() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -53,31 +101,26 @@ export function IslandCards() {
   }, [carouselApi]);
 
   const islandImages = useMemo(() => {
-    const imagesByIsland = new Map<string, string>();
+    const imagesByIsland = new Map<string, string[]>();
     const articles: EncyclopediaArticle[] = data?.items ?? [];
 
     for (const article of articles) {
       const island = article.island ?? undefined;
       const imageURL = article.imageURL ?? undefined;
 
-      if (!island || !imageURL || imagesByIsland.has(island)) continue;
+      if (!island || !imageURL) continue;
       const isNextImageSupported =
         imageURL.startsWith('/') || imageURL.startsWith('https://');
+      if (!isNextImageSupported) continue;
 
-      if (isNextImageSupported) {
-        imagesByIsland.set(island, imageURL);
+      const existing = imagesByIsland.get(island) ?? [];
+      if (!existing.includes(imageURL)) {
+        imagesByIsland.set(island, [...existing, imageURL]);
       }
     }
 
     return imagesByIsland;
   }, [data?.items]);
-
-  const islandMapImages: Record<string, string> = {
-    Jawa: '/islands_images/jawa.png',
-    Bali: '/islands_images/bali.png',
-    Sumatera: '/islands_images/sumatera.png',
-    'Nusa Tenggara': '/islands_images/nusatenggara.png',
-  };
 
   return (
     <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
@@ -149,26 +192,11 @@ export function IslandCards() {
                     href={`/encyclopedia?island=${encodeURIComponent(island.name)}`}
                   >
                     <Card className="group relative overflow-hidden rounded-2xl border border-[#ddd4c6] transition-all duration-500 ease-out hover:-translate-y-1 hover:border-[#c7b59b] hover:shadow-[0_22px_42px_-24px_rgba(20,28,22,0.65)]">
-                      {islandMapImages[island.name] ||
-                      islandImages.get(island.name) ? (
-                        <Image
-                          src={
-                            islandMapImages[island.name] ||
-                            islandImages.get(island.name)!
-                          }
-                          alt={island.name}
-                          fill
-                          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          className="object-cover transition duration-700 ease-out group-hover:scale-110"
-                        />
-                      ) : (
-                        <div
-                          className="absolute inset-0 transition duration-700 ease-out group-hover:scale-110"
-                          style={{
-                            backgroundImage: getIslandCardBackground(index),
-                          }}
-                        />
-                      )}
+                      <IslandCardImage
+                        images={islandImages.get(island.name) ?? []}
+                        alt={island.name}
+                        index={index}
+                      />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.78)_45%,rgba(0,0,0,0.35)_75%,rgba(0,0,0,0)_100%)]" />
 
                       <span className="absolute right-3 top-3 z-10 grid h-8 w-8 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6f2e8] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
