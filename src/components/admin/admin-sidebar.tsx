@@ -15,6 +15,7 @@ import {
   LogOut,
   Package2,
   ShoppingBag,
+  Store,
   TriangleAlert,
   UserRound,
 } from 'lucide-react';
@@ -24,6 +25,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const navigationIcons = {
   Dashboard: LayoutDashboard,
   Article: BookOpen,
+  'Seller Management': Store,
   'Produk & Inventori': Package2,
   Pesanan: ShoppingBag,
 } as const;
@@ -31,8 +33,10 @@ const navigationIcons = {
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
   { title: 'Article', href: '/admin/article' },
-  { title: 'Produk & Inventori', href: '/admin/product-inventory' },
-  { title: 'Pesanan', href: '/admin/pesanan' },
+  { title: 'Seller Management', href: '/admin/seller-management' },
+  // deprecated: superseded by seller panel
+  // { title: 'Produk & Inventori', href: '/admin/product-inventory' },
+  // { title: 'Pesanan', href: '/admin/pesanan' },
 ];
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {

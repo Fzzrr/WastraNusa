@@ -328,6 +328,11 @@ export const productService = {
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-wide product dashboard. Superseded by the seller-scoped
+   * dashboard (`sellerDashboardService`). Kept functional for backward
+   * compatibility; the admin product-inventory UI has been retired.
+   */
   getDashboardOverview: async (): Promise<ProductDashboardData> => {
     const LOW_STOCK_THRESHOLD = 20;
     const [totalProducts, lowStockItems] = await Promise.all([
@@ -366,6 +371,11 @@ export const productService = {
     };
   },
 
+  /**
+   * @deprecated Admin-owned product creation. Superseded by
+   * `sellerProductService.createProduct`, which scopes ownership to the
+   * authenticated seller. Kept functional for backward compatibility.
+   */
   createProduct: async (
     data: CreateProductInput,
   ): Promise<ProductInventoryItem> => {
@@ -406,6 +416,11 @@ export const productService = {
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-owned product update. Superseded by
+   * `sellerProductService.updateProduct`, which enforces seller ownership.
+   * Kept functional for backward compatibility.
+   */
   updateProduct: async (
     idOrSlug: string,
     data: UpdateProductInput,
@@ -456,6 +471,11 @@ export const productService = {
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-owned product deletion. Superseded by
+   * `sellerProductService.deleteProduct`, which enforces seller ownership.
+   * Kept functional for backward compatibility.
+   */
   deleteProduct: async (idOrSlug: string) => {
     const product = await productRepository.delete(idOrSlug);
     logger.info('Product deleted successfully', { productId: product.id });

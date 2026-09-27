@@ -74,6 +74,11 @@ export const GET = withApiPublic(async ({ req }) => {
   return jsend.success(products);
 });
 
+/**
+ * @deprecated Admin product creation endpoint. Superseded by
+ * `/api/seller/products`, which scopes ownership to the authenticated seller.
+ * Kept functional for backward compatibility. (The public GET above stays.)
+ */
 export const POST = withApiAdmin(async ({ req }) => {
   const body = await req.json();
   const data = createProductSchema.parse(body);

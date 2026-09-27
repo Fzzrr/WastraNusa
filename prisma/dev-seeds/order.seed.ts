@@ -50,6 +50,7 @@ export async function seedOrders() {
     userId: user.id,
     productId: product.id,
     productName: product.name,
+    sellerId: product.sellerId,
     quantity: 1,
     productPrice: product.price,
     shippingAddressId: address.id,

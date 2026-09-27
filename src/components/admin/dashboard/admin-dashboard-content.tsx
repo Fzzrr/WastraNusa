@@ -1,10 +1,9 @@
 'use client';
 
 import { AdminHeader } from '@/components/admin/admin-header';
-import { mergeArticleDashboardData } from '@/components/admin/dashboard/dashboard-data';
+import { AreaChart, HorizontalBarChart } from '@/components/charts';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -13,155 +12,160 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useArticleDashboard } from '@/hooks/use-article';
-import { useProductDashboard } from '@/hooks/use-product-inventory';
+import { useAdminDashboard } from '@/hooks/use-admin-dashboard';
 import { authClient } from '@/lib/auth/auth-client';
-import { cn } from '@/lib/utils';
-import {
-  type DashboardData,
-  type DashboardStat,
-  type DashboardStatIcon,
-  type StockAlertItem,
-} from '@/types/dashboard';
+import { cn, formatIDR } from '@/lib/utils';
+import type { PopularArticle } from '@/types/dashboard';
 import {
   ArrowDownRight,
   ArrowUpRight,
   BookOpen,
-  ChevronRight,
   Clock3,
   Eye,
-  Package,
-  TriangleAlert,
+  Store,
+  TrendingUp,
+  Users,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { type ReactNode, useSyncExternalStore } from 'react';
 
 const surfaceCardClassName =
   'border-0 bg-[#fffdf9] shadow-[0_1px_0_rgba(60,41,15,0.06),0_18px_40px_rgba(89,69,38,0.05)] ring-1 ring-[#e8decd]';
 const sectionHeaderClassName = 'border-b border-[#eee2d0] px-5 py-4';
-const sectionActionClassName =
-  'px-0 text-[#776b5c] no-underline hover:no-underline';
 
-function SummaryIcon({ icon }: { icon: DashboardStatIcon }) {
-  const iconClassName = 'text-[#a98345]';
-
-  switch (icon) {
-    case 'package':
-      return <Package className={iconClassName} />;
-    case 'book-open':
-      return <BookOpen className={iconClassName} />;
-    default:
-      return <TriangleAlert className={iconClassName} />;
-  }
-}
-
-function SummaryTrendBadge({ stat }: { stat: DashboardStat }) {
+function TrendBadge({ percent }: { percent: number }) {
+  const positive = percent >= 0;
   return (
     <Badge
-      variant={stat.tone === 'warning' ? 'destructive' : 'secondary'}
+      variant="secondary"
       className={cn(
         'rounded-full border-0 px-2 py-0.5 text-[11px] shadow-none',
-        stat.tone === 'warning' ? 'text-[#b45843]' : 'text-[#5f865a]',
+        positive ? 'text-[#5f865a]' : 'text-[#b45843]',
       )}
     >
-      {stat.tone === 'positive' ? (
+      {positive ? (
         <ArrowUpRight data-icon="inline-start" />
-      ) : stat.tone === 'warning' ? (
+      ) : (
         <ArrowDownRight data-icon="inline-start" />
-      ) : null}
-      {stat.changeLabel}
+      )}
+      {`${positive ? '+' : ''}${percent.toFixed(1)}% vs bulan lalu`}
     </Badge>
   );
 }
 
-function SummaryCard({ stat }: { stat: DashboardStat }) {
+function StatCard({
+  icon,
+  value,
+  label,
+  footnote,
+  trendPercent,
+}: {
+  icon: ReactNode;
+  value: string;
+  label: string;
+  footnote: string;
+  trendPercent?: number | null;
+}) {
   return (
     <Card className={cn(surfaceCardClassName, 'py-5')}>
       <CardHeader className="items-start gap-3 px-5">
-        <div className="flex size-10 items-center justify-center rounded-2xl bg-[#f8f1e4] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-          <SummaryIcon icon={stat.icon} />
+        <div className="flex size-10 items-center justify-center rounded-2xl bg-[#f8f1e4] text-[#a98345] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+          {icon}
         </div>
-        <CardAction>
-          <SummaryTrendBadge stat={stat} />
-        </CardAction>
+        {typeof trendPercent === 'number' ? (
+          <CardAction>
+            <TrendBadge percent={trendPercent} />
+          </CardAction>
+        ) : null}
       </CardHeader>
       <CardContent className="px-5">
-        <div className="text-4xl font-semibold tracking-tight text-[#30251d]">
-          {stat.value}
+        <div className="text-3xl font-semibold tracking-tight text-[#30251d]">
+          {value}
         </div>
-        <p className="mt-2 text-sm font-medium text-[#50463b]">
-          {stat.description}
-        </p>
-        <p className="text-xs text-[#9b8f82]">{stat.footnote}</p>
+        <p className="mt-2 text-sm font-medium text-[#50463b]">{label}</p>
+        <p className="text-xs text-[#9b8f82]">{footnote}</p>
       </CardContent>
     </Card>
   );
 }
+// APPEND_MARKER
 
-function StockStatusBadge({ item }: { item: StockAlertItem }) {
-  return item.severity === 'out' ? (
-    <Badge variant="destructive" className="bg-[#f5dfd8] text-[#b45843]">
-      {item.stockLabel}
-    </Badge>
-  ) : (
-    <Badge variant="secondary" className="bg-[#f4ead9] text-[#a56a2f]">
-      {item.stockLabel}
-    </Badge>
-  );
-}
-
-function SectionActionButton({ href }: { href: string }) {
+function TrafficCard({
+  data,
+}: {
+  data: Array<{ label: string; value: number }>;
+}) {
+  const hasData = data.some((point) => point.value > 0);
   return (
-    <Button variant="link" size="sm" className={sectionActionClassName} asChild>
-      <Link href={href}>
-        Kelola
-        <ChevronRight data-icon="inline-end" />
-      </Link>
-    </Button>
-  );
-}
-
-function StockAlertsCard({ items }: { items: DashboardData['stockAlerts'] }) {
-  return (
-    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
       <CardHeader className={sectionHeaderClassName}>
         <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <TriangleAlert className="text-[#a98345]" />
-          Peringatan Stok
+          <TrendingUp className="text-[#a98345]" />
+          Trafik Artikel
         </CardTitle>
-        <CardAction>
-          <SectionActionButton href="/admin/product-inventory" />
-        </CardAction>
+        <p className="text-xs text-[#9a8e81]">
+          Interaksi artikel 7 hari terakhir
+        </p>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 px-5 py-4">
-        {items.length === 0 ? (
-          <div className="text-sm text-[#8f8377]">
-            Belum ada produk dengan stok rendah atau habis.
-          </div>
+      <CardContent className="px-5 py-5">
+        {hasData ? (
+          <AreaChart
+            data={data}
+            color="var(--color-brand)"
+            height={200}
+            ariaLabel="Trafik artikel 7 hari terakhir"
+            valueFormatter={(value) => `${value} interaksi`}
+          />
         ) : (
-          items.map((item) => (
-            <div
-              key={item.name}
-              className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
-            >
-              <div>
-                <p className="font-medium text-[#41372c]">{item.name}</p>
-                <p className="text-xs text-[#998d80]">{item.category}</p>
-              </div>
-              <StockStatusBadge item={item} />
-            </div>
-          ))
+          <div className="flex h-[200px] items-center justify-center text-sm text-[#8f8377]">
+            Belum ada interaksi artikel dalam 7 hari terakhir.
+          </div>
         )}
       </CardContent>
     </Card>
   );
 }
 
-function PopularArticlesCard({
-  articles,
+function TopSellerCard({
+  data,
 }: {
-  articles: DashboardData['popularArticles'];
+  data: Array<{ name: string; gmv: number; orderCount: number }>;
 }) {
+  return (
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
+      <CardHeader className={sectionHeaderClassName}>
+        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
+          <Store className="text-[#a98345]" />
+          Top Seller
+        </CardTitle>
+        <p className="text-xs text-[#9a8e81]">
+          Berdasarkan GMV (pesanan lunas)
+        </p>
+      </CardHeader>
+      <CardContent className="px-5 py-5">
+        {data.length === 0 ? (
+          <div className="flex h-[200px] items-center justify-center text-sm text-[#8f8377]">
+            Belum ada penjualan dari seller.
+          </div>
+        ) : (
+          <HorizontalBarChart
+            data={data.map((seller) => ({
+              label: seller.name,
+              value: seller.gmv,
+              sublabel: `${seller.orderCount} pesanan`,
+            }))}
+            color="#C0653B"
+            valueFormatter={formatIDR}
+            ariaLabel="Top seller berdasarkan GMV"
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
   return (
     <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
       <CardHeader className={sectionHeaderClassName}>
@@ -169,9 +173,6 @@ function PopularArticlesCard({
           <BookOpen className="text-[#a98345]" />
           Artikel Paling Populer
         </CardTitle>
-        <CardAction>
-          <SectionActionButton href="/admin/article" />
-        </CardAction>
       </CardHeader>
       <CardContent className="px-5">
         {articles.length === 0 ? (
@@ -184,7 +185,7 @@ function PopularArticlesCard({
               <Link
                 key={article.rank}
                 href={`/encyclopedia/${article.slug}`}
-                className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 transition-colors hover:bg-[#fdf9f4] last:border-b-0"
+                className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 transition-colors last:border-b-0 hover:bg-[#fdf9f4]"
               >
                 <div className="pt-0.5 text-sm font-semibold text-[#8c7f71]">
                   {article.rank}
@@ -217,177 +218,115 @@ function PopularArticlesCard({
     </Card>
   );
 }
+// SKELETON_MARKER
 
-function DashboardStatusFooter({
-  label,
-  adminName,
-}: {
-  label: string;
-  adminName: string;
-}) {
-  return (
-    <div className="flex justify-end">
-      <div className="hidden items-center gap-3 rounded-full bg-white/60 px-3 py-2 text-xs text-[#8d806f] shadow-[0_1px_0_rgba(60,41,15,0.04)] ring-1 ring-[#e8decd] md:flex">
-        <Avatar size="sm" className="size-7">
-          <AvatarFallback className="bg-[#ecd9ba] text-[#8b6b37]">
-            {adminName.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <span>{label}</span>
-      </div>
-    </div>
-  );
-}
-
-function SummaryCardSkeleton() {
+function StatCardSkeleton() {
   return (
     <Card className={cn(surfaceCardClassName, 'py-5')}>
       <CardHeader className="items-start gap-3 px-5">
         <Skeleton className="size-10 rounded-2xl bg-[#eee2d0]" />
         <CardAction>
-          <Skeleton className="h-5 w-16 rounded-full bg-[#eee2d0]" />
+          <Skeleton className="h-5 w-24 rounded-full bg-[#eee2d0]" />
         </CardAction>
       </CardHeader>
       <CardContent className="px-5">
-        <Skeleton className="h-10 w-24 bg-[#eee2d0]" />
-        <Skeleton className="mt-2 h-5 w-32 bg-[#eee2d0]" />
-        <Skeleton className="mt-1 h-4 w-28 bg-[#eee2d0]" />
+        <Skeleton className="h-9 w-32 bg-[#eee2d0]" />
+        <Skeleton className="mt-2 h-5 w-28 bg-[#eee2d0]" />
+        <Skeleton className="mt-1 h-4 w-36 bg-[#eee2d0]" />
       </CardContent>
     </Card>
   );
 }
 
-function StockAlertsSkeleton() {
+function ChartCardSkeleton() {
   return (
-    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
+    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
       <CardHeader className={sectionHeaderClassName}>
         <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
           <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
           <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 px-5 py-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
-          >
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
-              <Skeleton className="h-3 w-20 bg-[#eee2d0]" />
-            </div>
-            <Skeleton className="h-6 w-16 rounded-md bg-[#eee2d0]" />
-          </div>
-        ))}
+      <CardContent className="px-5 py-5">
+        <Skeleton className="h-[200px] w-full rounded-lg bg-[#eee2d0]" />
       </CardContent>
     </Card>
   );
 }
 
-function PopularArticlesSkeleton() {
-  return (
-    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
-      <CardHeader className={sectionHeaderClassName}>
-        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
-          <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5">
-        <div className="flex flex-col">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 last:border-b-0"
-            >
-              <Skeleton className="size-4 bg-[#eee2d0] pt-0.5" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-48 bg-[#eee2d0]" />
-                <Skeleton className="h-3 w-32 bg-[#eee2d0]" />
-              </div>
-              <div className="flex gap-4">
-                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
-                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+function buildHeaderSubtitle() {
+  const now = new Date();
+  const weekdays = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+  ];
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  const weekday = weekdays[now.getDay()];
+  const month = months[now.getMonth()];
+  const day = String(now.getDate()).padStart(2, '0');
+  const year = now.getFullYear();
+
+  return `WastraNusa Admin · ${weekday}, ${day} ${month} ${year}`;
+}
+
+// `false` during SSR and the first client render (so hydration matches), `true`
+// on every render afterward — without a setState-in-effect. Lets us defer any
+// timezone-dependent value to the client.
+const subscribeNoop = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
   );
 }
 
 export function AdminDashboardContent() {
   const { data: session } = authClient.useSession();
-  const { data: articleDashboardData, isLoading } = useArticleDashboard();
-  const { data: productDashboardData, isLoading: isLoadingProducts } =
-    useProductDashboard();
+  const { data, isLoading } = useAdminDashboard();
 
-  const dashboardData = useMemo(
-    () => mergeArticleDashboardData(articleDashboardData, productDashboardData),
-    [articleDashboardData, productDashboardData],
-  );
-
+  // The subtitle embeds the current date, which depends on the viewer's
+  // timezone — computing it during render would differ between the server (UTC)
+  // and the browser and trip React's hydration check. Show a stable base until
+  // hydrated, then the dated version (client-side only).
+  const hydrated = useHydrated();
+  const headerSubtitle = hydrated ? buildHeaderSubtitle() : 'WastraNusa Admin';
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
-  const adminHeaderSubtitle = useMemo(() => {
-    const now = new Date();
-    const weekdays = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ];
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
 
-    const weekday = weekdays[now.getDay()];
-    const month = months[now.getMonth()];
-    const day = String(now.getDate()).padStart(2, '0');
-    const year = now.getFullYear();
-
-    const dateLabel = `${weekday}, ${day} ${month} ${year}`;
-
-    return `WastraNusa Admin · ${dateLabel}`;
-  }, []);
-  const lastUpdatedLabel = 'Ringkasan data terakhir diperbarui hari ini';
-
-  if (isLoading || isLoadingProducts) {
+  if (isLoading || !data) {
     return (
       <main className="flex flex-1 flex-col">
-        <AdminHeader
-          title="Dashboard Overview"
-          subtitle={adminHeaderSubtitle}
-        />
+        <AdminHeader title="Dashboard Overview" subtitle={headerSubtitle} />
         <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
           <section className="grid gap-4 xl:grid-cols-3">
-            <SummaryCardSkeleton />
-            <SummaryCardSkeleton />
-            <SummaryCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
           </section>
-
-          <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-            <StockAlertsSkeleton />
-            <PopularArticlesSkeleton />
+          <section className="grid gap-5 xl:grid-cols-2">
+            <ChartCardSkeleton />
+            <ChartCardSkeleton />
           </section>
-
-          <div className="flex justify-end">
-            <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
-          </div>
+          <ChartCardSkeleton />
         </div>
       </main>
     );
@@ -395,20 +334,47 @@ export function AdminDashboardContent() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <AdminHeader title="Dashboard Overview" subtitle={adminHeaderSubtitle} />
+      <AdminHeader title="Dashboard Overview" subtitle={headerSubtitle} />
       <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
         <section className="grid gap-4 xl:grid-cols-3">
-          {dashboardData.summary?.map((stat) => (
-            <SummaryCard key={stat.title} stat={stat} />
-          ))}
+          <StatCard
+            icon={<Wallet />}
+            value={formatIDR(data.gmv.currentMonth)}
+            label="GMV Bulan Ini"
+            footnote={`Bulan lalu ${formatIDR(data.gmv.lastMonth)}`}
+            trendPercent={data.gmv.changePercent}
+          />
+          <StatCard
+            icon={<Users />}
+            value={String(data.sellers.active)}
+            label="Seller Aktif"
+            footnote={`${data.sellers.active} dari ${data.sellers.registered} seller terdaftar`}
+          />
+          <StatCard
+            icon={<Eye />}
+            value={data.articleViews.total.toLocaleString('id-ID')}
+            label="Kunjungan Artikel"
+            footnote="Total kunjungan sepanjang waktu"
+          />
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-          <StockAlertsCard items={dashboardData.stockAlerts ?? []} />
-          <PopularArticlesCard articles={dashboardData.popularArticles ?? []} />
+        <section className="grid gap-5 xl:grid-cols-2">
+          <TrafficCard data={data.articleTraffic} />
+          <TopSellerCard data={data.topSellers} />
         </section>
 
-        <DashboardStatusFooter label={lastUpdatedLabel} adminName={adminName} />
+        <PopularArticlesCard articles={data.popularArticles} />
+
+        <div className="flex justify-end">
+          <div className="hidden items-center gap-3 rounded-full bg-white/60 px-3 py-2 text-xs text-[#8d806f] shadow-[0_1px_0_rgba(60,41,15,0.04)] ring-1 ring-[#e8decd] md:flex">
+            <Avatar size="sm" className="size-7">
+              <AvatarFallback className="bg-[#ecd9ba] text-[#8b6b37]">
+                {adminName.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span>Ringkasan data terakhir diperbarui hari ini</span>
+          </div>
+        </div>
       </div>
     </main>
   );

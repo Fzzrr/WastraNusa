@@ -5,6 +5,10 @@ import { orderService } from '@/services/order.service';
 
 type Params = { id: string };
 
+/**
+ * @deprecated Admin-wide order update endpoint. Superseded by
+ * `/api/seller/orders/[id]`. Kept functional for backward compatibility.
+ */
 export const PUT = withApiAdmin<Params>(async ({ req, params }) => {
   const body = await req.json();
   const payload = adminOrderUpdateSchema.parse(body);

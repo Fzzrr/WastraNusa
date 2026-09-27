@@ -743,6 +743,11 @@ export const orderService = {
     await cancelOrderAndRestoreStock(order, reason);
   },
 
+  /**
+   * @deprecated Admin-wide order listing (pesanan). Superseded by
+   * `sellerOrderService.getSellerOrders`, which scopes orders to the
+   * authenticated seller. Kept functional for backward compatibility.
+   */
   getAdminOrders: async (
     page: number = 1,
     limit: number = 10,
@@ -784,6 +789,11 @@ export const orderService = {
     };
   },
 
+  /**
+   * @deprecated Admin-wide order update (pesanan). Superseded by
+   * `sellerOrderService.updateOrderForSeller`, which enforces seller ownership.
+   * Kept functional for backward compatibility.
+   */
   updateOrderForAdmin: async (
     identifier: string,
     data: {

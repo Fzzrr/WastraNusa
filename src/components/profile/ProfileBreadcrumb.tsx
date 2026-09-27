@@ -24,6 +24,10 @@ const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
     { label: 'Profil Saya', href: '/profile' },
     { label: 'Pesanan Saya' },
   ],
+  '/profile/seller-application': [
+    { label: 'Profil Saya', href: '/profile' },
+    { label: 'Buka Toko' },
+  ],
 };
 
 export default function ProfileBreadcrumb() {
