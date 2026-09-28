@@ -1,5 +1,14 @@
 'use client';
 
+import {
+  CreatableCombobox,
+  Field,
+  FormSection,
+  ImagePreview,
+  inputClassName,
+  selectTriggerClassName,
+  textareaClassName,
+} from '@/components/form-sections';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +20,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArticleStatus } from '@/generated/prisma/enums';
-import { useCreateArticle, useUpdateArticle } from '@/hooks/use-article';
+import {
+  useArticleFieldOptions,
+  useCreateArticle,
+  useUpdateArticle,
+} from '@/hooks/use-article';
 import { useWikipediaSummaryImport } from '@/hooks/use-wikipedia-summary';
 import { cn } from '@/lib/utils';
 import {
@@ -23,11 +36,9 @@ import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { kabupaten, provinsi } from 'daftar-wilayah-indonesia';
 import {
-  AlertCircle,
   BookOpen,
   Download,
   FileText,
-  ImageIcon,
   Info,
   Layers,
   Loader2,
@@ -40,7 +51,7 @@ import {
   X,
 } from 'lucide-react';
 import Image from 'next/image';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Controller,
   type Resolver,
@@ -82,130 +93,7 @@ const ISLAND_TO_PROVINCE_CODES: Record<string, string[]> = {
   'Bangka Belitung': ['19'],
 };
 
-const inputClassName =
-  'h-11 rounded-xl border-[#e5ded5] bg-white px-4 text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
-const textareaClassName =
-  'w-full resize-none rounded-xl border border-[#e5ded5] bg-white px-4 py-3 text-sm text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
-const selectTriggerClassName =
-  'h-11 w-full rounded-xl border-[#e5ded5] bg-white text-[#2f3a33] data-[size=default]:h-11';
-
 const EXCERPT_SOFT_LIMIT = 160;
-
-function Field({
-  label,
-  required = false,
-  hint,
-  error,
-  aside,
-  className,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  hint?: ReactNode;
-  error?: string;
-  aside?: ReactNode;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={cn('flex flex-col gap-1.5', className)}>
-      <div className="flex items-center justify-between gap-2">
-        <label className="text-sm font-medium text-[#3d3a34]">
-          {label}
-          {required ? (
-            <span className="ml-0.5 text-[#c26a3d]">*</span>
-          ) : (
-            <span className="ml-1.5 text-xs font-normal text-[#a39c92]">
-              (Opsional)
-            </span>
-          )}
-        </label>
-        {aside}
-      </div>
-      {children}
-      {error ? (
-        <p className="flex animate-in items-center gap-1 text-xs text-red-600 fade-in">
-          <AlertCircle className="size-3.5 shrink-0" />
-          {error}
-        </p>
-      ) : hint ? (
-        <p className="text-xs text-[#9a8f80]">{hint}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function FormSection({
-  step,
-  icon: Icon,
-  title,
-  description,
-  aside,
-  children,
-}: {
-  step: number;
-  icon: typeof BookOpen;
-  title: string;
-  description: string;
-  aside?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl bg-[#fffdfa] p-5 ring-1 ring-[#ebe3d6]">
-      <div className="mb-5 flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#f4efe5] text-[#8a6a3a]">
-            <Icon className="size-4" />
-            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#3a5a4a] text-[10px] font-semibold text-white">
-              {step}
-            </span>
-          </span>
-          <div>
-            <h3 className="font-semibold text-[#2f4f3f]">{title}</h3>
-            <p className="text-xs text-[#9a8f80]">{description}</p>
-          </div>
-        </div>
-        {aside}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function ImagePreview({
-  url,
-  className,
-}: {
-  url?: string | null;
-  className?: string;
-}) {
-  const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const isValid =
-    Boolean(url) && /^https?:\/\//.test(url ?? '') && failedUrl !== url;
-
-  return (
-    <div
-      className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] text-[#b3aa9e]',
-        isValid && 'border-solid',
-        className,
-      )}
-    >
-      {isValid ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={url ?? ''}
-          alt=""
-          onError={() => setFailedUrl(url ?? null)}
-          className="size-full animate-in object-cover fade-in"
-        />
-      ) : (
-        <ImageIcon className="size-5" />
-      )}
-    </div>
-  );
-}
 
 interface AddUpdateArticleModalProps {
   isOpen: boolean;
@@ -227,6 +115,8 @@ export default function AddUpdateArticleModal({
   const isPending = isCreating || isUpdating;
 
   const wiki = useWikipediaSummaryImport(isOpen);
+  const { data: fieldOptions, isLoading: isLoadingFieldOptions } =
+    useArticleFieldOptions(isOpen);
 
   const defaultValues: CreateArticleInput = {
     title: initialData?.title ?? '',
@@ -321,7 +211,9 @@ export default function AddUpdateArticleModal({
         order: i,
       }));
       setValue('sections', mappedSections, { shouldDirty: true });
-      toast.success('Data Wikipedia dan section diterapkan ke form.');
+      toast.success(
+        'Data Wikipedia beserta bagian artikel diterapkan ke form.',
+      );
     } else {
       toast.success('Data Wikipedia diterapkan ke form.');
     }
@@ -468,7 +360,7 @@ export default function AddUpdateArticleModal({
                 progress === 100 ? 'text-[#2f5543]' : 'text-[#9a8f80]',
               )}
             >
-              {filledCount}/{requiredFields.length} field wajib
+              {filledCount}/{requiredFields.length} Field Wajib
             </span>
           </div>
         </div>
@@ -537,7 +429,7 @@ export default function AddUpdateArticleModal({
                 variant="destructive"
                 className="border-red-200 bg-red-50/90"
               >
-                <AlertTitle>Gagal mengambil data</AlertTitle>
+                <AlertTitle>Gagal Mengambil Data</AlertTitle>
                 <AlertDescription>{wiki.error}</AlertDescription>
               </Alert>
             )}
@@ -545,7 +437,7 @@ export default function AddUpdateArticleModal({
             {wiki.preview && (
               <div className="animate-in space-y-3 rounded-xl bg-white p-3 ring-1 ring-[#cde3d8] fade-in slide-in-from-top-1">
                 <p className="text-xs font-semibold tracking-wide text-[#305645] uppercase">
-                  Pratinjau — terapkan ke form
+                  Pratinjau — Terapkan ke Form
                 </p>
                 {wiki.preview.wikiType === 'disambiguation' && (
                   <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
@@ -584,7 +476,7 @@ export default function AddUpdateArticleModal({
                     className="cursor-pointer rounded-lg bg-[#305645] text-white hover:bg-[#264538]"
                     onClick={handleApplyWikimediaPreview}
                   >
-                    Terapkan ke form
+                    Terapkan ke Form
                   </Button>
                   <Button
                     type="button"
@@ -593,7 +485,7 @@ export default function AddUpdateArticleModal({
                     className="cursor-pointer rounded-lg"
                     onClick={wiki.discardPreview}
                   >
-                    Buang pratinjau
+                    Buang Pratinjau
                   </Button>
                 </div>
               </div>
@@ -605,7 +497,7 @@ export default function AddUpdateArticleModal({
               <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
               <div className="flex-1">
                 <p className="font-semibold">
-                  Lengkapi field berikut secara manual
+                  Lengkapi Field Berikut secara Manual
                 </p>
                 <p className="mt-0.5 text-amber-700">
                   Wikipedia tidak dapat mengisi:{' '}
@@ -652,19 +544,35 @@ export default function AddUpdateArticleModal({
                 required
                 error={errors.motifLabel?.message}
               >
-                <Input
-                  {...register('motifLabel')}
-                  type="text"
-                  placeholder="Batik Parang / Songket Palembang"
-                  className={inputClassName}
+                <Controller
+                  control={control}
+                  name="motifLabel"
+                  render={({ field }) => (
+                    <CreatableCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={fieldOptions?.motifLabels ?? []}
+                      isLoading={isLoadingFieldOptions}
+                      placeholder="Cari atau buat label motif"
+                      emptyText="Belum ada label motif tersimpan."
+                    />
+                  )}
                 />
               </Field>
               <Field label="Topik" required error={errors.topic?.message}>
-                <Input
-                  {...register('topic')}
-                  type="text"
-                  placeholder="Pakaian Adat / Tekstil"
-                  className={inputClassName}
+                <Controller
+                  control={control}
+                  name="topic"
+                  render={({ field }) => (
+                    <CreatableCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={fieldOptions?.topics ?? []}
+                      isLoading={isLoadingFieldOptions}
+                      placeholder="Cari atau buat topik"
+                      emptyText="Belum ada topik tersimpan."
+                    />
+                  )}
                 />
               </Field>
             </div>
@@ -675,7 +583,7 @@ export default function AddUpdateArticleModal({
             step={2}
             icon={MapPin}
             title="Asal Daerah"
-            description="Pilih berurutan: Pulau → Provinsi → Daerah"
+            description="Tentukan Daerah Asal Wastra"
           >
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Pulau" required error={errors.island?.message}>
@@ -721,9 +629,7 @@ export default function AddUpdateArticleModal({
                       <SelectTrigger className={selectTriggerClassName}>
                         <SelectValue
                           placeholder={
-                            watchedIsland
-                              ? 'Pilih Provinsi'
-                              : 'Pilih Pulau dulu'
+                            watchedIsland ? 'Pilih Provinsi' : 'Pilih Provinsi'
                           }
                         />
                       </SelectTrigger>
@@ -751,9 +657,7 @@ export default function AddUpdateArticleModal({
                       <SelectTrigger className={selectTriggerClassName}>
                         <SelectValue
                           placeholder={
-                            watchedProvince
-                              ? 'Pilih Daerah'
-                              : 'Pilih Provinsi dulu'
+                            watchedProvince ? 'Pilih Daerah' : 'Daerah'
                           }
                         />
                       </SelectTrigger>
@@ -816,19 +720,35 @@ export default function AddUpdateArticleModal({
                 label="Suku / Kelompok Etnis"
                 error={errors.ethnicGroup?.message}
               >
-                <Input
-                  {...register('ethnicGroup')}
-                  type="text"
-                  placeholder="Contoh: Jawa / Dayak"
-                  className={inputClassName}
+                <Controller
+                  control={control}
+                  name="ethnicGroup"
+                  render={({ field }) => (
+                    <CreatableCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={fieldOptions?.ethnicGroups ?? []}
+                      isLoading={isLoadingFieldOptions}
+                      placeholder="Cari atau buat suku / etnis"
+                      emptyText="Belum ada suku tersimpan."
+                    />
+                  )}
                 />
               </Field>
               <Field label="Jenis Pakaian" error={errors.clothingType?.message}>
-                <Input
-                  {...register('clothingType')}
-                  type="text"
-                  placeholder="Contoh: Kebaya / Batik"
-                  className={inputClassName}
+                <Controller
+                  control={control}
+                  name="clothingType"
+                  render={({ field }) => (
+                    <CreatableCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={fieldOptions?.clothingTypes ?? []}
+                      isLoading={isLoadingFieldOptions}
+                      placeholder="Cari atau buat jenis pakaian"
+                      emptyText="Belum ada jenis pakaian tersimpan."
+                    />
+                  )}
                 />
               </Field>
             </div>
@@ -930,12 +850,12 @@ export default function AddUpdateArticleModal({
             </div>
           </FormSection>
 
-          {/* 5. Section */}
+          {/* 5. Bagian artikel */}
           <FormSection
             step={5}
             icon={Layers}
-            title="Konten Section"
-            description={`${fields.length} section · bagian isi artikel`}
+            title="Bagian Artikel"
+            description={`${fields.length} bagian · isi utama artikel`}
             aside={
               <Button
                 type="button"
@@ -947,7 +867,7 @@ export default function AddUpdateArticleModal({
                 className="cursor-pointer gap-1.5 rounded-lg border-[#3a5a4a]/30 text-[#2f5543] hover:bg-[#e7efe4] hover:text-[#2f5543]"
               >
                 <Plus className="size-4" />
-                Tambah Section
+                Tambah Bagian
               </Button>
             }
           >
@@ -955,7 +875,7 @@ export default function AddUpdateArticleModal({
               {fields.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] py-8 text-sm text-[#9a8f80]">
                   <Layers className="size-5 text-[#b08a5e]" />
-                  Belum ada section.
+                  Belum ada bagian.
                 </div>
               ) : null}
               {fields.map((field, index) => (
@@ -969,13 +889,13 @@ export default function AddUpdateArticleModal({
                         {index + 1}
                       </span>
                       {watchedValues.sections?.[index]?.title?.trim() ||
-                        `Section ${index + 1}`}
+                        `Bagian ${index + 1}`}
                     </span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Hapus section ${index + 1}`}
+                      aria-label={`Hapus bagian ${index + 1}`}
                       onClick={() => remove(index)}
                       className="cursor-pointer rounded-lg text-[#a39c92] hover:bg-red-50 hover:text-red-600"
                     >
@@ -984,7 +904,7 @@ export default function AddUpdateArticleModal({
                   </div>
 
                   <Field
-                    label="Judul Section"
+                    label="Judul Bagian"
                     required
                     error={errors.sections?.[index]?.title?.message}
                   >
@@ -1002,12 +922,12 @@ export default function AddUpdateArticleModal({
                     <textarea
                       {...register(`sections.${index}.content` as const)}
                       rows={4}
-                      placeholder="Tuliskan isi detail section di sini..."
+                      placeholder="Tuliskan isi bagian ini..."
                       className={textareaClassName}
                     />
                   </Field>
                   <Field
-                    label="URL Gambar Section"
+                    label="URL Gambar Bagian"
                     error={errors.sections?.[index]?.imageURL?.message}
                   >
                     <div className="flex items-start gap-3">

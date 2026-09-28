@@ -167,7 +167,10 @@ export function useClothingTypeOptions() {
   return useQuery({
     queryKey: sellerProductKeys.clothingTypes(),
     queryFn: fetchClothingTypeOptions,
-    staleTime: 5 * 60 * 1000,
+    // Always refetch when the form opens so entries other users just added
+    // show up; the cached list still renders instantly meanwhile.
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 

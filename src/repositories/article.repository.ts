@@ -1,5 +1,6 @@
 import { ArticleStatus, Prisma } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
+import { mergeUniqueSorted } from '@/lib/utils';
 
 const getUniqueWhere = (idOrSlug: string) => {
   const isUuid =
@@ -306,6 +307,33 @@ export const articleRepository = {
         return { isLiked: true, engagement };
       }
     });
+  },
+
+  /**
+   * Every distinct value already used for the free-text classification
+   * fields, so the article form can offer them for reuse.
+   */
+  getFieldOptions: async () => {
+    // ponytail: one scan of all articles, deduped in memory; fine for an
+    // editorial catalog of hundreds, switch to per-field `distinct` if it grows.
+    const rows = await prisma.article.findMany({
+      select: {
+        motifLabel: true,
+        topic: true,
+        ethnicGroup: true,
+        clothingType: true,
+      },
+    });
+
+    const unique = (values: Array<string | null>) =>
+      mergeUniqueSorted(values.filter((value): value is string => !!value));
+
+    return {
+      motifLabels: unique(rows.map((row) => row.motifLabel)),
+      topics: unique(rows.map((row) => row.topic)),
+      ethnicGroups: unique(rows.map((row) => row.ethnicGroup)),
+      clothingTypes: unique(rows.map((row) => row.clothingType)),
+    };
   },
 
   getDistinctTopics: async () => {

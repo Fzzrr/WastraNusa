@@ -12,3 +12,15 @@ export function formatIDR(value: number): string {
     minimumFractionDigits: 0,
   }).format(value);
 }
+
+/** Union of string lists: trimmed, de-duplicated, sorted (Indonesian collation). */
+export function mergeUniqueSorted(...lists: string[][]): string[] {
+  return [
+    ...new Set(
+      lists
+        .flat()
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ),
+  ].sort((a, b) => a.localeCompare(b, 'id'));
+}

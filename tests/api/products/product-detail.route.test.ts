@@ -71,7 +71,7 @@ describe('GET /api/products/[id]', { tags: ['backend'] }, () => {
 
   it('should return 404 when product not found (via service)', async () => {
     mockService.getProductDetail.mockRejectedValue(
-      new ApiError('Product not found', 404),
+      new ApiError('Produk tidak ditemukan', 404),
     );
 
     const req = createRequest('http://localhost/api/products/nonexistent');
@@ -82,7 +82,7 @@ describe('GET /api/products/[id]', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(404);
     expect(body.status).toBe('fail');
-    expect(body.data.message).toBe('Product not found');
+    expect(body.data.message).toBe('Produk tidak ditemukan');
   });
 });
 
@@ -153,7 +153,7 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
       role: 'admin',
     } as never);
     mockService.updateProduct.mockRejectedValue(
-      new ApiError('Product not found', 404),
+      new ApiError('Produk tidak ditemukan', 404),
     );
 
     const req = createRequest('http://localhost/api/products/nonexistent', {
@@ -180,7 +180,7 @@ describe('PUT /api/products/[id]', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(404);
     expect(body.status).toBe('fail');
-    expect(body.data.message).toBe('Product not found');
+    expect(body.data.message).toBe('Produk tidak ditemukan');
   });
 });
 
@@ -211,7 +211,7 @@ describe('DELETE /api/products/[id]', { tags: ['backend'] }, () => {
       role: 'admin',
     } as never);
     mockService.deleteProduct.mockRejectedValue(
-      new ApiError('Product not found', 404),
+      new ApiError('Produk tidak ditemukan', 404),
     );
 
     const req = createRequest('http://localhost/api/products/nonexistent', {
@@ -224,6 +224,6 @@ describe('DELETE /api/products/[id]', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(404);
     expect(body.status).toBe('fail');
-    expect(body.data.message).toBe('Product not found');
+    expect(body.data.message).toBe('Produk tidak ditemukan');
   });
 });

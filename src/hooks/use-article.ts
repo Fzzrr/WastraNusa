@@ -30,6 +30,7 @@ export const articleKeys = {
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
   dashboard: () => [...articleKeys.all, 'dashboard'] as const,
+  fieldOptions: () => [...articleKeys.all, 'field-options'] as const,
   liked: () => [...articleKeys.all, 'liked'] as const,
   likedList: (page: number, limit: number = DEFAULT_LIKED_ARTICLE_LIMIT) =>
     [...articleKeys.liked(), page, limit] as const,
@@ -180,6 +181,26 @@ export function useArticles(
     queryKey: articleKeys.list(page, limit, filters.island, filters.topic),
     queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export type ArticleFieldOptions = {
+  motifLabels: string[];
+  topics: string[];
+  ethnicGroups: string[];
+  clothingTypes: string[];
+};
+
+/** Saved classification values, refreshed whenever articles change. */
+export function useArticleFieldOptions(enabled = true) {
+  return useQuery({
+    queryKey: articleKeys.fieldOptions(),
+    queryFn: () =>
+      fetchArticleApi<ArticleFieldOptions>('/api/articles/field-options'),
+    enabled,
+    // Refetch on every open so values other admins added appear right away.
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 

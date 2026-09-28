@@ -1,6 +1,7 @@
 import { ProductStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
+import { mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
 import {
@@ -322,7 +323,7 @@ export const productService = {
   getProductDetail: async (idOrSlug: string): Promise<ProductInventoryItem> => {
     const product = await productRepository.findByIdOrSlug(idOrSlug);
     if (!product) {
-      throw new ApiError('Product not found', 404);
+      throw new ApiError('Produk tidak ditemukan', 404);
     }
 
     return mapProduct(product);
@@ -427,7 +428,7 @@ export const productService = {
   ): Promise<ProductInventoryItem> => {
     const existing = await productRepository.findByIdOrSlug(idOrSlug);
     if (!existing) {
-      throw new ApiError('Product not found', 404);
+      throw new ApiError('Produk tidak ditemukan', 404);
     }
 
     const nextArticle =
@@ -482,7 +483,12 @@ export const productService = {
     return product;
   },
 
+  /** Clothing types used anywhere — every seller's products and articles. */
   getClothingTypes: async (): Promise<string[]> => {
-    return productRepository.getDistinctClothingTypes();
+    const [productTypes, articleOptions] = await Promise.all([
+      productRepository.getDistinctClothingTypes(),
+      articleRepository.getFieldOptions(),
+    ]);
+    return mergeUniqueSorted(productTypes, articleOptions.clothingTypes);
   },
 };
