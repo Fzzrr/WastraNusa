@@ -30,7 +30,71 @@ export const inputClassName =
 export const textareaClassName =
   'w-full resize-none rounded-xl border border-[#e5ded5] bg-white px-4 py-3 text-sm text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
 export const selectTriggerClassName =
-  'h-11 w-full rounded-xl border-[#e5ded5] bg-white text-[#2f3a33] data-[size=default]:h-11';
+  'h-11 w-full cursor-pointer gap-2.5 rounded-xl border-[#e5ded5] bg-white px-3.5 text-[#2f3a33] shadow-[0_1px_2px_rgba(60,41,15,0.04)] transition-all hover:border-[#caa86a]/60 focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15 disabled:cursor-not-allowed disabled:bg-[#f4efe5] data-[size=default]:h-11 data-[state=open]:border-[#3a5a4a] data-[state=open]:ring-3 data-[state=open]:ring-[#3a5a4a]/15 data-placeholder:text-[#b3aa9e] [&>svg:last-child]:text-[#8a6a3a] [&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-[state=open]:[&>svg:last-child]:rotate-180';
+
+/** Dropdown panel opened directly below its trigger, matching its width. */
+export const selectContentClassName =
+  'max-h-72 rounded-xl border-0 bg-[#fffdfa] p-1 shadow-[0_16px_36px_-12px_rgba(89,69,38,0.28)] ring-1 ring-[#ebe3d6]';
+
+export const selectItemClassName =
+  'cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm text-[#3d3a34] transition-colors focus:bg-[#f4efe5] focus:text-[#2f5543] data-[state=checked]:bg-[#e3ece5] data-[state=checked]:font-semibold data-[state=checked]:text-[#2f5543] [&_svg]:text-[#2f5543]';
+
+/**
+ * Single-choice pill buttons (radio group). Friendlier than a dropdown for
+ * short option lists such as gender.
+ */
+export function ChoicePills<T extends string | null>({
+  value,
+  onChange,
+  options,
+  ariaLabel,
+}: {
+  value: T;
+  onChange: (value: T) => void;
+  options: { value: T; label: string }[];
+  ariaLabel: string;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label={ariaLabel}
+      className="flex flex-wrap gap-2"
+    >
+      {options.map((option) => {
+        const isActive = value === option.value;
+        return (
+          <button
+            key={option.label}
+            type="button"
+            role="radio"
+            aria-checked={isActive}
+            onClick={() => onChange(option.value)}
+            className={cn(
+              'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl px-4 text-sm transition-all',
+              isActive
+                ? 'bg-[#3a5a4a] font-medium text-white shadow-[0_6px_14px_-6px_rgba(47,75,61,0.6)]'
+                : 'bg-white text-[#6f6a62] ring-1 ring-[#e5ded5] hover:text-[#2f5543] hover:ring-[#3a5a4a]/40',
+            )}
+          >
+            {isActive ? <Check className="size-3.5" /> : null}
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Gender choices shared by article and product forms (null = unspecified). */
+export const GENDER_CHOICES: {
+  value: 'male' | 'female' | 'unisex' | null;
+  label: string;
+}[] = [
+  { value: null, label: 'Tidak Ditentukan' },
+  { value: 'male', label: 'Laki-laki' },
+  { value: 'female', label: 'Perempuan' },
+  { value: 'unisex', label: 'Unisex' },
+];
 
 export function Field({
   label,

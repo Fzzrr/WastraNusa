@@ -1,11 +1,15 @@
 'use client';
 
 import {
+  ChoicePills,
   CreatableCombobox,
   Field,
   FormSection,
+  GENDER_CHOICES,
   ImagePreview,
   inputClassName,
+  selectContentClassName,
+  selectItemClassName,
   selectTriggerClassName,
   textareaClassName,
 } from '@/components/form-sections';
@@ -18,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Gender, VariantType } from '@/generated/prisma/enums';
+import { VariantType } from '@/generated/prisma/enums';
 import { cn, formatIDR } from '@/lib/utils';
 import {
   type CreateProductInput,
@@ -38,7 +42,6 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 import {
-  Check,
   ImageIcon,
   Layers,
   Loader2,
@@ -84,13 +87,6 @@ export interface ProductFormModalProps {
   onClose: () => void;
   initialData?: ProductInventoryItem | null;
 }
-
-const GENDER_OPTIONS: { value: Gender | null; label: string }[] = [
-  { value: null, label: 'Tidak Ditentukan' },
-  { value: Gender.male, label: 'Laki-laki' },
-  { value: Gender.female, label: 'Perempuan' },
-  { value: Gender.unisex, label: 'Unisex' },
-];
 
 const EMPTY_VARIANT = {
   name: '',
@@ -594,14 +590,21 @@ export function ProductFormModal({
                         />
                       </SelectTrigger>
                       <SelectContent
-                        className="max-h-72 overflow-y-auto"
+                        position="popper"
+                        className={cn(
+                          selectContentClassName,
+                          'overflow-y-auto',
+                        )}
                         onScroll={handleArticleSelectScroll}
                       >
                         {articleOptions.map((article) => (
                           <SelectItem
                             key={article.id}
                             value={article.id}
-                            className="h-9 overflow-hidden text-ellipsis whitespace-nowrap"
+                            className={cn(
+                              selectItemClassName,
+                              'overflow-hidden text-ellipsis whitespace-nowrap',
+                            )}
                           >
                             {article.title}
                           </SelectItem>
@@ -681,33 +684,12 @@ export function ProductFormModal({
                 control={control}
                 name="gender"
                 render={({ field }) => (
-                  <div
-                    role="radiogroup"
-                    aria-label="Gender"
-                    className="flex flex-wrap gap-2"
-                  >
-                    {GENDER_OPTIONS.map((option) => {
-                      const isActive = (field.value ?? null) === option.value;
-                      return (
-                        <button
-                          key={option.label}
-                          type="button"
-                          role="radio"
-                          aria-checked={isActive}
-                          onClick={() => field.onChange(option.value)}
-                          className={cn(
-                            'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl px-4 text-sm transition-all',
-                            isActive
-                              ? 'bg-[#3a5a4a] font-medium text-white shadow-[0_6px_14px_-6px_rgba(47,75,61,0.6)]'
-                              : 'bg-white text-[#6f6a62] ring-1 ring-[#e5ded5] hover:text-[#2f5543] hover:ring-[#3a5a4a]/40',
-                          )}
-                        >
-                          {isActive ? <Check className="size-3.5" /> : null}
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <ChoicePills
+                    ariaLabel="Gender"
+                    value={field.value ?? null}
+                    onChange={field.onChange}
+                    options={GENDER_CHOICES}
+                  />
                 )}
               />
             </Field>

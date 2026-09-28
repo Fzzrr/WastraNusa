@@ -1,11 +1,15 @@
 'use client';
 
 import {
+  ChoicePills,
   CreatableCombobox,
   Field,
   FormSection,
+  GENDER_CHOICES,
   ImagePreview,
   inputClassName,
+  selectContentClassName,
+  selectItemClassName,
   selectTriggerClassName,
   textareaClassName,
 } from '@/components/form-sections';
@@ -42,7 +46,9 @@ import {
   Info,
   Layers,
   Loader2,
+  Map as MapIcon,
   MapPin,
+  MapPinned,
   Plus,
   Save,
   SlidersHorizontal,
@@ -600,11 +606,19 @@ export default function AddUpdateArticleModal({
                       value={field.value || undefined}
                     >
                       <SelectTrigger className={selectTriggerClassName}>
+                        <MapIcon className="size-4 text-[#b08a5e]" />
                         <SelectValue placeholder="Pilih Pulau" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent
+                        position="popper"
+                        className={selectContentClassName}
+                      >
                         {MAJOR_ISLANDS.map((island) => (
-                          <SelectItem key={island} value={island}>
+                          <SelectItem
+                            key={island}
+                            value={island}
+                            className={selectItemClassName}
+                          >
                             {island}
                           </SelectItem>
                         ))}
@@ -627,15 +641,23 @@ export default function AddUpdateArticleModal({
                       disabled={!watchedIsland}
                     >
                       <SelectTrigger className={selectTriggerClassName}>
+                        <MapPinned className="size-4 text-[#b08a5e]" />
                         <SelectValue
                           placeholder={
                             watchedIsland ? 'Pilih Provinsi' : 'Pilih Provinsi'
                           }
                         />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent
+                        position="popper"
+                        className={selectContentClassName}
+                      >
                         {filteredProvinces.map((p) => (
-                          <SelectItem key={p.kode} value={p.nama}>
+                          <SelectItem
+                            key={p.kode}
+                            value={p.nama}
+                            className={selectItemClassName}
+                          >
                             {p.nama}
                           </SelectItem>
                         ))}
@@ -655,15 +677,23 @@ export default function AddUpdateArticleModal({
                       disabled={!watchedProvince}
                     >
                       <SelectTrigger className={selectTriggerClassName}>
+                        <MapPin className="size-4 text-[#b08a5e]" />
                         <SelectValue
                           placeholder={
                             watchedProvince ? 'Pilih Daerah' : 'Daerah'
                           }
                         />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent
+                        position="popper"
+                        className={selectContentClassName}
+                      >
                         {filteredKabupaten.map((k) => (
-                          <SelectItem key={k.kode} value={k.nama}>
+                          <SelectItem
+                            key={k.kode}
+                            value={k.nama}
+                            className={selectItemClassName}
+                          >
                             {k.nama}
                           </SelectItem>
                         ))}
@@ -696,23 +726,21 @@ export default function AddUpdateArticleModal({
                   className={inputClassName}
                 />
               </Field>
-              <Field label="Gender" error={errors.gender?.message}>
+              <Field
+                label="Gender"
+                error={errors.gender?.message}
+                className="md:col-span-2"
+              >
                 <Controller
                   control={control}
                   name="gender"
                   render={({ field }) => (
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value ?? undefined}
-                    >
-                      <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue placeholder="Pilih Gender" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="male">Laki-laki</SelectItem>
-                        <SelectItem value="female">Perempuan</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <ChoicePills
+                      ariaLabel="Gender"
+                      value={field.value ?? null}
+                      onChange={field.onChange}
+                      options={GENDER_CHOICES}
+                    />
                   )}
                 />
               </Field>
