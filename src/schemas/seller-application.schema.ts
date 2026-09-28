@@ -40,3 +40,12 @@ export type UpdateSellerApplicationInput = z.infer<
 export type ReviewSellerApplicationInput = z.infer<
   typeof reviewSellerApplicationSchema
 >;
+
+/**
+ * Admin revokes a seller's status (back to a regular user). Must carry a reason.
+ */
+export const demoteSellerSchema = z.object({
+  reason: z.string().trim().min(1, 'Alasan wajib diisi'),
+});
+
+export type DemoteSellerInput = z.infer<typeof demoteSellerSchema>;

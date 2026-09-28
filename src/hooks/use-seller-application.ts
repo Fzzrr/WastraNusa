@@ -1,9 +1,18 @@
 import type { SellerApplicationStatus } from '@/generated/prisma/enums';
 import type { JSendResponse } from '@/lib/jsend';
 import type {
+  SellerManagementRoleFilter,
+  SellerManagementSort,
+} from '@/repositories/sellerManagement.repository';
+import type {
   CreateSellerApplicationInput,
+  DemoteSellerInput,
   ReviewSellerApplicationInput,
 } from '@/schemas/seller-application.schema';
+import type {
+  SellerManagementStats,
+  SellerManagementUser,
+} from '@/services/sellerManagement.service';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 // --------------- Types ---------------
@@ -39,6 +48,21 @@ export const sellerApplicationKeys = {
   adminLists: () => [...sellerApplicationKeys.all, 'admin', 'list'] as const,
   adminList: (status: SellerApplicationStatus | 'all') =>
     [...sellerApplicationKeys.adminLists(), status] as const,
+  managementStats: () =>
+    [...sellerApplicationKeys.all, 'management', 'stats'] as const,
+  managementUsers: (
+    search: string,
+    role: SellerManagementRoleFilter | 'all',
+    sort: SellerManagementSort,
+  ) =>
+    [
+      ...sellerApplicationKeys.all,
+      'management',
+      'users',
+      search,
+      role,
+      sort,
+    ] as const,
 };
 
 // --------------- Fetch Helpers ---------------
@@ -150,9 +174,59 @@ export function useReviewSellerApplication() {
         data,
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: sellerApplicationKeys.adminLists(),
-      });
+      queryClient.invalidateQueries({ queryKey: sellerApplicationKeys.all });
+    },
+  });
+}
+
+// --------------- Seller Management (admin) ---------------
+
+export function useSellerManagementStats() {
+  return useQuery({
+    queryKey: sellerApplicationKeys.managementStats(),
+    queryFn: () =>
+      fetchApi<SellerManagementStats>('/api/admin/seller-management/stats'),
+  });
+}
+
+export function useSellerManagementUsers(
+  search: string,
+  role: SellerManagementRoleFilter | 'all',
+  sort: SellerManagementSort = 'newest',
+) {
+  return useQuery({
+    queryKey: sellerApplicationKeys.managementUsers(search, role, sort),
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (search) params.set('search', search);
+      if (role !== 'all') params.set('role', role);
+      if (sort !== 'newest') params.set('sort', sort);
+      return fetchApi<SellerManagementUser[]>(
+        `/api/admin/seller-management/users?${params.toString()}`,
+      );
+    },
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useDemoteSeller() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      data,
+    }: {
+      userId: string;
+      data: DemoteSellerInput;
+    }) =>
+      mutateApi<null>(
+        `/api/admin/seller-management/users/${encodeURIComponent(userId)}/demote`,
+        'POST',
+        data,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sellerApplicationKeys.all });
     },
   });
 }
