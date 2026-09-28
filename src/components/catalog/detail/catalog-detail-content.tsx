@@ -70,7 +70,7 @@ export function CatalogDetailContent({
     ['Kategori', product.clothingType],
     ['Asal', `${product.province}, ${product.island}`],
     ['Harga', formatIDR(displayPrice)],
-    ['Total Stok', `${product.stock} unit`],
+    ['Total Stok', `${product.stock} Unit`],
     ['Berat', `${product.weight} gram`],
     [
       'Gender',
@@ -91,7 +91,7 @@ export function CatalogDetailContent({
         product.status
       ),
     ],
-    ['Varian', `${product.variantCount} varian`],
+    ['Varian', `${product.variantCount} Varian`],
   ];
 
   return (

@@ -13,11 +13,14 @@ import { Home } from 'lucide-react';
 type CatalogMainHeaderProps = {
   totalProducts: number;
   totalIslands: number;
+  /** Product photos for the hero collage. */
+  images?: Array<string | null | undefined>;
 };
 
 export function CatalogMainHeader({
   totalProducts,
   totalIslands,
+  images = [],
 }: CatalogMainHeaderProps) {
   const stats = [
     { value: totalProducts, label: 'Produk Autentik' },
@@ -40,7 +43,7 @@ export function CatalogMainHeader({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className="text-[#2f5b49]">
-              Catalog Produk
+              Katalog Produk
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -52,18 +55,18 @@ export function CatalogMainHeader({
         title="Katalog Produk"
         accent="Wastra"
         description="Jelajahi ragam kain tradisional Indonesia, mulai dari tenun, batik, hingga songket, hasil karya pengrajin lokal terpercaya."
-        aside={
-          <div className="grid shrink-0 grid-cols-2 gap-3 lg:w-[440px]">
-            {stats.map((stat, index) => (
-              <StatCard
-                key={stat.label}
-                stat={{ value: String(stat.value), label: stat.label }}
-                index={index}
-              />
-            ))}
-          </div>
-        }
-      />
+        images={images}
+      >
+        <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 md:gap-4 lg:max-w-2xl">
+          {stats.map((stat, index) => (
+            <StatCard
+              key={stat.label}
+              stat={{ value: String(stat.value), label: stat.label }}
+              index={index}
+            />
+          ))}
+        </div>
+      </WastraHeroPanel>
     </section>
   );
 }

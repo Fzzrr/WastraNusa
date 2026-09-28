@@ -142,7 +142,7 @@ export function EncyclopediaSearchResults({
             {/* Show more indicator */}
             {searchResults.length > 8 && (
               <div className="px-4 py-2 text-center text-xs text-[#9a9289]">
-                +{searchResults.length - 8} artikel lainnya
+                +{searchResults.length - 8} Artikel Lainnya
               </div>
             )}
           </div>

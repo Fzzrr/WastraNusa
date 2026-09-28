@@ -35,7 +35,7 @@ const menuItems = [
   // shows the panel button once their shop exists (or the form otherwise).
   { label: 'Toko', icon: Store, href: '/seller/dashboard', sellerOnly: true },
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
-  { label: 'Catalog', icon: Grid2X2, href: '/catalog' },
+  { label: 'Katalog', icon: Grid2X2, href: '/catalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
   { label: 'Profil', icon: UserRound, href: '/profile' },
 ];

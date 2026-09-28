@@ -20,7 +20,7 @@ import { WastraHeroPanel } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
 import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Home, X } from 'lucide-react';
+import { Home, Library, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -34,16 +34,16 @@ interface EncyclopediaMainProps {
 
 function EncyclopediaStatsSkeleton() {
   return (
-    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#e3d9c7] pt-6 md:gap-4 lg:grid-cols-4">
+    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 md:gap-4 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="flex items-center gap-3 rounded-2xl bg-[#fffdf8]/80 p-4 ring-1 ring-[#e6dccb]"
+          className="flex items-center gap-3 rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/15"
         >
-          <Skeleton className="size-11 shrink-0 rounded-xl bg-[#e6dfd1]" />
+          <Skeleton className="size-11 shrink-0 rounded-xl bg-white/15" />
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-6 w-10 bg-[#e6dfd1]" />
-            <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
+            <Skeleton className="h-6 w-10 bg-white/15" />
+            <Skeleton className="h-3 w-24 bg-white/15" />
           </div>
         </div>
       ))}
@@ -272,6 +272,7 @@ export function EncyclopediaMain({
           title="Ensiklopedia Budaya"
           accent="Wastra"
           description="Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari teknik tenun hingga makna filosofi setiap motif kain."
+          images={articles.map((article) => article.imageURL)}
         >
           {showLoadingSkeleton ? (
             <EncyclopediaStatsSkeleton />
@@ -309,8 +310,15 @@ export function EncyclopediaMain({
                   </button>
                 </p>
               ) : (
-                <p className="text-left text-sm font-semibold text-[#4e6659]">
-                  Menampilkan {data?.meta.totalItems ?? articles.length} Artikel
+                <p className="inline-flex items-center gap-2 text-left text-sm font-semibold text-[#4e6659]">
+                  <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                    <Library className="size-3.5" />
+                  </span>
+                  Menampilkan
+                  <span className="rounded-full bg-[#2f5f49] px-2 py-0.5 text-xs text-[#eef3ea] tabular-nums">
+                    {data?.meta.totalItems ?? articles.length}
+                  </span>
+                  Artikel
                 </p>
               )}
             </div>

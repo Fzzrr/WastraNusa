@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { useArticles } from '@/hooks/use-article';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
@@ -126,13 +126,17 @@ export function IslandCards() {
     <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
       <Badge
         variant="outline"
-        className="inline-flex rounded-lg border-[#e4dac8] bg-[#f3ecdd] px-3 py-1 text-xs font-semibold text-[#b09c80]"
+        className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#8a6a2a]"
       >
+        <Compass className="size-3 text-[#caa86a]" />
         Jelajahi Pulau
       </Badge>
 
       <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#2d5f48] sm:text-2xl lg:text-2xl">
-        Wastra dari Seluruh Nusantara
+        Wastra dari Seluruh{' '}
+        <span className="bg-gradient-to-r from-[#2d5f48] via-[#7a8f4e] to-[#caa86a] bg-clip-text text-transparent">
+          Nusantara
+        </span>
       </h3>
 
       <div className="mt-6">
@@ -198,17 +202,21 @@ export function IslandCards() {
                         index={index}
                       />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.78)_45%,rgba(0,0,0,0.35)_75%,rgba(0,0,0,0)_100%)]" />
+                      <span className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-1 origin-left scale-x-0 bg-gradient-to-r from-[#e8cb8d] via-[#caa86a] to-transparent transition-transform duration-500 group-hover:scale-x-100" />
 
                       <span className="absolute right-3 top-3 z-10 grid h-8 w-8 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6f2e8] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                         <ArrowUpRight className="h-4 w-4" />
                       </span>
 
                       <div className="relative flex min-h-[188px] flex-col justify-end p-4 text-[#f6f2e8] transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
-                        <p className="mt-2 text-lg font-bold leading-tight">
+                        <p className="mt-2 text-lg font-bold leading-tight transition-colors group-hover:text-[#f3dfb4]">
                           {island.name}
                         </p>
                         <p className="text-xs text-[#d3ccb8]">
-                          {island.count} artikel
+                          <span className="font-semibold text-[#e8cb8d]">
+                            {island.count}
+                          </span>{' '}
+                          Artikel
                         </p>
                       </div>
                     </Card>

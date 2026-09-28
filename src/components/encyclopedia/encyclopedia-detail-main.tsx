@@ -285,9 +285,9 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               <HeroMeta icon={UserRound}>{article.author}</HeroMeta>
               <HeroMeta icon={CalendarDays}>{article.publishedAt}</HeroMeta>
               <HeroMeta icon={Clock3}>
-                {article.readMinutes ?? 8} mnt baca
+                {article.readMinutes ?? 8} Menit Baca
               </HeroMeta>
-              <HeroMeta icon={Eye}>{article.views} kunjungan</HeroMeta>
+              <HeroMeta icon={Eye}>{article.views} Kunjungan</HeroMeta>
             </div>
           </div>
         </div>

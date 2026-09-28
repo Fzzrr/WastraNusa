@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticles } from '@/hooks/use-article';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -137,7 +137,7 @@ export function HeroSection() {
         className="h-full"
       >
         <CarouselContent className="-ml-0 h-full">
-          {slides.map((slide) => (
+          {slides.map((slide, slideIndex) => (
             <CarouselItem key={slide.id} className="pl-0 h-full">
               <div className="relative flex h-full min-h-[300px] flex-col justify-end pb-8 pt-5 pr-5 pl-14 sm:min-h-[360px] sm:pb-12 sm:pt-6 sm:pr-6 sm:pl-20 md:min-h-[420px] md:pb-14 md:pt-8 md:pr-8 md:pl-20">
                 <div
@@ -149,7 +149,9 @@ export function HeroSection() {
                     src={slide.imageURL}
                     alt={slide.title}
                     fill
-                    className="object-cover opacity-45 mix-blend-screen"
+                    className={`object-cover opacity-60 transition-transform duration-[6000ms] ease-out ${
+                      activeSlide === slideIndex ? 'scale-110' : 'scale-100'
+                    }`}
                     priority={!slide.isSkeleton}
                     sizes="100vw"
                   />
@@ -162,6 +164,10 @@ export function HeroSection() {
                   className="absolute inset-0 bg-gradient-to-r from-black/72 via-black/42 to-black/30"
                   aria-hidden="true"
                 />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent"
+                  aria-hidden="true"
+                />
 
                 <div className="relative z-10">
                   {slide.isSkeleton ? (
@@ -169,8 +175,9 @@ export function HeroSection() {
                   ) : (
                     <Badge
                       variant="outline"
-                      className="mb-3 w-fit rounded-lg border-white/25 bg-black/35 px-3 py-1 text-xs font-semibold text-[#ddd7ce] backdrop-blur"
+                      className="mb-3 w-fit gap-1.5 rounded-full border-[#e8cb8d]/40 bg-black/35 px-3 py-1 text-xs font-semibold text-[#f3dfb4] shadow-[0_0_20px_-6px_rgba(232,203,141,0.6)] backdrop-blur"
                     >
+                      <Sparkles className="size-3 text-[#e8cb8d]" />
                       {slide.badge}
                     </Badge>
                   )}
@@ -181,9 +188,9 @@ export function HeroSection() {
                       <Skeleton className="h-10 w-48 bg-white/20 md:h-12 md:w-64" />
                     </div>
                   ) : (
-                    <h1 className="max-w-xl text-2xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] sm:text-3xl md:text-4xl lg:text-[46px]">
+                    <h1 className="max-w-xl text-2xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] drop-shadow-[0_2px_16px_rgba(0,0,0,0.45)] sm:text-3xl md:text-4xl lg:text-[46px]">
                       <span className="block line-clamp-2">{slide.title}</span>
-                      <span className="mt-1 block line-clamp-1 text-[0.72em] text-[#e4d5bf] md:text-[0.68em]">
+                      <span className="mt-1 block line-clamp-1 bg-gradient-to-r from-[#f3dfb4] via-[#e8cb8d] to-[#caa86a] bg-clip-text text-[0.72em] text-transparent md:text-[0.68em]">
                         {slide.subtitle}
                       </span>
                     </h1>
@@ -211,15 +218,16 @@ export function HeroSection() {
                         <Button
                           asChild
                           variant="outline"
-                          className="rounded-xl bg-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] transition hover:-translate-y-0.5 hover:border-[#2d5f48] hover:bg-[#2d5f48] hover:text-white hover:shadow-lg active:scale-95"
+                          className="group/cta rounded-xl border-transparent bg-gradient-to-r from-[#f3dfb4] to-[#d7ccb7] px-5 py-2.5 text-sm font-bold text-[#2c503f] shadow-[0_10px_24px_-12px_rgba(232,203,141,0.9)] transition hover:-translate-y-0.5 hover:border-[#2d5f48] hover:from-[#2d5f48] hover:to-[#3f7359] hover:text-white hover:shadow-lg active:scale-95"
                         >
                           <Link href={`/encyclopedia/${slide.slug}`}>
                             Baca Artikel
+                            <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-0.5" />
                           </Link>
                         </Button>
                         <Button
                           asChild
-                          className="rounded-xl border border-[#c7b59b] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] transition hover:-translate-y-0.5 hover:bg-white/20 active:scale-95"
+                          className="rounded-xl border border-white/30 bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#f8f3e9] backdrop-blur-md transition hover:-translate-y-0.5 hover:border-[#e8cb8d]/60 hover:bg-white/20 active:scale-95"
                         >
                           <Link href="/encyclopedia">
                             Jelajahi Ensiklopedia
@@ -236,21 +244,24 @@ export function HeroSection() {
       </Carousel>
 
       <Badge
-        className="absolute right-4 top-4 rounded-md bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5]"
+        className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/40 px-2.5 py-1 text-xs font-semibold text-[#e8e2d5] tabular-nums backdrop-blur-md"
         variant="secondary"
       >
-        {activeSlide + 1} / {slides.length}
+        <span className="text-[#f3dfb4]">{activeSlide + 1}</span> /{' '}
+        {slides.length}
       </Badge>
       <Button
-        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:bg-white/25 active:scale-95"
+        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
         type="button"
+        aria-label="Slide sebelumnya"
         onClick={goToPreviousSlide}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
-        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:bg-white/25 active:scale-95"
+        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
         type="button"
+        aria-label="Slide berikutnya"
         onClick={goToNextSlide}
       >
         <ChevronRight className="h-4 w-4" />
@@ -266,13 +277,22 @@ export function HeroSection() {
               type="button"
               aria-label={`Go to slide ${index + 1}`}
               aria-current={isActive}
-              className={`pointer-events-auto h-1.5 rounded-full transition-all duration-300 ${
+              className={`pointer-events-auto relative h-1.5 overflow-hidden rounded-full transition-all duration-300 ${
                 isActive
-                  ? 'w-8 bg-white shadow-[0_0_12px_rgba(255,255,255,0.4)]'
+                  ? 'w-8 bg-white/30 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
                   : 'w-1.5 bg-white/40 hover:bg-white/60'
               }`}
               onClick={() => goToSlide(index)}
-            />
+            >
+              {isActive ? (
+                // Fills over the autoplay delay; remounts per slide to restart.
+                <span
+                  key={activeSlide}
+                  className="absolute inset-0 animate-in rounded-full bg-gradient-to-r from-[#f3dfb4] to-white ease-linear fill-mode-both slide-in-from-left-[100%]"
+                  style={{ animationDuration: `${HERO_AUTOPLAY_DELAY}ms` }}
+                />
+              ) : null}
+            </button>
           );
         })}
       </div>

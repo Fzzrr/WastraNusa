@@ -2,7 +2,14 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { IslandFilter } from '@/types/encyclopedia';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  MapPin,
+  RotateCcw,
+  Tags,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 const MAX_VISIBLE_ISLANDS = 9;
@@ -112,9 +119,11 @@ export function EncyclopediaSidebar({
         <div className="overflow-hidden">
           <div className="space-y-3 pt-3 xl:pt-0">
             {/* Region Filters */}
-            <Card className="gap-2 rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#587061]">
-                <Filter className="h-4 w-4" />
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <MapPin className="size-3.5" />
+                </span>
                 Filter Pulau
               </div>
               <div>
@@ -123,10 +132,10 @@ export function EncyclopediaSidebar({
                     <li key={island.name}>
                       <Button
                         variant="ghost"
-                        className={`flex h-auto w-full cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm font-medium ${
+                        className={`relative flex h-auto w-full cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
                           island.active
-                            ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49] hover:text-[#eef3ea]'
-                            : 'text-[#4c6457] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                            ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#eef3ea] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] hover:text-[#eef3ea] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                            : 'text-[#4c6457] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]'
                         }`}
                         onClick={() => onIslandClick?.(island.name)}
                       >
@@ -136,7 +145,7 @@ export function EncyclopediaSidebar({
                           className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                             island.active
                               ? 'bg-white/20 text-[#f4f7f1]'
-                              : 'bg-[#e5decf] text-[#839386]'
+                              : 'bg-[#efe8dd] text-[#839386]'
                           }`}
                         >
                           {island.count}
@@ -169,8 +178,13 @@ export function EncyclopediaSidebar({
             </Card>
 
             {/* Topics */}
-            <Card className="gap-2 rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <div className="text-sm font-bold text-[#587061]">Topic</div>
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <Tags className="size-3.5" />
+                </span>
+                Topik
+              </div>
               <div>
                 <div className="flex flex-wrap gap-2">
                   {visibleTopics.map((topic) => (
@@ -178,10 +192,10 @@ export function EncyclopediaSidebar({
                       key={topic}
                       variant="outline"
                       size="sm"
-                      className={`h-auto cursor-pointer rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold ${
+                      className={`h-auto cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
                         selectedTopic === topic
-                          ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49] hover:text-[#eef3ea]'
-                          : 'bg-[#efeadf] text-[#5d6f62] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                          ? 'border-[#2f5f49] bg-[#2f5f49] text-[#eef3ea] shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                          : 'border-[#e6d6b8] bg-[#fbf8f2] text-[#6f6a62] hover:-translate-y-px hover:border-[#caa86a] hover:bg-[#f5ead3] hover:text-[#7a5a2c]'
                       }`}
                       onClick={() => onTopicClick?.(topic)}
                     >
@@ -215,9 +229,10 @@ export function EncyclopediaSidebar({
             {/* Reset Button */}
             <Button
               variant="outline"
-              className="w-full cursor-pointer rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62]"
+              className="group/reset w-full cursor-pointer gap-2 rounded-xl border-[#e3d9c7] bg-[#fbf8f2] px-4 py-2 text-sm font-bold text-[#5d6f62] transition-all hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] hover:text-[#2f5f49]"
               onClick={onResetFilters}
             >
+              <RotateCcw className="size-4 transition-transform duration-500 group-hover/reset:-rotate-180" />
               Reset Semua Filter
             </Button>
           </div>

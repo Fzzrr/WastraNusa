@@ -99,7 +99,7 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
 
   return (
     <div
-      className="group relative animate-in overflow-hidden rounded-2xl bg-[#fffdf8]/80 p-4 backdrop-blur-sm ring-1 ring-[#e6dccb] transition-all duration-300 ease-out fill-mode-both fade-in slide-in-from-bottom-2 hover:-translate-y-1 hover:shadow-[0_18px_32px_-22px_var(--stat-color)] hover:ring-[var(--stat-color)]/40"
+      className="group relative animate-in overflow-hidden rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/15 backdrop-blur-md transition-all duration-300 ease-out fill-mode-both fade-in slide-in-from-bottom-2 hover:-translate-y-1 hover:bg-white/[0.11] hover:shadow-[0_18px_32px_-18px_rgba(0,0,0,0.6)] hover:ring-[#e8cb8d]/40"
       style={
         {
           '--stat-color': style.color,
@@ -111,35 +111,32 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
       <span
         className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(120% 90% at 100% 0%, ${style.tint} 0%, transparent 60%)`,
+          background: `radial-gradient(120% 90% at 100% 0%, ${style.tint}33 0%, transparent 60%)`,
         }}
       />
       {/* Oversized faint icon as decoration */}
       <Icon
-        className="pointer-events-none absolute -right-3 -bottom-4 size-20 opacity-[0.07] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
-        style={{ color: style.color }}
+        className="pointer-events-none absolute -right-3 -bottom-4 size-20 opacity-[0.08] transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6"
+        style={{ color: style.tint }}
       />
 
       <div className="relative flex items-center gap-3">
         <span
-          className="grid size-11 shrink-0 place-items-center rounded-xl transition-all duration-300 group-hover:scale-105 group-hover:rotate-[-4deg]"
+          className="grid size-11 shrink-0 place-items-center rounded-xl shadow-[0_8px_18px_-10px_rgba(0,0,0,0.6)] transition-all duration-300 group-hover:scale-105 group-hover:rotate-[-4deg]"
           style={{ backgroundColor: style.tint, color: style.color }}
         >
           <Icon className="size-5" />
         </span>
         <div className="min-w-0">
           <p className="flex items-baseline gap-1.5">
-            <span
-              className="text-2xl leading-none font-extrabold tracking-tight tabular-nums"
-              style={{ color: style.color }}
-            >
+            <span className="text-2xl leading-none font-extrabold tracking-tight text-white tabular-nums">
               {displayValue}
             </span>
-            <span className="text-sm font-semibold text-[#3d3a34]">
+            <span className="text-sm font-semibold whitespace-nowrap text-[#e4ece3]">
               {stat.label}
             </span>
           </p>
-          <p className="mt-1 truncate text-xs text-[#8f8577]">
+          <p className="mt-1 truncate text-xs text-[#a9c2b3]">
             {style.caption}
           </p>
         </div>
@@ -147,7 +144,7 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
 
       <span
         className="absolute bottom-0 left-0 h-0.5 w-0 transition-all duration-500 group-hover:w-full"
-        style={{ backgroundColor: style.color }}
+        style={{ backgroundColor: style.tint }}
       />
     </div>
   );
@@ -155,7 +152,7 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
 
 export function EncyclopediaStats({ stats }: EncyclopediaStatsProps) {
   return (
-    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#e3d9c7] pt-6 md:gap-4 lg:grid-cols-4">
+    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 md:gap-4 lg:grid-cols-4">
       {stats.map((stat, index) => (
         <StatCard key={stat.label} stat={stat} index={index} />
       ))}

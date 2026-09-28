@@ -128,6 +128,7 @@ export function CatalogMain() {
       <CatalogMainHeader
         totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
         totalIslands={meta?.stats?.totalIslands ?? meta?.islands?.length ?? 0}
+        images={products.map((product) => product.imageURL)}
       />
 
       <section className="border-y border-[#d4ccbe] bg-[#e8e3d9] py-6">
