@@ -14,9 +14,11 @@ import {
   LogOut,
   MessageCircle,
   Package2,
+  ShieldCheck,
   Store,
   UserRound,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -38,15 +40,15 @@ const SELLER_NAVIGATION: DashboardNavItem[] = [
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const className = cn(
-    'flex h-10 items-center gap-2 rounded-xl px-3 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    item.active && 'bg-[#4a6b3a] text-[#f2e7c9]',
+    'flex h-12 items-center gap-3 rounded-xl px-3 text-[15px] text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+    item.active && 'bg-white/10 text-[#e08a55] hover:text-[#e08a55]',
     item.disabled && 'pointer-events-none opacity-50',
   );
 
   if (item.href && !item.disabled) {
     return (
       <Link href={item.href} className={className}>
-        <Icon className="size-4" />
+        <Icon className="size-[18px]" />
         <span>{item.title}</span>
       </Link>
     );
@@ -54,10 +56,10 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
 
   return (
     <button type="button" disabled className={className}>
-      <Icon className="size-4" />
+      <Icon className="size-[18px]" />
       <span className="flex-1 text-left">{item.title}</span>
       {item.disabled ? (
-        <span className="rounded-full bg-[#d9b061]/20 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e7c98c]">
+        <span className="rounded-full bg-[#d2a36d]/20 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e3bf8c]">
           Segera hadir
         </span>
       ) : null}
@@ -72,6 +74,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
   const { data: session } = authClient.useSession();
 
   const sellerName = session?.user?.name ?? 'Seller WastraNusa';
+  const isAdmin = session?.user?.role === 'admin';
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -86,22 +89,26 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="px-4 py-5">
-        <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-[#4a6b3a] text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
-            W
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-sidebar-foreground">
-              WastraNusa Seller Panel
-            </p>
-            <p className="text-xs text-sidebar-foreground/75">Pusat Penjual</p>
-          </div>
+      <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
+        <div className="relative size-12 shrink-0 overflow-hidden">
+          <Image
+            src="/logo.png"
+            alt="WastraNusa"
+            fill
+            sizes="48px"
+            className="scale-[1.35] object-contain"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-base font-bold text-sidebar-foreground">
+            WastraNusa
+          </p>
+          <p className="text-sm text-[#d2a36d]">Seller Panel</p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3">
-        <nav className="space-y-2">
+      <div className="flex-1 overflow-y-auto px-3 pt-5">
+        <nav className="space-y-1">
           {SELLER_NAVIGATION.map((item) => (
             <SidebarNavigationItem
               key={item.title}
@@ -113,6 +120,15 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
 
       <div className="space-y-3 px-3 pb-4">
         <nav className="space-y-2">
+          {isAdmin ? (
+            <Link
+              href="/admin/dashboard"
+              className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
+              <ShieldCheck className="size-4" />
+              <span>Admin Panel</span>
+            </Link>
+          ) : null}
           <Link
             href="/"
             className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
@@ -135,7 +151,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
           className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3 transition-colors hover:bg-white/12"
         >
           <Avatar size="sm" className="size-9">
-            <AvatarFallback className="bg-[#d9b061] font-semibold text-[#3a2f16]">
+            <AvatarFallback className="bg-[#d2a36d] font-semibold text-[#3a2f16]">
               <Store className="size-4" />
             </AvatarFallback>
           </Avatar>

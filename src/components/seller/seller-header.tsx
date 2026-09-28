@@ -14,7 +14,7 @@ export function SellerHeader({
   const { setOpen } = useSellerSidebar();
 
   return (
-    <header className="flex flex-col gap-4 border-b border-[#d8e0cc] bg-white px-4 py-4 md:px-8 md:py-6">
+    <header className="flex flex-col gap-4 px-4 pt-6 md:px-8 md:pt-8">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <Button
@@ -22,16 +22,16 @@ export function SellerHeader({
             aria-label="Open sidebar"
             variant="outline"
             size="icon-sm"
-            className="mt-0.5 border-[#cbd6bb] bg-white/80 text-[#4b5a3d] shadow-none md:hidden"
+            className="mt-0.5 border-[#d7cab7] bg-white/80 text-[#5e554a] shadow-none md:hidden"
             onClick={() => setOpen(true)}
           >
             <Menu className="size-4" />
           </Button>
           <div className="flex flex-col gap-1">
-            <h1 className="text-xl font-semibold tracking-tight text-[#2f4a2f] md:text-2xl">
+            <h1 className="text-2xl font-bold tracking-tight text-[#2f5543] md:text-3xl">
               {title}
             </h1>
-            <p className="text-sm text-[#7d8a70]">{subtitle}</p>
+            <p className="text-base text-[#7d766c]">{subtitle}</p>
           </div>
         </div>
       </div>

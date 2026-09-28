@@ -59,30 +59,30 @@ const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-t border-[#e2e8d6]">
+    <tr className="border-t border-[#ece7de]">
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-5 w-28 bg-[#dce6cd]" />
-          <Skeleton className="h-4 w-36 bg-[#dce6cd]" />
+          <Skeleton className="h-5 w-28 bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
         </div>
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-36 bg-[#dce6cd]" />
+        <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-[#dce6cd]" />
+        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-[#dce6cd]" />
+        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-36 rounded-lg bg-[#dce6cd]" />
+        <Skeleton className="h-9 w-36 rounded-lg bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-28 rounded-lg bg-[#dce6cd]" />
+        <Skeleton className="h-9 w-28 rounded-lg bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-20 rounded-lg bg-[#dce6cd]" />
+        <Skeleton className="h-9 w-20 rounded-lg bg-[#eee2d0]" />
       </td>
     </tr>
   );
@@ -253,7 +253,7 @@ export function SellerOrderContent() {
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">
-        <div className="flex flex-col gap-4 rounded-2xl bg-[#eef2e6] p-4">
+        <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <p className="text-sm text-muted-foreground">
               {isLoading ? '...' : orderData?.meta.totalItems} Pesanan
@@ -267,7 +267,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-[#d4dec5] bg-white sm:w-[190px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[190px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -287,7 +287,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-[#d4dec5] bg-white sm:w-[180px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[180px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -302,10 +302,10 @@ export function SellerOrderContent() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-2xl border border-[#d4dec5] bg-background py-0 ring-0">
+          <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-[#e6ecda] text-xs font-semibold tracking-wide text-[#5c6a4d] ">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] ">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
                     <th className="px-4 py-3">Pelanggan</th>
@@ -325,7 +325,7 @@ export function SellerOrderContent() {
                     <tr>
                       <td
                         colSpan={7}
-                        className="py-10 text-center text-[#7d8a70]"
+                        className="py-10 text-center text-[#8f8377]"
                       >
                         Belum ada data pesanan.
                       </td>
@@ -343,7 +343,7 @@ export function SellerOrderContent() {
                       return (
                         <tr
                           key={order.orderId}
-                          className="border-t border-[#e2e8d6]"
+                          className="border-t border-[#ece7de]"
                         >
                           <td className="px-4 py-3 text-[#2b2b2b]">
                             <div className="flex flex-col gap-0.5">
@@ -405,7 +405,7 @@ export function SellerOrderContent() {
                                 }
                                 disabled={!editable}
                               >
-                                <SelectTrigger className="h-9 w-36 rounded-lg border-[#d4dec5] bg-white text-xs">
+                                <SelectTrigger className="h-9 w-36 rounded-lg border-[#ddd6c9] bg-white text-xs">
                                   <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -445,7 +445,7 @@ export function SellerOrderContent() {
                                 )
                               }
                               placeholder="Isi no. resi"
-                              className="h-9 rounded-lg border-[#d4dec5] bg-white text-sm"
+                              className="h-9 rounded-lg border-[#ddd6c9] bg-white text-sm"
                               disabled={!editable}
                             />
                           </td>
@@ -477,7 +477,7 @@ export function SellerOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#d4dec5] bg-background text-[#5c6a4d] hover:bg-[#e6ecda]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) => Math.max(1, currentPage - 1))
                   }
@@ -512,7 +512,7 @@ export function SellerOrderContent() {
                           className="flex items-center gap-1"
                         >
                           {showEllipsis ? (
-                            <span className="px-1 text-[#7d8a70]">...</span>
+                            <span className="px-1 text-[#8f8377]">...</span>
                           ) : null}
                           <Button
                             variant={
@@ -521,8 +521,8 @@ export function SellerOrderContent() {
                             size="icon"
                             className={`size-8 rounded-lg ${
                               page === pageNumber
-                                ? 'bg-[#3d5a34] text-white hover:bg-[#3d5a34]/90'
-                                : 'border-[#d4dec5] bg-background text-[#5c6a4d] hover:bg-[#e6ecda]'
+                                ? 'bg-[#3d3a34] text-white hover:bg-[#3d3a34]/90'
+                                : 'border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]'
                             }`}
                             onClick={() => setPage(pageNumber)}
                             disabled={isLoading}
@@ -537,7 +537,7 @@ export function SellerOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#d4dec5] bg-background text-[#5c6a4d] hover:bg-[#e6ecda]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     setPage((currentPage) =>
                       Math.min(orderData.meta.totalPages, currentPage + 1),

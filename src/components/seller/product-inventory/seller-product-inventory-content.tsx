@@ -23,32 +23,32 @@ import AddUpdateProductModal from './add-update-product-modal';
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-t border-[#e2e8d6]">
+    <tr className="border-t border-[#ece7de]">
       <td className="px-4 py-3">
-        <Skeleton className="size-4 rounded-sm bg-[#dce6cd]" />
+        <Skeleton className="size-4 rounded-sm bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-5 w-40 bg-[#dce6cd]" />
-          <Skeleton className="h-4 w-28 bg-[#dce6cd]" />
+          <Skeleton className="h-5 w-40 bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
         </div>
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-20 bg-[#dce6cd]" />
+        <Skeleton className="h-4 w-20 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-16 rounded-md bg-[#dce6cd]" />
+        <Skeleton className="h-6 w-16 rounded-md bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="ml-auto h-4 w-16 bg-[#dce6cd]" />
+        <Skeleton className="ml-auto h-4 w-16 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="ml-auto h-4 w-14 bg-[#dce6cd]" />
+        <Skeleton className="ml-auto h-4 w-14 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-center gap-2">
-          <Skeleton className="size-8 rounded-md bg-[#dce6cd]" />
-          <Skeleton className="size-8 rounded-md bg-[#dce6cd]" />
+          <Skeleton className="size-8 rounded-md bg-[#eee2d0]" />
+          <Skeleton className="size-8 rounded-md bg-[#eee2d0]" />
         </div>
       </td>
     </tr>
@@ -185,7 +185,7 @@ export function SellerProductInventoryContent() {
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">
-        <div className="flex flex-col gap-4 rounded-2xl bg-[#eef2e6] p-4">
+        <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted-foreground">
               {isLoading ? '...' : productData?.meta.totalItems} Units
@@ -208,10 +208,10 @@ export function SellerProductInventoryContent() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-2xl border border-[#d4dec5] bg-background py-0 ring-0">
+          <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
-                <thead className="bg-[#e6ecda] text-xs font-semibold tracking-wide text-[#5c6a4d]">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a]">
                   <tr>
                     <th className="px-4 py-3">
                       <Checkbox
@@ -239,7 +239,7 @@ export function SellerProductInventoryContent() {
                     <tr>
                       <td
                         colSpan={8}
-                        className="py-10 text-center text-[#7d8a70]"
+                        className="py-10 text-center text-[#8f8377]"
                       >
                         Belum ada produk yang tersedia.
                       </td>
@@ -249,7 +249,7 @@ export function SellerProductInventoryContent() {
                       <tr
                         key={product.id}
                         onClick={() => handleEdit(product)}
-                        className="cursor-pointer border-t border-[#e2e8d6] hover:bg-[#f3f6ec]"
+                        className="cursor-pointer border-t border-[#ece7de] hover:bg-[#f7f4ec]"
                       >
                         <td
                           className="px-4 py-3"
@@ -332,7 +332,7 @@ export function SellerProductInventoryContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#d4dec5] bg-background text-[#5c6a4d] hover:bg-[#e6ecda]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() => goToPage(Math.max(1, page - 1))}
                   disabled={page === 1 || isLoading}
                 >
@@ -341,7 +341,7 @@ export function SellerProductInventoryContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#d4dec5] bg-background text-[#5c6a4d] hover:bg-[#e6ecda]"
+                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
                   onClick={() =>
                     goToPage(Math.min(productData.meta.totalPages, page + 1))
                   }
