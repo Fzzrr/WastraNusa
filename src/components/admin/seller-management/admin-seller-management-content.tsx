@@ -51,8 +51,8 @@ const ROLE_FILTER_OPTIONS: { value: RoleFilter; label: string }[] = [
 ];
 
 const SORT_OPTIONS: { value: SellerManagementSort; label: string }[] = [
-  { value: 'newest', label: 'Terbaru bergabung' },
-  { value: 'oldest', label: 'Terlama bergabung' },
+  { value: 'newest', label: 'Terbaru Bergabung' },
+  { value: 'oldest', label: 'Terlama Bergabung' },
   { value: 'name', label: 'Nama A–Z' },
 ];
 
@@ -192,7 +192,7 @@ function KpiCards() {
           verifiedSellers.newThisMonth > 0 ? (
             <span className="inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white">
               <ArrowUp className="size-2.5" />
-              {verifiedSellers.newThisMonth} baru
+              {verifiedSellers.newThisMonth} Baru
             </span>
           ) : null
         }
@@ -537,7 +537,7 @@ function UserDetail({
         {application ? (
           <div className="rounded-lg bg-[#faf7f2] px-4 py-3">
             <p className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
-              Deskripsi toko
+              Deskripsi Toko
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[#2f3a33]">
               {application.description?.trim() || '—'}
@@ -630,7 +630,7 @@ function UserDetail({
                 disabled={isBusy}
               >
                 <UserMinus data-icon="inline-start" />
-                Cabut status seller
+                Cabut Status Seller
               </Button>
             )}
           </div>

@@ -237,8 +237,8 @@ export function AdminArticleContent() {
                   <th className="px-4 py-4">Judul Artikel</th>
                   <th className="px-4 py-4">Topik</th>
                   <th className="px-4 py-4">Wilayah</th>
-                  <th className="px-4 py-4 text-center">Ditonton</th>
-                  <th className="px-4 py-4 text-center">Baca (Mnt)</th>
+                  <th className="px-4 py-4 text-center">Dilihat</th>
+                  <th className="px-4 py-4 text-center">Waktu Baca (Mnt)</th>
                   <th className="px-4 py-4 text-center">Aksi</th>
                 </tr>
               </thead>

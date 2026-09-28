@@ -19,7 +19,7 @@ export function SellerHeader({
         <div className="flex items-start gap-3">
           <Button
             type="button"
-            aria-label="Open sidebar"
+            aria-label="Buka sidebar"
             variant="outline"
             size="icon-sm"
             className="mt-0.5 border-[#d7cab7] bg-white/80 text-[#5e554a] shadow-none md:hidden"

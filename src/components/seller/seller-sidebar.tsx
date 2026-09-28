@@ -60,7 +60,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
       <span className="flex-1 text-left">{item.title}</span>
       {item.disabled ? (
         <span className="rounded-full bg-[#d2a36d]/20 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e3bf8c]">
-          Segera hadir
+          Segera Hadir
         </span>
       ) : null}
     </button>
@@ -103,7 +103,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
           <p className="truncate text-base font-bold text-sidebar-foreground">
             WastraNusa
           </p>
-          <p className="text-sm text-[#d2a36d]">Seller Panel</p>
+          <p className="text-sm text-[#d2a36d]">Panel Penjual</p>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
               className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             >
               <ShieldCheck className="size-4" />
-              <span>Admin Panel</span>
+              <span>Panel Admin</span>
             </Link>
           ) : null}
           <Link
@@ -142,7 +142,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />
-            <span>Sign Out</span>
+            <span>Keluar</span>
           </Button>
         </nav>
         <div className="h-px bg-white/10" />

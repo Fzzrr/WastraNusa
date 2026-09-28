@@ -129,7 +129,7 @@ function AdminSidebarContent({
           <p className="truncate text-base font-bold text-sidebar-foreground">
             WastraNusa
           </p>
-          <p className="text-sm text-[#d2a36d]">Admin Panel</p>
+          <p className="text-sm text-[#d2a36d]">Panel Admin</p>
         </div>
       </div>
 
@@ -167,7 +167,7 @@ function AdminSidebarContent({
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />
-            <span>Sign Out</span>
+            <span>Keluar</span>
           </Button>
         </nav>
         <div className="h-px bg-white/10" />

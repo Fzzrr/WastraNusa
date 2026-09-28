@@ -224,7 +224,7 @@ function TrafficCard({
     >
       <SectionHeader
         title="Trafik Artikel"
-        subtitle="Total interaksi"
+        subtitle="Total Interaksi"
         aside={
           <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
             7 Hari
@@ -267,10 +267,10 @@ function TopSellerCard({
     >
       <SectionHeader
         title="Top Seller"
-        subtitle="Penjualan (juta rupiah)"
+        subtitle="Penjualan (Juta Rupiah)"
         aside={
           <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
-            Bulan ini
+            Bulan Ini
           </span>
         }
       />
@@ -307,7 +307,7 @@ function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
             href="/admin/article"
             className="group/link inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm text-[#a07a3a] transition-colors hover:bg-[#f4efe5]"
           >
-            Lihat semua
+            Lihat Semua
             <ArrowRight className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
           </Link>
         }
@@ -345,7 +345,7 @@ function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-[#f4efe5] px-2 py-1">
                   <Clock3 className="size-3.5" />
-                  {article.readTimeMinutes} mnt
+                  {article.readTimeMinutes} Mnt
                 </span>
                 <ArrowRight className="size-3.5 -translate-x-1 text-[#a07a3a] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
               </div>
