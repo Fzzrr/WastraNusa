@@ -29,6 +29,13 @@ export const adminDashboardRepository = {
     return prisma.user.count({ where: { role: ROLES.SELLER } });
   },
 
+  /** Seller applications approved within [start, end). */
+  countSellersApprovedBetween: async (start: Date, end: Date) => {
+    return prisma.sellerApplication.count({
+      where: { status: 'approved', reviewedAt: { gte: start, lt: end } },
+    });
+  },
+
   /** Number of distinct sellers that have at least one order. */
   countActiveSellers: async () => {
     const groups = await prisma.order.groupBy({
@@ -59,11 +66,15 @@ export const adminDashboardRepository = {
     });
   },
 
-  /** Top sellers by paid GMV, with their paid-order count. */
-  findTopSellersByGmv: async (limit: number = 5) => {
+  /** Top sellers by paid GMV within [start, end), with their paid-order count. */
+  findTopSellersByGmv: async (start: Date, end: Date, limit: number = 5) => {
     const groups = await prisma.order.groupBy({
       by: ['sellerId'],
-      where: { sellerId: { not: null }, paymentStatus: 'paid' },
+      where: {
+        sellerId: { not: null },
+        paymentStatus: 'paid',
+        paidAt: { gte: start, lt: end },
+      },
       _sum: { totalAmount: true },
       _count: { _all: true },
       orderBy: { _sum: { totalAmount: 'desc' } },
@@ -76,9 +87,18 @@ export const adminDashboardRepository = {
 
     const sellers = await prisma.user.findMany({
       where: { id: { in: sellerIds } },
-      select: { id: true, name: true },
+      select: {
+        id: true,
+        name: true,
+        sellerApplication: { select: { shopName: true } },
+      },
     });
-    const nameById = new Map(sellers.map((seller) => [seller.id, seller.name]));
+    const nameById = new Map(
+      sellers.map((seller) => [
+        seller.id,
+        seller.sellerApplication?.shopName ?? seller.name,
+      ]),
+    );
 
     return groups.map((group) => ({
       sellerId: group.sellerId as string,

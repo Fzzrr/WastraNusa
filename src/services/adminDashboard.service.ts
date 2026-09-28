@@ -13,13 +13,15 @@ export type AdminDashboardData = {
     active: number;
     /** Users holding the seller role. */
     registered: number;
+    /** Seller applications approved this month. */
+    newThisMonth: number;
   };
   articleViews: {
     total: number;
   };
   /** Daily article-engagement traffic for the last 7 days (oldest → newest). */
   articleTraffic: Array<{ label: string; value: number }>;
-  /** Top sellers ranked by paid GMV. */
+  /** Top sellers ranked by paid GMV this month. */
   topSellers: Array<{ name: string; gmv: number; orderCount: number }>;
   popularArticles: PopularArticle[];
 };
@@ -46,6 +48,7 @@ export const adminDashboardService = {
       gmvCurrentMonth,
       gmvLastMonth,
       registeredSellers,
+      newSellersThisMonth,
       activeSellers,
       articleViews,
       likeEvents,
@@ -61,10 +64,18 @@ export const adminDashboardService = {
         currentMonthStart,
       ),
       adminDashboardRepository.countRegisteredSellers(),
+      adminDashboardRepository.countSellersApprovedBetween(
+        currentMonthStart,
+        nextMonthStart,
+      ),
       adminDashboardRepository.countActiveSellers(),
       adminDashboardRepository.sumArticleViews(),
       adminDashboardRepository.findArticleLikesSince(trafficStart),
-      adminDashboardRepository.findTopSellersByGmv(5),
+      adminDashboardRepository.findTopSellersByGmv(
+        currentMonthStart,
+        nextMonthStart,
+        5,
+      ),
       adminDashboardRepository.findPopularArticles(6),
     ]);
 
@@ -105,6 +116,7 @@ export const adminDashboardService = {
       sellers: {
         active: activeSellers,
         registered: registeredSellers,
+        newThisMonth: newSellersThisMonth,
       },
       articleViews: {
         total: articleViews,
