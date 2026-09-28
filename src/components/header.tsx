@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   Menu,
   ShoppingCart,
+  Store,
   UserRound,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -30,6 +31,9 @@ const menuItems = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
+  // Sellers go straight to their panel; admins land on "Buka Toko", which
+  // shows the panel button once their shop exists (or the form otherwise).
+  { label: 'Toko', icon: Store, href: '/seller/dashboard', sellerOnly: true },
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
   { label: 'Catalog', icon: Grid2X2, href: '/catalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
@@ -43,6 +47,7 @@ type HeaderProps = {
 export function Header({ homeHref = '/' }: HeaderProps) {
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
+  const isSeller = session?.user?.role === 'seller';
   const pathname = usePathname();
   const showSearch =
     pathname === '/' ||
@@ -51,9 +56,14 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const visibleMenuItems = menuItems.filter(
-    (item) => !item.adminOnly || isAdmin,
-  );
+  const visibleMenuItems = menuItems
+    .filter((item) => !item.adminOnly || isAdmin)
+    .filter((item) => !item.sellerOnly || isSeller || isAdmin)
+    .map((item) =>
+      item.sellerOnly && !isSeller
+        ? { ...item, href: '/profile/seller-application' }
+        : item,
+    );
 
   return (
     <header className="border-b-4 border-[#2F4F3F] bg-[#f9f7f2]">

@@ -13,6 +13,7 @@ vi.mock('@/repositories/sellerApplication.repository', () => ({
     create: vi.fn(),
     update: vi.fn(),
     approveAndPromote: vi.fn(),
+    findUserRole: vi.fn(),
   },
 }));
 
@@ -24,6 +25,7 @@ const APP_ID = 'app-1';
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockRepo.findUserRole.mockResolvedValue('user');
 });
 
 describe('sellerApplicationService', { tags: ['backend'] }, () => {
@@ -91,6 +93,40 @@ describe('sellerApplicationService', { tags: ['backend'] }, () => {
         }),
       );
       expect(mockRepo.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('createApplication (admin)', () => {
+    it('self-approves an admin shop without changing their role', async () => {
+      mockRepo.findUserRole.mockResolvedValue('admin');
+      mockRepo.findByUser.mockResolvedValue(null as never);
+      mockRepo.create.mockResolvedValue({ id: APP_ID } as never);
+
+      await sellerApplicationService.createApplication(USER_ID, {
+        shopName: 'Toko Admin',
+      });
+
+      expect(mockRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: USER_ID,
+          status: SellerApplicationStatus.approved,
+          reviewedById: USER_ID,
+        }),
+      );
+      expect(mockRepo.approveAndPromote).not.toHaveBeenCalled();
+    });
+
+    it('keeps normal users pending', async () => {
+      mockRepo.findByUser.mockResolvedValue(null as never);
+      mockRepo.create.mockResolvedValue({ id: APP_ID } as never);
+
+      await sellerApplicationService.createApplication(USER_ID, {
+        shopName: 'Toko User',
+      });
+
+      expect(mockRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ status: SellerApplicationStatus.pending }),
+      );
     });
   });
 

@@ -160,12 +160,16 @@ function SellerApplicationForm({
 
   const onSubmit = async (data: CreateSellerApplicationInput) => {
     try {
-      await mutateAsync({
+      const created = await mutateAsync({
         shopName: data.shopName.trim(),
         description: data.description?.trim() || null,
         phoneNumber: data.phoneNumber?.trim() || null,
       });
-      toast.success('Pengajuan toko berhasil dikirim');
+      toast.success(
+        created?.status === 'approved'
+          ? 'Toko berhasil dibuka'
+          : 'Pengajuan toko berhasil dikirim',
+      );
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : 'Gagal mengirim pengajuan toko',

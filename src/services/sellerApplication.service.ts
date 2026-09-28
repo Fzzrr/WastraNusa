@@ -1,4 +1,5 @@
 import { SellerApplicationStatus } from '@/generated/prisma/enums';
+import { isAdmin } from '@/lib/auth/roles';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
@@ -18,12 +19,29 @@ export const sellerApplicationService = {
   /**
    * Submit a seller application. A user may only have one; a previously
    * rejected application can be re-submitted (reset to pending).
+   *
+   * Admins open their shop instantly: the application is self-approved and
+   * their role stays `admin` (they then have user + seller + admin access).
    */
   createApplication: async (
     userId: string,
     data: CreateSellerApplicationInput,
   ) => {
     const existing = await sellerApplicationRepository.findByUser(userId);
+    const isAdminApplicant = isAdmin(
+      await sellerApplicationRepository.findUserRole(userId),
+    );
+    const reviewState = isAdminApplicant
+      ? {
+          status: SellerApplicationStatus.approved,
+          reviewedById: userId,
+          reviewedAt: new Date(),
+        }
+      : {
+          status: SellerApplicationStatus.pending,
+          reviewedById: null,
+          reviewedAt: null,
+        };
 
     if (existing) {
       if (existing.status === SellerApplicationStatus.pending) {
@@ -36,10 +54,8 @@ export const sellerApplicationService = {
       // Rejected → allow the user to re-apply by resetting the record.
       const reapplied = await sellerApplicationRepository.update(existing.id, {
         ...data,
-        status: SellerApplicationStatus.pending,
+        ...reviewState,
         rejectionReason: null,
-        reviewedById: null,
-        reviewedAt: null,
       });
       logger.info('Seller application re-submitted', {
         applicationId: existing.id,
@@ -51,6 +67,7 @@ export const sellerApplicationService = {
     const id = crypto.randomUUID();
     const application = await sellerApplicationRepository.create({
       ...data,
+      ...reviewState,
       id,
       userId,
     });

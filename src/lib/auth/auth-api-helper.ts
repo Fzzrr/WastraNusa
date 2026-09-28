@@ -1,6 +1,7 @@
 import { ApiError } from '../error';
 import { getSessionUser } from './auth';
-import { isAdmin, isSeller } from './roles';
+import { isAdmin } from './roles';
+import { hasSellerAccess } from './seller-access';
 
 /**
  * Centralized authentication helpers for API routes
@@ -31,7 +32,7 @@ export const AuthHelper = {
   async requireSeller() {
     const user = await this.requireUser();
 
-    if (!isSeller(user.role)) {
+    if (!(await hasSellerAccess(user))) {
       throw new ApiError('Seller privileges required', 403);
     }
 

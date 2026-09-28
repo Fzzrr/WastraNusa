@@ -28,6 +28,21 @@ export const sellerApplicationRepository = {
     });
   },
 
+  hasApprovedApplication: async (userId: string) => {
+    const count = await prisma.sellerApplication.count({
+      where: { userId, status: SellerApplicationStatus.approved },
+    });
+    return count > 0;
+  },
+
+  findUserRole: async (userId: string) => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return user?.role ?? null;
+  },
+
   countByStatus: async (status: SellerApplicationStatus) => {
     return prisma.sellerApplication.count({ where: { status } });
   },
@@ -62,8 +77,13 @@ export const sellerApplicationRepository = {
           reviewedAt: new Date(),
         },
       }),
-      prisma.user.update({
-        where: { id: userId },
+      // Admins keep their admin role; their approved application alone
+      // grants seller access (see `hasSellerAccess`).
+      prisma.user.updateMany({
+        where: {
+          id: userId,
+          OR: [{ role: null }, { role: { not: ROLES.ADMIN } }],
+        },
         data: { role: ROLES.SELLER },
       }),
     ]);
