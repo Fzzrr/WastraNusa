@@ -35,5 +35,6 @@ export function formatVariantPriceRange(
     return formatIDR(min);
   }
 
-  return `${formatIDR(min)} - ${formatIDR(max)}`;
+  // Single currency prefix keeps the range short enough for one line.
+  return `${formatIDR(min)} – ${formatIDR(max).replace(/^Rp\s?/, '')}`;
 }

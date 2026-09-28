@@ -16,19 +16,27 @@ export const createArticleSchema = z.object({
   clothingType: z.string().nullish(),
   motifLabel: z.string().min(1, 'Label motif wajib diisi'),
   gender: z.nativeEnum(Gender).nullish(),
-  readMinutes: z.number().int().min(1).optional(),
+  readMinutes: z
+    .number({ error: 'Estimasi waktu baca wajib berupa angka' })
+    .int('Estimasi waktu baca harus bilangan bulat')
+    .min(1, 'Estimasi waktu baca minimal 1 menit')
+    .optional(),
   featured: z.boolean().optional(),
 
-  imageURL: z.union([z.string().url(), z.literal('')]).nullish(),
+  imageURL: z
+    .union([z.string().url('Format URL tidak valid'), z.literal('')])
+    .nullish(),
 
   sections: z
     .array(
       z.object({
-        title: z.string().min(1, 'Judul section wajib diisi'),
-        content: z.string().min(1, 'Konten section wajib diisi'),
+        title: z.string().min(1, 'Judul bagian wajib diisi'),
+        content: z.string().min(1, 'Konten bagian wajib diisi'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
-        imageURL: z.union([z.string().url(), z.literal('')]).nullish(),
+        imageURL: z
+          .union([z.string().url('Format URL tidak valid'), z.literal('')])
+          .nullish(),
         order: z.number().int(),
       }),
     )

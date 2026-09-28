@@ -1,80 +1,130 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import { formatIDR } from '@/lib/utils';
-import { Hexagon, Minus, Plus } from 'lucide-react';
+import { cn, formatIDR } from '@/lib/utils';
+import { Hexagon, MapPin, Minus, Plus } from 'lucide-react';
 import Image from 'next/image';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function CartItem({ item, isSelected, onToggle, onUpdateQty }: any) {
+import type { CartProduct } from './cart-list';
+
+interface CartItemProps {
+  item: CartProduct;
+  index?: number;
+  isSelected: boolean;
+  onToggle: () => void;
+  onUpdateQty: (delta: number) => void;
+}
+
+export function CartItem({
+  item,
+  index = 0,
+  isSelected,
+  onToggle,
+  onUpdateQty,
+}: CartItemProps) {
+  const isAtMin = item.quantity <= 1;
+  const isAtMax = item.quantity >= item.stock;
+
   return (
     <div
-      className={`p-5 flex gap-5 transition-colors ${isSelected ? 'bg-brand/5' : 'bg-white'}`}
+      className={cn(
+        'group flex animate-in gap-4 rounded-2xl p-4 ring-1 transition-all duration-300 fill-mode-both fade-in slide-in-from-bottom-1 md:gap-5 md:p-5',
+        isSelected
+          ? 'bg-gradient-to-r from-[#e3ece5] to-[#fffdf8] ring-2 ring-[#2f5f49]/40'
+          : 'bg-[#fffdf8] ring-[#e8dfd0] hover:shadow-[0_16px_32px_-22px_rgba(89,69,38,0.45)] hover:ring-[#caa86a]/50',
+      )}
+      style={{ animationDelay: `${index * 50}ms` }}
     >
-      {/* Checkbox Produk */}
       <div className="flex items-center">
-        <Checkbox checked={isSelected} onChange={onToggle} />
+        <Checkbox
+          checked={isSelected}
+          onChange={onToggle}
+          aria-label={`Pilih ${item.name}`}
+        />
       </div>
 
-      {/* Gambar */}
-      <div className="w-20 h-20 shrink-0 bg-[#f4efe6] border border-[#e8e2d5] rounded-xl overflow-hidden flex flex-col items-center justify-center text-[#8e8476]">
+      <div className="flex size-20 shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl bg-[#f4efe6] text-[#8e8476] ring-1 ring-[#e8e2d5] md:size-24">
         {item.imageURL ? (
           <Image
             src={item.imageURL}
             alt={item.name}
-            width={80}
-            height={80}
-            className="w-full h-full object-cover"
+            width={96}
+            height={96}
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (
           <>
-            <Hexagon className="w-7 h-7 stroke-[1.5]" />
-            <span className="text-[9px] font-bold mt-1 uppercase tracking-wider">
+            <Hexagon className="size-7 stroke-[1.5]" />
+            <span className="mt-1 text-[9px] font-bold tracking-wider uppercase">
               {item.clothingType}
             </span>
           </>
         )}
       </div>
 
-      {/* Info Detail */}
-      <div className="flex-1 flex justify-between items-center gap-4">
-        <div>
-          <h3 className="font-bold text-[#3d5446] text-sm leading-tight hover:text-brand cursor-pointer">
+      <div className="flex flex-1 flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="min-w-0">
+          <span className="inline-flex rounded-full bg-[#f5ead3] px-2 py-0.5 text-[10px] font-semibold text-[#8a6a2a]">
+            {item.clothingType}
+          </span>
+          <h3 className="mt-1 leading-tight font-bold text-[#2f4f3f]">
             {item.name}
           </h3>
-          <p className="text-[11px] text-[#8e8476] mt-1 italic">
-            {item.province}
-          </p>
-          <div className="mt-2 flex items-center gap-3">
-            <span className="px-2 py-0.5 bg-[#f0ede6] rounded text-[10px] font-bold text-[#726759]">
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#9a8f80]">
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="size-3 text-[#b08a5e]" />
+              {item.province}
+            </span>
+            <span className="rounded-full bg-white px-2 py-0.5 font-semibold text-[#4d6356] ring-1 ring-[#e3d9c7]">
               Size {item.size}
             </span>
-            <span className="text-[10px] text-[#aca493]">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1',
+                item.stock <= 5 && 'font-semibold text-[#a0702a]',
+              )}
+            >
+              <span
+                className={cn(
+                  'size-1.5 rounded-full',
+                  item.stock <= 5 ? 'bg-amber-500' : 'bg-[#3f8f63]',
+                )}
+              />
               Stok: {item.stock}
             </span>
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-3 shrink-0">
-          <p className="font-bold text-brand text-[15px]">
-            {formatIDR(item.price)}
-          </p>
-          <div className="flex items-center border border-[#d8cfbf] rounded-lg overflow-hidden h-8 bg-white shadow-sm">
+        <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-2">
+          <div className="text-left sm:text-right">
+            <p className="text-base font-extrabold text-[#2f5f49]">
+              {formatIDR(item.price)}
+            </p>
+            {item.quantity > 1 ? (
+              <p className="text-[11px] text-[#9a8f80]">
+                Subtotal {formatIDR(item.price * item.quantity)}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex h-9 items-center gap-1 rounded-full bg-white p-1 ring-1 ring-[#e3d9c7]">
             <button
+              type="button"
+              aria-label="Kurangi jumlah"
               onClick={() => onUpdateQty(-1)}
-              className="px-2.5 bg-[#fbf8f2] hover:bg-[#f0ede6] text-[#455c4d] border-r border-[#d8cfbf] transition-colors"
+              disabled={isAtMin}
+              className="grid size-7 cursor-pointer place-items-center rounded-full text-[#2f5f49] transition-colors hover:bg-[#e3ece5] disabled:cursor-not-allowed disabled:opacity-30"
             >
               <Minus size={12} strokeWidth={3} />
             </button>
-            <input
-              type="text"
-              value={item.quantity}
-              className="w-9 text-center text-xs font-extrabold text-[#3d5446] bg-transparent outline-none"
-              readOnly
-            />
+            <span className="w-7 text-center text-sm font-extrabold text-[#2f4f3f] tabular-nums">
+              {item.quantity}
+            </span>
             <button
+              type="button"
+              aria-label="Tambah jumlah"
               onClick={() => onUpdateQty(1)}
-              className="px-2.5 bg-[#fbf8f2] hover:bg-[#f0ede6] text-[#455c4d] border-l border-[#d8cfbf] transition-colors"
+              disabled={isAtMax}
+              className="grid size-7 cursor-pointer place-items-center rounded-full bg-[#2f5f49] text-white transition-colors hover:bg-[#244a39] disabled:cursor-not-allowed disabled:opacity-30"
             >
               <Plus size={12} strokeWidth={3} />
             </button>

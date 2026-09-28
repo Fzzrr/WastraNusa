@@ -23,29 +23,35 @@ describe('ResetPasswordForm', { tags: ['frontend'] }, () => {
   it('shows the invalid-link state when no token is provided', () => {
     render(<ResetPasswordForm />);
 
-    expect(screen.getByText(/invalid or has expired/i)).toBeTruthy();
-    expect(screen.queryByLabelText('New Password')).toBeNull();
+    expect(
+      screen.getByText(/tidak valid atau sudah kedaluwarsa/i),
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('Password Baru')).toBeNull();
   });
 
   it('shows the invalid-link state when urlError is INVALID_TOKEN', () => {
     render(<ResetPasswordForm token="some-token" error="INVALID_TOKEN" />);
 
-    expect(screen.getByText(/invalid or has expired/i)).toBeTruthy();
+    expect(
+      screen.getByText(/tidak valid atau sudah kedaluwarsa/i),
+    ).toBeTruthy();
   });
 
   it('validates the minimum password length', async () => {
     render(<ResetPasswordForm token="valid-token" />);
 
-    fireEvent.change(screen.getByLabelText('New Password'), {
+    fireEvent.change(screen.getByLabelText('Password Baru'), {
       target: { value: 'short' },
     });
-    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+    fireEvent.change(screen.getByLabelText('Konfirmasi Password'), {
       target: { value: 'short' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /simpan password baru/i }),
+    );
 
     expect(
-      await screen.findByText('Password must be at least 8 characters.'),
+      await screen.findByText('Password minimal 8 karakter.'),
     ).toBeTruthy();
     expect(mockedReset).not.toHaveBeenCalled();
   });
@@ -53,15 +59,17 @@ describe('ResetPasswordForm', { tags: ['frontend'] }, () => {
   it('rejects mismatched passwords', async () => {
     render(<ResetPasswordForm token="valid-token" />);
 
-    fireEvent.change(screen.getByLabelText('New Password'), {
+    fireEvent.change(screen.getByLabelText('Password Baru'), {
       target: { value: 'password123' },
     });
-    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+    fireEvent.change(screen.getByLabelText('Konfirmasi Password'), {
       target: { value: 'different123' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /simpan password baru/i }),
+    );
 
-    expect(await screen.findByText('Passwords do not match.')).toBeTruthy();
+    expect(await screen.findByText('Password tidak cocok.')).toBeTruthy();
     expect(mockedReset).not.toHaveBeenCalled();
   });
 
@@ -69,15 +77,17 @@ describe('ResetPasswordForm', { tags: ['frontend'] }, () => {
     mockedReset.mockResolvedValue({ error: null } as never);
     render(<ResetPasswordForm token="valid-token" />);
 
-    fireEvent.change(screen.getByLabelText('New Password'), {
+    fireEvent.change(screen.getByLabelText('Password Baru'), {
       target: { value: 'password123' },
     });
-    fireEvent.change(screen.getByLabelText('Confirm Password'), {
+    fireEvent.change(screen.getByLabelText('Konfirmasi Password'), {
       target: { value: 'password123' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /reset password/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /simpan password baru/i }),
+    );
 
-    expect(await screen.findByText(/successfully updated/i)).toBeTruthy();
+    expect(await screen.findByText(/berhasil diperbarui/i)).toBeTruthy();
     expect(mockedReset).toHaveBeenCalledWith({
       newPassword: 'password123',
       token: 'valid-token',

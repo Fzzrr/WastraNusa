@@ -3,6 +3,11 @@ import { withApiAdmin } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
 import { orderService } from '@/services/order.service';
 
+/**
+ * @deprecated Admin-wide orders (pesanan) endpoint. Superseded by
+ * `/api/seller/orders`. Kept functional for backward compatibility; the admin
+ * pesanan UI has been retired.
+ */
 export const GET = withApiAdmin(async ({ req }) => {
   const url = new URL(req.url);
   const page = Math.max(1, Number(url.searchParams.get('page')) || 1);

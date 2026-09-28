@@ -1,5 +1,7 @@
 import { ApiError } from '../error';
 import { getSessionUser } from './auth';
+import { isAdmin } from './roles';
+import { hasSellerAccess } from './seller-access';
 
 /**
  * Centralized authentication helpers for API routes
@@ -11,7 +13,7 @@ export const AuthHelper = {
     const user = await this.getUser();
 
     if (!user) {
-      throw new ApiError('Unauthorized access attempt detected', 401);
+      throw new ApiError('Silakan login terlebih dahulu', 401);
     }
 
     return user;
@@ -20,8 +22,18 @@ export const AuthHelper = {
   async requireAdmin() {
     const user = await this.requireUser();
 
-    if (user.role !== 'admin') {
-      throw new ApiError('Admin privileges required', 403);
+    if (!isAdmin(user.role)) {
+      throw new ApiError('Akses khusus admin', 403);
+    }
+
+    return user;
+  },
+
+  async requireSeller() {
+    const user = await this.requireUser();
+
+    if (!(await hasSellerAccess(user))) {
+      throw new ApiError('Akses khusus seller', 403);
     }
 
     return user;

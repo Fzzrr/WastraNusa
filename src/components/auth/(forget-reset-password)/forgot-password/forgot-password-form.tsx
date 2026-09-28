@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z.string().email('Invalid email address.'),
+  email: z.string().email('Alamat email tidak valid.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -38,12 +38,12 @@ export function ForgotPasswordForm() {
       });
 
       if (authError) {
-        setError(authError.message || 'Failed to send reset link.');
+        setError(authError.message || 'Gagal mengirim link reset password.');
       } else {
         setIsSuccess(true);
       }
     } catch {
-      setError('An unexpected error occurred.');
+      setError('Terjadi kesalahan tak terduga.');
     }
   };
 
@@ -51,17 +51,17 @@ export function ForgotPasswordForm() {
     return (
       <div className="text-center space-y-4">
         <p className="text-sm text-[#2d2318]">
-          We&apos;ve sent a password reset link to your email address.
+          Link reset password telah dikirim ke alamat email Anda.
         </p>
         <p className="text-xs text-[#2d2318]/70">
-          Please check your inbox (and spam folder) and follow the instructions
-          to reset your password.
+          Periksa kotak masuk (dan folder spam) Anda, lalu ikuti petunjuknya
+          untuk mengatur ulang password.
         </p>
         <Button
           asChild
           className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm"
         >
-          <Link href="/login">Return to Login</Link>
+          <Link href="/login">Kembali ke Halaman Masuk</Link>
         </Button>
       </div>
     );
@@ -75,7 +75,7 @@ export function ForgotPasswordForm() {
             htmlFor="email"
             className="text-xs font-sm text-[#2d2318]"
           >
-            Email Address
+            Alamat Email
           </FieldLabel>
           <Input
             id="email"
@@ -104,16 +104,16 @@ export function ForgotPasswordForm() {
           disabled={isSubmitting}
           className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm mt-0.5"
         >
-          {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+          {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
         </Button>
 
         <p className="mt-4 text-center text-xs text-[#7a6e62]">
-          Remember your password?{' '}
+          Ingat password Anda?{' '}
           <Link
             href="/login"
             className="text-[#c07a4a] hover:underline font-medium"
           >
-            Sign In
+            Masuk
           </Link>
         </p>
       </div>

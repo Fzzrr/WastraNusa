@@ -38,7 +38,7 @@ function handleApiError(err: unknown, req: Request) {
     const fieldErrors = err.flatten().fieldErrors;
     const flatErrors: Record<string, string> = {};
     for (const [key, errors] of Object.entries(fieldErrors)) {
-      flatErrors[key] = (errors as string[])?.[0] || 'Invalid value';
+      flatErrors[key] = (errors as string[])?.[0] || 'Nilai tidak valid';
     }
 
     return jsend.fail(flatErrors, 400);
@@ -49,15 +49,15 @@ function handleApiError(err: unknown, req: Request) {
     const code = err.code;
 
     if (code === 'P2002') {
-      return jsend.fail({ message: 'Resource already exists' }, 400);
+      return jsend.fail({ message: 'Data sudah ada' }, 400);
     }
     if (code === 'P2025') {
-      return jsend.fail({ message: 'Resource not found' }, 404);
+      return jsend.fail({ message: 'Data tidak ditemukan' }, 404);
     }
   }
 
   return jsend.error(
-    err instanceof Error ? err.message : 'Internal Server Error',
+    err instanceof Error ? err.message : 'Terjadi kesalahan pada server',
     500,
   );
 }
@@ -89,6 +89,25 @@ export function withApiAdmin<T = unknown>(handler: ApiHandler<T>) {
   return async (req: Request, { params }: { params: Promise<T> }) => {
     try {
       const user = await AuthHelper.requireAdmin();
+      const resolvedParams = await params;
+
+      return await handler({ userId: user.id, params: resolvedParams, req });
+    } catch (err) {
+      return handleApiError(err, req);
+    }
+  };
+}
+
+/**
+ * Higher-order function to wrap API routes with seller authentication and standardized error handling.
+ * The seller's own user id is passed as `userId` so handlers can scope queries by `sellerId`.
+ * @param handler The actual route logic
+ * @returns A Next.js API route handler
+ */
+export function withApiSeller<T = unknown>(handler: ApiHandler<T>) {
+  return async (req: Request, { params }: { params: Promise<T> }) => {
+    try {
+      const user = await AuthHelper.requireSeller();
       const resolvedParams = await params;
 
       return await handler({ userId: user.id, params: resolvedParams, req });

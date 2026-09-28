@@ -40,7 +40,7 @@ export const addressService = {
   ) => {
     const existing = await addressRepository.findById(id, userId);
     if (!existing) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
 
     if (data.isDefault === true) {
@@ -49,7 +49,7 @@ export const addressService = {
 
     const address = await addressRepository.update(id, data, userId);
     if (!address) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
     logger.info('Address updated', { addressId: id, userId });
     return address;
@@ -58,7 +58,7 @@ export const addressService = {
   deleteAddress: async (id: string, userId: string) => {
     const existing = await addressRepository.findById(id, userId);
     if (!existing) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
     if (existing.isDefault) {
       throw new ApiError('Alamat utama tidak dapat dihapus', 400);
@@ -66,7 +66,7 @@ export const addressService = {
 
     const address = await addressRepository.delete(id, userId);
     if (!address) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
     logger.info('Address deleted', { addressId: id, userId });
     return address;
@@ -75,12 +75,12 @@ export const addressService = {
   setDefaultAddress: async (id: string, userId: string) => {
     const existing = await addressRepository.findById(id, userId);
     if (!existing) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
 
     const [, , updated] = await addressRepository.setDefault(id, userId);
     if (!updated) {
-      throw new ApiError('Address not found', 404);
+      throw new ApiError('Alamat tidak ditemukan', 404);
     }
     logger.info('Default address set', { addressId: id, userId });
     return updated;

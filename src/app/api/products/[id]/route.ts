@@ -8,6 +8,11 @@ export const GET = withApiPublic<{ id: string }>(async ({ params }) => {
   return jsend.success(product);
 });
 
+/**
+ * @deprecated Admin product update endpoint. Superseded by
+ * `/api/seller/products/[id]`, which enforces seller ownership. Kept functional
+ * for backward compatibility.
+ */
 export const PUT = withApiAdmin<{ id: string }>(async ({ req, params }) => {
   const body = await req.json();
   const data = updateProductSchema.parse(body);
@@ -15,6 +20,11 @@ export const PUT = withApiAdmin<{ id: string }>(async ({ req, params }) => {
   return jsend.success(product);
 });
 
+/**
+ * @deprecated Admin product deletion endpoint. Superseded by
+ * `/api/seller/products/[id]`, which enforces seller ownership. Kept functional
+ * for backward compatibility.
+ */
 export const DELETE = withApiAdmin<{ id: string }>(async ({ params }) => {
   await productService.deleteProduct(params.id);
   return jsend.success(null);

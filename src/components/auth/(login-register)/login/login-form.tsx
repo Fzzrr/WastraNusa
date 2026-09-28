@@ -5,6 +5,7 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth/auth-client';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -13,14 +14,35 @@ import * as z from 'zod/v3';
 import { GoogleButton } from '../google-button';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z.string().min(1, { message: 'Password is required.' }),
+  email: z.string().email({ message: 'Masukkan alamat email yang valid.' }),
+  password: z.string().min(1, { message: 'Password wajib diisi.' }),
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
 
+/**
+ * better-auth also answers 403 for reasons other than an unverified email
+ * (e.g. an untrusted origin), so map by error code instead of status.
+ */
+function getSignInErrorMessage(error: {
+  code?: string;
+  message?: string;
+}): string {
+  switch (error.code) {
+    case 'EMAIL_NOT_VERIFIED':
+      return 'Verifikasi email Anda terlebih dahulu sebelum masuk.';
+    case 'INVALID_EMAIL_OR_PASSWORD':
+      return 'Email atau password salah';
+  }
+  if (error.message?.toLowerCase().includes('origin')) {
+    return 'Login ditolak karena alamat situs ini belum diizinkan oleh server.';
+  }
+  return error.message || 'Email atau password salah';
+}
+
 export function LoginForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -41,14 +63,8 @@ export function LoginForm() {
         password: data.password,
       },
       {
-        onError: (ctx) => {
-          if (ctx.error.status === 403) {
-            setError('root', {
-              message: 'Please verify your email address before signing in.',
-            });
-          }
-        },
         onSuccess: async () => {
+          queryClient.clear();
           const session = await authClient.getSession();
           if (session.data?.user.role === 'admin') {
             router.push('/admin/dashboard');
@@ -59,10 +75,8 @@ export function LoginForm() {
       },
     );
 
-    if (signInError && signInError.status !== 403) {
-      setError('root', {
-        message: signInError.message || 'Wrong email or password',
-      });
+    if (signInError) {
+      setError('root', { message: getSignInErrorMessage(signInError) });
     }
   };
 
@@ -70,7 +84,7 @@ export function LoginForm() {
     <div className="w-full">
       <p className="text-xs font-semibold text-[#7a6e62]">Start your journey</p>
       <h1 className="mt-1 mb-5 text-2xl font-bold text-[#2d2318]">
-        Sign In to WastraNusa
+        Masuk ke WastraNusa
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
@@ -129,7 +143,7 @@ export function LoginForm() {
             href="/forgot-password"
             className="text-[#c07a4a] hover:underline font-medium"
           >
-            Forgot password?
+            Lupa password?
           </Link>
         </div>
 
@@ -139,23 +153,23 @@ export function LoginForm() {
           disabled={isSubmitting}
           className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm mt-1"
         >
-          {isSubmitting ? 'Signing In...' : 'Sign In'}
+          {isSubmitting ? 'Sedang masuk...' : 'Masuk'}
         </Button>
       </form>
 
       {/* Google — no divider, just directly below */}
       <div className="mt-3">
-        <GoogleButton label="Continue with Google" />
+        <GoogleButton label="Lanjutkan dengan Google" />
       </div>
 
       {/* Register link */}
       <p className="mt-5 text-center text-xs text-[#7a6e62]">
-        Don&apos;t have an account?{' '}
+        Belum punya akun?{' '}
         <Link
           href="/register"
           className="text-[#c07a4a] hover:underline font-medium"
         >
-          Sign Up
+          Daftar
         </Link>
       </p>
     </div>

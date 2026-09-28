@@ -1,5 +1,6 @@
 import prisma from '../../src/lib/prisma';
 import { SEED_ARTICLE_1, SEED_ARTICLE_2, SEED_ARTICLE_3 } from './article.seed';
+import { SEED_SELLER_USER } from './user.seed';
 
 export const SEED_PRODUCT_1 = {
   id: 'p0000000-0000-0000-0000-000000000001',
@@ -220,6 +221,18 @@ export const SEED_VARIANT_7_1 = {
 };
 
 export async function seedProducts() {
+  // All seed products are owned by the seed seller so the seller-scoped
+  // inventory/orders/dashboard views have data on a fresh database.
+  const seller = await prisma.user.findFirst({
+    where: { email: SEED_SELLER_USER.email },
+  });
+
+  if (!seller) {
+    throw new Error(
+      'Seed seller not found. Run seedUsers before seedProducts.',
+    );
+  }
+
   const products = [
     SEED_PRODUCT_1,
     SEED_PRODUCT_2,
@@ -242,13 +255,16 @@ export async function seedProducts() {
 
   await prisma.$transaction(async (tx) => {
     for (const prod of products) {
+      const data = { ...prod, sellerId: seller.id };
       await tx.product.upsert({
         where: { id: prod.id },
-        update: prod,
-        create: prod,
+        update: data,
+        create: data,
       });
     }
-    console.log(`Seeded ${products.length} products`);
+    console.log(
+      `Seeded ${products.length} products → ${SEED_SELLER_USER.email}`,
+    );
 
     for (const variant of variants) {
       await tx.productVariant.upsert({

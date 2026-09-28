@@ -81,6 +81,7 @@ export function FeaturedCards() {
                   className={`absolute inset-0 bg-gradient-to-t ${CARD_BACKGROUNDS[index % CARD_BACKGROUNDS.length]}`}
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_26%,rgba(249,229,193,.28)_0%,rgba(0,0,0,0)_36%)]" />
+                <span className="absolute inset-x-0 top-0 z-10 h-0.5 origin-left scale-x-0 bg-gradient-to-r from-[#e8cb8d] to-transparent transition-transform duration-500 group-hover:scale-x-100" />
 
                 <span className="absolute right-4 top-4 z-10 grid h-9 w-9 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6eee1] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                   <ArrowUpRight className="h-4 w-4" />
@@ -88,11 +89,13 @@ export function FeaturedCards() {
 
                 <div className="relative flex min-h-[150px] items-end p-4 sm:min-h-[180px] lg:min-h-[225px]">
                   <div className="transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
-                    <Badge className="mb-3 rounded-md bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:bg-white/24">
+                    <Badge className="mb-3 rounded-full border border-white/15 bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:border-[#e8cb8d]/50 group-hover:bg-[#e8cb8d]/25 group-hover:text-[#fff6e3]">
                       {article.topic}
                     </Badge>
-                    <p className="text-base font-semibold leading-tight text-[#f6eee1] lg:text-lg">
-                      {article.title}
+                    <p className="text-base font-semibold leading-tight text-[#f6eee1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] lg:text-lg">
+                      <span className="bg-gradient-to-r from-[#e8cb8d] to-[#e8cb8d] bg-[length:0%_2px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-500 group-hover:bg-[length:100%_2px]">
+                        {article.title}
+                      </span>
                     </p>
                     <p className="mt-1 text-sm text-[#d5cab9]">
                       {article.subtitle}

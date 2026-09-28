@@ -1,7 +1,8 @@
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
-import { formatIDR } from '@/lib/utils';
+import { formatIDR, mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
+import { productRepository } from '@/repositories/product.repository';
 import {
   type CreateArticleInput,
   type UpdateArticleInput,
@@ -101,6 +102,24 @@ export const articleService = {
     };
   },
 
+  /**
+   * Saved values from every admin's articles; clothing types also include
+   * those sellers used on products, so both forms share one vocabulary.
+   */
+  getFieldOptions: async () => {
+    const [options, productClothingTypes] = await Promise.all([
+      articleRepository.getFieldOptions(),
+      productRepository.getDistinctClothingTypes(),
+    ]);
+    return {
+      ...options,
+      clothingTypes: mergeUniqueSorted(
+        options.clothingTypes,
+        productClothingTypes,
+      ),
+    };
+  },
+
   getDashboardOverview: async (): Promise<ArticleDashboardData> => {
     const [totalArticles, mostPopularArticles] = await Promise.all([
       articleRepository.countAll({ status: 'published' }),
@@ -136,7 +155,7 @@ export const articleService = {
   getArticleDetail: async (idOrSlug: string, userId?: string) => {
     const article = await articleRepository.findByIdOrSlug(idOrSlug);
     if (!article) {
-      throw new ApiError('Article not found', 404);
+      throw new ApiError('Artikel tidak ditemukan', 404);
     }
 
     const existingLike =
@@ -175,7 +194,7 @@ export const articleService = {
         { label: 'Wilayah Utama', value: article.region },
         { label: 'Kategori', value: article.topic },
         { label: 'Jenis Wastra', value: article.motifLabel },
-        { label: 'Durasi Baca', value: `${article.readMinutes} menit` },
+        { label: 'Durasi Baca', value: `${article.readMinutes} Menit` },
       ],
       relatedProducts: (article.products ?? []).map((product) => ({
         slug: product.slug,

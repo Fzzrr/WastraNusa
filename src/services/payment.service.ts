@@ -209,7 +209,7 @@ export const paymentService = {
         userId,
       );
       if (!shippingAddress) {
-        throw new ApiError('Shipping address not found', 404);
+        throw new ApiError('Alamat pengiriman tidak ditemukan', 404);
       }
       shippingAddressId = shippingAddress.id;
       logger.info('use address id from req', {
@@ -218,7 +218,7 @@ export const paymentService = {
     } else {
       const defaultAddress = await addressRepository.findDefaultByUser(userId);
       if (!defaultAddress) {
-        throw new ApiError('Default shipping address not found', 400);
+        throw new ApiError('Alamat pengiriman utama tidak ditemukan', 400);
       }
       shippingAddressId = defaultAddress.id;
       logger.info('use default id since no address id passed');
@@ -230,10 +230,10 @@ export const paymentService = {
     for (const item of mergedItems) {
       const product = await productRepository.findProductById(item.productId);
       if (!product) {
-        throw new ApiError(`Product not found: ${item.productId}`, 404);
+        throw new ApiError(`Produk tidak ditemukan: ${item.productId}`, 404);
       }
       if (product.status !== 'active') {
-        throw new ApiError(`Product is not available: ${product.name}`, 400);
+        throw new ApiError(`Produk tidak tersedia: ${product.name}`, 400);
       }
 
       let variantName: string | null = null;
@@ -245,10 +245,10 @@ export const paymentService = {
           item.variantId,
         );
         if (!variant) {
-          throw new ApiError('Variant not found', 404);
+          throw new ApiError('Varian tidak ditemukan', 404);
         }
         if (variant.productId !== product.id) {
-          throw new ApiError('Variant does not belong to this product', 400);
+          throw new ApiError('Varian tidak sesuai dengan produk ini', 400);
         }
         if (variant.stock < item.quantity) {
           throw new ApiError(
@@ -300,7 +300,7 @@ export const paymentService = {
     const primaryItem = resolvedItems[0];
 
     if (!primaryItem) {
-      throw new ApiError('No checkout items were provided', 400);
+      throw new ApiError('Tidak ada produk untuk di-checkout', 400);
     }
 
     const orderId = crypto.randomUUID();
@@ -383,7 +383,7 @@ export const paymentService = {
             cancelError,
           });
         });
-      throw new ApiError('Failed to create payment transaction', 502);
+      throw new ApiError('Gagal membuat transaksi pembayaran', 502);
     }
 
     await paymentTransactionRepository.createPaymentTransaction({
@@ -432,7 +432,7 @@ export const paymentService = {
 
     if (!isValid) {
       logger.warn('Invalid Midtrans signature key', { order_id });
-      throw new ApiError('Invalid signature key', 403);
+      throw new ApiError('Signature key tidak valid', 403);
     }
 
     const transaction =

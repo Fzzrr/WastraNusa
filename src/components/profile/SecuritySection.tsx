@@ -1,11 +1,27 @@
 'use client';
 
+import { Field, inputClassName } from '@/components/form-sections';
+import {
+  ProfileSection,
+  profileOutlineButtonClassName,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth/auth-client';
+import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle, Info, Loader2, Lock, X } from 'lucide-react';
+import {
+  CheckCircle,
+  Info,
+  KeyRound,
+  Loader2,
+  Lock,
+  MonitorSmartphone,
+  Save,
+  ShieldCheck,
+  X,
+} from 'lucide-react';
 import { ReactNode, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -28,32 +44,27 @@ function SecurityRow({
   icon,
   title,
   subtitle,
-  action,
+  status,
 }: {
   icon: ReactNode;
   title: string;
   subtitle?: string;
-  action?: string;
+  status?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 py-4 sm:py-3.5 bg-brand-muted rounded-lg gap-3 sm:gap-0">
-      <div className="flex items-center gap-3 w-full sm:w-auto">
-        {icon}
-        <div>
-          <div className="text-[13px] font-medium text-foreground">{title}</div>
+    <div className="group flex items-center justify-between gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e3ece5] text-[#2f5f49] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-[#2f3a33]">{title}</div>
           {subtitle && (
-            <div className="text-[12px] text-amber-700">{subtitle}</div>
+            <div className="truncate text-xs text-[#9a8f80]">{subtitle}</div>
           )}
         </div>
       </div>
-      {action && (
-        <Button
-          variant="outline"
-          className="h-8 px-3.5 text-xs text-foreground w-full sm:w-auto mt-1 sm:mt-0"
-        >
-          {action}
-        </Button>
-      )}
+      {status}
     </div>
   );
 }
@@ -130,29 +141,43 @@ export default function SecuritySection() {
       })
     : '-';
 
+  const passwordField = (
+    name: keyof PasswordFormValues,
+    label: string,
+    hint?: string,
+  ) => (
+    <Field label={label} required error={errors[name]?.message} hint={hint}>
+      <Input type="password" {...register(name)} className={inputClassName} />
+    </Field>
+  );
+
   return (
-    <div className="bg-background rounded-2xl p-5 md:p-7 shadow-sm border">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4 sm:gap-0">
-        <h2 className="m-0 text-lg font-bold flex items-center gap-2 text-brand">
-          <Lock size={18} /> Keamanan Akun
-        </h2>
-        {!isChangingPassword ? (
+    <ProfileSection
+      icon={ShieldCheck}
+      title="Keamanan Akun"
+      description="Kelola password dan pantau aktivitas login"
+      aside={
+        !isChangingPassword ? (
           <Button
             variant="outline"
             onClick={() => setIsChangingPassword(true)}
             disabled={isOAuthOnly}
-            className="flex items-center gap-1.5 text-[13px] text-brand border-border rounded-lg h-9 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
+            className={cn(
+              profileOutlineButtonClassName,
+              'h-9 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto',
+            )}
           >
+            <KeyRound className="size-3.5" />
             Ubah Password
           </Button>
-        ) : null}
-      </div>
-
+        ) : null
+      }
+    >
       {isOAuthOnly && (
-        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <Info className="mt-0.5 size-5 shrink-0 text-amber-600" />
           <div className="text-sm text-amber-800">
-            <p className="font-semibold mb-1">Akun Terhubung dengan Google</p>
+            <p className="mb-1 font-semibold">Akun Terhubung dengan Google</p>
             <p className="text-[13px] leading-relaxed">
               Anda menggunakan login Google untuk akun ini. Pengaturan password
               dinonaktifkan karena Anda tidak memiliki password lokal.
@@ -162,90 +187,78 @@ export default function SecuritySection() {
       )}
 
       {isChangingPassword ? (
-        <div className="space-y-4 bg-brand-muted/50 p-4 rounded-xl border border-border/50">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-semibold text-sm">Ubah Password</h3>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] duration-300 fade-in slide-in-from-top-1 md:p-5"
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
+              <KeyRound className="size-4 text-[#a07a2c]" />
+              Ubah Password
+            </h3>
             <Button
+              type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              aria-label="Tutup"
+              className="size-8 cursor-pointer rounded-full text-[#9a8f80] hover:bg-white"
               onClick={() => setIsChangingPassword(false)}
             >
-              <X className="h-4 w-4" />
+              <X className="size-4" />
             </Button>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-3 relative">
-              <div className="space-y-1">
-                <Label className="text-xs">Password Saat Ini</Label>
-                <Input
-                  type="password"
-                  {...register('currentPassword')}
-                  className="h-9"
-                />
-                {errors.currentPassword && (
-                  <p className="text-[10px] text-destructive">
-                    {errors.currentPassword.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Password Baru</Label>
-                <Input
-                  type="password"
-                  {...register('newPassword')}
-                  className="h-9"
-                />
-                {errors.newPassword && (
-                  <p className="text-[10px] text-destructive">
-                    {errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Konfirmasi Password Baru</Label>
-                <Input
-                  type="password"
-                  {...register('confirmPassword')}
-                  className="h-9"
-                />
-                {errors.confirmPassword && (
-                  <p className="text-[10px] text-destructive">
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end pt-2">
-              <Button
-                type="submit"
-                disabled={isSaving}
-                className="bg-brand text-white hover:bg-brand-dark h-9 text-xs"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />
-                ) : null}
-                Simpan Password
-              </Button>
-            </div>
-          </form>
-        </div>
+          {passwordField('currentPassword', 'Password Saat Ini')}
+          <div className="grid gap-4 md:grid-cols-2">
+            {passwordField(
+              'newPassword',
+              'Password Baru',
+              'Minimal 8 karakter.',
+            )}
+            {passwordField('confirmPassword', 'Konfirmasi Password Baru')}
+          </div>
+          <div className="flex justify-end pt-1">
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className={cn(profilePrimaryButtonClassName, 'h-10 px-5')}
+            >
+              {isSaving ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Save className="size-4" />
+              )}
+              Simpan Password
+            </Button>
+          </div>
+        </form>
       ) : (
-        <div className="flex flex-col gap-2.5">
+        <div className="grid gap-3 md:grid-cols-2">
           {!isOAuthOnly && (
             <SecurityRow
-              icon={<Lock size={16} />}
+              icon={<Lock className="size-4" />}
               title="Password"
               subtitle="••••••••••••"
+              status={
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#e3ece5] px-2.5 py-1 text-[11px] font-semibold text-[#2f5f49]">
+                  <CheckCircle className="size-3" />
+                  Aktif
+                </span>
+              }
             />
           )}
           <SecurityRow
-            icon={<CheckCircle size={16} />}
+            icon={<MonitorSmartphone className="size-4" />}
             title="Login Terakhir"
-            subtitle={isPending ? 'Memuat...' : `${loginDate} (Sesi Aktif)`}
+            subtitle={isPending ? 'Memuat...' : loginDate}
+            status={
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e3ece5] px-2.5 py-1 text-[11px] font-semibold text-[#2f5f49]">
+                <span className="size-1.5 animate-pulse rounded-full bg-[#3f8f63]" />
+                Sesi Aktif
+              </span>
+            }
           />
         </div>
       )}
-    </div>
+    </ProfileSection>
   );
 }

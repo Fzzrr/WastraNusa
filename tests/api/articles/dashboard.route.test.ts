@@ -16,6 +16,7 @@ describe('GET /api/articles/dashboard', { tags: ['backend'] }, () => {
       popularArticles: [
         {
           rank: 1,
+          slug: 'sejarah-batik-jawa',
           title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
           category: 'Sejarah & Asal Usul',
           region: 'Jawa',
@@ -36,6 +37,7 @@ describe('GET /api/articles/dashboard', { tags: ['backend'] }, () => {
       popularArticles: [
         {
           rank: 1,
+          slug: 'sejarah-batik-jawa',
           title: 'Sejarah Batik Jawa: Warisan Dunia UNESCO',
           category: 'Sejarah & Asal Usul',
           region: 'Jawa',

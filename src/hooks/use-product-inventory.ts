@@ -28,6 +28,7 @@ export const productInventoryKeys = {
   articles: () => [...productInventoryKeys.all, 'article-options'] as const,
   articlePages: (limit: number) =>
     [...productInventoryKeys.articles(), 'pages', limit] as const,
+  clothingTypes: () => [...productInventoryKeys.all, 'clothing-types'] as const,
 };
 
 const ARTICLE_OPTIONS_LIMIT = 20;
@@ -81,11 +82,16 @@ export function fetchProductInventories(page: number = 1, limit: number = 10) {
   const searchParams = new URLSearchParams({
     page: String(page),
     limit: String(limit),
+    includeOutOfStock: 'true',
   });
 
   return fetchApi<ProductInventoryListResponse>(
     `/api/products?${searchParams.toString()}`,
   );
+}
+
+export function fetchClothingTypeOptions() {
+  return fetchApi<string[]>('/api/products/clothing-types');
 }
 
 export function fetchProductInventoryDetail(idOrSlug: string) {
@@ -168,6 +174,17 @@ export function useArticleOptions() {
     getNextPageParam: (lastPage) =>
       lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useClothingTypeOptions() {
+  return useQuery({
+    queryKey: productInventoryKeys.clothingTypes(),
+    queryFn: fetchClothingTypeOptions,
+    // Always refetch when the form opens so entries other users just added
+    // show up; the cached list still renders instantly meanwhile.
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 }
 

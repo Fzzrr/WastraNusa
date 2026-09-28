@@ -1,25 +1,75 @@
 'use client';
 
+import { Field, inputClassName } from '@/components/form-sections';
+import {
+  ProfileSection,
+  profileCardClassName,
+  profileOutlineButtonClassName,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth/auth-client';
-import { Edit2, Loader2, Save, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Cake,
+  Check,
+  Edit2,
+  Loader2,
+  type LucideIcon,
+  Mail,
+  Phone,
+  Save,
+  UserRound,
+  Users,
+  X,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-function InfoField({ label, value }: { label: string; value: string }) {
+function InfoTile({
+  icon: Icon,
+  label,
+  value,
+  className,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  className?: string;
+}) {
+  const isEmpty = !value || value === '-';
   return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-muted-foreground">{label}</Label>
-      <Input
-        value={value}
-        readOnly
-        className="bg-brand-muted border-none text-foreground pointer-events-none h-10 w-full"
-      />
+    <div
+      className={cn(
+        'group flex items-center gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50',
+        className,
+      )}
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#f5ead3] text-[#a07a2c] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
+        <Icon className="size-4" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
+          {label}
+        </p>
+        <p
+          className={cn(
+            'truncate text-sm font-semibold',
+            isEmpty ? 'text-[#b3aa9e] italic' : 'text-[#2f3a33]',
+          )}
+        >
+          {isEmpty ? 'Belum diisi' : value}
+        </p>
+      </div>
     </div>
   );
 }
+
+const GENDER_OPTIONS = [
+  { value: 'male', label: 'Laki-laki' },
+  { value: 'female', label: 'Perempuan' },
+];
 
 interface ExtendedUser {
   id: string;
@@ -101,131 +151,183 @@ export default function ProfileInfoSection() {
         ? 'Perempuan'
         : '-';
 
+  const filledCount = [
+    user?.name,
+    user?.phoneNumber,
+    user?.gender,
+    user?.birthDate,
+  ].filter(Boolean).length;
+
   if (isPending) {
     return (
-      <div className="bg-background rounded-2xl p-5 md:p-7 shadow-sm border animate-pulse">
-        <div className="h-6 w-48 bg-muted rounded mb-6"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-16 bg-muted rounded"></div>
-          <div className="h-16 bg-muted rounded"></div>
-          <div className="h-16 bg-muted rounded"></div>
-          <div className="h-16 bg-muted rounded"></div>
+      <div className={cn(profileCardClassName, 'animate-pulse p-6')}>
+        <div className="mb-6 h-10 w-56 rounded-xl bg-[#efe8dd]" />
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="h-[68px] rounded-xl bg-[#f4efe5]" />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-background rounded-2xl p-5 md:p-7 shadow-sm border">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 sm:gap-0">
-        <h2 className="m-0 text-lg font-bold text-brand">Informasi Profil</h2>
-        {!isEditing ? (
+    <ProfileSection
+      icon={UserRound}
+      title="Informasi Profil"
+      description={
+        isEditing
+          ? 'Perbarui data diri Anda'
+          : `${filledCount}/4 data diri sudah dilengkapi`
+      }
+      aside={
+        !isEditing ? (
           <Button
             variant="outline"
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1.5 text-[13px] text-brand border-border rounded-lg h-9 w-full sm:w-auto"
+            className={cn(
+              profileOutlineButtonClassName,
+              'h-9 w-full sm:w-auto',
+            )}
           >
-            <Edit2 className="w-3.5 h-3.5" />
+            <Edit2 className="size-3.5" />
             Edit Profil
           </Button>
         ) : (
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex w-full items-center gap-2 sm:w-auto">
             <Button
               variant="outline"
               onClick={() => setIsEditing(false)}
               disabled={isSaving}
-              className="flex items-center gap-1.5 text-[13px] h-9 flex-1 sm:flex-none"
+              className={cn(
+                profileOutlineButtonClassName,
+                'h-9 flex-1 sm:flex-none',
+              )}
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="size-3.5" />
               Batal
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-1.5 text-[13px] h-9 flex-1 sm:flex-none bg-brand text-white hover:bg-brand-dark"
+              className={cn(
+                profilePrimaryButtonClassName,
+                'h-9 flex-1 sm:flex-none',
+              )}
             >
               {isSaving ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <Loader2 className="size-3.5 animate-spin" />
               ) : (
-                <Save className="w-3.5 h-3.5" />
+                <Save className="size-3.5" />
               )}
               Simpan
             </Button>
           </div>
-        )}
-      </div>
-
+        )
+      }
+    >
       {!isEditing ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <InfoField label="Nama Lengkap" value={user?.name || '-'} />
-            <InfoField label="Nomor Telepon" value={user?.phoneNumber || '-'} />
-            <InfoField label="Email" value={user?.email || '-'} />
-            <InfoField label="Jenis Kelamin" value={formattedGender} />
-          </div>
-          <div className="mt-4">
-            <InfoField label="Tanggal Lahir" value={formattedBirthDate} />
-          </div>
-        </>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <InfoTile
+            icon={UserRound}
+            label="Nama Lengkap"
+            value={user?.name || '-'}
+          />
+          <InfoTile
+            icon={Phone}
+            label="Nomor Telepon"
+            value={user?.phoneNumber || '-'}
+          />
+          <InfoTile icon={Mail} label="Email" value={user?.email || '-'} />
+          <InfoTile
+            icon={Users}
+            label="Jenis Kelamin"
+            value={formattedGender}
+          />
+          <InfoTile
+            icon={Cake}
+            label="Tanggal Lahir"
+            value={formattedBirthDate}
+            className="md:col-span-2"
+          />
+        </div>
       ) : (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label className="text-muted-foreground">Nama Lengkap</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="h-10 border-border"
-              />
+        <div className="grid animate-in grid-cols-1 gap-4 duration-300 fade-in md:grid-cols-2">
+          <Field label="Nama Lengkap" required>
+            <Input
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Nomor Telepon">
+            <Input
+              value={formData.phoneNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, phoneNumber: e.target.value })
+              }
+              placeholder="08xxxxxxxxxx"
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Email" required hint="Email tidak dapat diubah.">
+            <Input
+              value={user?.email || ''}
+              readOnly
+              className={cn(
+                inputClassName,
+                'pointer-events-none bg-[#f4efe5] text-[#6f6a62]',
+              )}
+            />
+          </Field>
+          <Field label="Jenis Kelamin">
+            <div
+              role="radiogroup"
+              aria-label="Jenis kelamin"
+              className="flex gap-2"
+            >
+              {GENDER_OPTIONS.map((option) => {
+                const isActive = formData.gender === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        gender: isActive ? '' : option.value,
+                      })
+                    }
+                    className={cn(
+                      'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-sm transition-all',
+                      isActive
+                        ? 'bg-[#2f5f49] font-medium text-white shadow-[0_6px_14px_-6px_rgba(47,95,73,0.6)]'
+                        : 'bg-white text-[#6f6a62] ring-1 ring-[#e5ded5] hover:text-[#2f5543] hover:ring-[#2f5f49]/40',
+                    )}
+                  >
+                    {isActive ? <Check className="size-3.5" /> : null}
+                    {option.label}
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-muted-foreground">Nomor Telepon</Label>
-              <Input
-                value={formData.phoneNumber}
-                onChange={(e) =>
-                  setFormData({ ...formData, phoneNumber: e.target.value })
-                }
-                className="h-10 border-border"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-muted-foreground">Email</Label>
-              <Input
-                value={user?.email || ''}
-                readOnly
-                className="bg-brand-muted border-none text-foreground pointer-events-none h-10 w-full"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label className="text-muted-foreground">Jenis Kelamin</Label>
-              <select
-                value={formData.gender}
-                onChange={(e) =>
-                  setFormData({ ...formData, gender: e.target.value })
-                }
-                className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Pilih</option>
-                <option value="male">Laki-laki</option>
-                <option value="female">Perempuan</option>
-              </select>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label className="text-muted-foreground">Tanggal Lahir</Label>
+          </Field>
+          <Field label="Tanggal Lahir">
             <Input
               type="date"
               value={formData.birthDate}
               onChange={(e) =>
                 setFormData({ ...formData, birthDate: e.target.value })
               }
-              className="h-10 border-border w-full md:w-[calc(50%-0.5rem)]"
+              className={inputClassName}
             />
-          </div>
+          </Field>
         </div>
       )}
-    </div>
+    </ProfileSection>
   );
 }

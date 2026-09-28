@@ -2,22 +2,24 @@ import { z } from 'zod';
 
 const checkoutItemSchema = z.object({
   cartItemId: z.string().min(1).optional(),
-  productId: z.string().min(1, 'Product ID is required'),
+  productId: z.string().min(1, 'ID produk wajib diisi'),
   variantId: z.string().nullish(),
-  quantity: z.number().int().min(1, 'Quantity must be at least 1'),
+  quantity: z.number().int().min(1, 'Jumlah minimal 1'),
   frontendPrice: z.number().min(0).optional(),
 });
 
 export const checkoutSchema = z.object({
-  items: z.array(checkoutItemSchema).min(1, 'At least one item is required'),
+  items: z
+    .array(checkoutItemSchema)
+    .min(1, 'Minimal satu produk wajib dipilih'),
   shippingAddressId: z
     .string()
-    .min(1, 'Shipping address is required')
+    .min(1, 'Alamat pengiriman wajib dipilih')
     .nullish(),
-  courier: z.string().min(1, 'Courier is required'),
-  courierService: z.string().min(1, 'Courier service is required'),
+  courier: z.string().min(1, 'Kurir wajib dipilih'),
+  courierService: z.string().min(1, 'Layanan kurir wajib dipilih'),
   estimatedDelivery: z.string().nullish(),
-  shippingCost: z.number().min(0, 'Shipping cost cannot be negative'),
+  shippingCost: z.number().min(0, 'Ongkos kirim tidak boleh negatif'),
   customerNotes: z.string().nullish(),
 });
 

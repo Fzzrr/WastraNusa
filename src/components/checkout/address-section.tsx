@@ -1,10 +1,22 @@
 'use client';
 
+import {
+  ProfileSection,
+  profileOutlineButtonClassName,
+} from '@/components/profile/profile-section';
 import AddUpdateAddressModal from '@/components/profile/saved-address/add-update-address-modal';
 import { Button } from '@/components/ui/button';
 import { type CustomerAddress, useAddresses } from '@/hooks/use-address';
+import { cn } from '@/lib/utils';
 import type { CheckoutAddressSelection } from '@/types/checkout';
-import { Edit2, MapPin, Plus } from 'lucide-react';
+import {
+  AlertCircle,
+  Check,
+  Edit2,
+  MapPin,
+  Plus,
+  Settings2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -96,33 +108,36 @@ export function AddressSection({
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm mb-6 relative">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-sm font-bold text-[#3d5446] flex items-center gap-2">
-            <MapPin size={18} className="text-brand" /> Alamat Pengiriman
-          </h3>
+      <ProfileSection
+        icon={MapPin}
+        title="Alamat Pengiriman"
+        description="Pesanan akan dikirim ke alamat yang dipilih"
+        aside={
           <div className="flex items-center gap-2">
-            <Link href="/profile/saved-address">
-              <Button
-                variant="outline"
-                className="text-[10px] h-8 border-[#d8cfbf] rounded-lg gap-1 hover:bg-[#fbf8f2]"
-              >
+            <Button
+              asChild
+              variant="outline"
+              className={cn(profileOutlineButtonClassName, 'h-8 px-3 text-xs')}
+            >
+              <Link href="/profile/saved-address">
+                <Settings2 className="size-3.5" />
                 Kelola Alamat
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <Button
               onClick={handleAddNew}
               variant="outline"
-              className="text-[10px] h-8 border-[#d8cfbf] rounded-lg gap-1 hover:bg-[#fbf8f2]"
+              className={cn(profileOutlineButtonClassName, 'h-8 px-3 text-xs')}
             >
-              <Plus size={12} /> Tambah Alamat Baru
+              <Plus className="size-3.5" /> Tambah Alamat Baru
             </Button>
           </div>
-        </div>
-
+        }
+      >
         {shouldShowAddAddressWarning && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-            <p className="text-xs font-semibold text-red-600">
+          <div className="mb-4 flex items-start gap-2 rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] px-4 py-3">
+            <AlertCircle className="mt-0.5 size-4 shrink-0 text-[#b04a3a]" />
+            <p className="text-xs font-semibold text-[#9a3b2d]">
               Belum ada alamat tersimpan. Silakan tambah alamat baru untuk
               melanjutkan checkout.
             </p>
@@ -130,68 +145,92 @@ export function AddressSection({
         )}
 
         {isLoading ? (
-          <div className="space-y-4">
-            <div className="h-24 rounded-xl border border-[#e8e2d5] bg-[#f8f5ef] animate-pulse" />
-            <div className="h-24 rounded-xl border border-[#e8e2d5] bg-[#f8f5ef] animate-pulse" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="h-28 animate-pulse rounded-xl bg-[#f4efe5]" />
+            <div className="h-28 animate-pulse rounded-xl bg-[#f4efe5]" />
           </div>
         ) : error && addresses.length === 0 ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-            <p className="text-xs text-red-600">{errorMessage}</p>
+          <div className="rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] px-4 py-3">
+            <p className="text-xs text-[#9a3b2d]">{errorMessage}</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {addresses.map((addr) => (
-              <div
-                key={addr.id}
-                onClick={() => handleSelectAddress(addr.id)}
-                className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                  activeAddressId === addr.id
-                    ? 'border-brand bg-brand/5'
-                    : 'border-[#e8e2d5] bg-white'
-                }`}
-              >
-                <div className="flex gap-3">
-                  <input
-                    type="radio"
-                    checked={activeAddressId === addr.id}
-                    onChange={() => handleSelectAddress(addr.id)}
-                    className="mt-1 accent-brand h-4 w-4"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-sm text-[#3d5446]">
-                        {addr.recipientName}
-                      </span>
-                      <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-[#f0ede6] text-[#726759]">
+          <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+            {addresses.map((addr) => {
+              const isActive = activeAddressId === addr.id;
+              return (
+                <div
+                  key={addr.id}
+                  role="radio"
+                  aria-checked={isActive}
+                  tabIndex={0}
+                  onClick={() => handleSelectAddress(addr.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      handleSelectAddress(addr.id);
+                    }
+                  }}
+                  className={cn(
+                    'relative cursor-pointer rounded-xl p-4 ring-1 transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#2f5f49]',
+                    isActive
+                      ? 'bg-gradient-to-br from-[#e3ece5] to-[#fffdf8] shadow-[0_10px_24px_-16px_rgba(47,95,73,0.7)] ring-2 ring-[#2f5f49]/50'
+                      : 'bg-white ring-[#efe8dd] hover:-translate-y-0.5 hover:ring-[#caa86a]/50',
+                  )}
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span
+                        className={cn(
+                          'rounded-lg px-2 py-0.5 text-[10px] font-bold',
+                          isActive
+                            ? 'bg-[#2f5f49] text-[#e8cb8d]'
+                            : 'bg-[#f4efe5] text-[#8a6a3a]',
+                        )}
+                      >
                         {addr.label}
                       </span>
                       {addr.isDefault && (
-                        <span className="px-2 py-0.5 bg-brand text-[10px] font-bold text-white rounded">
+                        <span className="rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-[10px] font-bold text-[#3c2e14]">
                           Utama
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-[#7a887f]">{addr.phone}</p>
-                    <p className="text-[11px] text-[#7a887f] leading-relaxed mt-1">
-                      {addr.fullAddress}
-                    </p>
+                    <span
+                      className={cn(
+                        'grid size-5 shrink-0 place-items-center rounded-full transition-all',
+                        isActive
+                          ? 'bg-[#2f5f49] text-white'
+                          : 'ring-2 ring-[#e3d9c7]',
+                      )}
+                    >
+                      {isActive ? <Check className="size-3" /> : null}
+                    </span>
                   </div>
+                  <p className="text-sm font-bold text-[#2f4f3f]">
+                    {addr.recipientName}
+                    <span className="ml-1.5 text-xs font-normal text-[#9a8f80]">
+                      {addr.phone}
+                    </span>
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#6f6a62]">
+                    {addr.fullAddress}
+                  </p>
                   <button
                     type="button"
-                    className="text-xs text-brand font-bold flex items-center gap-1 self-start"
+                    className="mt-2 inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-[#2f5f49] hover:underline"
                     onClick={(event) => {
                       event.stopPropagation();
                       handleEdit(addr);
                     }}
                   >
-                    <Edit2 size={12} /> Ubah
+                    <Edit2 className="size-3" /> Ubah
                   </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
-      </div>
+      </ProfileSection>
 
       <AddUpdateAddressModal
         key={editingAddress?.id ?? 'new'}

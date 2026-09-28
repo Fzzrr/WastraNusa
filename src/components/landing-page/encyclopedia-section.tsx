@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { KawungPattern } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
-import { ChevronRight, Search } from 'lucide-react';
+import { BookOpenText, ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -79,18 +80,24 @@ export function EncyclopediaSection() {
 
   return (
     <section className="mx-auto mt-14 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
-      <div className="overflow-hidden rounded-2xl bg-[#2f5e48] text-[#edf3e8] shadow-[0_30px_50px_-35px_rgba(15,41,28,0.85)]">
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#33664e] via-[#2f5e48] to-[#264d3b] text-[#edf3e8] shadow-[0_30px_50px_-35px_rgba(15,41,28,0.85)]">
+        <KawungPattern className="inset-y-0 left-0 h-full w-2/3 text-[#e8cb8d] opacity-[0.06] [mask-image:linear-gradient(to_right,black,transparent)]" />
+        <span className="pointer-events-none absolute -top-24 left-1/3 size-72 rounded-full bg-[#e8cb8d]/10 blur-3xl" />
+        <div className="relative grid lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="p-6 md:p-10">
             <Badge
               variant="outline"
-              className="inline-flex rounded-lg border-white/20 bg-white/7 px-3 py-1 text-xs font-semibold text-[#d8e2d4]"
+              className="inline-flex gap-1.5 rounded-lg border-[#e8cb8d]/30 bg-white/7 px-3 py-1 text-xs font-semibold text-[#f3dfb4]"
             >
+              <BookOpenText className="size-3 text-[#e8cb8d]" />
               Ensiklopedia Budaya
             </Badge>
 
             <h3 className="mt-4 text-2xl font-semibold tracking-tight text-[#f2f8ee]">
-              Jelajahi Kekayaan Wastra Nusantara
+              Jelajahi Kekayaan{' '}
+              <span className="bg-gradient-to-r from-[#f3dfb4] to-[#caa86a] bg-clip-text text-transparent">
+                Wastra Nusantara
+              </span>
             </h3>
 
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#bed0c4]">
@@ -111,9 +118,9 @@ export function EncyclopediaSection() {
                 );
               }}
               role="search"
-              className="mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a] transition-all duration-300 focus-within:border-white/35 focus-within:bg-[#21473590] focus-within:shadow-[0_0_0_4px_rgba(213,200,179,0.12)]"
+              className="group/search mt-5 flex max-w-xl items-center overflow-hidden rounded-xl border border-white/15 bg-[#254d3a]/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.15)] backdrop-blur transition-all duration-300 focus-within:border-[#e8cb8d]/50 focus-within:bg-[#21473590] focus-within:shadow-[0_0_0_4px_rgba(232,203,141,0.14)]"
             >
-              <Search className="ml-4 h-4 w-4 text-[#b7cdbf]" />
+              <Search className="ml-4 h-4 w-4 text-[#b7cdbf] transition-colors group-focus-within/search:text-[#e8cb8d]" />
               <Input
                 className="h-12 w-full border-0 bg-transparent px-3 text-sm text-[#ebf3e7] placeholder:text-[#95b19f] focus-visible:ring-0 focus-visible:ring-offset-0"
                 placeholder="Cari artikel budaya, motif, atau provinsi..."
@@ -124,19 +131,19 @@ export function EncyclopediaSection() {
               />
               <Button
                 type="submit"
-                className="inline-flex h-12 items-center bg-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:bg-[#e6dccc] active:scale-95"
+                className="inline-flex h-12 cursor-pointer items-center bg-gradient-to-r from-[#f3dfb4] to-[#d5c8b3] px-6 text-sm font-bold text-[#2d5f48] transition hover:from-[#fbe9c4] hover:to-[#e6dccc] active:scale-95"
               >
                 Cari
               </Button>
             </form>
 
             <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#b1c4b5]">Filter Pulau :</span>
+              <span className="text-[#b1c4b5]">Filter Pulau:</span>
               {popularTags.map((tag) => (
                 <Button
                   key={tag.name}
                   asChild
-                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-white/35 hover:bg-white/14 active:scale-95"
+                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-[#e8cb8d]/50 hover:bg-[#e8cb8d]/15 hover:text-[#fff6e3] active:scale-95"
                 >
                   <Link
                     href={`/encyclopedia?island=${encodeURIComponent(tag.name)}`}
@@ -148,12 +155,12 @@ export function EncyclopediaSection() {
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#b1c4b5]">Filter Topik :</span>
+              <span className="text-[#b1c4b5]">Filter Topik:</span>
               {popularTopics.map((topic) => (
                 <Button
                   key={topic}
                   asChild
-                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-white/35 hover:bg-white/14 active:scale-95"
+                  className="rounded-full border border-white/18 bg-white/8 px-3 py-1.5 font-semibold text-[#d2dfd2] transition hover:scale-105 hover:border-[#e8cb8d]/50 hover:bg-[#e8cb8d]/15 hover:text-[#fff6e3] active:scale-95"
                 >
                   <Link
                     href={`/encyclopedia?topic=${encodeURIComponent(topic)}`}
@@ -167,7 +174,7 @@ export function EncyclopediaSection() {
 
           <aside
             ref={asideRef}
-            className="border-t border-white/12 bg-[#2a5541] p-5 md:p-6 lg:border-l lg:border-t-0"
+            className="border-t border-white/12 bg-[#2a5541]/80 p-5 backdrop-blur-sm md:p-6 lg:border-l lg:border-t-0"
           >
             <h4 className="text-lg font-bold tracking-tight text-[#f0f7eb]">
               Artikel Terkini
@@ -224,7 +231,7 @@ export function EncyclopediaSection() {
                       href={`/encyclopedia/${article.slug}`}
                       className="block"
                     >
-                      <Card className="group rounded-2xl border border-white/6 bg-white/7 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/11">
+                      <Card className="group rounded-2xl border border-white/6 bg-white/7 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[#e8cb8d]/35 hover:bg-white/11 hover:shadow-[0_16px_28px_-18px_rgba(0,0,0,0.6)]">
                         <div className="flex items-center gap-4">
                           <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border-2 border-dashed border-white/10 bg-[radial-gradient(circle_at_35%_35%,rgba(248,234,210,.18)_0%,rgba(214,183,145,.2)_55%,rgba(138,110,77,.3)_100%)]">
                             {article.imageURL ? (
@@ -242,7 +249,7 @@ export function EncyclopediaSection() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-medium font-medium leading-snug text-[#e9f2e5]">
+                            <p className="text-medium font-medium leading-snug text-[#e9f2e5] transition-colors group-hover:text-[#f3dfb4]">
                               {article.title}
                             </p>
                             <p className="mt-1 text-xs text-[#adc0b3]">
@@ -273,7 +280,7 @@ export function EncyclopediaSection() {
               className="group mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
             >
               <Link href="/encyclopedia">
-                Lihat semua artikel
+                Lihat Semua Artikel
                 <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </Button>

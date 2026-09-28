@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import { Home } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
@@ -24,17 +25,33 @@ const breadcrumbMap: Record<string, { label: string; href?: string }[]> = {
     { label: 'Profil Saya', href: '/profile' },
     { label: 'Pesanan Saya' },
   ],
+  '/profile/seller-application': [
+    { label: 'Profil Saya', href: '/profile' },
+    { label: 'Buka Toko' },
+  ],
 };
 
 export default function ProfileBreadcrumb() {
   const pathname = usePathname();
-  const items = breadcrumbMap[pathname] ?? [{ label: 'Profil Saya' }];
+  const items =
+    breadcrumbMap[pathname] ??
+    (pathname.startsWith('/profile/my-order/')
+      ? [
+          { label: 'Profil Saya', href: '/profile' },
+          { label: 'Pesanan Saya', href: '/profile/my-order' },
+          { label: 'Detail Pesanan' },
+        ]
+      : [{ label: 'Profil Saya' }]);
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-muted-foreground text-[13px]">
+      <BreadcrumbList className="text-sm font-medium text-[#6e8276]">
         <BreadcrumbItem>
-          <BreadcrumbLink href="/" className="text-brand hover:text-brand-dark">
+          <BreadcrumbLink
+            href="/"
+            className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+          >
+            <Home className="size-3.5" />
             Beranda
           </BreadcrumbLink>
         </BreadcrumbItem>
@@ -43,14 +60,13 @@ export default function ProfileBreadcrumb() {
           <BreadcrumbSeparator key={`separator-${item.label}-${index}`} />,
           <BreadcrumbItem key={`item-${item.label}-${index}`}>
             {item.href ? (
-              <BreadcrumbLink
-                href={item.href}
-                className="text-brand hover:text-brand-dark"
-              >
+              <BreadcrumbLink href={item.href} className="hover:text-[#2f5b49]">
                 {item.label}
               </BreadcrumbLink>
             ) : (
-              <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              <BreadcrumbPage className="text-[#2f5b49]">
+                {item.label}
+              </BreadcrumbPage>
             )}
           </BreadcrumbItem>,
         ])}

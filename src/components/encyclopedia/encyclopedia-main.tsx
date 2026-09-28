@@ -2,10 +2,8 @@
 
 import {
   EncyclopediaArticleCard,
-  EncyclopediaArticleListCard,
   EncyclopediaFeaturedCard,
   EncyclopediaPagination,
-  EncyclopediaSearchResults,
   EncyclopediaSidebar,
   EncyclopediaStats,
 } from '@/components/encyclopedia';
@@ -17,12 +15,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { WastraHeroPanel } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
 import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Grid3x3, Home, Menu, X } from 'lucide-react';
+import { Home, Library, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -36,16 +34,16 @@ interface EncyclopediaMainProps {
 
 function EncyclopediaStatsSkeleton() {
   return (
-    <div className="mt-7 grid grid-cols-2 gap-3 border-t border-[#d8d0c1] pt-5 sm:grid-cols-4">
+    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 md:gap-4 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, index) => (
         <div
           key={index}
-          className="flex items-center gap-3 rounded-xl border border-[#ddd3c2] bg-[#f7f3ea]/70 px-4 py-3"
+          className="flex items-center gap-3 rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/15"
         >
-          <Skeleton className="h-10 w-10 shrink-0 rounded-lg bg-[#e6dfd1]" />
+          <Skeleton className="size-11 shrink-0 rounded-xl bg-white/15" />
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-6 w-10 bg-[#e6dfd1]" />
-            <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
+            <Skeleton className="h-6 w-10 bg-white/15" />
+            <Skeleton className="h-3 w-24 bg-white/15" />
           </div>
         </div>
       ))}
@@ -135,7 +133,6 @@ export function EncyclopediaMain({
   const [selectedIsland, setSelectedIsland] = useState(initialIsland);
   const [selectedTopic, setSelectedTopic] = useState(initialTopic);
   const [searchTerm, setSearchTerm] = useState(initialSearch ?? '');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { data, error, isPending } = useArticles(
     currentPage,
     ARTICLES_PER_PAGE,
@@ -245,7 +242,7 @@ export function EncyclopediaMain({
   return (
     <main>
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-4 pt-7 md:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div>
           <div>
             <Breadcrumb className="mb-2">
               <BreadcrumbList className="text-[#6e8276] text-sm font-medium">
@@ -266,30 +263,23 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight text-[#2f5b49] sm:text-5xl">
-              Ensiklopedia Budaya Wastra
-            </h1>
-            <div className="mt-3 h-1.5 w-20 rounded-full bg-gradient-to-r from-[#2f5b49] to-[#caa86a]" />
-            <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#4d6759]">
-              Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari
-              teknik tenun hingga makna filosofi setiap motif kain.
-            </p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex items-start">
-            <EncyclopediaSearchResults
-              articles={searchArticles}
-              onArticleClick={handleArticleClick}
-            />
           </div>
         </div>
 
-        {showLoadingSkeleton ? (
-          <EncyclopediaStatsSkeleton />
-        ) : (
-          <EncyclopediaStats stats={stats} />
-        )}
+        <WastraHeroPanel
+          className="mt-3"
+          eyebrow="Pustaka Wastra Nusantara"
+          title="Ensiklopedia Budaya"
+          accent="Wastra"
+          description="Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari teknik tenun hingga makna filosofi setiap motif kain."
+          images={articles.map((article) => article.imageURL)}
+        >
+          {showLoadingSkeleton ? (
+            <EncyclopediaStatsSkeleton />
+          ) : (
+            <EncyclopediaStats stats={stats} />
+          )}
+        </WastraHeroPanel>
       </section>
 
       <section className="border-y border-[#d3cbbd] bg-[#e9e4d9] py-6">
@@ -320,38 +310,17 @@ export function EncyclopediaMain({
                   </button>
                 </p>
               ) : (
-                <p className="text-left text-sm font-semibold text-[#4e6659]">
-                  Menampilkan {data?.meta.totalItems ?? articles.length} Artikel
+                <p className="inline-flex items-center gap-2 text-left text-sm font-semibold text-[#4e6659]">
+                  <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                    <Library className="size-3.5" />
+                  </span>
+                  Menampilkan
+                  <span className="rounded-full bg-[#2f5f49] px-2 py-0.5 text-xs text-[#eef3ea] tabular-nums">
+                    {data?.meta.totalItems ?? articles.length}
+                  </span>
+                  Artikel
                 </p>
               )}
-              <div className="flex gap-1.5 rounded-sm border border-[#d4cbbc] bg-[#f7f3ea] p-0.5">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
-                    viewMode === 'grid'
-                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                  }`}
-                  onClick={() => setViewMode('grid')}
-                  title="Grid view"
-                >
-                  <Grid3x3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`h-7 w-7 p-0 transition-all active:scale-90 ${
-                    viewMode === 'list'
-                      ? 'bg-[#2f5f49] text-[#eef3ea] hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                      : 'text-[#4c6457] hover:bg-[#ece5d8]'
-                  }`}
-                  onClick={() => setViewMode('list')}
-                  title="List view"
-                >
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           )}
 
@@ -388,37 +357,22 @@ export function EncyclopediaMain({
               {!isPending && !error && featuredArticle ? (
                 <EncyclopediaFeaturedCard
                   article={featuredArticle}
-                  viewMode={viewMode}
                   onReadMore={handleArticleClick}
                 />
               ) : null}
 
               {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
-              <div
-                className={`mt-4 ${
-                  viewMode === 'grid'
-                    ? 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3'
-                    : 'space-y-3'
-                }`}
-              >
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {!isPending &&
                   !error &&
-                  displayedArticles.map((article) =>
-                    viewMode === 'list' ? (
-                      <EncyclopediaArticleListCard
-                        key={article.slug}
-                        article={article}
-                        onClick={handleArticleClick}
-                      />
-                    ) : (
-                      <EncyclopediaArticleCard
-                        key={article.slug}
-                        article={article}
-                        onClick={handleArticleClick}
-                      />
-                    ),
-                  )}
+                  displayedArticles.map((article) => (
+                    <EncyclopediaArticleCard
+                      key={article.slug}
+                      article={article}
+                      onClick={handleArticleClick}
+                    />
+                  ))}
 
                 {!isPending &&
                   !error &&

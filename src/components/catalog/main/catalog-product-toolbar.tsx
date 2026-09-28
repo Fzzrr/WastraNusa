@@ -39,11 +39,11 @@ export function CatalogProductToolbar({
   onSortChange,
 }: CatalogProductToolbarProps) {
   return (
-    <Card className="rounded-2xl border border-[#d9d0c1] bg-[#f9f6ef] px-3 py-3 sm:px-4">
+    <Card className="rounded-2xl border-0 bg-[#fbf8f2] px-3 py-3 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7] sm:px-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         {/* Result count */}
         <div className="flex items-center gap-2.5 rounded-xl border border-[#e2dac9] bg-[#efeadf] py-1.5 pr-4 pl-1.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#2f5f49] text-[#edf3eb]">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
             <Package className="size-4" />
           </span>
           <p className="text-sm text-[#5b6f63]">
@@ -51,7 +51,7 @@ export function CatalogProductToolbar({
             <span className="rounded-md bg-[#2f5f49]/10 px-1.5 py-0.5 font-bold text-[#2f5b49]">
               {productCount}
             </span>{' '}
-            produk
+            Produk
           </p>
         </div>
 
@@ -74,7 +74,7 @@ export function CatalogProductToolbar({
                   className={cn(
                     'h-7 gap-1.5 rounded-lg px-3 text-xs font-semibold transition-all duration-200 active:scale-95',
                     isActive
-                      ? 'bg-[#2f5f49] text-[#edf3eb] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#edf3eb]'
+                      ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf3eb] shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)] hover:text-[#edf3eb]'
                       : 'text-[#5d6f62] hover:bg-[#e3dccd] hover:text-[#3f5b4c]',
                   )}
                   onClick={() => onSortChange(option.value)}

@@ -25,7 +25,7 @@ export interface ProductInventoryItem {
   island: string;
   province: string;
   clothingType: string;
-  gender: Gender;
+  gender: Gender | null;
   status: ProductStatus;
   sold: number;
   variants: ProductVariantItem[];
@@ -51,6 +51,7 @@ export interface ProductCatalogFilters {
   gender?: Gender;
   status?: ProductStatus;
   inStock?: boolean;
+  excludeOutOfStock?: boolean;
   sortBy?: ProductCatalogSortBy;
   topic?: string;
 }

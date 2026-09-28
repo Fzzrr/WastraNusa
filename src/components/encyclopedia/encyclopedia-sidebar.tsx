@@ -2,10 +2,18 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import type { IslandFilter } from '@/types/encyclopedia';
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Filter,
+  MapPin,
+  RotateCcw,
+  Tags,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 const MAX_VISIBLE_ISLANDS = 9;
+const MAX_VISIBLE_TOPICS = 8;
 
 interface EncyclopediaSidebarProps {
   islands: IslandFilter[];
@@ -27,6 +35,7 @@ export function EncyclopediaSidebar({
   onResetFilters,
 }: EncyclopediaSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isTopicsExpanded, setIsTopicsExpanded] = useState(false);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const activeFilterCount = (selectedIsland ? 1 : 0) + (selectedTopic ? 1 : 0);
@@ -46,6 +55,20 @@ export function EncyclopediaSidebar({
   const visibleIslands = shouldShowAllIslands
     ? islands
     : islands.slice(0, MAX_VISIBLE_ISLANDS);
+
+  const hasMoreTopics = topics.length > MAX_VISIBLE_TOPICS;
+  const activeTopicIsHidden = useMemo(() => {
+    if (!selectedTopic) {
+      return false;
+    }
+
+    return topics.slice(MAX_VISIBLE_TOPICS).includes(selectedTopic);
+  }, [topics, selectedTopic]);
+
+  const shouldShowAllTopics = isTopicsExpanded || activeTopicIsHidden;
+  const visibleTopics = shouldShowAllTopics
+    ? topics
+    : topics.slice(0, MAX_VISIBLE_TOPICS);
 
   return (
     <aside>
@@ -96,88 +119,120 @@ export function EncyclopediaSidebar({
         <div className="overflow-hidden">
           <div className="space-y-3 pt-3 xl:pt-0">
             {/* Region Filters */}
-            <Card className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-[#587061]">
-                <Filter className="h-4 w-4" />
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <MapPin className="size-3.5" />
+                </span>
                 Filter Pulau
-              </h2>
-              <ul className="space-y-1.5">
-                {visibleIslands.map((island) => (
-                  <li key={island.name}>
-                    <Button
-                      variant="ghost"
-                      className={`flex h-auto w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 ${
-                        island.active
-                          ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                          : 'text-[#4c6457] hover:translate-x-0.5 hover:bg-[#ece5d8] active:scale-[0.98]'
-                      }`}
-                      onClick={() => onIslandClick?.(island.name)}
-                    >
-                      <span>{island.name}</span>
-                      <Badge
-                        variant="secondary"
-                        className={`rounded-full px-2 py-0.5 text-xs font-normal ${
+              </div>
+              <div>
+                <ul className="space-y-1.5">
+                  {visibleIslands.map((island) => (
+                    <li key={island.name}>
+                      <Button
+                        variant="ghost"
+                        className={`relative flex h-auto w-full cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
                           island.active
-                            ? 'bg-white/20 text-[#f4f7f1]'
-                            : 'bg-[#e5decf] text-[#839386]'
+                            ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#eef3ea] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] hover:text-[#eef3ea] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                            : 'text-[#4c6457] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]'
                         }`}
+                        onClick={() => onIslandClick?.(island.name)}
                       >
-                        {island.count}
-                      </Badge>
-                    </Button>
-                  </li>
-                ))}
-              </ul>
+                        <span>{island.name}</span>
+                        <Badge
+                          variant="secondary"
+                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                            island.active
+                              ? 'bg-white/20 text-[#f4f7f1]'
+                              : 'bg-[#efe8dd] text-[#839386]'
+                          }`}
+                        >
+                          {island.count}
+                        </Badge>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
 
-              {hasMoreIslands ? (
-                <Button
-                  variant="ghost"
-                  className="mt-2 h-auto w-full justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62] transition hover:bg-[#ece5d8] hover:text-[#5d6f62] aria-expanded:bg-transparent aria-expanded:text-[#5d6f62] aria-expanded:hover:bg-[#ece5d8] aria-expanded:hover:text-[#5d6f62]"
-                  onClick={() => setIsExpanded((value) => !value)}
-                  aria-expanded={shouldShowAllIslands}
-                >
-                  <span>
-                    {shouldShowAllIslands
-                      ? 'Sembunyikan lainnya'
-                      : 'Tampilkan lainnya'}
-                  </span>
-                  {shouldShowAllIslands ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              ) : null}
+                {hasMoreIslands ? (
+                  <Button
+                    variant="ghost"
+                    className="mt-2 h-auto w-full cursor-pointer justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllIslands}
+                  >
+                    <span>
+                      {shouldShowAllIslands
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllIslands ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : null}
+              </div>
             </Card>
 
             {/* Topics */}
-            <Card className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-              <h2 className="mb-3 text-sm font-bold text-[#587061]">Topik</h2>
-              <div className="flex flex-wrap gap-2">
-                {topics.map((topic) => (
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <Tags className="size-3.5" />
+                </span>
+                Topik
+              </div>
+              <div>
+                <div className="flex flex-wrap gap-2">
+                  {visibleTopics.map((topic) => (
+                    <Button
+                      key={topic}
+                      variant="outline"
+                      size="sm"
+                      className={`h-auto cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                        selectedTopic === topic
+                          ? 'border-[#2f5f49] bg-[#2f5f49] text-[#eef3ea] shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)] hover:bg-[#2f5f49] hover:text-[#eef3ea]'
+                          : 'border-[#e6d6b8] bg-[#fbf8f2] text-[#6f6a62] hover:-translate-y-px hover:border-[#caa86a] hover:bg-[#f5ead3] hover:text-[#7a5a2c]'
+                      }`}
+                      onClick={() => onTopicClick?.(topic)}
+                    >
+                      {topic}
+                    </Button>
+                  ))}
+                </div>
+
+                {hasMoreTopics ? (
                   <Button
-                    key={topic}
-                    variant="outline"
-                    size="sm"
-                    className={`h-auto rounded-md border-[#d8cfbf] px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95 ${
-                      selectedTopic === topic
-                        ? 'bg-[#2f5f49] text-[#eef3ea] shadow-sm hover:bg-[#2f5f49]/90 hover:text-[#eef3ea]'
-                        : 'bg-[#efeadf] text-[#5d6f62] hover:border-[#bfae8e] hover:bg-[#e4decf]'
-                    }`}
-                    onClick={() => onTopicClick?.(topic)}
+                    variant="ghost"
+                    className="mt-2 h-auto w-full cursor-pointer justify-between rounded-md px-3 py-2 text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsTopicsExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllTopics}
                   >
-                    {topic}
+                    <span>
+                      {shouldShowAllTopics
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllTopics ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
                   </Button>
-                ))}
+                ) : null}
               </div>
             </Card>
 
             {/* Reset Button */}
             <Button
               variant="outline"
-              className="w-full rounded-xl border-[#d4cbbc] bg-[#f7f3ea] px-4 py-2 text-sm font-bold text-[#5d6f62] transition-all duration-200 hover:border-[#c0b39a] hover:bg-[#eee8db] hover:shadow-sm active:scale-[0.99]"
+              className="group/reset w-full cursor-pointer gap-2 rounded-xl border-[#e3d9c7] bg-[#fbf8f2] px-4 py-2 text-sm font-bold text-[#5d6f62] transition-all hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] hover:text-[#2f5f49]"
               onClick={onResetFilters}
             >
+              <RotateCcw className="size-4 transition-transform duration-500 group-hover/reset:-rotate-180" />
               Reset Semua Filter
             </Button>
           </div>

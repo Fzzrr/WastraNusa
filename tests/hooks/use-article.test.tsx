@@ -418,7 +418,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
 
   it('should expose error state when the API returns fail', async () => {
     vi.spyOn(global, 'fetch').mockResolvedValue(
-      createFailResponse({ message: 'Article not found' }, 404) as never,
+      createFailResponse({ message: 'Artikel tidak ditemukan' }, 404) as never,
     );
 
     const { result } = renderHook(() => useArticleDetail('missing'), {
@@ -426,7 +426,7 @@ describe('use-article hooks', { tags: ['frontend'] }, () => {
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error?.message).toBe('Article not found');
+    expect(result.current.error?.message).toBe('Artikel tidak ditemukan');
   });
 
   it('should update the detail cache when toggling like succeeds', async () => {

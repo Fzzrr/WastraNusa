@@ -1,16 +1,32 @@
 'use client';
 
+import { CheckoutHeader } from '@/components/checkout/checkout-stepper';
+import {
+  ProfileEmptyState,
+  profileOutlineButtonClassName,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import { useCheckout } from '@/hooks/use-checkout';
 import {
   getCheckoutSession,
   subscribeToCheckoutSession,
 } from '@/lib/checkout-session';
+import { cn } from '@/lib/utils';
 import type {
   CheckoutSessionData,
   CheckoutShippingSelection,
 } from '@/types/checkout';
-import { ChevronLeft, CreditCard, Loader2 } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowRight,
+  ChevronLeft,
+  CreditCard,
+  Loader2,
+  Lock,
+  ShieldCheck,
+  ShoppingCart,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useMemo, useState, useSyncExternalStore } from 'react';
 
@@ -95,60 +111,84 @@ export function PaymentMain() {
 
   return (
     <>
+      <CheckoutHeader
+        step={3}
+        title="Pembayaran"
+        description="Periksa kembali pesanan sebelum membayar"
+      />
+
       {items.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
-          <p className="text-lg font-bold text-[#3d5446]">
-            Belum ada data checkout
-          </p>
-          <p className="text-[#8e8476] mt-2">
-            Kembali ke keranjang dan pilih produk terlebih dahulu.
-          </p>
-          <Link href="/cart" className="inline-block mt-6">
-            <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
-              Kembali ke Keranjang
+        <ProfileEmptyState
+          icon={ShoppingCart}
+          title="Belum ada data checkout"
+          description="Kembali ke keranjang dan pilih produk terlebih dahulu."
+          action={
+            <Button
+              asChild
+              className={cn(profilePrimaryButtonClassName, 'h-10 px-5')}
+            >
+              <Link href="/cart">Kembali ke Keranjang</Link>
             </Button>
-          </Link>
-        </div>
+          }
+        />
       ) : (
-        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-8 space-y-6">
+        <div className="items-start gap-6 lg:grid lg:grid-cols-12">
+          <div className="space-y-6 lg:col-span-8">
             <ReviewItems items={items} shipping={shipping} address={address} />
 
             {errorMessage && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              <div className="flex animate-in items-start gap-3 rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] p-4 text-sm text-[#9a3b2d] fade-in">
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
                 {errorMessage}
               </div>
             )}
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <Link href="/cart/checkout">
-                <Button
-                  variant="outline"
-                  className="w-full sm:w-auto text-[#3d5446] border-[#d8cfbf] font-bold gap-2 hover:bg-[#f4efe6] px-6 py-6 rounded-xl"
-                >
-                  <ChevronLeft size={18} /> Kembali
-                </Button>
-              </Link>
+            <div className="flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
+              <Button
+                asChild
+                variant="outline"
+                className={cn(
+                  profileOutlineButtonClassName,
+                  'h-11 w-full px-5 font-bold sm:w-auto',
+                )}
+              >
+                <Link href="/cart/checkout">
+                  <ChevronLeft className="size-4" /> Kembali
+                </Link>
+              </Button>
 
               <Button
                 onClick={handleConfirmAndPay}
                 disabled={isProcessing}
-                className="w-full sm:w-auto bg-[#cc6644] hover:bg-[#b3593b] text-white px-8 py-6 rounded-xl font-bold shadow-lg shadow-[#cc6644]/20 transition-all active:scale-95 gap-2"
+                className="group/pay h-12 w-full cursor-pointer gap-2 rounded-xl bg-gradient-to-r from-[#cc6644] to-[#d98b52] px-8 text-base font-bold text-white shadow-[0_12px_24px_-12px_rgba(204,102,68,0.9)] transition-all hover:-translate-y-px hover:from-[#b3593b] hover:to-[#c97a45] active:scale-95 disabled:opacity-70 sm:w-auto"
               >
                 {isProcessing ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" /> Memproses...
+                    <Loader2 className="size-4 animate-spin" /> Memproses...
                   </>
                 ) : (
                   <>
-                    <CreditCard size={18} /> Konfirmasi & Bayar Sekarang
+                    <CreditCard className="size-4" /> Konfirmasi & Bayar
+                    Sekarang
+                    <ArrowRight className="size-4 transition-transform group-hover/pay:translate-x-1" />
                   </>
                 )}
               </Button>
             </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#9a8f80]">
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="size-3.5 text-[#2f5f49]" />
+                Pembayaran aman & terenkripsi
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Lock className="size-3.5 text-[#2f5f49]" />
+                Diproses oleh Midtrans
+              </span>
+            </div>
           </div>
 
-          <aside className="lg:col-span-4">
+          <aside className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">
             <CheckoutSummary totals={totals} items={items} />
           </aside>
         </div>

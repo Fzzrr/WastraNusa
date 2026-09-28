@@ -1,6 +1,7 @@
 import { ProductStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
+import { mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
 import {
@@ -55,7 +56,7 @@ const mapProduct = (product: {
   island?: string | null;
   province: string;
   clothingType: string;
-  gender: 'male' | 'female';
+  gender: 'male' | 'female' | 'unisex' | null;
   status: ProductStatus;
   sold: number;
   variants: {
@@ -142,6 +143,10 @@ const normalizeFilters = (
     gender: filters.gender,
     status: filters.status,
     inStock: typeof filters.inStock === 'boolean' ? filters.inStock : undefined,
+    excludeOutOfStock:
+      typeof filters.excludeOutOfStock === 'boolean'
+        ? filters.excludeOutOfStock
+        : undefined,
     sortBy: PRODUCT_SORT_OPTIONS.includes(filters.sortBy ?? 'newest')
       ? (filters.sortBy ?? 'newest')
       : 'newest',
@@ -264,10 +269,14 @@ export const productService = {
     );
 
     const genders = mapFilterOptions(
-      genderCounts.map((item) => ({
-        name: item.gender,
-        count: item._count.gender,
-      })),
+      genderCounts
+        .filter((item): item is typeof item & { gender: string } =>
+          Boolean(item.gender),
+        )
+        .map((item) => ({
+          name: item.gender,
+          count: item._count.gender,
+        })),
       normalizedFilters.gender,
     );
 
@@ -314,12 +323,17 @@ export const productService = {
   getProductDetail: async (idOrSlug: string): Promise<ProductInventoryItem> => {
     const product = await productRepository.findByIdOrSlug(idOrSlug);
     if (!product) {
-      throw new ApiError('Product not found', 404);
+      throw new ApiError('Produk tidak ditemukan', 404);
     }
 
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-wide product dashboard. Superseded by the seller-scoped
+   * dashboard (`sellerDashboardService`). Kept functional for backward
+   * compatibility; the admin product-inventory UI has been retired.
+   */
   getDashboardOverview: async (): Promise<ProductDashboardData> => {
     const LOW_STOCK_THRESHOLD = 20;
     const [totalProducts, lowStockItems] = await Promise.all([
@@ -358,6 +372,11 @@ export const productService = {
     };
   },
 
+  /**
+   * @deprecated Admin-owned product creation. Superseded by
+   * `sellerProductService.createProduct`, which scopes ownership to the
+   * authenticated seller. Kept functional for backward compatibility.
+   */
   createProduct: async (
     data: CreateProductInput,
   ): Promise<ProductInventoryItem> => {
@@ -387,8 +406,8 @@ export const productService = {
       island,
       province,
       clothingType: data.clothingType,
-      gender: data.gender,
-      status: data.status ?? ProductStatus.active,
+      gender: data.gender ?? null,
+      status: ProductStatus.active,
       variants: data.variants?.length
         ? { create: normalizeVariantsForCreate(data.variants) }
         : undefined,
@@ -398,13 +417,18 @@ export const productService = {
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-owned product update. Superseded by
+   * `sellerProductService.updateProduct`, which enforces seller ownership.
+   * Kept functional for backward compatibility.
+   */
   updateProduct: async (
     idOrSlug: string,
     data: UpdateProductInput,
   ): Promise<ProductInventoryItem> => {
     const existing = await productRepository.findByIdOrSlug(idOrSlug);
     if (!existing) {
-      throw new ApiError('Product not found', 404);
+      throw new ApiError('Produk tidak ditemukan', 404);
     }
 
     const nextArticle =
@@ -439,7 +463,6 @@ export const productService = {
       province: nextProvince,
       clothingType: data.clothingType,
       gender: data.gender,
-      status: data.status,
       variants: data.variants
         ? normalizeVariantsForUpdate(data.variants)
         : undefined,
@@ -449,9 +472,23 @@ export const productService = {
     return mapProduct(product);
   },
 
+  /**
+   * @deprecated Admin-owned product deletion. Superseded by
+   * `sellerProductService.deleteProduct`, which enforces seller ownership.
+   * Kept functional for backward compatibility.
+   */
   deleteProduct: async (idOrSlug: string) => {
     const product = await productRepository.delete(idOrSlug);
     logger.info('Product deleted successfully', { productId: product.id });
     return product;
+  },
+
+  /** Clothing types used anywhere — every seller's products and articles. */
+  getClothingTypes: async (): Promise<string[]> => {
+    const [productTypes, articleOptions] = await Promise.all([
+      productRepository.getDistinctClothingTypes(),
+      articleRepository.getFieldOptions(),
+    ]);
+    return mergeUniqueSorted(productTypes, articleOptions.clothingTypes);
   },
 };

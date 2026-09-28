@@ -1,4 +1,4 @@
-import { Gender, ProductStatus, VariantType } from '@/generated/prisma/enums';
+import { Gender, VariantType } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
 const decimalNumberSchema = z.number().min(0, 'Nilai tidak boleh negatif');
@@ -39,8 +39,7 @@ const productPayloadSchema = z.object({
     .int()
     .min(1, 'Berat produk wajib diisi dalam gram dan minimal 1'),
   clothingType: z.string().min(1, 'Jenis pakaian wajib diisi'),
-  gender: z.nativeEnum(Gender),
-  status: z.nativeEnum(ProductStatus).optional(),
+  gender: z.nativeEnum(Gender).nullish(),
   imageURL: z.url('Format URL tidak valid').nullish(),
   variants: requiredVariantsSchema,
 });

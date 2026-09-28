@@ -46,7 +46,7 @@ describe('withApiAuth', { tags: ['backend'] }, () => {
 
   it('should return 401 when user is not authenticated', async () => {
     mockAuth.requireUser.mockRejectedValue(
-      new ApiError('Unauthorized access attempt detected', 401),
+      new ApiError('Silakan login terlebih dahulu', 401),
     );
 
     const handler = vi.fn();
@@ -56,7 +56,7 @@ describe('withApiAuth', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(401);
     expect(body.status).toBe('fail');
-    expect(body.data.message).toBe('Unauthorized access attempt detected');
+    expect(body.data.message).toBe('Silakan login terlebih dahulu');
     expect(handler).not.toHaveBeenCalled();
   });
 });
@@ -80,7 +80,7 @@ describe('withApiAdmin', { tags: ['backend'] }, () => {
 
   it('should return 403 when user is not admin', async () => {
     mockAuth.requireAdmin.mockRejectedValue(
-      new ApiError('Admin privileges required', 403),
+      new ApiError('Akses khusus admin', 403),
     );
 
     const handler = vi.fn();
@@ -90,13 +90,13 @@ describe('withApiAdmin', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(403);
     expect(body.status).toBe('fail');
-    expect(body.data.message).toBe('Admin privileges required');
+    expect(body.data.message).toBe('Akses khusus admin');
     expect(handler).not.toHaveBeenCalled();
   });
 
   it('should return 401 when user is not authenticated at all', async () => {
     mockAuth.requireAdmin.mockRejectedValue(
-      new ApiError('Unauthorized access attempt detected', 401),
+      new ApiError('Silakan login terlebih dahulu', 401),
     );
 
     const handler = vi.fn();
@@ -177,7 +177,7 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(500);
     expect(body.status).toBe('error');
-    expect(body.message).toBe('Internal Server Error');
+    expect(body.message).toBe('Terjadi kesalahan pada server');
   });
 
   it('should return 400 with field errors on ZodError', async () => {
@@ -243,7 +243,7 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
 
       expect(res.status).toBe(400);
       expect(body.status).toBe('fail');
-      expect(body.data.message).toBe('Resource already exists');
+      expect(body.data.message).toBe('Data sudah ada');
     });
 
     it('should return 404 on P2025 (Record not found)', async () => {
@@ -264,7 +264,7 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
 
       expect(res.status).toBe(404);
       expect(body.status).toBe('fail');
-      expect(body.data.message).toBe('Resource not found');
+      expect(body.data.message).toBe('Data tidak ditemukan');
     });
   });
 });

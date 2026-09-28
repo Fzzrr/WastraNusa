@@ -27,7 +27,7 @@ export function CatalogDetailBreadcrumb({
         <BreadcrumbSeparator />
         <BreadcrumbItem>
           <BreadcrumbLink href="/catalog" className="hover:text-[#2f5b49]">
-            Catalog
+            Katalog
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />

@@ -18,6 +18,7 @@ datasource db {
 enum Gender {
   male
   female
+  unisex
 }
 
 enum ArticleStatus {
@@ -60,6 +61,12 @@ enum PaymentTransactionStatus {
   expired
 }
 
+enum SellerApplicationStatus {
+  pending
+  approved
+  rejected
+}
+
 // --------------- Table -----------------
 
 model User {
@@ -79,6 +86,12 @@ model User {
   orders            Order[]
   userArticleLikes  UserArticleLike[]
   cart              Cart?
+
+  // Seller feature
+  sellerApplication    SellerApplication?  @relation("SellerApplicant")
+  reviewedApplications SellerApplication[] @relation("ApplicationReviewer")
+  products             Product[]           @relation("ProductSeller")
+  sellerOrders         Order[]             @relation("OrderSeller")
 
   role       String?
   banned     Boolean?  @default(false)
@@ -189,6 +202,7 @@ model Article {
 model Product {
   id          String  @id
   articleId   String
+  sellerId    String?
   name        String
   slug        String  @unique
   description String?
@@ -201,7 +215,7 @@ model Product {
   island       String
   province     String
   clothingType String
-  gender       Gender
+  gender       Gender?
 
   status ProductStatus @default(active)
   sold   Int           @default(0)
@@ -213,6 +227,7 @@ model Product {
 
   // Relations
   article   Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  seller    User?            @relation("ProductSeller", fields: [sellerId], references: [id], onDelete: SetNull)
   variants  ProductVariant[]
   orders    Order[]
   cartItems CartItem[]
@@ -221,6 +236,7 @@ model Product {
   @@index([province])
   @@index([clothingType])
   @@index([gender])
+  @@index([sellerId])
   @@map("product")
 }
 
@@ -284,6 +300,7 @@ model Order {
 
   productId    String
   variantId    String?
+  sellerId     String?
   productName  String
   variantName  String?
   quantity     Int
@@ -316,11 +333,13 @@ model Order {
   user                User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   product             Product              @relation(fields: [productId], references: [id], onDelete: Restrict)
   variant             ProductVariant?      @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  seller              User?                @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: SetNull)
   shippingAddress     CustomerAddress      @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
   paymentTransactions PaymentTransaction[]
 
   @@index([userId])
   @@index([productId])
+  @@index([sellerId])
   @@index([orderStatus])
   @@index([paymentStatus])
   @@map("order")
@@ -420,4 +439,28 @@ model ArticleSection {
 
   @@index([articleId])
   @@map("article_section")
+}
+
+model SellerApplication {
+  id String @id
+
+  userId String @unique
+  user   User   @relation("SellerApplicant", fields: [userId], references: [id], onDelete: Cascade)
+
+  shopName    String
+  description String?
+  phoneNumber String?
+
+  status          SellerApplicationStatus @default(pending)
+  rejectionReason String?
+
+  reviewedById String?
+  reviewer     User?     @relation("ApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("seller_application")
 }

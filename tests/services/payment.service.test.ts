@@ -84,7 +84,7 @@ describe('paymentService', () => {
 
       await expect(
         paymentService.checkout(mockInput, mockUserId),
-      ).rejects.toThrow(new ApiError('Product not found: prod-1', 404));
+      ).rejects.toThrow(new ApiError('Produk tidak ditemukan: prod-1', 404));
     });
 
     it('should throw error if insufficient product stock', async () => {
@@ -138,7 +138,7 @@ describe('paymentService', () => {
       await expect(
         paymentService.checkout(mockInput, mockUserId),
       ).rejects.toThrow(
-        new ApiError('Variant does not belong to this product', 400),
+        new ApiError('Varian tidak sesuai dengan produk ini', 400),
       );
     });
 
@@ -191,7 +191,7 @@ describe('paymentService', () => {
 
       await expect(
         paymentService.checkout(mockInput, mockUserId),
-      ).rejects.toThrow(new ApiError('Variant not found', 404));
+      ).rejects.toThrow(new ApiError('Varian tidak ditemukan', 404));
     });
 
     it('should use default address when shippingAddressId is not provided', async () => {
@@ -301,7 +301,7 @@ describe('paymentService', () => {
 
       await expect(
         paymentService.handleNotification(mockPayload),
-      ).rejects.toThrow(new ApiError('Invalid signature key', 403));
+      ).rejects.toThrow(new ApiError('Signature key tidak valid', 403));
     });
 
     it('should handle fraud detection', async () => {

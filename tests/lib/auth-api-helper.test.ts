@@ -55,7 +55,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
       mockedGetSessionUser.mockResolvedValue(null);
 
       await expect(AuthHelper.requireUser()).rejects.toThrow(
-        new ApiError('Unauthorized access attempt detected', 401),
+        new ApiError('Silakan login terlebih dahulu', 401),
       );
     });
   });
@@ -80,7 +80,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
       } as never);
 
       await expect(AuthHelper.requireAdmin()).rejects.toThrow(
-        new ApiError('Admin privileges required', 403),
+        new ApiError('Akses khusus admin', 403),
       );
     });
 
@@ -88,7 +88,7 @@ describe('AuthHelper', { tags: ['backend'] }, () => {
       mockedGetSessionUser.mockResolvedValue(null);
 
       await expect(AuthHelper.requireAdmin()).rejects.toThrow(
-        new ApiError('Unauthorized access attempt detected', 401),
+        new ApiError('Silakan login terlebih dahulu', 401),
       );
     });
   });

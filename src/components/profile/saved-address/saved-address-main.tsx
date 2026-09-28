@@ -1,7 +1,13 @@
 'use client';
 
+import {
+  ProfileSection,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import { type CustomerAddress, useAddresses } from '@/hooks/use-address';
+import { cn } from '@/lib/utils';
+import { MapPin, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import AddUpdateAddressModal from './add-update-address-modal';
@@ -31,28 +37,36 @@ export function SavedAddressMain() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-[#e8e2d5] bg-[#fdfaf5] shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-[#e8e2d5] px-6 py-5">
-          <h2 className="m-0 text-[18px] font-bold text-[#5c7365]">
-            Alamat Tersimpan{' '}
-            {!isLoading && addresses.length > 0 && `(${addresses.length})`}
-          </h2>
+      <ProfileSection
+        icon={MapPin}
+        title={
+          <span className="flex items-center gap-2">
+            Alamat Tersimpan
+            {!isLoading && addresses.length > 0 ? (
+              <span className="rounded-full bg-[#e3ece5] px-2 py-0.5 text-xs font-semibold text-[#2f5f49]">
+                {addresses.length}
+              </span>
+            ) : null}
+          </span>
+        }
+        description="Alamat utama dipakai otomatis saat checkout"
+        aside={
           <Button
-            className="rounded-full bg-[#3c5043] px-4 hover:bg-[#2d3d32]"
+            className={cn(profilePrimaryButtonClassName, 'h-9 px-4')}
             onClick={handleAddNew}
           >
-            + Tambah Alamat
+            <Plus className="size-4" />
+            Tambah Alamat
           </Button>
-        </div>
-
-        <div className="p-6">
-          <SavedAddressList
-            addresses={addresses}
-            isLoading={isLoading}
-            onEdit={handleEdit}
-          />
-        </div>
-      </div>
+        }
+      >
+        <SavedAddressList
+          addresses={addresses}
+          isLoading={isLoading}
+          onEdit={handleEdit}
+          onAddNew={handleAddNew}
+        />
+      </ProfileSection>
 
       <AddUpdateAddressModal
         key={editingAddress?.id ?? 'new'}

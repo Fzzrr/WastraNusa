@@ -48,6 +48,9 @@ export const GET = withApiPublic(async ({ req }) => {
   const inStock =
     rawInStock === 'true' ? true : rawInStock === 'false' ? false : undefined;
 
+  const includeOutOfStock =
+    url.searchParams.get('includeOutOfStock') === 'true';
+
   const rawSortBy = url.searchParams.get('sortBy');
   const sortBy =
     rawSortBy &&
@@ -65,11 +68,17 @@ export const GET = withApiPublic(async ({ req }) => {
     gender,
     status,
     inStock,
+    excludeOutOfStock: !includeOutOfStock,
     sortBy,
   });
   return jsend.success(products);
 });
 
+/**
+ * @deprecated Admin product creation endpoint. Superseded by
+ * `/api/seller/products`, which scopes ownership to the authenticated seller.
+ * Kept functional for backward compatibility. (The public GET above stays.)
+ */
 export const POST = withApiAdmin(async ({ req }) => {
   const body = await req.json();
   const data = createProductSchema.parse(body);

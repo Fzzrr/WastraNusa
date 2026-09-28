@@ -1,13 +1,19 @@
 import { EncyclopediaPagination as Pagination } from '@/components/encyclopedia/encyclopedia-pagination';
+import {
+  ProfileEmptyState,
+  profileOutlineButtonClassName,
+} from '@/components/profile/profile-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { OrderItem, useCancelOrder, useOrders } from '@/hooks/use-order';
-import { Eye, Hexagon, XCircle } from 'lucide-react';
+import { useCancelOrder, useOrders } from '@/hooks/use-order';
+import { cn } from '@/lib/utils';
+import { CalendarDays, Eye, Hexagon, ShoppingBag, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
 import type { OrderStatus } from './my-order-main';
+import { OrderStatusBadge } from './order-status';
 import { PaymentDeadlineBadge } from './payment-deadline-badge';
 
 interface MyOrderListProps {
@@ -27,22 +33,23 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse flex flex-col gap-3.5">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <div className="h-5 w-20 bg-[#ece7dd] rounded"></div>
-                <div className="h-5 w-32 bg-[#ece7dd] rounded"></div>
+          <div
+            key={i}
+            className="animate-pulse overflow-hidden rounded-2xl ring-1 ring-[#efe8dd]"
+          >
+            <div className="flex justify-between bg-[#faf7f2] px-4 py-3">
+              <div className="h-6 w-40 rounded-full bg-[#efe8dd]" />
+              <div className="h-5 w-24 rounded bg-[#efe8dd]" />
+            </div>
+            <div className="flex gap-4 p-4">
+              <div className="size-16 rounded-xl bg-[#efe8dd]" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-1/2 rounded bg-[#efe8dd]" />
+                <div className="h-3 w-1/3 rounded bg-[#f4efe5]" />
               </div>
-              <div className="h-5 w-24 bg-[#ece7dd] rounded"></div>
             </div>
-            <div className="h-[94px] bg-[#fbf8f2] border border-[#ece7dd] rounded-xl"></div>
-            <div className="flex justify-between mt-1">
-              <div className="h-5 w-32 bg-[#ece7dd] rounded"></div>
-              <div className="h-8 w-24 bg-[#ece7dd] rounded"></div>
-            </div>
-            <div className="h-px w-full bg-[#ece7dd] mt-2 mb-1" />
           </div>
         ))}
       </div>
@@ -51,15 +58,12 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
 
   if (isError) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-[#d8cfbf] bg-[#fbf8f2]/50 text-[#726759]">
-        <div className="mb-3 rounded-full bg-[#fdf6f2] p-4 text-[#c4826b]">
-          <XCircle className="h-8 w-8" />
-        </div>
-        <p className="text-sm font-medium">Gagal memuat pesanan.</p>
-        <p className="mt-1 text-xs text-[#a29582]">
-          Terjadi kesalahan saat mengambil data pesanan.
-        </p>
-      </div>
+      <ProfileEmptyState
+        icon={XCircle}
+        tone="error"
+        title="Gagal memuat pesanan"
+        description="Terjadi kesalahan saat mengambil data pesanan."
+      />
     );
   }
 
@@ -72,154 +76,156 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
 
   if (filteredOrders.length === 0) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-[#d8cfbf] bg-[#fbf8f2]/50 text-[#726759]">
-        <div className="mb-3 rounded-full bg-[#efe8db] p-4 text-[#ccbda4]">
-          <Hexagon className="h-8 w-8" />
-        </div>
-        <p className="text-sm font-medium">Belum ada pesanan.</p>
-        <p className="mt-1 text-xs text-[#a29582]">
-          Pesananmu yang sesuai filter ini akan muncul di sini.
-        </p>
-      </div>
+      <ProfileEmptyState
+        icon={ShoppingBag}
+        title={
+          activeTab === 'Semua'
+            ? 'Belum ada pesanan'
+            : `Tidak ada pesanan "${activeTab}"`
+        }
+        description="Pesanan Anda yang sesuai filter ini akan muncul di sini."
+        action={
+          <Button
+            asChild
+            variant="outline"
+            className={cn(profileOutlineButtonClassName, 'h-9')}
+          >
+            <Link href="/catalog">
+              <ShoppingBag className="size-3.5" />
+              Mulai Belanja
+            </Link>
+          </Button>
+        }
+      />
     );
   }
 
-  const getStatusBadgeColor = (status: OrderItem['status']) => {
-    switch (status) {
-      case 'Diterima':
-        return 'bg-[#eef3ef] text-[#5c7365]';
-      case 'Dikirim':
-        return 'bg-[#f4efe6] text-[#8b7e6a]';
-      case 'Dibatalkan':
-        return 'bg-[#fdf6f2] text-[#c4826b]';
-      default:
-        return 'bg-[#f4efe6] text-[#8b7e6a]';
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-6">
-      {filteredOrders.map((order) => (
-        <div key={order.id} className="flex flex-col gap-3.5">
-          <div className="flex items-center justify-between">
-            <Badge
-              variant="secondary"
-              className={`rounded border-none px-2.5 py-0.5 text-[11px] font-semibold hover:bg-opacity-80 ${getStatusBadgeColor(
-                order.status,
-              )} hover:${getStatusBadgeColor(order.status).split(' ')[0]}`}
-            >
-              {order.status}
-            </Badge>
-            <div className="text-[14px] font-bold text-[#4d6356]">
-              {order.totalPrice}
+    <div className="flex flex-col gap-4">
+      {filteredOrders.map((order, orderIndex) => (
+        <article
+          key={order.id}
+          className="animate-in overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe8dd] transition-shadow duration-300 fill-mode-both fade-in slide-in-from-bottom-1 hover:shadow-[0_16px_32px_-22px_rgba(89,69,38,0.45)]"
+          style={{ animationDelay: `${orderIndex * 60}ms` }}
+        >
+          <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[#efe8dd] bg-[#faf7f2] px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <OrderStatusBadge status={order.status} />
+              <span className="font-mono text-xs font-semibold text-[#6f6a62]">
+                {order.id}
+              </span>
             </div>
-          </div>
+            <span className="inline-flex items-center gap-1.5 text-xs text-[#9a8f80]">
+              <CalendarDays className="size-3.5" />
+              {order.date}
+            </span>
+          </header>
 
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col divide-y divide-[#f4efe5]">
             {order.products.map((product, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between gap-4 rounded-xl border border-[#ece7dd] bg-[#fbf8f2] p-4 transition-colors hover:border-[#dfd7ca]"
-              >
-                <div className="flex items-center gap-4 min-w-0 flex-1">
-                  <div className="relative flex h-[60px] w-[60px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#efe8db] text-[#b0a591] border border-[#e8e2d5]">
-                    {product.imageURL ? (
-                      <Image
-                        src={product.imageURL}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
+              <div key={index} className="flex items-center gap-4 px-4 py-3.5">
+                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#efe8db] text-[#b0a591] ring-1 ring-[#e8e2d5]">
+                  {product.imageURL ? (
+                    <Image
+                      src={product.imageURL}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <>
+                      <Hexagon
+                        size={24}
+                        strokeWidth={1.5}
+                        className="text-[#c4b9a3]"
                       />
-                    ) : (
-                      <>
-                        <Hexagon
-                          size={24}
-                          strokeWidth={1.5}
-                          className="text-[#c4b9a3]"
-                        />
-                        <span className="mt-1 absolute bottom-1.5 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
-                          {product.category.substring(0, 4)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                    <div className="flex flex-wrap gap-1.5 mb-0.5">
-                      <Badge
-                        variant="secondary"
-                        className="rounded border-none bg-[#f4efe6] px-2 py-0 text-[10px] font-medium text-[#c4826b] hover:bg-[#f4efe6]"
-                      >
-                        {product.category}
-                      </Badge>
-                    </div>
-                    <h3 className="w-full truncate text-[15px] font-bold leading-none text-[#4d6356]">
-                      {product.name}
-                    </h3>
-                    <p className="text-[12px] leading-relaxed text-[#8f9b94] mt-0.5">
-                      {product.location}
-                    </p>
-                  </div>
+                      <span className="absolute bottom-1.5 mt-1 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
+                        {product.category.substring(0, 4)}
+                      </span>
+                    </>
+                  )}
                 </div>
 
-                <div className="shrink-0 text-right flex flex-col items-end justify-center">
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#f4efe6] text-[#5c7365] border border-[#ece7dd]">
-                    {product.quantity}
-                  </span>
+                <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full border-none bg-[#f6e4da] px-2 py-0 text-[10px] font-medium text-[#b8613f] hover:bg-[#f6e4da]"
+                  >
+                    {product.category}
+                  </Badge>
+                  <h3 className="w-full truncate text-[15px] font-bold text-[#2f4f3f]">
+                    {product.name}
+                  </h3>
+                  <p className="text-xs text-[#9a8f80]">{product.location}</p>
                 </div>
+
+                <span className="shrink-0 rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-semibold text-[#4d6356]">
+                  ×{product.quantity}
+                </span>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            {order.canCancel && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 rounded-lg border-[#d8b5a7] text-[#b56d56] hover:bg-[#fdf6f2] hover:text-[#9d5a46] text-xs font-semibold px-4"
-                disabled={cancelOrderMutation.isPending}
-                onClick={() => {
-                  cancelOrderMutation.mutate(order.id, {
-                    onSuccess: () => {
-                      toast.success('Pesanan berhasil dibatalkan.');
-                    },
-                    onError: (error) => {
-                      toast.error(error.message);
-                    },
-                  });
-                }}
-              >
-                Batalkan
-              </Button>
-            )}
-            {order.actions.includes('Detail') && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1.5 rounded-lg border-[#ece7dd] text-[#726759] text-xs font-semibold px-4"
-                asChild
-              >
-                <Link
-                  href={`/profile/my-order/${encodeURIComponent(order.id)}`}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  Detail
-                </Link>
-              </Button>
-            )}
-          </div>
-
           {order.paymentDeadlineAt && order.status === 'Menunggu Bayar' && (
-            <PaymentDeadlineBadge
-              deadlineAt={order.paymentDeadlineAt}
-              onExpire={() => {
-                void refetch();
-              }}
-            />
+            <div className="px-4 pb-1">
+              <PaymentDeadlineBadge
+                deadlineAt={order.paymentDeadlineAt}
+                onExpire={() => {
+                  void refetch();
+                }}
+              />
+            </div>
           )}
 
-          <div className="h-px w-full bg-[#ece7dd] mt-2 mb-1 last:hidden block" />
-        </div>
+          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#efe8dd] px-4 py-3">
+            <p className="text-xs text-[#9a8f80]">
+              Total Belanja
+              <span className="ml-2 text-base font-extrabold text-[#2f5f49]">
+                {order.totalPrice}
+              </span>
+            </p>
+            <div className="flex items-center gap-2">
+              {order.canCancel && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 cursor-pointer rounded-xl border-[#f0cfc7] px-4 text-xs font-semibold text-[#b04a3a] hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
+                  disabled={cancelOrderMutation.isPending}
+                  onClick={() => {
+                    cancelOrderMutation.mutate(order.id, {
+                      onSuccess: () => {
+                        toast.success('Pesanan berhasil dibatalkan.');
+                      },
+                      onError: (error) => {
+                        toast.error(error.message);
+                      },
+                    });
+                  }}
+                >
+                  Batalkan
+                </Button>
+              )}
+              {order.actions.includes('Detail') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    profileOutlineButtonClassName,
+                    'h-8 px-4 text-xs font-semibold',
+                  )}
+                  asChild
+                >
+                  <Link
+                    href={`/profile/my-order/${encodeURIComponent(order.id)}`}
+                  >
+                    <Eye className="size-3.5" />
+                    Detail
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </footer>
+        </article>
       ))}
 
       {meta && meta.totalPages > 1 && (

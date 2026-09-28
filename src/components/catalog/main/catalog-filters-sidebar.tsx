@@ -4,8 +4,21 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ProductFilterOption } from '@/types/product';
-import { ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { useState } from 'react';
+import {
+  ChevronDown,
+  ChevronUp,
+  MapPin,
+  PackageCheck,
+  RotateCcw,
+  SlidersHorizontal,
+  Tags,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import { useMemo, useState } from 'react';
+
+const MAX_VISIBLE_CATEGORIES = 8;
+const MAX_VISIBLE_ISLANDS = 8;
 
 export type PricePresetKey =
   | 'all'
@@ -27,29 +40,18 @@ const PRICE_RANGES: Array<{
   { key: 'gt-3m', label: '> Rp 3.000.000' },
 ];
 
+const GENDER_LABELS: Record<string, string> = {
+  male: 'Laki-laki',
+  female: 'Perempuan',
+  unisex: 'Unisex',
+};
+
 function capitalizeFirstLetter(value: string): string {
   if (!value) {
     return value;
   }
 
   return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function formatStatusLabel(value: string): string {
-  const statusLabels: Record<string, string> = {
-    active: 'Aktif',
-    inactive: 'Tidak Aktif',
-    out_of_stock: 'Stok Habis',
-  };
-
-  if (statusLabels[value]) {
-    return statusLabels[value];
-  }
-
-  return value
-    .split('_')
-    .map((word) => capitalizeFirstLetter(word))
-    .join(' ');
 }
 
 type CatalogFiltersSidebarProps = {
@@ -84,9 +86,7 @@ export function CatalogFiltersSidebar({
   totalProducts,
   categories,
   islands,
-  sizes,
   genders,
-  statuses,
   selectedCategory,
   selectedIsland,
   selectedSize,
@@ -98,9 +98,7 @@ export function CatalogFiltersSidebar({
   selectedPricePreset,
   onCategoryChange,
   onIslandChange,
-  onSizeChange,
   onGenderChange,
-  onStatusChange,
   onInStockOnlyChange,
   onMinPriceChange,
   onMaxPriceChange,
@@ -108,6 +106,40 @@ export function CatalogFiltersSidebar({
   onResetFilters,
 }: CatalogFiltersSidebarProps) {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const [isIslandsExpanded, setIsIslandsExpanded] = useState(false);
+
+  const hasMoreCategories = categories.length > MAX_VISIBLE_CATEGORIES;
+  const activeCategoryIsHidden = useMemo(() => {
+    if (!selectedCategory) {
+      return false;
+    }
+
+    return categories
+      .slice(MAX_VISIBLE_CATEGORIES)
+      .some((category) => category.name === selectedCategory);
+  }, [categories, selectedCategory]);
+  const shouldShowAllCategories =
+    isCategoriesExpanded || activeCategoryIsHidden;
+  const visibleCategories = shouldShowAllCategories
+    ? categories
+    : categories.slice(0, MAX_VISIBLE_CATEGORIES);
+
+  const hasMoreIslands = islands.length > MAX_VISIBLE_ISLANDS;
+  const activeIslandIsHidden = useMemo(() => {
+    if (!selectedIsland) {
+      return false;
+    }
+
+    return islands
+      .slice(MAX_VISIBLE_ISLANDS)
+      .some((island) => island.name === selectedIsland);
+  }, [islands, selectedIsland]);
+  const shouldShowAllIslands = isIslandsExpanded || activeIslandIsHidden;
+  const visibleIslands = shouldShowAllIslands
+    ? islands
+    : islands.slice(0, MAX_VISIBLE_ISLANDS);
 
   const hasPriceFilter =
     selectedPricePreset !== 'all' ||
@@ -173,186 +205,237 @@ export function CatalogFiltersSidebar({
       >
         <div className="overflow-hidden">
           <div className="flex flex-col gap-3 pt-3 xl:pt-0">
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Kategori Produk</h3>
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 text-[#3f5b4c] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <Tags className="size-3.5" />
+                </span>
+                Kategori Produk
+              </div>
               <div className="flex flex-col gap-1.5">
                 <button
                   type="button"
                   className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                     !selectedCategory
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                      : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                   )}
                   onClick={() => onCategoryChange(undefined)}
                 >
                   <span>Semua Produk</span>
                   <Badge
                     variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                      !selectedCategory
+                        ? 'bg-white/20 text-[#f4f7f1]'
+                        : 'bg-[#efe8dd] text-[#839386]'
+                    }`}
                   >
                     {totalProducts}
                   </Badge>
                 </button>
 
-                {categories.map((category) => (
+                {visibleCategories.map((category) => (
                   <button
                     key={category.name}
                     type="button"
                     className={cn(
-                      'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                       selectedCategory === category.name
-                        ? 'bg-[#2f5f49] text-[#edf4ec]'
-                        : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                        ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                        : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                     )}
                     onClick={() => onCategoryChange(category.name)}
                   >
                     <span>{category.name}</span>
                     <Badge
                       variant="secondary"
-                      className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        selectedCategory === category.name
+                          ? 'bg-white/20 text-[#f4f7f1]'
+                          : 'bg-[#efe8dd] text-[#839386]'
+                      }`}
                     >
                       {category.count}
                     </Badge>
                   </button>
                 ))}
-              </div>
-            </Card>
 
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Rentang Harga</h3>
-              <div className="flex flex-col gap-2 text-sm text-[#52685b]">
-                {PRICE_RANGES.map((item) => (
-                  <label
-                    key={item.key}
-                    className="inline-flex items-center gap-2"
-                  >
-                    <input
-                      type="radio"
-                      name="price-range"
-                      checked={selectedPricePreset === item.key}
-                      onChange={() => onPricePresetChange(item.key)}
-                    />
-                    {item.label}
-                  </label>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  value={minPriceInput}
-                  onChange={(event) => onMinPriceChange(event.target.value)}
-                  placeholder="Min"
-                  className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
-                />
-                <Input
-                  value={maxPriceInput}
-                  onChange={(event) => onMaxPriceChange(event.target.value)}
-                  placeholder="Max"
-                  className="h-8 rounded-md border-[#ddd5c6] bg-[#ece6db] text-xs"
-                />
-              </div>
-            </Card>
-
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Ukuran</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant={!selectedSize ? 'default' : 'outline'}
-                  size="xs"
-                  className={cn(
-                    'rounded-md',
-                    !selectedSize
-                      ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                      : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                  )}
-                  onClick={() => onSizeChange(undefined)}
-                >
-                  Semua Ukuran
-                </Button>
-                {sizes.map((size) => (
-                  <Button
-                    key={size.name}
+                {hasMoreCategories ? (
+                  <button
                     type="button"
-                    variant={selectedSize === size.name ? 'default' : 'outline'}
-                    size="xs"
-                    className={cn(
-                      'rounded-md',
-                      selectedSize === size.name
-                        ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                        : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                    )}
-                    onClick={() => onSizeChange(size.name)}
+                    className="mt-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsCategoriesExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllCategories}
                   >
-                    {size.name} ({size.count})
-                  </Button>
-                ))}
+                    <span>
+                      {shouldShowAllCategories
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllCategories ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                ) : null}
               </div>
             </Card>
 
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Asal Daerah</h3>
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 text-[#3f5b4c] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <Wallet className="size-3.5" />
+                </span>
+                Rentang Harga
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2 text-sm text-[#52685b]">
+                  {PRICE_RANGES.map((item) => (
+                    <label
+                      key={item.key}
+                      className={cn(
+                        'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-1.5 transition-colors',
+                        selectedPricePreset === item.key
+                          ? 'bg-[#e3ece5] font-semibold text-[#2f5f49]'
+                          : 'hover:bg-[#f4efe5]',
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="price-range"
+                        checked={selectedPricePreset === item.key}
+                        onChange={() => onPricePresetChange(item.key)}
+                        className="size-4 accent-[#2f5f49]"
+                      />
+                      {item.label}
+                    </label>
+                  ))}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    value={minPriceInput}
+                    onChange={(event) => onMinPriceChange(event.target.value)}
+                    placeholder="Min"
+                    className="h-9 rounded-xl border-[#e5ded5] bg-white text-xs transition-shadow focus-visible:border-[#2f5f49] focus-visible:ring-3 focus-visible:ring-[#2f5f49]/15"
+                  />
+                  <Input
+                    value={maxPriceInput}
+                    onChange={(event) => onMaxPriceChange(event.target.value)}
+                    placeholder="Max"
+                    className="h-9 rounded-xl border-[#e5ded5] bg-white text-xs transition-shadow focus-visible:border-[#2f5f49] focus-visible:ring-3 focus-visible:ring-[#2f5f49]/15"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 text-[#3f5b4c] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <MapPin className="size-3.5" />
+                </span>
+                Asal Daerah
+              </div>
               <div className="flex flex-col gap-1.5">
                 <button
                   type="button"
                   className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                     !selectedIsland
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                      : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                   )}
                   onClick={() => onIslandChange(undefined)}
                 >
                   <span>Semua Pulau</span>
                   <Badge
                     variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                      !selectedIsland
+                        ? 'bg-white/20 text-[#f4f7f1]'
+                        : 'bg-[#efe8dd] text-[#839386]'
+                    }`}
                   >
                     {islands.reduce((total, island) => total + island.count, 0)}
                   </Badge>
                 </button>
 
-                {islands.map((island) => (
+                {visibleIslands.map((island) => (
                   <button
                     key={island.name}
                     type="button"
                     className={cn(
-                      'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                       selectedIsland === island.name
-                        ? 'bg-[#2f5f49] text-[#edf4ec]'
-                        : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                        ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                        : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                     )}
                     onClick={() => onIslandChange(island.name)}
                   >
                     <span>{island.name}</span>
                     <Badge
                       variant="secondary"
-                      className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        selectedIsland === island.name
+                          ? 'bg-white/20 text-[#f4f7f1]'
+                          : 'bg-[#efe8dd] text-[#839386]'
+                      }`}
                     >
                       {island.count}
                     </Badge>
                   </button>
                 ))}
+
+                {hasMoreIslands ? (
+                  <button
+                    type="button"
+                    className="mt-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm font-semibold text-[#5d6f62]"
+                    onClick={() => setIsIslandsExpanded((value) => !value)}
+                    aria-expanded={shouldShowAllIslands}
+                  >
+                    <span>
+                      {shouldShowAllIslands
+                        ? 'Sembunyikan lainnya'
+                        : 'Tampilkan lainnya'}
+                    </span>
+                    {shouldShowAllIslands ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </button>
+                ) : null}
               </div>
             </Card>
 
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Gender</h3>
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 text-[#3f5b4c] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <Users className="size-3.5" />
+                </span>
+                Gender
+              </div>
               <div className="flex flex-col gap-1.5">
                 <button
                   type="button"
                   className={cn(
-                    'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                     !selectedGender
-                      ? 'bg-[#2f5f49] text-[#edf4ec]'
-                      : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                      ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                      : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                   )}
                   onClick={() => onGenderChange(undefined)}
                 >
                   <span>Semua Gender</span>
                   <Badge
                     variant="secondary"
-                    className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                    className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                      !selectedGender
+                        ? 'bg-white/20 text-[#f4f7f1]'
+                        : 'bg-[#efe8dd] text-[#839386]'
+                    }`}
                   >
                     {genders.reduce((total, gender) => total + gender.count, 0)}
                   </Badge>
@@ -363,17 +446,24 @@ export function CatalogFiltersSidebar({
                     key={gender.name}
                     type="button"
                     className={cn(
-                      'flex items-center justify-between rounded-md px-2 py-1.5 text-left text-sm transition',
+                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-xl px-3 py-2 text-left text-sm transition-all duration-200',
                       selectedGender === gender.name
-                        ? 'bg-[#2f5f49] text-[#edf4ec]'
-                        : 'text-[#4f6659] hover:bg-[#ece5d8]',
+                        ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf4ec] shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-1.5 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                        : 'text-[#4f6659] hover:translate-x-0.5 hover:bg-[#e3ece5] hover:text-[#2f5f49]',
                     )}
                     onClick={() => onGenderChange(gender.name)}
                   >
-                    <span>{capitalizeFirstLetter(gender.name)}</span>
+                    <span>
+                      {GENDER_LABELS[gender.name.toLowerCase()] ??
+                        capitalizeFirstLetter(gender.name)}
+                    </span>
                     <Badge
                       variant="secondary"
-                      className="rounded-none border-0 bg-transparent p-0 text-current shadow-none"
+                      className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                        selectedGender === gender.name
+                          ? 'bg-white/20 text-[#f4f7f1]'
+                          : 'bg-[#efe8dd] text-[#839386]'
+                      }`}
                     >
                       {gender.count}
                     </Badge>
@@ -382,50 +472,24 @@ export function CatalogFiltersSidebar({
               </div>
             </Card>
 
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Status Produk</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="xs"
-                  variant={!selectedStatus ? 'default' : 'outline'}
-                  className={cn(
-                    'rounded-md',
-                    !selectedStatus
-                      ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                      : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                  )}
-                  onClick={() => onStatusChange(undefined)}
-                >
-                  Semua Status
-                </Button>
-                {statuses.map((status) => (
-                  <Button
-                    key={status.name}
-                    type="button"
-                    size="xs"
-                    variant={
-                      selectedStatus === status.name ? 'default' : 'outline'
-                    }
-                    className={cn(
-                      'rounded-md',
-                      selectedStatus === status.name
-                        ? 'bg-[#2f5f49] text-[#edf3eb] hover:bg-[#244938]'
-                        : 'border-[#dad1c2] bg-[#f8f4eb] text-[#4f6659]',
-                    )}
-                    onClick={() => onStatusChange(status.name)}
-                  >
-                    {formatStatusLabel(status.name)} ({status.count})
-                  </Button>
-                ))}
+            <Card className="gap-3 rounded-2xl border-0 bg-[#fbf8f2] p-4 text-[#3f5b4c] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7]">
+              <div className="flex items-center gap-2 text-sm font-bold text-[#2f5b49]">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                  <PackageCheck className="size-3.5" />
+                </span>
+                Ketersediaan
               </div>
-            </Card>
-
-            <Card className="gap-3 rounded-2xl border border-[#dad1c3] bg-[#f6f2e9] p-3 text-[#3f5b4c]">
-              <h3 className="text-sm font-bold">Ketersediaan</h3>
-              <label className="inline-flex items-center gap-2 text-sm text-[#52685b]">
+              <label
+                className={cn(
+                  'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors',
+                  inStockOnly
+                    ? 'bg-[#e3ece5] font-semibold text-[#2f5f49]'
+                    : 'text-[#52685b] hover:bg-[#f4efe5]',
+                )}
+              >
                 <input
                   type="checkbox"
+                  className="size-4 accent-[#2f5f49]"
                   checked={inStockOnly}
                   onChange={(event) =>
                     onInStockOnlyChange(event.target.checked)
@@ -437,9 +501,10 @@ export function CatalogFiltersSidebar({
 
             <Button
               variant="outline"
-              className="h-8 rounded-xl border-[#dad2c4] bg-[#f7f3ea] text-xs text-[#4f6558] transition-all duration-200 hover:border-[#c0b39a] hover:bg-[#ece5d8] active:scale-[0.99]"
+              className="group/reset h-9 cursor-pointer gap-2 rounded-xl border-[#e3d9c7] bg-[#fbf8f2] text-xs font-bold text-[#4f6558] transition-all hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] hover:text-[#2f5f49]"
               onClick={onResetFilters}
             >
+              <RotateCcw className="size-3.5 transition-transform duration-500 group-hover/reset:-rotate-180" />
               Reset Semua Filter
             </Button>
           </div>

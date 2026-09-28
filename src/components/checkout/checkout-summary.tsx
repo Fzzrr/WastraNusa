@@ -1,8 +1,9 @@
 'use client';
 
+import { KawungPattern } from '@/components/wastra-hero';
 import { formatIDR } from '@/lib/utils';
 import type { CheckoutSelectedItem } from '@/types/checkout';
-import { Package } from 'lucide-react';
+import { Package, Receipt } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -27,90 +28,93 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
 
   if (!mounted) {
     return (
-      <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm animate-pulse h-[400px]">
-        <div className="flex justify-between mb-6">
-          <div className="h-4 bg-muted rounded w-1/2"></div>
-          <div className="h-4 bg-muted rounded w-1/4"></div>
-        </div>
-        <div className="space-y-4">
-          <div className="h-12 bg-muted rounded"></div>
-          <div className="h-12 bg-muted rounded"></div>
-        </div>
-      </div>
+      <div className="h-[400px] animate-pulse rounded-2xl bg-[#fffdf8] ring-1 ring-[#e8dfd0]" />
     );
   }
 
   if (!totals) return null;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e8e2d5] p-6 shadow-sm">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-bold text-[#3d5446] text-sm">Ringkasan Pesanan</h3>
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#f0ede6] text-[#5c7365]">
-          {items.length} Produk
-        </span>
+    <div className="overflow-hidden rounded-2xl bg-[#fffdf8] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.08)] ring-1 ring-[#e8dfd0]">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5e48] to-[#244a39] px-5 py-4 text-white">
+        <KawungPattern className="inset-0 size-full text-[#e8cb8d] opacity-[0.07]" />
+        <div className="relative flex items-center justify-between">
+          <h3 className="flex items-center gap-2 font-bold">
+            <Receipt className="size-4 text-[#e8cb8d]" />
+            Ringkasan Pesanan
+          </h3>
+          <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold">
+            {items.length} Produk
+          </span>
+        </div>
       </div>
 
-      <div className="space-y-4 mb-6 max-h-[240px] overflow-y-auto pr-2">
-        {items.map((item) => (
-          <div key={item.cartItemId} className="flex gap-4 items-center">
-            <div className="w-11 h-11 bg-[#eadecb] rounded-lg shrink-0 overflow-hidden flex items-center justify-center">
-              {item.imageURL ? (
-                <Image
-                  src={item.imageURL}
-                  alt={item.name}
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Package className="w-5 h-5 text-[#8e8476]" />
-              )}
+      <div className="p-5">
+        <div className="custom-scrollbar mb-4 max-h-[240px] space-y-3 overflow-y-auto pr-1">
+          {items.map((item) => (
+            <div key={item.cartItemId} className="flex items-center gap-3">
+              <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#eadecb] ring-1 ring-[#e8e2d5]">
+                {item.imageURL ? (
+                  <Image
+                    src={item.imageURL}
+                    alt={item.name}
+                    width={44}
+                    height={44}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <Package className="size-5 text-[#8e8476]" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold text-[#2f4f3f]">
+                  {item.name}
+                </p>
+                <p className="mt-0.5 truncate text-[11px] text-[#9a8f80]">
+                  {item.variant || 'Default'} · ×{item.quantity} Barang
+                </p>
+              </div>
+              <span className="text-xs font-bold whitespace-nowrap text-[#2f4f3f]">
+                {formatIDR(item.price * item.quantity)}
+              </span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-[#3d5446] truncate">
-                {item.name}
-              </p>
-              <p className="text-[11px] text-[#726759] mt-0.5 truncate">
-                {item.variant || 'Default'} {' | '} x {item.quantity} barang
-              </p>
-            </div>
-            <span className="text-xs font-bold text-[#3d5446] whitespace-nowrap">
-              {formatIDR(item.price * item.quantity)}
+          ))}
+        </div>
+
+        <div className="space-y-2.5 rounded-xl bg-[#faf7f2] p-3.5 text-xs text-[#6f6a62] ring-1 ring-[#efe8dd]">
+          <div className="flex justify-between gap-4">
+            <span>Subtotal</span>
+            <span className="font-semibold text-[#2f4f3f]">
+              {formatIDR(totals.subtotal || 0)}
             </span>
           </div>
-        ))}
-      </div>
-
-      <hr className="border-[#f0ede6] mb-5" />
-
-      <div className="space-y-3 text-[11px] text-[#3d5446]">
-        <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span className="font-bold">{formatIDR(totals.subtotal || 0)}</span>
+          <div className="flex items-start justify-between gap-4">
+            <span className="leading-tight">
+              Ongkos Kirim
+              <span className="block text-[10px] text-[#9a8f80]">
+                {totals.shippingName || '-'}
+              </span>
+            </span>
+            <span className="font-semibold whitespace-nowrap text-[#2f4f3f]">
+              {formatIDR(totals.shippingFee || 0)}
+            </span>
+          </div>
+          <div className="flex justify-between gap-4">
+            <span>Biaya Layanan</span>
+            <span className="font-semibold text-[#2f4f3f]">
+              {formatIDR(totals.serviceFee || 0)}
+            </span>
+          </div>
         </div>
-        <div className="flex justify-between items-start gap-4">
-          <span className="leading-tight shrink">
-            Ongkos Kirim ({totals.shippingName || '-'})
-          </span>
-          <span className="font-bold whitespace-nowrap">
-            {formatIDR(totals.shippingFee || 0)}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span>Biaya Layanan</span>
-          <span className="font-bold">{formatIDR(totals.serviceFee || 0)}</span>
-        </div>
-      </div>
 
-      <hr className="border-[#f0ede6] my-5" />
-
-      <div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm font-bold text-[#3d5446]">
+        <div className="mt-4 flex items-end justify-between border-t border-dashed border-[#e3d9c7] pt-4">
+          <span className="text-sm font-semibold text-[#6f6a62]">
             Total Pembayaran
           </span>
-          <span className="text-base font-extrabold text-[#3d5446]">
+          <span
+            key={totals.total}
+            className="animate-in text-xl font-extrabold text-[#2f5f49] duration-300 fade-in"
+          >
             {formatIDR(totals.total || 0)}
           </span>
         </div>
