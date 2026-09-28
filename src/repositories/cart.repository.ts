@@ -104,7 +104,7 @@ export const cartRepository = {
       });
 
       if (!cart) {
-        throw new Error('Cart not found');
+        throw new Error('Keranjang tidak ditemukan');
       }
     }
 

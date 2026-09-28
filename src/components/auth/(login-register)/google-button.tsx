@@ -7,7 +7,7 @@ type GoogleButtonProps = {
 };
 
 export function GoogleButton({
-  label = 'Continue with Google',
+  label = 'Lanjutkan dengan Google',
 }: GoogleButtonProps) {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({

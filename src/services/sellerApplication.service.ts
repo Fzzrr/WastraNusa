@@ -99,7 +99,7 @@ export const sellerApplicationService = {
   ) => {
     const application = await sellerApplicationRepository.findById(id);
     if (!application) {
-      throw new ApiError('Seller application not found', 404);
+      throw new ApiError('Pengajuan seller tidak ditemukan', 404);
     }
     if (application.status !== SellerApplicationStatus.pending) {
       throw new ApiError('Pengajuan ini sudah ditinjau', 400);

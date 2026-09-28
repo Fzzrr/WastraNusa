@@ -38,7 +38,7 @@ function handleApiError(err: unknown, req: Request) {
     const fieldErrors = err.flatten().fieldErrors;
     const flatErrors: Record<string, string> = {};
     for (const [key, errors] of Object.entries(fieldErrors)) {
-      flatErrors[key] = (errors as string[])?.[0] || 'Invalid value';
+      flatErrors[key] = (errors as string[])?.[0] || 'Nilai tidak valid';
     }
 
     return jsend.fail(flatErrors, 400);
@@ -49,15 +49,15 @@ function handleApiError(err: unknown, req: Request) {
     const code = err.code;
 
     if (code === 'P2002') {
-      return jsend.fail({ message: 'Resource already exists' }, 400);
+      return jsend.fail({ message: 'Data sudah ada' }, 400);
     }
     if (code === 'P2025') {
-      return jsend.fail({ message: 'Resource not found' }, 404);
+      return jsend.fail({ message: 'Data tidak ditemukan' }, 404);
     }
   }
 
   return jsend.error(
-    err instanceof Error ? err.message : 'Internal Server Error',
+    err instanceof Error ? err.message : 'Terjadi kesalahan pada server',
     500,
   );
 }

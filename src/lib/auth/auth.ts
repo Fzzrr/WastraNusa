@@ -49,7 +49,7 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       void sendEmail({
         to: user.email,
-        subject: 'Reset your password',
+        subject: 'Atur ulang password WastraNusa',
         type: EmailType.RESET_PASSWORD,
         params: {
           user_name: user.name || 'User',
@@ -71,7 +71,7 @@ export const auth = betterAuth({
       verificationUrl.searchParams.set('callbackURL', '/login');
       void sendEmail({
         to: user.email,
-        subject: 'Verify your email address',
+        subject: 'Verifikasi email WastraNusa Anda',
         type: EmailType.VERIFICATION,
         params: {
           user_name: user.name || 'User',

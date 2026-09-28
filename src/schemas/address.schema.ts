@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createAddressSchema = z.object({
   label: z.string().min(1, 'Label alamat wajib diisi'),
   recipientName: z.string().min(1, 'Nama penerima wajib diisi'),
-  phone: z.string().min(1, 'No. telepon wajib diisi'),
+  phone: z.string().min(1, 'Nomor telepon wajib diisi'),
   province: z.string().min(1, 'Provinsi wajib diisi'),
   city: z.string().min(1, 'Kota/Kabupaten wajib diisi'),
   district: z.string().min(1, 'Kecamatan wajib diisi'),

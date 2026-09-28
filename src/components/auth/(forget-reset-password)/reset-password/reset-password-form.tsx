@@ -12,11 +12,11 @@ import * as z from 'zod';
 
 const formSchema = z
   .object({
-    password: z.string().min(8, 'Password must be at least 8 characters.'),
+    password: z.string().min(8, 'Password minimal 8 karakter.'),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match.',
+    message: 'Password tidak cocok.',
     path: ['confirmPassword'],
   });
 
@@ -41,19 +41,19 @@ const ResetPasswordStatus = ({
     <div className="text-center space-y-4">
       <p className="text-sm text-[#2d2318]">
         {isSuccess
-          ? 'Your password has been successfully updated.'
-          : 'This password reset link is invalid or has expired.'}
+          ? 'Password Anda berhasil diperbarui.'
+          : 'Link reset password tidak valid atau sudah kedaluwarsa.'}
       </p>
       <p className="text-xs text-[#2d2318]/70">
         {isSuccess
-          ? 'You will be redirected to the login page shortly.'
-          : 'For your security, reset links expire after a short period of time. Please request a new one.'}
+          ? 'Anda akan segera diarahkan ke halaman masuk.'
+          : 'Demi keamanan, link reset hanya berlaku sebentar. Silakan minta link baru.'}
       </p>
       <Button
         onClick={onAction}
         className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm"
       >
-        {isSuccess ? 'Go to Login Now' : 'Return to Login'}
+        {isSuccess ? 'Masuk Sekarang' : 'Kembali ke Halaman Masuk'}
       </Button>
     </div>
   );
@@ -79,7 +79,7 @@ const ActualResetForm = ({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-4">
         <Field data-invalid={!!errors.password}>
-          <FieldLabel htmlFor="password">New Password</FieldLabel>
+          <FieldLabel htmlFor="password">Password Baru</FieldLabel>
           <Input
             id="password"
             type="password"
@@ -91,7 +91,7 @@ const ActualResetForm = ({
         </Field>
 
         <Field data-invalid={!!errors.confirmPassword}>
-          <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+          <FieldLabel htmlFor="confirmPassword">Konfirmasi Password</FieldLabel>
           <Input
             id="confirmPassword"
             type="password"
@@ -114,7 +114,7 @@ const ActualResetForm = ({
         className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm mt-1"
         disabled={isSubmitting}
       >
-        {isSubmitting ? 'Resetting...' : 'Reset Password'}
+        {isSubmitting ? 'Menyimpan...' : 'Simpan Password Baru'}
       </Button>
     </form>
   );
@@ -146,9 +146,7 @@ export function ResetPasswordForm({
       });
 
       if (error) {
-        setAuthError(
-          error.message || 'Something went wrong. Please try again.',
-        );
+        setAuthError(error.message || 'Terjadi kesalahan. Silakan coba lagi.');
       } else {
         setSuccess(true);
         setTimeout(() => {
@@ -156,7 +154,7 @@ export function ResetPasswordForm({
         }, 3000);
       }
     } catch {
-      setAuthError('An unexpected error occurred. Please try again.');
+      setAuthError('Terjadi kesalahan tak terduga. Silakan coba lagi.');
     }
   };
 

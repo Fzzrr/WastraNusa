@@ -68,7 +68,7 @@ describe('PUT /api/addresses/[id]', { tags: ['backend'] }, () => {
       role: 'user',
     } as never);
     mockService.updateAddress.mockRejectedValue(
-      new ApiError('Address not found', 404),
+      new ApiError('Alamat tidak ditemukan', 404),
     );
 
     const req = createRequest('http://localhost/api/addresses/invalid', {

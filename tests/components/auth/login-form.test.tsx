@@ -39,12 +39,12 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
   it('shows validation errors for empty fields', async () => {
     render(<LoginForm />);
 
-    fireEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
 
     expect(
-      await screen.findByText('Please enter a valid email address.'),
+      await screen.findByText('Masukkan alamat email yang valid.'),
     ).toBeTruthy();
-    expect(await screen.findByText('Password is required.')).toBeTruthy();
+    expect(await screen.findByText('Password wajib diisi.')).toBeTruthy();
     expect(mockedSignIn).not.toHaveBeenCalled();
   });
 
@@ -65,7 +65,7 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     fireEvent.change(screen.getByLabelText('Password'), {
       target: { value: 'User@12345' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
 
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/encyclopedia'));
     expect(mockedSignIn).toHaveBeenCalledWith(
@@ -76,7 +76,7 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
 
   it('shows an error message on wrong credentials', async () => {
     mockedSignIn.mockResolvedValue({
-      error: { status: 401, message: 'Wrong email or password' },
+      error: { status: 401, message: 'Email atau password salah' },
     } as never);
 
     render(<LoginForm />);
@@ -87,9 +87,9 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     fireEvent.change(screen.getByLabelText('Password'), {
       target: { value: 'badpass' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /^sign in$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
 
-    expect(await screen.findByText('Wrong email or password')).toBeTruthy();
+    expect(await screen.findByText('Email atau password salah')).toBeTruthy();
     expect(pushMock).not.toHaveBeenCalled();
   });
 });

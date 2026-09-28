@@ -20,8 +20,8 @@ export default function NotFound() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#446957] md:text-lg">
-            Maaf, halaman yang kamu cari tidak tersedia atau mungkin sudah
-            dipindahkan. Yuk lanjutkan eksplorasi budaya wastra dari halaman
+            Maaf, halaman yang Anda cari tidak tersedia atau mungkin sudah
+            dipindahkan. Silakan lanjutkan eksplorasi budaya wastra dari halaman
             utama.
           </p>
 

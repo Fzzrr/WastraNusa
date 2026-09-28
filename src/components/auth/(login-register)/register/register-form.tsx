@@ -24,39 +24,35 @@ import { GoogleButton } from '../google-button';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => String(i + 1));
 const MONTHS = [
-  'January',
-  'February',
-  'March',
+  'Januari',
+  'Februari',
+  'Maret',
   'April',
-  'May',
-  'June',
-  'July',
-  'August',
+  'Mei',
+  'Juni',
+  'Juli',
+  'Agustus',
   'September',
-  'October',
+  'Oktober',
   'November',
-  'December',
+  'Desember',
 ];
 const YEARS = Array.from({ length: 80 }, (_, i) =>
   String(new Date().getFullYear() - i),
 );
 
 const registerSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: 'First name must be at least 2 characters.' }),
+  firstName: z.string().min(2, { message: 'Nama depan minimal 2 karakter.' }),
   phone: z
     .string()
-    .min(10, { message: 'Phone number must be at least 10 digits.' })
-    .regex(/^\d+$/, { message: 'Phone number must contain only digits.' }),
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z
-    .string()
-    .min(8, { message: 'Password must be at least 8 characters.' }),
-  day: z.string().min(1, { message: 'Day is required.' }),
-  month: z.string().min(1, { message: 'Month is required.' }),
-  year: z.string().min(1, { message: 'Year is required.' }),
-  gender: z.enum(['male', 'female'], { message: 'Please select a gender.' }),
+    .min(10, { message: 'Nomor telepon minimal 10 digit.' })
+    .regex(/^\d+$/, { message: 'Nomor telepon hanya boleh berisi angka.' }),
+  email: z.string().email({ message: 'Masukkan alamat email yang valid.' }),
+  password: z.string().min(8, { message: 'Password minimal 8 karakter.' }),
+  day: z.string().min(1, { message: 'Tanggal wajib dipilih.' }),
+  month: z.string().min(1, { message: 'Bulan wajib dipilih.' }),
+  year: z.string().min(1, { message: 'Tahun wajib dipilih.' }),
+  gender: z.enum(['male', 'female'], { message: 'Pilih jenis kelamin.' }),
 });
 
 type RegisterValues = z.infer<typeof registerSchema>;
@@ -101,7 +97,7 @@ export function RegisterForm() {
 
     if (signUpError) {
       setError('root', {
-        message: signUpError.message || 'Failed to sign up. Please try again.',
+        message: signUpError.message || 'Pendaftaran gagal. Silakan coba lagi.',
       });
     } else {
       setIsSuccess(true);
@@ -111,7 +107,7 @@ export function RegisterForm() {
   return (
     <div className="w-full">
       <h1 className="mb-5 text-2xl font-bold text-[#2d2318]">
-        Sign Up to WastraNusa
+        Daftar ke WastraNusa
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
@@ -123,13 +119,13 @@ export function RegisterForm() {
                 htmlFor="firstName"
                 className="text-xs font-sm text-[#2d2318]"
               >
-                First name
+                Nama Depan
               </FieldLabel>
               <Input
                 id="firstName"
                 type="text"
                 autoComplete="given-name"
-                placeholder="First Name"
+                placeholder="Nama depan"
                 {...register('firstName')}
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
@@ -144,13 +140,13 @@ export function RegisterForm() {
                 htmlFor="phone"
                 className="text-xs font-sm text-[#2d2318]"
               >
-                Phone
+                Nomor Telepon
               </FieldLabel>
               <Input
                 id="phone"
                 type="tel"
                 autoComplete="tel"
-                placeholder="Phone Number"
+                placeholder="08xxxxxxxxxx"
                 {...register('phone')}
                 onInput={(e) =>
                   (e.currentTarget.value = e.currentTarget.value.replace(
@@ -213,7 +209,7 @@ export function RegisterForm() {
               className="gap-1"
             >
               <FieldLabel className="text-xs font-sm text-[#2d2318]">
-                Date of Birth
+                Tanggal Lahir
               </FieldLabel>
               <div className="flex gap-2">
                 <Controller
@@ -222,7 +218,7 @@ export function RegisterForm() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
-                        <SelectValue placeholder="Day" />
+                        <SelectValue placeholder="Tanggal" />
                       </SelectTrigger>
                       <SelectContent>
                         {DAYS.map((d) => (
@@ -241,7 +237,7 @@ export function RegisterForm() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
-                        <SelectValue placeholder="Month" />
+                        <SelectValue placeholder="Bulan" />
                       </SelectTrigger>
                       <SelectContent>
                         {MONTHS.map((m) => (
@@ -260,7 +256,7 @@ export function RegisterForm() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
-                        <SelectValue placeholder="Year" />
+                        <SelectValue placeholder="Tahun" />
                       </SelectTrigger>
                       <SelectContent>
                         {YEARS.map((y) => (
@@ -275,25 +271,28 @@ export function RegisterForm() {
               </div>
               <FieldError className="text-[10px] font-medium leading-none">
                 {(errors.day || errors.month || errors.year) &&
-                  'Please complete your date of birth.'}
+                  'Lengkapi tanggal lahir Anda.'}
               </FieldError>
             </Field>
 
             {/* Gender */}
             <Field data-invalid={!!errors.gender} className="gap-1">
               <div className="flex gap-2.5 text-xs text-[#2d2318] mt-0.5">
-                {['Female', 'Male'].map((gender) => (
+                {[
+                  { value: 'female', label: 'Perempuan' },
+                  { value: 'male', label: 'Laki-laki' },
+                ].map((gender) => (
                   <label
-                    key={gender}
+                    key={gender.value}
                     className="flex items-center gap-1.5 cursor-pointer"
                   >
                     <input
                       type="radio"
-                      value={gender.toLowerCase()}
+                      value={gender.value}
                       {...register('gender')}
                       className="accent-[#3d2e1e] w-3 h-3"
                     />
-                    {gender}
+                    {gender.label}
                   </label>
                 ))}
               </div>
@@ -307,10 +306,10 @@ export function RegisterForm() {
         {isSuccess && (
           <Alert className="bg-green-50 border-green-200 text-green-800">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertTitle>Success!</AlertTitle>
+            <AlertTitle>Berhasil!</AlertTitle>
             <AlertDescription>
-              Registration successful! A verification email has been sent to
-              your inbox. Please verify your email address before signing in.
+              Pendaftaran berhasil! Email verifikasi telah dikirim ke kotak
+              masuk Anda. Verifikasi email Anda terlebih dahulu sebelum masuk.
             </AlertDescription>
           </Alert>
         )}
@@ -332,26 +331,26 @@ export function RegisterForm() {
           className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm"
         >
           {isSuccess
-            ? 'Go to Sign In'
+            ? 'Ke Halaman Masuk'
             : isSubmitting
-              ? 'Signing Up...'
-              : 'Sign Up'}
+              ? 'Sedang mendaftar...'
+              : 'Daftar'}
         </Button>
       </form>
 
       {!isSuccess && (
         <>
           <div className="mt-3">
-            <GoogleButton label="Continue with Google" />
+            <GoogleButton label="Lanjutkan dengan Google" />
           </div>
 
           <p className="mt-4 text-center text-xs text-[#7a6e62]">
-            Already have an account?{' '}
+            Sudah punya akun?{' '}
             <Link
               href="/login"
               className="text-[#c07a4a] hover:underline font-medium"
             >
-              Sign In
+              Masuk
             </Link>
           </p>
         </>

@@ -21,7 +21,7 @@ export const cartService = {
     quantity: number,
   ) => {
     if (quantity <= 0) {
-      throw new ApiError('Quantity must be greater than 0', 400);
+      throw new ApiError('Jumlah harus lebih dari 0', 400);
     }
 
     const cart = await cartRepository.findOrCreateByUser(userId);
@@ -53,18 +53,18 @@ export const cartService = {
     quantity: number,
   ) => {
     if (quantity <= 0) {
-      throw new ApiError('Quantity must be greater than 0', 400);
+      throw new ApiError('Jumlah harus lebih dari 0', 400);
     }
 
     // Verify item belongs to user's cart
     const cart = await cartRepository.findByUserId(userId);
     if (!cart) {
-      throw new ApiError('Cart not found', 404);
+      throw new ApiError('Keranjang tidak ditemukan', 404);
     }
 
     const itemExists = cart.items.some((item) => item.id === cartItemId);
     if (!itemExists) {
-      throw new ApiError('Item not found in cart', 404);
+      throw new ApiError('Item tidak ditemukan di keranjang', 404);
     }
 
     await cartRepository.updateItemQuantity(cartItemId, quantity, userId);
@@ -85,12 +85,12 @@ export const cartService = {
     // Verify item belongs to user's cart
     const cart = await cartRepository.findByUserId(userId);
     if (!cart) {
-      throw new ApiError('Cart not found', 404);
+      throw new ApiError('Keranjang tidak ditemukan', 404);
     }
 
     const itemExists = cart.items.some((item) => item.id === cartItemId);
     if (!itemExists) {
-      throw new ApiError('Item not found in cart', 404);
+      throw new ApiError('Item tidak ditemukan di keranjang', 404);
     }
 
     await cartRepository.removeItem(cartItemId, userId);
@@ -108,20 +108,20 @@ export const cartService = {
    */
   removeMultipleFromCart: async (userId: string, cartItemIds: string[]) => {
     if (cartItemIds.length === 0) {
-      throw new ApiError('No items to remove', 400);
+      throw new ApiError('Tidak ada item yang dihapus', 400);
     }
 
     // Verify all items belong to user's cart
     const cart = await cartRepository.findByUserId(userId);
     if (!cart) {
-      throw new ApiError('Cart not found', 404);
+      throw new ApiError('Keranjang tidak ditemukan', 404);
     }
 
     const cartItemIdSet = new Set(cart.items.map((item) => item.id));
     const invalidIds = cartItemIds.filter((id) => !cartItemIdSet.has(id));
 
     if (invalidIds.length > 0) {
-      throw new ApiError('Some items not found in cart', 404);
+      throw new ApiError('Beberapa item tidak ditemukan di keranjang', 404);
     }
 
     await cartRepository.removeItems(cartItemIds, userId);
@@ -140,7 +140,7 @@ export const cartService = {
   clearCart: async (userId: string) => {
     const cart = await cartRepository.findByUserId(userId);
     if (!cart) {
-      throw new ApiError('Cart not found', 404);
+      throw new ApiError('Keranjang tidak ditemukan', 404);
     }
 
     await cartRepository.clearCart(cart.id, userId);
