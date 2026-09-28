@@ -1,8 +1,12 @@
 'use client';
 
+import { ProfileSection } from '@/components/profile/profile-section';
+import { cn } from '@/lib/utils';
+import { LayoutList, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 
 import { MyOrderList } from './my-order-list';
+import { ORDER_STATUS_STYLES } from './order-status';
 
 export type OrderStatus =
   | 'Semua'
@@ -28,36 +32,49 @@ export function MyOrderMain() {
   const [page, setPage] = useState(1);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e8e2d5] bg-white shadow-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-[#e8e2d5] px-6 py-5">
-        <h2 className="m-0 text-[18px] font-bold text-[#5c7365]">
-          Pesanan Saya
-        </h2>
-      </div>
-      <div className="border-b border-[#ece7dd] px-6 py-3">
-        <div className="flex gap-2 overflow-x-auto scrollbar-none">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => {
-                setActiveTab(tab);
-                setPage(1);
-              }}
-              className={`whitespace-nowrap px-3 py-1.5 text-[13px] font-semibold transition-colors rounded-md ${
-                activeTab === tab
-                  ? 'bg-[#3b5249] text-white'
-                  : 'bg-[#f4efe6] text-[#8b7e6a] hover:bg-[#ebe4d7]'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+    <ProfileSection
+      icon={ShoppingBag}
+      title="Pesanan Saya"
+      description="Lacak status dan riwayat belanja Anda"
+      bodyClassName="p-0"
+    >
+      <div className="border-b border-[#efe8dd] px-5 py-3 md:px-6">
+        <div
+          role="tablist"
+          aria-label="Filter status pesanan"
+          className="flex gap-1 overflow-x-auto rounded-xl bg-[#f4efe5] p-1 scrollbar-none"
+        >
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab;
+            const Icon =
+              tab === 'Semua' ? LayoutList : ORDER_STATUS_STYLES[tab].icon;
+            return (
+              <button
+                key={tab}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setPage(1);
+                }}
+                className={cn(
+                  'inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all duration-200',
+                  isActive
+                    ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-white shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)]'
+                    : 'text-[#6f6a62] hover:bg-white/70 hover:text-[#2f5f49]',
+                )}
+              >
+                <Icon className="size-3.5" />
+                {tab}
+              </button>
+            );
+          })}
         </div>
       </div>
-      <div className="p-6">
+      <div className="p-5 md:p-6">
         <MyOrderList activeTab={activeTab} page={page} setPage={setPage} />
       </div>
-    </div>
+    </ProfileSection>
   );
 }

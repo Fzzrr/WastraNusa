@@ -283,7 +283,7 @@ export default function AddUpdateAddressModal({
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
-                  No. Telepon <span className="text-red-400">*</span>
+                  Nomor Telepon <span className="text-red-400">*</span>
                 </label>
                 <Input
                   {...register('phone')}

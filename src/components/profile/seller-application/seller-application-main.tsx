@@ -1,21 +1,42 @@
 'use client';
 
+import {
+  Field,
+  inputClassName,
+  textareaClassName,
+} from '@/components/form-sections';
+import {
+  ProfileEmptyState,
+  ProfileSection,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { KawungPattern } from '@/components/wastra-hero';
 import {
   type SellerApplication,
   useCreateSellerApplication,
   useMySellerApplication,
 } from '@/hooks/use-seller-application';
+import { cn } from '@/lib/utils';
 import {
   type CreateSellerApplicationInput,
   createSellerApplicationSchema,
 } from '@/schemas/seller-application.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CheckCircle2, Clock, Store } from 'lucide-react';
+import {
+  CheckCircle2,
+  Clock,
+  type LucideIcon,
+  Package,
+  Store,
+  TrendingUp,
+  Users,
+  XCircle,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -31,27 +52,91 @@ export function SellerApplicationMain() {
   const { data, isPending, error } = useMySellerApplication();
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e8e2d5] bg-[#fdfaf5] shadow-sm">
-      <div className="flex items-center justify-between gap-3 border-b border-[#e8e2d5] px-6 py-5">
-        <h2 className="m-0 text-[18px] font-bold text-[#5c7365]">Buka Toko</h2>
-      </div>
+    <ProfileSection
+      icon={Store}
+      title="Buka Toko"
+      description="Jual wastra Anda ke pembeli di seluruh Nusantara"
+    >
+      {isPending ? (
+        <div className="flex animate-pulse flex-col gap-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="h-20 rounded-xl bg-[#f4efe5]" />
+            ))}
+          </div>
+          <div className="h-11 w-full rounded-xl bg-[#f2ede4]" />
+          <div className="h-24 w-full rounded-xl bg-[#f6f2ea]" />
+        </div>
+      ) : error ? (
+        <ProfileEmptyState
+          icon={XCircle}
+          tone="error"
+          title="Gagal memuat status toko"
+          description="Gagal memuat status pengajuan toko. Silakan coba lagi."
+        />
+      ) : (
+        <SellerApplicationContent application={data ?? null} />
+      )}
+    </ProfileSection>
+  );
+}
 
-      <div className="p-6">
-        {isPending ? (
-          <div className="flex flex-col gap-4">
-            <div className="h-4 w-40 animate-pulse rounded bg-[#efe8db]" />
-            <div className="h-11 w-full animate-pulse rounded-xl bg-[#f2ede4]" />
-            <div className="h-24 w-full animate-pulse rounded-xl bg-[#f6f2ea]" />
-            <div className="h-11 w-full animate-pulse rounded-xl bg-[#f2ede4]" />
-          </div>
-        ) : error ? (
-          <div className="rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
-            Gagal memuat status pengajuan toko. Silakan coba lagi.
-          </div>
-        ) : (
-          <SellerApplicationContent application={data ?? null} />
+const BENEFITS: { icon: LucideIcon; title: string; text: string }[] = [
+  {
+    icon: Users,
+    title: 'Jangkau Pembeli',
+    text: 'Produk tampil di katalog WastraNusa',
+  },
+  {
+    icon: Package,
+    title: 'Kelola Produk',
+    text: 'Atur stok, varian, dan harga dengan mudah',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Pantau Penjualan',
+    text: 'Dashboard pendapatan & pesanan',
+  },
+];
+
+function StatusPanel({
+  icon: Icon,
+  tone,
+  title,
+  children,
+  action,
+}: {
+  icon: LucideIcon;
+  tone: 'pending' | 'approved';
+  title: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        'relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl px-6 py-10 text-center',
+        tone === 'approved'
+          ? 'bg-gradient-to-br from-[#e3ece5] to-[#faf7f2]'
+          : 'bg-gradient-to-br from-[#fbf0d9] to-[#faf7f2]',
+      )}
+    >
+      <KawungPattern className="inset-0 size-full text-[#2f5b49] opacity-[0.04]" />
+      <span
+        className={cn(
+          'relative grid size-16 place-items-center rounded-full ring-8',
+          tone === 'approved'
+            ? 'bg-[#2f5f49] text-[#e8cb8d] ring-[#2f5f49]/10'
+            : 'bg-[#e8cb8d] text-[#6b4f1f] ring-[#e8cb8d]/25',
         )}
+      >
+        <Icon className={cn('size-8', tone === 'pending' && 'animate-pulse')} />
+      </span>
+      <div className="relative">
+        <h3 className="text-lg font-bold text-[#2f4f3f]">{title}</h3>
+        <p className="mt-1 max-w-md text-sm text-[#6f6a62]">{children}</p>
       </div>
+      {action ? <div className="relative">{action}</div> : null}
     </div>
   );
 }
@@ -65,47 +150,36 @@ function SellerApplicationContent({
 
   if (application?.status === 'pending') {
     return (
-      <div className="flex flex-col items-center gap-4 py-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#fdf3e0]">
-          <Clock className="h-7 w-7 text-[#c08a3e]" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-[#4d6356]">
-            Pengajuan sedang ditinjau
-          </h3>
-          <p className="mt-1 max-w-md text-sm text-[#7a8a80]">
-            Pengajuan toko <strong>{application.shopName}</strong> sedang kami
-            tinjau. Kami akan memberitahu Anda setelah proses peninjauan
-            selesai.
-          </p>
-        </div>
-      </div>
+      <StatusPanel
+        icon={Clock}
+        tone="pending"
+        title="Pengajuan Sedang Ditinjau"
+      >
+        Pengajuan toko <strong>{application.shopName}</strong> sedang kami
+        tinjau. Kami akan memberitahu Anda setelah proses peninjauan selesai.
+      </StatusPanel>
     );
   }
 
   if (application?.status === 'approved') {
     return (
-      <div className="flex flex-col items-center gap-4 py-8 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eef6f1]">
-          <CheckCircle2 className="h-7 w-7 text-[#3c5043]" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-[#4d6356]">
-            Selamat, toko Anda telah disetujui!
-          </h3>
-          <p className="mt-1 max-w-md text-sm text-[#7a8a80]">
-            Pengajuan toko <strong>{application.shopName}</strong> telah
-            disetujui. Anda kini dapat mengelola toko melalui panel penjual.
-          </p>
-        </div>
-        <Button
-          onClick={() => router.push('/seller/dashboard')}
-          className="rounded-full bg-[#3c5043] px-6 hover:bg-[#2d3d32]"
-        >
-          <Store className="h-4 w-4" />
-          Buka Panel Penjual
-        </Button>
-      </div>
+      <StatusPanel
+        icon={CheckCircle2}
+        tone="approved"
+        title="Selamat, toko Anda telah aktif!"
+        action={
+          <Button
+            onClick={() => router.push('/seller/dashboard')}
+            className={cn(profilePrimaryButtonClassName, 'h-10 px-6')}
+          >
+            <Store className="size-4" />
+            Buka Panel Penjual
+          </Button>
+        }
+      >
+        Toko <strong>{application.shopName}</strong> sudah bisa dikelola melalui
+        panel penjual.
+      </StatusPanel>
     );
   }
 
@@ -183,64 +257,64 @@ function SellerApplicationForm({
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-col gap-5"
     >
-      <p className="text-sm text-[#7a8a80]">
+      <div className="grid gap-3 sm:grid-cols-3">
+        {BENEFITS.map(({ icon: Icon, title, text }) => (
+          <div
+            key={title}
+            className="group flex items-start gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50"
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
+              <Icon className="size-4" />
+            </span>
+            <div>
+              <p className="text-sm font-semibold text-[#2f4f3f]">{title}</p>
+              <p className="text-xs text-[#9a8f80]">{text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-sm text-[#6f6a62]">
         Lengkapi data berikut untuk mengajukan pembukaan toko. Pengajuan Anda
         akan ditinjau oleh tim kami sebelum toko dapat diaktifkan.
       </p>
 
       {isRejected && application?.rejectionReason ? (
         <Alert variant="destructive" className="border-[#e2c9bb] bg-[#fbf1eb]">
-          <AlertTitle>Pengajuan sebelumnya ditolak</AlertTitle>
+          <AlertTitle>Pengajuan Sebelumnya Ditolak</AlertTitle>
           <AlertDescription>{application.rejectionReason}</AlertDescription>
         </Alert>
       ) : null}
 
-      {/* Shop name */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
-          Nama Toko <span className="text-red-400">*</span>
-        </label>
+      <Field label="Nama Toko" required error={errors.shopName?.message}>
         <Input
           {...register('shopName')}
           placeholder="Contoh: Batik Nusantara"
-          className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+          className={inputClassName}
         />
-        {errors.shopName && (
-          <p className="mt-1 text-xs text-red-500">{errors.shopName.message}</p>
-        )}
-      </div>
+      </Field>
 
-      {/* Description */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
-          Deskripsi Toko{' '}
-          <span className="text-xs font-normal text-[#8f9b94]">(opsional)</span>
-        </label>
+      <Field label="Deskripsi Toko">
         <textarea
           {...register('description')}
           rows={4}
           placeholder="Ceritakan tentang toko dan produk yang akan Anda jual..."
-          className="w-full resize-none rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 py-3 text-sm text-[#4d6356] placeholder:text-[#b0b8b3] outline-none transition-all focus:border-[#5c7365] focus:ring-2 focus:ring-[#5c7365]/20"
+          className={textareaClassName}
         />
-      </div>
+      </Field>
 
-      {/* Phone number */}
-      <div>
-        <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
-          No. Telepon{' '}
-          <span className="text-xs font-normal text-[#8f9b94]">(opsional)</span>
-        </label>
+      <Field label="Nomor Telepon">
         <Input
           {...register('phoneNumber')}
           placeholder="08xxxxxxxxxx"
-          className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+          className={inputClassName}
         />
-      </div>
+      </Field>
 
       <Button
         type="submit"
         disabled={isPending}
-        className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#3c5043] text-base font-medium text-white transition-colors hover:bg-[#2d3d32]"
+        className={cn(profilePrimaryButtonClassName, 'h-11 text-base')}
       >
         {isPending ? (
           <div className="size-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
