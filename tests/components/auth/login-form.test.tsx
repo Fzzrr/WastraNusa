@@ -92,4 +92,42 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     expect(await screen.findByText('Email atau password salah')).toBeTruthy();
     expect(pushMock).not.toHaveBeenCalled();
   });
+
+  const submitWith403 = async (error: { code?: string; message: string }) => {
+    mockedSignIn.mockResolvedValue({
+      error: { status: 403, ...error },
+    } as never);
+    render(<LoginForm />);
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'user@test.com' },
+    });
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'password123' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
+  };
+
+  it('asks to verify email only for EMAIL_NOT_VERIFIED', async () => {
+    await submitWith403({
+      code: 'EMAIL_NOT_VERIFIED',
+      message: 'Email not verified',
+    });
+
+    expect(
+      await screen.findByText(
+        'Verifikasi email Anda terlebih dahulu sebelum masuk.',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('does not blame email verification for other 403s', async () => {
+    await submitWith403({ message: 'Invalid origin' });
+
+    expect(
+      await screen.findByText(
+        'Login ditolak karena alamat situs ini belum diizinkan oleh server.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText(/verifikasi email/i)).toBeNull();
+  });
 });

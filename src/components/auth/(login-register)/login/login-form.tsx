@@ -20,6 +20,26 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
+/**
+ * better-auth also answers 403 for reasons other than an unverified email
+ * (e.g. an untrusted origin), so map by error code instead of status.
+ */
+function getSignInErrorMessage(error: {
+  code?: string;
+  message?: string;
+}): string {
+  switch (error.code) {
+    case 'EMAIL_NOT_VERIFIED':
+      return 'Verifikasi email Anda terlebih dahulu sebelum masuk.';
+    case 'INVALID_EMAIL_OR_PASSWORD':
+      return 'Email atau password salah';
+  }
+  if (error.message?.toLowerCase().includes('origin')) {
+    return 'Login ditolak karena alamat situs ini belum diizinkan oleh server.';
+  }
+  return error.message || 'Email atau password salah';
+}
+
 export function LoginForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -43,13 +63,6 @@ export function LoginForm() {
         password: data.password,
       },
       {
-        onError: (ctx) => {
-          if (ctx.error.status === 403) {
-            setError('root', {
-              message: 'Verifikasi email Anda terlebih dahulu sebelum masuk.',
-            });
-          }
-        },
         onSuccess: async () => {
           queryClient.clear();
           const session = await authClient.getSession();
@@ -62,10 +75,8 @@ export function LoginForm() {
       },
     );
 
-    if (signInError && signInError.status !== 403) {
-      setError('root', {
-        message: signInError.message || 'Email atau password salah',
-      });
+    if (signInError) {
+      setError('root', { message: getSignInErrorMessage(signInError) });
     }
   };
 
