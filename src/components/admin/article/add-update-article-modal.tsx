@@ -13,6 +13,7 @@ import {
 import { ArticleStatus } from '@/generated/prisma/enums';
 import { useCreateArticle, useUpdateArticle } from '@/hooks/use-article';
 import { useWikipediaSummaryImport } from '@/hooks/use-wikipedia-summary';
+import { cn } from '@/lib/utils';
 import {
   type CreateArticleInput,
   createArticleSchema,
@@ -21,9 +22,25 @@ import {
 import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { kabupaten, provinsi } from 'daftar-wilayah-indonesia';
-import { Download, Loader2, Plus, Trash2, X } from 'lucide-react';
+import {
+  AlertCircle,
+  BookOpen,
+  Download,
+  FileText,
+  ImageIcon,
+  Info,
+  Layers,
+  Loader2,
+  MapPin,
+  Plus,
+  Save,
+  SlidersHorizontal,
+  Sparkles,
+  Trash2,
+  X,
+} from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   Controller,
   type Resolver,
@@ -64,6 +81,131 @@ const ISLAND_TO_PROVINCE_CODES: Record<string, string[]> = {
   'Kepulauan Riau': ['21'],
   'Bangka Belitung': ['19'],
 };
+
+const inputClassName =
+  'h-11 rounded-xl border-[#e5ded5] bg-white px-4 text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
+const textareaClassName =
+  'w-full resize-none rounded-xl border border-[#e5ded5] bg-white px-4 py-3 text-sm text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
+const selectTriggerClassName =
+  'h-11 w-full rounded-xl border-[#e5ded5] bg-white text-[#2f3a33] data-[size=default]:h-11';
+
+const EXCERPT_SOFT_LIMIT = 160;
+
+function Field({
+  label,
+  required = false,
+  hint,
+  error,
+  aside,
+  className,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: ReactNode;
+  error?: string;
+  aside?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn('flex flex-col gap-1.5', className)}>
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-sm font-medium text-[#3d3a34]">
+          {label}
+          {required ? (
+            <span className="ml-0.5 text-[#c26a3d]">*</span>
+          ) : (
+            <span className="ml-1.5 text-xs font-normal text-[#a39c92]">
+              (Opsional)
+            </span>
+          )}
+        </label>
+        {aside}
+      </div>
+      {children}
+      {error ? (
+        <p className="flex animate-in items-center gap-1 text-xs text-red-600 fade-in">
+          <AlertCircle className="size-3.5 shrink-0" />
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="text-xs text-[#9a8f80]">{hint}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function FormSection({
+  step,
+  icon: Icon,
+  title,
+  description,
+  aside,
+  children,
+}: {
+  step: number;
+  icon: typeof BookOpen;
+  title: string;
+  description: string;
+  aside?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl bg-[#fffdfa] p-5 ring-1 ring-[#ebe3d6]">
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#f4efe5] text-[#8a6a3a]">
+            <Icon className="size-4" />
+            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#3a5a4a] text-[10px] font-semibold text-white">
+              {step}
+            </span>
+          </span>
+          <div>
+            <h3 className="font-semibold text-[#2f4f3f]">{title}</h3>
+            <p className="text-xs text-[#9a8f80]">{description}</p>
+          </div>
+        </div>
+        {aside}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ImagePreview({
+  url,
+  className,
+}: {
+  url?: string | null;
+  className?: string;
+}) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const isValid =
+    Boolean(url) && /^https?:\/\//.test(url ?? '') && failedUrl !== url;
+
+  return (
+    <div
+      className={cn(
+        'flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] text-[#b3aa9e]',
+        isValid && 'border-solid',
+        className,
+      )}
+    >
+      {isValid ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url ?? ''}
+          alt=""
+          onError={() => setFailedUrl(url ?? null)}
+          className="size-full animate-in object-cover fade-in"
+        />
+      ) : (
+        <ImageIcon className="size-5" />
+      )}
+    </div>
+  );
+}
 
 interface AddUpdateArticleModalProps {
   isOpen: boolean;
@@ -129,6 +271,20 @@ export default function AddUpdateArticleModal({
 
   const watchedIsland = useWatch({ control, name: 'island' });
   const watchedProvince = useWatch({ control, name: 'province' });
+  const watchedValues = useWatch({ control });
+  const excerptLength = watchedValues.excerpt?.length ?? 0;
+
+  const requiredFields = [
+    watchedValues.title,
+    watchedValues.motifLabel,
+    watchedValues.topic,
+    watchedValues.island,
+    watchedValues.province,
+    watchedValues.region,
+    watchedValues.excerpt,
+  ];
+  const filledCount = requiredFields.filter((value) => value?.trim()).length;
+  const progress = Math.round((filledCount / requiredFields.length) * 100);
 
   const filteredProvinces = useMemo(() => {
     if (!watchedIsland) return ALL_PROVINCES;
@@ -171,6 +327,10 @@ export default function AddUpdateArticleModal({
     }
     wiki.discardPreview();
     setShowWikiReminder(true);
+  };
+
+  const onInvalid = () => {
+    toast.error('Masih ada field yang belum diisi dengan benar.');
   };
 
   const onSubmit = (data: CreateArticleInput) => {
@@ -246,64 +406,86 @@ export default function AddUpdateArticleModal({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-300 ${
-        isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-      }`}
+      className={cn(
+        'fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300',
+        isOpen ? 'visible opacity-100' : 'invisible opacity-0',
+      )}
     >
-      {/* Dark Overlay */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-[#1f2a24]/45 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal Content */}
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className={`relative w-full max-w-3xl bg-[#fefdfb] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] transition-all duration-300 transform ${
-          isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-        }`}
+        onSubmit={handleSubmit(onSubmit, onInvalid)}
+        className={cn(
+          'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#f7f3ec] shadow-2xl transition-all duration-300',
+          isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95',
+        )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#ebdxc2]">
-          <div className="flex items-center gap-3 text-foreground">
-            <svg
-              className="w-5 h-5 text-[#8c6b5d]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="border-b border-[#ebe3d6] bg-[#fffdfa] px-6 pt-5 pb-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
+                <BookOpen className="size-5" />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold text-[#2f4f3f]">
+                  {isEdit ? 'Edit Artikel' : 'Tambah Artikel Baru'}
+                </h2>
+                <p className="text-xs text-[#9a8f80]">
+                  Field bertanda <span className="text-[#c26a3d]">*</span> wajib
+                  diisi
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Tutup"
+              onClick={onClose}
+              className="cursor-pointer rounded-full bg-[#f4efe5] text-[#6f6a62] transition-colors hover:bg-[#ebe3d6] hover:text-[#2f3a33]"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              />
-            </svg>
-            <h2 className="text-lg font-semibold">
-              {isEdit ? 'Edit Artikel' : 'Tambah Artikel Baru'}
-            </h2>
+              <X className="size-4" />
+            </Button>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onClose}
-            className="bg-[#f3ede8] hover:bg-[#e6dcd5] rounded-full text-muted-foreground transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+
+          <div className="mt-4 flex items-center gap-3">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efe8dd]">
+              <div
+                className={cn(
+                  'h-full rounded-full transition-all duration-500',
+                  progress === 100 ? 'bg-[#3a5a4a]' : 'bg-[#d2a36d]',
+                )}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span
+              className={cn(
+                'text-xs font-medium whitespace-nowrap tabular-nums',
+                progress === 100 ? 'text-[#2f5543]' : 'text-[#9a8f80]',
+              )}
+            >
+              {filledCount}/{requiredFields.length} field wajib
+            </span>
+          </div>
         </div>
 
-        {/* Body / Form */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 custom-scrollbar">
-          {/* Impor ringkasan Wikipedia (fetch di browser) */}
-          <div className="rounded-2xl border border-[#e5ded5] bg-[#fdfaf7]/80 p-4 space-y-3">
-            <div className="flex flex-wrap items-start justify-between gap-2">
+        {/* Body */}
+        <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5 md:px-8">
+          {/* Impor dari Wikipedia */}
+          <div className="space-y-3 rounded-2xl bg-gradient-to-br from-[#eef3ee] to-[#f7f3ec] p-4 ring-1 ring-[#d5e2d8]">
+            <div className="flex items-start gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#3a5a4a] text-[#e8cb8d]">
+                <Sparkles className="size-4" />
+              </span>
               <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Impor dari Wikipedia
+                <p className="font-semibold text-[#2f4f3f]">
+                  Isi Cepat dari Wikipedia
                 </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="mt-0.5 text-xs text-[#6f6a62]">
                   Tempel URL artikel (mis.{' '}
                   <span className="font-mono text-[11px]">
                     https://id.wikipedia.org/wiki/Batik
@@ -313,7 +495,7 @@ export default function AddUpdateArticleModal({
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 type="url"
                 inputMode="url"
@@ -322,16 +504,15 @@ export default function AddUpdateArticleModal({
                 value={wiki.url}
                 onChange={(e) => wiki.setUrl(e.target.value)}
                 disabled={wiki.isLoading}
-                className="h-11 flex-1 px-4 bg-white border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
+                className={cn(inputClassName, 'flex-1')}
               />
               <Button
                 type="button"
-                variant="outline"
                 disabled={
                   wiki.isLoading || !wiki.urlLooksValid || !!wiki.urlHint
                 }
                 onClick={() => void wiki.fetchSummary()}
-                className="h-11 shrink-0 border-[#305645] text-[#305645] hover:bg-[#305645]/10 gap-2"
+                className="h-11 shrink-0 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-4 text-white hover:bg-[#2f4b3d]"
               >
                 {wiki.isLoading ? (
                   <>
@@ -362,17 +543,17 @@ export default function AddUpdateArticleModal({
             )}
 
             {wiki.preview && (
-              <div className="rounded-xl border border-[#cde3d8] bg-white p-3 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#305645]">
+              <div className="animate-in space-y-3 rounded-xl bg-white p-3 ring-1 ring-[#cde3d8] fade-in slide-in-from-top-1">
+                <p className="text-xs font-semibold tracking-wide text-[#305645] uppercase">
                   Pratinjau — terapkan ke form
                 </p>
                 {wiki.preview.wikiType === 'disambiguation' && (
-                  <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5">
+                  <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
                     Halaman ini berupa disambiguasi Wikipedia; ringkasan mungkin
                     pendek — selalu sesuaikan untuk konteks WastraNusa.
                   </p>
                 )}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row">
                   {wiki.preview.mapped.imageURL ? (
                     <Image
                       src={wiki.preview.mapped.imageURL}
@@ -380,18 +561,18 @@ export default function AddUpdateArticleModal({
                       width={112}
                       height={112}
                       unoptimized
-                      className="w-full sm:w-28 h-28 object-cover rounded-lg border border-[#e5ded5] bg-[#f5f3ec]"
+                      className="h-28 w-full rounded-lg border border-[#e5ded5] bg-[#f5f3ec] object-cover sm:w-28"
                     />
                   ) : (
-                    <div className="w-full sm:w-28 h-28 rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] flex items-center justify-center text-[11px] text-muted-foreground text-center px-2">
+                    <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] px-2 text-center text-[11px] text-muted-foreground sm:w-28">
                       Tidak ada gambar thumbnail
                     </div>
                   )}
                   <div className="min-w-0 flex-1 space-y-1">
-                    <p className="font-medium text-foreground leading-snug">
+                    <p className="leading-snug font-medium text-foreground">
                       {wiki.preview.mapped.title}
                     </p>
-                    <p className="text-sm text-muted-foreground line-clamp-4">
+                    <p className="line-clamp-4 text-sm text-muted-foreground">
                       {wiki.preview.mapped.summary}
                     </p>
                   </div>
@@ -400,7 +581,7 @@ export default function AddUpdateArticleModal({
                   <Button
                     type="button"
                     size="sm"
-                    className="bg-[#305645] hover:bg-[#264538] text-white"
+                    className="cursor-pointer rounded-lg bg-[#305645] text-white hover:bg-[#264538]"
                     onClick={handleApplyWikimediaPreview}
                   >
                     Terapkan ke form
@@ -409,6 +590,7 @@ export default function AddUpdateArticleModal({
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className="cursor-pointer rounded-lg"
                     onClick={wiki.discardPreview}
                   >
                     Buang pratinjau
@@ -418,22 +600,9 @@ export default function AddUpdateArticleModal({
             )}
           </div>
 
-          {/* Reminder: required fields not populated by Wikipedia */}
           {showWikiReminder && (
-            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              <svg
-                className="mt-0.5 size-4 shrink-0 text-amber-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"
-                />
-              </svg>
+            <div className="flex animate-in items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 fade-in">
+              <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
               <div className="flex-1">
                 <p className="font-semibold">
                   Lengkapi field berikut secara manual
@@ -450,214 +619,180 @@ export default function AddUpdateArticleModal({
                 type="button"
                 aria-label="Tutup peringatan"
                 onClick={() => setShowWikiReminder(false)}
-                className="ml-1 rounded-lg p-0.5 text-amber-500 hover:bg-amber-100 transition-colors"
+                className="ml-1 cursor-pointer rounded-lg p-0.5 text-amber-500 transition-colors hover:bg-amber-100"
               >
                 <X className="size-4" />
               </button>
             </div>
           )}
 
-          {/* Judul Artikel */}
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-              Judul Artikel *
-            </label>
-            <Input
-              {...register('title')}
-              type="text"
-              placeholder="Contoh: Sejarah Batik Jawa: Warisan Dunia UNESCO"
-              className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-            />
-            {errors.title && (
-              <p className="text-xs text-red-500 mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Motif Label */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Label Motif *
-              </label>
-              <Input
-                {...register('motifLabel')}
-                type="text"
-                placeholder="Batik Parang / Songket Palembang"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-              />
-              {errors.motifLabel && (
-                <p className="text-xs text-red-500 mt-1 font-medium">
-                  {errors.motifLabel.message}
-                </p>
-              )}
+          {/* 1. Informasi Dasar */}
+          <FormSection
+            step={1}
+            icon={FileText}
+            title="Informasi Dasar"
+            description="Judul dan identitas utama artikel"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field
+                label="Judul Artikel"
+                required
+                error={errors.title?.message}
+                className="md:col-span-2"
+              >
+                <Input
+                  {...register('title')}
+                  type="text"
+                  placeholder="Contoh: Sejarah Batik Jawa: Warisan Dunia UNESCO"
+                  className={inputClassName}
+                />
+              </Field>
+              <Field
+                label="Label Motif"
+                required
+                error={errors.motifLabel?.message}
+              >
+                <Input
+                  {...register('motifLabel')}
+                  type="text"
+                  placeholder="Batik Parang / Songket Palembang"
+                  className={inputClassName}
+                />
+              </Field>
+              <Field label="Topik" required error={errors.topic?.message}>
+                <Input
+                  {...register('topic')}
+                  type="text"
+                  placeholder="Pakaian Adat / Tekstil"
+                  className={inputClassName}
+                />
+              </Field>
             </div>
+          </FormSection>
 
-            {/* Topik */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Topik *
-              </label>
-              <Input
-                {...register('topic')}
-                type="text"
-                placeholder="Pakaian Adat / Tekstil"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-              />
-              {errors.topic && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.topic.message}
-                </p>
-              )}
+          {/* 2. Asal Daerah */}
+          <FormSection
+            step={2}
+            icon={MapPin}
+            title="Asal Daerah"
+            description="Pilih berurutan: Pulau → Provinsi → Daerah"
+          >
+            <div className="grid gap-4 md:grid-cols-3">
+              <Field label="Pulau" required error={errors.island?.message}>
+                <Controller
+                  control={control}
+                  name="island"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue('province', '');
+                        setValue('region', '');
+                      }}
+                      value={field.value || undefined}
+                    >
+                      <SelectTrigger className={selectTriggerClassName}>
+                        <SelectValue placeholder="Pilih Pulau" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MAJOR_ISLANDS.map((island) => (
+                          <SelectItem key={island} value={island}>
+                            {island}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </Field>
+              <Field label="Provinsi" required error={errors.province?.message}>
+                <Controller
+                  control={control}
+                  name="province"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={(val) => {
+                        field.onChange(val);
+                        setValue('region', '');
+                      }}
+                      value={field.value || undefined}
+                      disabled={!watchedIsland}
+                    >
+                      <SelectTrigger className={selectTriggerClassName}>
+                        <SelectValue
+                          placeholder={
+                            watchedIsland
+                              ? 'Pilih Provinsi'
+                              : 'Pilih Pulau dulu'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredProvinces.map((p) => (
+                          <SelectItem key={p.kode} value={p.nama}>
+                            {p.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </Field>
+              <Field label="Daerah" required error={errors.region?.message}>
+                <Controller
+                  control={control}
+                  name="region"
+                  render={({ field }) => (
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || undefined}
+                      disabled={!watchedProvince}
+                    >
+                      <SelectTrigger className={selectTriggerClassName}>
+                        <SelectValue
+                          placeholder={
+                            watchedProvince
+                              ? 'Pilih Daerah'
+                              : 'Pilih Provinsi dulu'
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {filteredKabupaten.map((k) => (
+                          <SelectItem key={k.kode} value={k.nama}>
+                            {k.nama}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </Field>
             </div>
+          </FormSection>
 
-            {/* Pulau */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Pulau *
-              </label>
-              <Controller
-                control={control}
-                name="island"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(val) => {
-                      field.onChange(val);
-                      setValue('province', '');
-                      setValue('region', '');
-                    }}
-                    value={field.value || undefined}
-                  >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
-                      <SelectValue placeholder="Pilih Pulau" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MAJOR_ISLANDS.map((island) => (
-                        <SelectItem key={island} value={island}>
-                          {island}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.island && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.island.message}
-                </p>
-              )}
-            </div>
-
-            {/* Provinsi */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Provinsi *
-              </label>
-              <Controller
-                control={control}
-                name="province"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={(val) => {
-                      field.onChange(val);
-                      setValue('region', '');
-                    }}
-                    value={field.value || undefined}
-                    disabled={!watchedIsland}
-                  >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
-                      <SelectValue
-                        placeholder={
-                          watchedIsland
-                            ? 'Pilih Provinsi'
-                            : 'Pilih Pulau terlebih dahulu'
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredProvinces.map((p) => (
-                        <SelectItem key={p.kode} value={p.nama}>
-                          {p.nama}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.province && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.province.message}
-                </p>
-              )}
-            </div>
-
-            {/* Daerah */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Daerah *
-              </label>
-              <Controller
-                control={control}
-                name="region"
-                render={({ field }) => (
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value || undefined}
-                    disabled={!watchedProvince}
-                  >
-                    <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
-                      <SelectValue
-                        placeholder={
-                          watchedProvince
-                            ? 'Pilih Daerah'
-                            : 'Pilih Provinsi terlebih dahulu'
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {filteredKabupaten.map((k) => (
-                        <SelectItem key={k.kode} value={k.nama}>
-                          {k.nama}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.region && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.region.message}
-                </p>
-              )}
-            </div>
-
-            {/* Read Minutes, Gender, Featured, Status */}
-            <div className="block text-sm font-medium text-muted-foreground mb-1.5">
-              {/* Estimasi Waktu Baca */}
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                  Estimasi Waktu Baca (Menit) *
-                </label>
+          {/* 3. Detail */}
+          <FormSection
+            step={3}
+            icon={SlidersHorizontal}
+            title="Detail Tambahan"
+            description="Informasi pendukung untuk filter dan tampilan"
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              <Field
+                label="Estimasi Waktu Baca (Menit)"
+                required
+                error={errors.readMinutes?.message}
+              >
                 <Input
                   {...register('readMinutes', { valueAsNumber: true })}
                   type="number"
+                  min={1}
                   placeholder="6"
-                  className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
+                  className={inputClassName}
                 />
-                {errors.readMinutes && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {errors.readMinutes.message}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-5">
-              {/* Gender */}
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                  Gender (Opsional)
-                </label>
+              </Field>
+              <Field label="Gender" error={errors.gender?.message}>
                 <Controller
                   control={control}
                   name="gender"
@@ -666,7 +801,7 @@ export default function AddUpdateArticleModal({
                       onValueChange={field.onChange}
                       value={field.value ?? undefined}
                     >
-                      <SelectTrigger className="h-11 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground">
+                      <SelectTrigger className={selectTriggerClassName}>
                         <SelectValue placeholder="Pilih Gender" />
                       </SelectTrigger>
                       <SelectContent>
@@ -676,151 +811,132 @@ export default function AddUpdateArticleModal({
                     </Select>
                   )}
                 />
-                {errors.gender && (
-                  <p className="text-xs text-red-500 mt-1">
-                    {errors.gender.message}
-                  </p>
-                )}
-              </div>
+              </Field>
+              <Field
+                label="Suku / Kelompok Etnis"
+                error={errors.ethnicGroup?.message}
+              >
+                <Input
+                  {...register('ethnicGroup')}
+                  type="text"
+                  placeholder="Contoh: Jawa / Dayak"
+                  className={inputClassName}
+                />
+              </Field>
+              <Field label="Jenis Pakaian" error={errors.clothingType?.message}>
+                <Input
+                  {...register('clothingType')}
+                  type="text"
+                  placeholder="Contoh: Kebaya / Batik"
+                  className={inputClassName}
+                />
+              </Field>
             </div>
 
-            <div className="grid grid-cols-2 gap-5">
-              {/* Featured Toggle */}
-              <div className="flex items-end pb-2">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className="relative">
-                    <input
-                      {...register('featured')}
-                      type="checkbox"
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#c26a3d]/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c26a3d]"></div>
-                  </div>
-                  <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                    Tampilkan di Featured
+            <label className="group mt-4 flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-[#faf7f2] px-4 py-3 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f4efe5]">
+              <div>
+                <p className="text-sm font-medium text-[#3d3a34]">
+                  Tampilkan di Featured
+                </p>
+                <p className="text-xs text-[#9a8f80]">
+                  Artikel akan ditonjolkan di halaman ensiklopedia
+                </p>
+              </div>
+              <span className="relative shrink-0">
+                <input
+                  {...register('featured')}
+                  type="checkbox"
+                  className="peer sr-only"
+                />
+                <span className="block h-6 w-11 rounded-full bg-[#ddd4c6] transition-colors peer-checked:bg-[#3a5a4a] peer-focus-visible:ring-4 peer-focus-visible:ring-[#3a5a4a]/20" />
+                <span className="absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
+              </span>
+            </label>
+          </FormSection>
+
+          {/* 4. Konten & Gambar */}
+          <FormSection
+            step={4}
+            icon={BookOpen}
+            title="Ringkasan & Gambar"
+            description="Teks yang muncul di kartu dan halaman artikel"
+          >
+            <div className="space-y-4">
+              <Field
+                label="Excerpt (Ringkasan Pendek)"
+                required
+                error={errors.excerpt?.message}
+                hint="Teaser singkat yang muncul di kartu artikel."
+                aside={
+                  <span
+                    className={cn(
+                      'text-xs tabular-nums',
+                      excerptLength > EXCERPT_SOFT_LIMIT
+                        ? 'text-[#c26a3d]'
+                        : 'text-[#a39c92]',
+                    )}
+                  >
+                    {excerptLength}/{EXCERPT_SOFT_LIMIT}
                   </span>
-                </label>
-              </div>
+                }
+              >
+                <textarea
+                  {...register('excerpt')}
+                  rows={2}
+                  placeholder="Teaser singkat yang muncul di kartu artikel..."
+                  className={textareaClassName}
+                />
+              </Field>
+              <Field
+                label="Ringkasan (Summary)"
+                error={errors.summary?.message}
+              >
+                <textarea
+                  {...register('summary')}
+                  rows={3}
+                  placeholder="Ringkasan lengkap tentang isi artikel..."
+                  className={textareaClassName}
+                />
+              </Field>
+              <Field
+                label="Deskripsi Tambahan"
+                error={errors.description?.message}
+              >
+                <textarea
+                  {...register('description')}
+                  rows={3}
+                  placeholder="Detail informasi tambahan lainnya..."
+                  className={textareaClassName}
+                />
+              </Field>
+              <Field
+                label="URL Gambar Utama"
+                error={errors.imageURL?.message}
+                hint="Pratinjau muncul otomatis setelah URL diisi."
+              >
+                <div className="flex items-start gap-3">
+                  <Input
+                    {...register('imageURL')}
+                    type="text"
+                    placeholder="https://example.com/image.jpg"
+                    className={cn(inputClassName, 'flex-1')}
+                  />
+                  <ImagePreview
+                    url={watchedValues.imageURL}
+                    className="h-20 w-28"
+                  />
+                </div>
+              </Field>
             </div>
-          </div>
+          </FormSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Ethnic Group */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Suku / Kelompok Etnis (Opsional)
-              </label>
-              <Input
-                {...register('ethnicGroup')}
-                type="text"
-                placeholder="Contoh: Jawa / Dayak"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
-              />
-              {errors.ethnicGroup && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.ethnicGroup.message}
-                </p>
-              )}
-            </div>
-
-            {/* Clothing Type */}
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Jenis Pakaian (Opsional)
-              </label>
-              <Input
-                {...register('clothingType')}
-                type="text"
-                placeholder="Contoh: Kebaya / Batik"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground"
-              />
-              {errors.clothingType && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.clothingType.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Excerpt, Summary, Description */}
-          <div className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Excerpt (Ringkasan Pendek) *
-              </label>
-              <textarea
-                {...register('excerpt')}
-                rows={2}
-                placeholder="Teaser singkat yang muncul di kartu artikel..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
-              />
-              {errors.excerpt && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.excerpt.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Ringkasan (Summary) (Opsional)
-              </label>
-              <textarea
-                {...register('summary')}
-                rows={3}
-                placeholder="Ringkasan lengkap tentang isi artikel..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
-              />
-              {errors.summary && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.summary.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                Deskripsi Tambahan (Opsional)
-              </label>
-              <textarea
-                {...register('description')}
-                rows={3}
-                placeholder="Detail informasi tambahan lainnya..."
-                className="w-full px-4 py-3 bg-[#fdfaf7] border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-3 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
-              />
-              {errors.description && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1.5">
-                URL Gambar Utama (Opsional)
-              </label>
-              <Input
-                {...register('imageURL')}
-                type="text"
-                placeholder="https://example.com/image.jpg"
-                className="h-11 px-4 bg-[#fdfaf7] border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d]"
-              />
-              {errors.imageURL && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.imageURL.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <hr className="border-[#ebdxc2]" />
-
-          {/* Sections Management */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-semibold text-foreground">
-                Konten Section
-              </h3>
+          {/* 5. Section */}
+          <FormSection
+            step={5}
+            icon={Layers}
+            title="Konten Section"
+            description={`${fields.length} section · bagian isi artikel`}
+            aside={
               <Button
                 type="button"
                 variant="outline"
@@ -828,142 +944,115 @@ export default function AddUpdateArticleModal({
                 onClick={() =>
                   append({ title: '', content: '', order: fields.length })
                 }
-                className="flex items-center gap-2 border-[#c26a3d] text-[#c26a3d] hover:bg-[#c26a3d]/10"
+                className="cursor-pointer gap-1.5 rounded-lg border-[#3a5a4a]/30 text-[#2f5543] hover:bg-[#e7efe4] hover:text-[#2f5543]"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="size-4" />
                 Tambah Section
               </Button>
-            </div>
-
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="p-4 bg-[#fdfaf7] border border-[#e5ded5] rounded-2xl space-y-4 relative"
-              >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => remove(index)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-500 hover:bg-red-50"
+            }
+          >
+            <div className="space-y-3">
+              {fields.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] py-8 text-sm text-[#9a8f80]">
+                  <Layers className="size-5 text-[#b08a5e]" />
+                  Belum ada section.
+                </div>
+              ) : null}
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] fade-in slide-in-from-bottom-1"
                 >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                    Judul Section {index + 1} *
-                  </label>
-                  <Input
-                    {...register(`sections.${index}.title` as const)}
-                    placeholder="Contoh: Sejarah Singkat"
-                    className="h-10 bg-white"
-                  />
-                  {errors.sections?.[index]?.title && (
-                    <p className="text-xs text-red-500 mt-1 italic">
-                      {errors.sections[index]?.title?.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                    Isi Konten *
-                  </label>
-                  <textarea
-                    {...register(`sections.${index}.content` as const)}
-                    rows={4}
-                    placeholder="Tuliskan isi detail section di sini..."
-                    className="w-full px-4 py-3 bg-white border border-[#e5ded5] rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c26a3d]/30 focus-visible:border-[#c26a3d] transition-all resize-none"
-                  />
-                  {errors.sections?.[index]?.content && (
-                    <p className="text-xs text-red-500 mt-1 italic">
-                      {errors.sections[index]?.content?.message}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                    URL Gambar Section (Opsional)
-                  </label>
-                  <div className="flex items-start gap-3">
-                    <Input
-                      {...register(`sections.${index}.imageURL` as const)}
-                      placeholder="https://example.com/section-image.jpg"
-                      className="h-10 bg-white flex-1"
-                    />
-                    {/** preview if imageURL exists */}
-                    {/** Use value from field so it updates immediately */}
-                    <div className="w-20 h-12 bg-[#faf8f5] rounded-md flex items-center justify-center border border-dashed border-[#e5ded5]">
-                      {(() => {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const formValues = (control as any)._formValues;
-                        const imageUrl =
-                          formValues?.sections?.[index]?.imageURL;
-                        return imageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={imageUrl as string}
-                            alt=""
-                            className="w-20 h-12 object-cover rounded-md"
-                          />
-                        ) : (
-                          <span className="text-[11px] text-muted-foreground text-center">
-                            No image
-                          </span>
-                        );
-                      })()}
-                    </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-[#3a5a4a] text-xs text-white">
+                        {index + 1}
+                      </span>
+                      {watchedValues.sections?.[index]?.title?.trim() ||
+                        `Section ${index + 1}`}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Hapus section ${index + 1}`}
+                      onClick={() => remove(index)}
+                      className="cursor-pointer rounded-lg text-[#a39c92] hover:bg-red-50 hover:text-red-600"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
                   </div>
-                  {errors.sections?.[index]?.imageURL && (
-                    <p className="text-xs text-red-500 mt-1 italic">
-                      {errors.sections[index]?.imageURL?.message}
-                    </p>
-                  )}
+
+                  <Field
+                    label="Judul Section"
+                    required
+                    error={errors.sections?.[index]?.title?.message}
+                  >
+                    <Input
+                      {...register(`sections.${index}.title` as const)}
+                      placeholder="Contoh: Sejarah Singkat"
+                      className={inputClassName}
+                    />
+                  </Field>
+                  <Field
+                    label="Isi Konten"
+                    required
+                    error={errors.sections?.[index]?.content?.message}
+                  >
+                    <textarea
+                      {...register(`sections.${index}.content` as const)}
+                      rows={4}
+                      placeholder="Tuliskan isi detail section di sini..."
+                      className={textareaClassName}
+                    />
+                  </Field>
+                  <Field
+                    label="URL Gambar Section"
+                    error={errors.sections?.[index]?.imageURL?.message}
+                  >
+                    <div className="flex items-start gap-3">
+                      <Input
+                        {...register(`sections.${index}.imageURL` as const)}
+                        placeholder="https://example.com/section-image.jpg"
+                        className={cn(inputClassName, 'flex-1')}
+                      />
+                      <ImagePreview
+                        url={watchedValues.sections?.[index]?.imageURL}
+                        className="h-11 w-20"
+                      />
+                    </div>
+                  </Field>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </FormSection>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-[#ebd8c2] flex items-center gap-3 bg-[#fefdfb] rounded-b-2xl">
+        <div className="flex items-center justify-end gap-3 border-t border-[#ebe3d6] bg-[#fffdfa] px-6 py-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="h-11 cursor-pointer rounded-xl border-[#e5ded5] bg-white px-6 text-[#6f6a62] hover:bg-[#f4efe5]"
+          >
+            Batal
+          </Button>
           <Button
             type="submit"
             disabled={isPending}
-            className="flex-1 h-11 bg-[#c26a3d] hover:bg-[#a85b34] text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 text-base"
+            className="h-11 min-w-44 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-6 text-white shadow-[0_6px_16px_rgba(47,75,61,0.25)] transition-all hover:-translate-y-px hover:bg-[#2f4b3d]"
           >
             {isPending ? (
-              <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                />
-              </svg>
+              <Save className="size-4" />
             )}
             {isPending
               ? 'Menyimpan...'
               : isEdit
                 ? 'Simpan Perubahan'
                 : 'Tambah Artikel'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="px-6 h-11 bg-white border-[#e5ded5] text-muted-foreground hover:bg-muted rounded-xl font-medium transition-colors text-base"
-          >
-            Batal
           </Button>
         </div>
       </form>

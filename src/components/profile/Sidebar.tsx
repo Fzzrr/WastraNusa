@@ -3,7 +3,14 @@
 import { Badge } from '@/components/ui/badge';
 import { authClient } from '@/lib/auth/auth-client';
 import { useQueryClient } from '@tanstack/react-query';
-import { BookOpen, LogOut, MapPin, ShoppingBag, User } from 'lucide-react';
+import {
+  BookOpen,
+  LogOut,
+  MapPin,
+  ShoppingBag,
+  Store,
+  User,
+} from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function Sidebar() {
@@ -47,6 +54,12 @@ export default function Sidebar() {
       label: 'Artikel Disukai',
       badge: null,
       href: '/profile/liked-article',
+    },
+    {
+      icon: <Store size={16} />,
+      label: 'Buka Toko',
+      badge: null,
+      href: '/profile/seller-application',
     },
     {
       icon: <LogOut size={16} />,

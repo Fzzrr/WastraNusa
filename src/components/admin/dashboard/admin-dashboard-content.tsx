@@ -1,414 +1,441 @@
 'use client';
 
-import { AdminHeader } from '@/components/admin/admin-header';
-import { mergeArticleDashboardData } from '@/components/admin/dashboard/dashboard-data';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { AdminBrandChip, AdminHeader } from '@/components/admin/admin-header';
+import { AreaChart, HorizontalBarChart } from '@/components/charts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useArticleDashboard } from '@/hooks/use-article';
-import { useProductDashboard } from '@/hooks/use-product-inventory';
-import { authClient } from '@/lib/auth/auth-client';
-import { cn } from '@/lib/utils';
 import {
-  type DashboardData,
-  type DashboardStat,
-  type DashboardStatIcon,
-  type StockAlertItem,
-} from '@/types/dashboard';
+  type AdminDashboardData,
+  useAdminDashboard,
+} from '@/hooks/use-admin-dashboard';
+import { cn, formatIDR } from '@/lib/utils';
+import type { PopularArticle } from '@/types/dashboard';
 import {
-  ArrowDownRight,
-  ArrowUpRight,
-  BookOpen,
-  ChevronRight,
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  CalendarDays,
+  ChartNoAxesColumn,
   Clock3,
   Eye,
-  Package,
-  TriangleAlert,
+  type LucideIcon,
+  Store,
+  TrendingUp,
+  Wallet,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { type ReactNode, useSyncExternalStore } from 'react';
 
-const surfaceCardClassName =
-  'border-0 bg-[#fffdf9] shadow-[0_1px_0_rgba(60,41,15,0.06),0_18px_40px_rgba(89,69,38,0.05)] ring-1 ring-[#e8decd]';
-const sectionHeaderClassName = 'border-b border-[#eee2d0] px-5 py-4';
-const sectionActionClassName =
-  'px-0 text-[#776b5c] no-underline hover:no-underline';
+const cardClassName =
+  'rounded-2xl bg-[#fffdfa] p-6 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6] animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both';
+const hoverLiftClassName =
+  'transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(60,41,15,0.05),0_18px_40px_rgba(89,69,38,0.12)]';
 
-function SummaryIcon({ icon }: { icon: DashboardStatIcon }) {
-  const iconClassName = 'text-[#a98345]';
+const compactNumber = new Intl.NumberFormat('id-ID', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
 
-  switch (icon) {
-    case 'package':
-      return <Package className={iconClassName} />;
-    case 'book-open':
-      return <BookOpen className={iconClassName} />;
-    default:
-      return <TriangleAlert className={iconClassName} />;
-  }
-}
+type BadgeTone = 'green' | 'blue' | 'peach' | 'red';
 
-function SummaryTrendBadge({ stat }: { stat: DashboardStat }) {
+const badgeToneClassName: Record<BadgeTone, string> = {
+  green: 'bg-[#e7efe4] text-[#3f6b4a]',
+  blue: 'bg-[#e6ecf3] text-[#34507a]',
+  peach: 'bg-[#f6e7de] text-[#a15d3b]',
+  red: 'bg-[#f6e1dd] text-[#b04a3a]',
+};
+
+function TrendBadge({
+  children,
+  tone,
+  down = false,
+}: {
+  children: ReactNode;
+  tone: BadgeTone;
+  down?: boolean;
+}) {
+  const Icon = down ? ArrowDown : ArrowUp;
   return (
-    <Badge
-      variant={stat.tone === 'warning' ? 'destructive' : 'secondary'}
+    <span
       className={cn(
-        'rounded-full border-0 px-2 py-0.5 text-[11px] shadow-none',
-        stat.tone === 'warning' ? 'text-[#b45843]' : 'text-[#5f865a]',
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium',
+        badgeToneClassName[tone],
       )}
     >
-      {stat.tone === 'positive' ? (
-        <ArrowUpRight data-icon="inline-start" />
-      ) : stat.tone === 'warning' ? (
-        <ArrowDownRight data-icon="inline-start" />
-      ) : null}
-      {stat.changeLabel}
-    </Badge>
+      <Icon className="size-3" />
+      {children}
+    </span>
   );
 }
 
-function SummaryCard({ stat }: { stat: DashboardStat }) {
-  return (
-    <Card className={cn(surfaceCardClassName, 'py-5')}>
-      <CardHeader className="items-start gap-3 px-5">
-        <div className="flex size-10 items-center justify-center rounded-2xl bg-[#f8f1e4] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-          <SummaryIcon icon={stat.icon} />
-        </div>
-        <CardAction>
-          <SummaryTrendBadge stat={stat} />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="px-5">
-        <div className="text-4xl font-semibold tracking-tight text-[#30251d]">
-          {stat.value}
-        </div>
-        <p className="mt-2 text-sm font-medium text-[#50463b]">
-          {stat.description}
-        </p>
-        <p className="text-xs text-[#9b8f82]">{stat.footnote}</p>
-      </CardContent>
-    </Card>
-  );
+function formatPercent(percent: number) {
+  return `${percent >= 0 ? '+' : ''}${percent.toLocaleString('id-ID', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })}%`;
 }
 
-function StockStatusBadge({ item }: { item: StockAlertItem }) {
-  return item.severity === 'out' ? (
-    <Badge variant="destructive" className="bg-[#f5dfd8] text-[#b45843]">
-      {item.stockLabel}
-    </Badge>
-  ) : (
-    <Badge variant="secondary" className="bg-[#f4ead9] text-[#a56a2f]">
-      {item.stockLabel}
-    </Badge>
-  );
-}
-
-function SectionActionButton({ href }: { href: string }) {
-  return (
-    <Button variant="link" size="sm" className={sectionActionClassName} asChild>
-      <Link href={href}>
-        Kelola
-        <ChevronRight data-icon="inline-end" />
-      </Link>
-    </Button>
-  );
-}
-
-function StockAlertsCard({ items }: { items: DashboardData['stockAlerts'] }) {
-  return (
-    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
-      <CardHeader className={sectionHeaderClassName}>
-        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <TriangleAlert className="text-[#a98345]" />
-          Peringatan Stok
-        </CardTitle>
-        <CardAction>
-          <SectionActionButton href="/admin/product-inventory" />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 px-5 py-4">
-        {items.length === 0 ? (
-          <div className="text-sm text-[#8f8377]">
-            Belum ada produk dengan stok rendah atau habis.
-          </div>
-        ) : (
-          items.map((item) => (
-            <div
-              key={item.name}
-              className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
-            >
-              <div>
-                <p className="font-medium text-[#41372c]">{item.name}</p>
-                <p className="text-xs text-[#998d80]">{item.category}</p>
-              </div>
-              <StockStatusBadge item={item} />
-            </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function PopularArticlesCard({
-  articles,
-}: {
-  articles: DashboardData['popularArticles'];
-}) {
-  return (
-    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
-      <CardHeader className={sectionHeaderClassName}>
-        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <BookOpen className="text-[#a98345]" />
-          Artikel Paling Populer
-        </CardTitle>
-        <CardAction>
-          <SectionActionButton href="/admin/article" />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="px-5">
-        {articles.length === 0 ? (
-          <div className="py-6 text-sm text-[#8f8377]">
-            Belum ada data artikel populer.
-          </div>
-        ) : (
-          <div className="flex flex-col">
-            {articles.map((article) => (
-              <Link
-                key={article.rank}
-                href={`/encyclopedia/${article.slug}`}
-                className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 transition-colors hover:bg-[#fdf9f4] last:border-b-0"
-              >
-                <div className="pt-0.5 text-sm font-semibold text-[#8c7f71]">
-                  {article.rank}
-                </div>
-                <div>
-                  <p className="font-medium text-[#41372c]">{article.title}</p>
-                  <p className="text-xs text-[#9a8e81]">
-                    {article.category} / {article.region}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 whitespace-nowrap text-xs font-semibold text-[#6b6053]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
-                      <Eye className="size-3" />
-                    </span>
-                    {article.views.toLocaleString('id-ID')}
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
-                      <Clock3 className="size-3" />
-                    </span>
-                    {article.readTimeMinutes}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function DashboardStatusFooter({
+function StatCard({
+  icon: Icon,
   label,
-  adminName,
+  value,
+  footnote,
+  badge,
+  footnoteClassName = 'text-[#9a8f80]',
+  delay = 0,
 }: {
+  icon: LucideIcon;
+  delay?: number;
   label: string;
-  adminName: string;
+  value: string;
+  footnote: string;
+  badge?: ReactNode;
+  footnoteClassName?: string;
 }) {
   return (
-    <div className="flex justify-end">
-      <div className="hidden items-center gap-3 rounded-full bg-white/60 px-3 py-2 text-xs text-[#8d806f] shadow-[0_1px_0_rgba(60,41,15,0.04)] ring-1 ring-[#e8decd] md:flex">
-        <Avatar size="sm" className="size-7">
-          <AvatarFallback className="bg-[#ecd9ba] text-[#8b6b37]">
-            {adminName.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <span>{label}</span>
+    <div
+      className={cn(cardClassName, hoverLiftClassName, 'group')}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <div className="flex min-h-7 items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-[#f4efe5] text-[#8a6a3a] transition-colors group-hover:bg-[#2f5543] group-hover:text-[#f4efe2]">
+            <Icon className="size-4" />
+          </span>
+          <p className="text-sm text-[#5f5a52]">{label}</p>
+        </div>
+        {badge}
       </div>
+      <p className="mt-5 text-4xl font-bold tracking-tight text-[#2f4f3f] tabular-nums">
+        {value}
+      </p>
+      <p className={cn('mt-3 text-xs', footnoteClassName)}>{footnote}</p>
     </div>
   );
 }
 
-function SummaryCardSkeleton() {
+function SectionHeader({
+  title,
+  subtitle,
+  aside,
+}: {
+  title: string;
+  subtitle?: string;
+  aside?: ReactNode;
+}) {
   return (
-    <Card className={cn(surfaceCardClassName, 'py-5')}>
-      <CardHeader className="items-start gap-3 px-5">
-        <Skeleton className="size-10 rounded-2xl bg-[#eee2d0]" />
-        <CardAction>
-          <Skeleton className="h-5 w-16 rounded-full bg-[#eee2d0]" />
-        </CardAction>
-      </CardHeader>
-      <CardContent className="px-5">
-        <Skeleton className="h-10 w-24 bg-[#eee2d0]" />
-        <Skeleton className="mt-2 h-5 w-32 bg-[#eee2d0]" />
-        <Skeleton className="mt-1 h-4 w-28 bg-[#eee2d0]" />
-      </CardContent>
-    </Card>
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-[#2f4f3f]">
+          <span className="h-4 w-1 rounded-full bg-[#d2a36d]" />
+          {title}
+        </h2>
+        {subtitle ? (
+          <p className="mt-1 pl-3 text-sm text-[#9a8f80]">{subtitle}</p>
+        ) : null}
+      </div>
+      {aside}
+    </div>
   );
 }
 
-function StockAlertsSkeleton() {
+function EmptyState({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: ReactNode;
+}) {
   return (
-    <Card className={cn(surfaceCardClassName, 'min-h-[420px] gap-0 py-0')}>
-      <CardHeader className={sectionHeaderClassName}>
-        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
-          <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 px-5 py-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="flex items-start justify-between gap-3 border-b border-[#f2e9dc] pb-4 last:border-b-0 last:pb-0"
+    <div className="flex h-[200px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#e6dccb] bg-[#faf7f2] text-sm text-[#8f8377]">
+      <span className="flex size-10 items-center justify-center rounded-full bg-[#f4efe5] text-[#b08a5e]">
+        <Icon className="size-5" />
+      </span>
+      {children}
+    </div>
+  );
+}
+
+function StatCards({ data }: { data: AdminDashboardData }) {
+  const gmvChange = data.gmv.changePercent;
+
+  return (
+    <section className="grid gap-6 md:grid-cols-3">
+      <StatCard
+        icon={Wallet}
+        label="GMV Bulan Ini"
+        value={`Rp ${compactNumber.format(data.gmv.currentMonth)}`}
+        footnote="Total transaksi seluruh seller"
+        badge={
+          typeof gmvChange === 'number' ? (
+            <TrendBadge
+              tone={gmvChange >= 0 ? 'green' : 'red'}
+              down={gmvChange < 0}
+            >
+              {formatPercent(gmvChange)}
+            </TrendBadge>
+          ) : null
+        }
+      />
+      <StatCard
+        icon={Store}
+        delay={80}
+        label="Seller Aktif"
+        value={data.sellers.active.toLocaleString('id-ID')}
+        footnote={`dari ${data.sellers.registered.toLocaleString('id-ID')} seller terdaftar`}
+        badge={
+          data.sellers.newThisMonth > 0 ? (
+            <TrendBadge tone="blue">+{data.sellers.newThisMonth}</TrendBadge>
+          ) : null
+        }
+      />
+      <StatCard
+        icon={Eye}
+        delay={160}
+        label="Kunjungan Artikel"
+        value={compactNumber.format(data.articleViews.total)}
+        footnote="Total kunjungan seluruh artikel"
+        footnoteClassName="text-[#b08a5e]"
+      />
+    </section>
+  );
+}
+
+const WEEKDAY_FULL_ID: Record<string, string> = {
+  Min: 'Minggu',
+  Sen: 'Senin',
+  Sel: 'Selasa',
+  Rab: 'Rabu',
+  Kam: 'Kamis',
+  Jum: 'Jumat',
+  Sab: 'Sabtu',
+};
+
+function TrafficCard({
+  data,
+}: {
+  data: Array<{ label: string; value: number }>;
+}) {
+  const hasData = data.some((point) => point.value > 0);
+
+  return (
+    <section
+      className={cn(cardClassName, hoverLiftClassName)}
+      style={{ animationDelay: '200ms' }}
+    >
+      <SectionHeader
+        title="Trafik Artikel"
+        subtitle="Total interaksi"
+        aside={
+          <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
+            7 Hari
+          </span>
+        }
+      />
+      <div className="mt-6">
+        {hasData ? (
+          <AreaChart
+            data={data.map((point) => ({
+              ...point,
+              tooltipLabel: WEEKDAY_FULL_ID[point.label],
+            }))}
+            color="#2f5543"
+            height={190}
+            ariaLabel="Trafik artikel 7 hari terakhir"
+            valueFormatter={(value) =>
+              `${value.toLocaleString('id-ID')} Interaksi`
+            }
+          />
+        ) : (
+          <EmptyState icon={TrendingUp}>
+            Belum ada interaksi artikel dalam 7 hari terakhir.
+          </EmptyState>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function TopSellerCard({
+  data,
+}: {
+  data: Array<{ name: string; gmv: number }>;
+}) {
+  return (
+    <section
+      className={cn(cardClassName, hoverLiftClassName)}
+      style={{ animationDelay: '280ms' }}
+    >
+      <SectionHeader
+        title="Top Seller"
+        subtitle="Penjualan (juta rupiah)"
+        aside={
+          <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
+            Bulan ini
+          </span>
+        }
+      />
+      <div className="mt-5">
+        {data.length === 0 ? (
+          <EmptyState icon={ChartNoAxesColumn}>
+            Belum ada penjualan seller bulan ini.
+          </EmptyState>
+        ) : (
+          <HorizontalBarChart
+            data={data.map((seller) => ({
+              label: seller.name,
+              value: seller.gmv / 1_000_000,
+            }))}
+            valueFormatter={(value) => formatIDR(value * 1_000_000)}
+            ariaLabel="Top seller berdasarkan penjualan bulan ini"
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
+  return (
+    <section
+      className={cn(cardClassName, hoverLiftClassName)}
+      style={{ animationDelay: '360ms' }}
+    >
+      <SectionHeader
+        title="Artikel Paling Populer"
+        aside={
+          <Link
+            href="/admin/article"
+            className="group/link inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm text-[#a07a3a] transition-colors hover:bg-[#f4efe5]"
           >
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
-              <Skeleton className="h-3 w-20 bg-[#eee2d0]" />
-            </div>
-            <Skeleton className="h-6 w-16 rounded-md bg-[#eee2d0]" />
+            Lihat semua
+            <ArrowRight className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
+          </Link>
+        }
+      />
+      <div className="-mx-3 mt-4">
+        {articles.length === 0 ? (
+          <EmptyState icon={Eye}>Belum ada data artikel populer.</EmptyState>
+        ) : (
+          articles.map((article) => (
+            <Link
+              key={article.rank}
+              href={`/encyclopedia/${article.slug}`}
+              className="group grid grid-cols-[1.75rem_1fr_auto] items-center gap-3 rounded-xl border-b border-[#efe8dd] px-3 py-3 transition-colors last:border-b-0 hover:bg-[#f7f2ea]"
+            >
+              <span
+                className={cn(
+                  'flex size-7 items-center justify-center rounded-full text-sm font-semibold',
+                  article.rank <= 3
+                    ? 'bg-[#f5ead3] text-[#b8923f]'
+                    : 'bg-[#f1ede6] text-[#6b665e]',
+                )}
+              >
+                {article.rank}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-[#2f3a33] transition-colors group-hover:text-[#2f5543]">
+                  {article.title}
+                </p>
+                <p className="text-xs text-[#9a8f80]">{article.category}</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs whitespace-nowrap text-[#6b665e]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4efe5] px-2 py-1">
+                  <Eye className="size-3.5" />
+                  {article.views.toLocaleString('id-ID')}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4efe5] px-2 py-1">
+                  <Clock3 className="size-3.5" />
+                  {article.readTimeMinutes} mnt
+                </span>
+                <ArrowRight className="size-3.5 -translate-x-1 text-[#a07a3a] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <>
+      <section className="grid gap-6 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className={cardClassName}>
+            <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
+            <Skeleton className="mt-5 h-10 w-36 bg-[#eee2d0]" />
+            <Skeleton className="mt-3 h-3 w-40 bg-[#eee2d0]" />
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </section>
+      <div className={cardClassName}>
+        <Skeleton className="h-5 w-32 bg-[#eee2d0]" />
+        <Skeleton className="mt-6 h-[190px] w-full bg-[#eee2d0]" />
+      </div>
+      <section className="grid gap-6 xl:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div key={index} className={cardClassName}>
+            <Skeleton className="h-5 w-32 bg-[#eee2d0]" />
+            <Skeleton className="mt-6 h-[220px] w-full bg-[#eee2d0]" />
+          </div>
+        ))}
+      </section>
+    </>
   );
 }
 
-function PopularArticlesSkeleton() {
-  return (
-    <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
-      <CardHeader className={sectionHeaderClassName}>
-        <CardTitle className="flex items-center gap-2 text-sm text-[#41372c]">
-          <Skeleton className="size-4 rounded-full bg-[#eee2d0]" />
-          <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-5">
-        <div className="flex flex-col">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-b border-[#f2e9dc] py-3 last:border-b-0"
-            >
-              <Skeleton className="size-4 bg-[#eee2d0] pt-0.5" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-48 bg-[#eee2d0]" />
-                <Skeleton className="h-3 w-32 bg-[#eee2d0]" />
-              </div>
-              <div className="flex gap-4">
-                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
-                <Skeleton className="h-3 w-12 bg-[#eee2d0]" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+// `false` during SSR and the first client render (so hydration matches), `true`
+// afterward — the dated subtitle depends on the viewer's timezone.
+const subscribeNoop = () => () => {};
+function useHydrated() {
+  return useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
   );
 }
 
 export function AdminDashboardContent() {
-  const { data: session } = authClient.useSession();
-  const { data: articleDashboardData, isLoading } = useArticleDashboard();
-  const { data: productDashboardData, isLoading: isLoadingProducts } =
-    useProductDashboard();
-
-  const dashboardData = useMemo(
-    () => mergeArticleDashboardData(articleDashboardData, productDashboardData),
-    [articleDashboardData, productDashboardData],
+  const { data, isLoading } = useAdminDashboard();
+  const hydrated = useHydrated();
+  const headerSubtitle = (
+    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+      <AdminBrandChip />
+      {hydrated ? (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fffdfa] px-3 py-1 text-[#6f6a62] ring-1 ring-[#ebe3d6]">
+          <CalendarDays className="size-3.5 text-[#b08a5e]" />
+          {new Date().toLocaleDateString('id-ID', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          })}
+        </span>
+      ) : null}
+    </div>
   );
-
-  const adminName = session?.user?.name ?? 'Admin WastraNusa';
-  const adminHeaderSubtitle = useMemo(() => {
-    const now = new Date();
-    const weekdays = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ];
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-
-    const weekday = weekdays[now.getDay()];
-    const month = months[now.getMonth()];
-    const day = String(now.getDate()).padStart(2, '0');
-    const year = now.getFullYear();
-
-    const dateLabel = `${weekday}, ${day} ${month} ${year}`;
-
-    return `WastraNusa Admin · ${dateLabel}`;
-  }, []);
-  const lastUpdatedLabel = 'Ringkasan data terakhir diperbarui hari ini';
-
-  if (isLoading || isLoadingProducts) {
-    return (
-      <main className="flex flex-1 flex-col">
-        <AdminHeader
-          title="Dashboard Overview"
-          subtitle={adminHeaderSubtitle}
-        />
-        <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
-          <section className="grid gap-4 xl:grid-cols-3">
-            <SummaryCardSkeleton />
-            <SummaryCardSkeleton />
-            <SummaryCardSkeleton />
-          </section>
-
-          <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-            <StockAlertsSkeleton />
-            <PopularArticlesSkeleton />
-          </section>
-
-          <div className="flex justify-end">
-            <Skeleton className="h-10 w-48 rounded-full bg-[#eee2d0]" />
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="flex flex-1 flex-col">
-      <AdminHeader title="Dashboard Overview" subtitle={adminHeaderSubtitle} />
-      <div className="flex flex-1 flex-col gap-6 px-4 py-5 md:px-8 md:py-7">
-        <section className="grid gap-4 xl:grid-cols-3">
-          {dashboardData.summary?.map((stat) => (
-            <SummaryCard key={stat.title} stat={stat} />
-          ))}
-        </section>
-
-        <section className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-          <StockAlertsCard items={dashboardData.stockAlerts ?? []} />
-          <PopularArticlesCard articles={dashboardData.popularArticles ?? []} />
-        </section>
-
-        <DashboardStatusFooter label={lastUpdatedLabel} adminName={adminName} />
+      <AdminHeader
+        title="Dashboard Overview"
+        subtitle={headerSubtitle}
+        variant="plain"
+      />
+      <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-8">
+        {isLoading || !data ? (
+          <DashboardSkeleton />
+        ) : (
+          <>
+            <StatCards data={data} />
+            <TrafficCard data={data.articleTraffic} />
+            <section className="grid gap-6 xl:grid-cols-2">
+              <TopSellerCard data={data.topSellers} />
+              <PopularArticlesCard articles={data.popularArticles} />
+            </section>
+          </>
+        )}
       </div>
     </main>
   );

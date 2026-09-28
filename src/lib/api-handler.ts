@@ -99,6 +99,25 @@ export function withApiAdmin<T = unknown>(handler: ApiHandler<T>) {
 }
 
 /**
+ * Higher-order function to wrap API routes with seller authentication and standardized error handling.
+ * The seller's own user id is passed as `userId` so handlers can scope queries by `sellerId`.
+ * @param handler The actual route logic
+ * @returns A Next.js API route handler
+ */
+export function withApiSeller<T = unknown>(handler: ApiHandler<T>) {
+  return async (req: Request, { params }: { params: Promise<T> }) => {
+    try {
+      const user = await AuthHelper.requireSeller();
+      const resolvedParams = await params;
+
+      return await handler({ userId: user.id, params: resolvedParams, req });
+    } catch (err) {
+      return handleApiError(err, req);
+    }
+  };
+}
+
+/**
  * Higher-order function to wrap public API routes with standardized error handling and async params.
  * @param handler The actual route logic
  * @returns A Next.js API route handler

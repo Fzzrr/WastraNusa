@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 
 import { getSessionUser } from './auth';
+import { isAdmin } from './roles';
+import { hasSellerAccess } from './seller-access';
 
 export async function requireUser() {
   const user = await getSessionUser();
@@ -12,7 +14,15 @@ export async function requireUser() {
 
 export async function requireAdmin() {
   const user = await requireUser();
-  if (user.role !== 'admin') {
+  if (!isAdmin(user.role)) {
+    return redirect('/');
+  }
+  return user;
+}
+
+export async function requireSeller() {
+  const user = await requireUser();
+  if (!(await hasSellerAccess(user))) {
     return redirect('/');
   }
   return user;
