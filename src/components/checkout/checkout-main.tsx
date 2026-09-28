@@ -1,17 +1,29 @@
 'use client';
 
+import { CheckoutHeader } from '@/components/checkout/checkout-stepper';
+import {
+  ProfileEmptyState,
+  profileOutlineButtonClassName,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import {
   getCheckoutSession,
   setCheckoutSession,
   subscribeToCheckoutSession,
 } from '@/lib/checkout-session';
+import { cn } from '@/lib/utils';
 import {
   type CheckoutAddressSelection,
   type CheckoutSessionData,
   type CheckoutShippingSelection,
 } from '@/types/checkout';
-import { ChevronLeft, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight,
+  ChevronLeft,
+  ShieldCheck,
+  ShoppingCart,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState, useSyncExternalStore } from 'react';
@@ -38,7 +50,7 @@ const shippingOptions = [
   },
   {
     id: 'jne-yes',
-    name: 'YES (1 hari)',
+    name: 'YES (1 Hari)',
     courier: 'JNE',
     price: 42000,
     desc: '1 hari kerja',
@@ -120,32 +132,28 @@ export function CheckoutMain() {
 
   return (
     <>
-      <div className="mb-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-[#8e8476]">
-        <span className="text-brand">Keranjang</span>
-        <span className="text-[#d8cfbf]">&gt;</span>
-        <span className="text-[#3d5446] border-b-2 border-brand pb-1">
-          Pengiriman
-        </span>
-        <span className="text-[#d8cfbf]">&gt;</span>
-        <span className="text-[#d8cfbf]">Pembayaran</span>
-      </div>
+      <CheckoutHeader
+        step={2}
+        title="Pengiriman"
+        description="Pilih alamat tujuan dan metode pengiriman"
+      />
 
       {selectedItems.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#e8e2d5] p-8 text-center">
-          <p className="text-lg font-bold text-[#3d5446]">
-            Belum ada produk checkout
-          </p>
-          <p className="text-[#8e8476] mt-2">
-            Pilih produk dari keranjang terlebih dahulu.
-          </p>
-          <Link href="/cart" className="inline-block mt-6">
-            <Button className="bg-[#2f5f49] hover:bg-[#244a39] text-white">
-              Kembali ke Keranjang
+        <ProfileEmptyState
+          icon={ShoppingCart}
+          title="Belum ada produk checkout"
+          description="Pilih produk dari keranjang terlebih dahulu."
+          action={
+            <Button
+              asChild
+              className={cn(profilePrimaryButtonClassName, 'h-10 px-5')}
+            >
+              <Link href="/cart">Kembali ke Keranjang</Link>
             </Button>
-          </Link>
-        </div>
+          }
+        />
       ) : (
-        <div className="lg:grid lg:grid-cols-12 gap-8 items-start">
+        <div className="items-start gap-6 lg:grid lg:grid-cols-12">
           <div className="lg:col-span-8 space-y-6">
             <AddressSection
               initialSelectedAddressId={selectedAddress?.id}
@@ -157,11 +165,14 @@ export function CheckoutMain() {
               onSelect={setSelectedShippingId}
             />
 
-            <div className="mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
               <Link href="/cart">
                 <Button
-                  variant="ghost"
-                  className="text-brand font-bold gap-2 hover:bg-brand/5 px-0 sm:px-4"
+                  variant="outline"
+                  className={cn(
+                    profileOutlineButtonClassName,
+                    'h-11 px-5 font-bold',
+                  )}
                 >
                   <ChevronLeft size={18} /> Kembali ke Keranjang
                 </Button>
@@ -170,21 +181,25 @@ export function CheckoutMain() {
               <Button
                 onClick={handleContinueToPayment}
                 disabled={!selectedAddress}
-                className="w-full sm:w-auto bg-[#2f5f49] hover:bg-[#244a39] text-white px-12 py-7 rounded-2xl font-bold shadow-lg shadow-brand/10 transition-all active:scale-95"
+                className={cn(
+                  profilePrimaryButtonClassName,
+                  'group/cta h-12 w-full px-8 text-base font-bold active:scale-95 disabled:opacity-50 sm:w-auto',
+                )}
               >
                 Tinjau & Konfirmasi
+                <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[#8e8476] mt-4">
-              <ShieldCheck size={14} />
-              <p className="text-[10px] font-medium uppercase tracking-tighter">
+            <div className="flex items-center justify-center gap-2 text-[#9a8f80]">
+              <ShieldCheck className="size-3.5 text-[#2f5f49]" />
+              <p className="text-[11px] font-medium">
                 Pembayaran Aman & Terenkripsi
               </p>
             </div>
           </div>
 
-          <aside className="lg:col-span-4">
+          <aside className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">
             <CheckoutSummary totals={totals} items={selectedItems} />
           </aside>
         </div>

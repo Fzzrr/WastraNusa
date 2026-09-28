@@ -1,11 +1,19 @@
 'use client';
 
+import { CheckoutHeader } from '@/components/checkout/checkout-stepper';
+import {
+  ProfileEmptyState,
+  profilePrimaryButtonClassName,
+} from '@/components/profile/profile-section';
+import { Button } from '@/components/ui/button';
 import {
   useCart,
   useRemoveMultipleFromCart,
   useUpdateCartItem,
 } from '@/hooks/use-cart';
-import { Loader2, ShoppingCart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { ShoppingBag, ShoppingCart, XCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { CartProduct } from './cart-list';
@@ -204,31 +212,60 @@ export function CartMain() {
 
   return (
     <>
-      <div className="mb-8 flex items-center gap-2">
-        <ShoppingCart className="text-brand" />
-        <h1 className="text-2xl font-bold text-[#3d5446]">Keranjang Belanja</h1>
-      </div>
+      <CheckoutHeader
+        step={1}
+        title="Keranjang Belanja"
+        description={
+          items.length > 0
+            ? `${items.length} Produk di keranjang Anda`
+            : 'Pilih produk yang ingin Anda beli'
+        }
+      />
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-brand" />
-          <span className="ml-2 text-[#3d5446]">Memuat keranjang...</span>
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="space-y-3 lg:col-span-8">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex animate-pulse gap-4 rounded-2xl bg-[#fffdf8] p-5 ring-1 ring-[#e8dfd0]"
+              >
+                <div className="size-20 rounded-xl bg-[#efe8dd]" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-1/2 rounded bg-[#efe8dd]" />
+                  <div className="h-3 w-1/3 rounded bg-[#f4efe5]" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="h-80 animate-pulse rounded-2xl bg-[#fffdf8] ring-1 ring-[#e8dfd0] lg:col-span-4" />
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700">
-          <p className="font-bold">Gagal memuat keranjang</p>
-          <p className="text-sm mt-1">{error.message}</p>
-        </div>
+        <ProfileEmptyState
+          icon={XCircle}
+          tone="error"
+          title="Gagal memuat keranjang"
+          description={error.message}
+        />
       ) : items.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#e8e2d5] p-8 text-center">
-          <ShoppingCart className="w-12 h-12 mx-auto text-[#8e8476] mb-4" />
-          <p className="text-lg font-semibold text-[#3d5446]">
-            Keranjang Anda kosong
-          </p>
-          <p className="text-[#8e8476] mt-2">Tambahkan produk favorit Anda</p>
-        </div>
+        <ProfileEmptyState
+          icon={ShoppingCart}
+          title="Keranjang Anda masih kosong"
+          description="Temukan wastra favorit Anda dan tambahkan ke keranjang."
+          action={
+            <Button
+              asChild
+              className={cn(profilePrimaryButtonClassName, 'h-10 px-5')}
+            >
+              <Link href="/catalog">
+                <ShoppingBag className="size-4" />
+                Mulai Belanja
+              </Link>
+            </Button>
+          }
+        />
       ) : (
-        <div className="lg:grid lg:grid-cols-12 gap-8">
+        <div className="items-start gap-6 lg:grid lg:grid-cols-12">
           <div className="lg:col-span-8">
             <CartList
               items={items}
@@ -239,7 +276,7 @@ export function CartMain() {
               onDeleteSelected={handleDeleteSelected}
             />
           </div>
-          <div className="lg:col-span-4">
+          <div className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">
             <CartSummary
               totals={totals}
               selectedItems={selectedItemsForSummary}

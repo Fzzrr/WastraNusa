@@ -11,6 +11,7 @@ vi.mock('next/image', () => ({
 
 const baseItem = {
   id: 'item-1',
+  productId: 'product-1',
   name: 'Kemeja Batik Kawung',
   price: 150000,
   quantity: 2,
