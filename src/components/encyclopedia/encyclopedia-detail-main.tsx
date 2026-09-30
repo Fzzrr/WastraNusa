@@ -35,8 +35,11 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { toast } from 'sonner';
+
+import { EncyclopediaChatSidebarCard } from './encyclopedia-chat-sidebar-card';
+import { EncyclopediaChatWidget } from './encyclopedia-chat-widget';
 
 const sideCardClassName =
   'rounded-2xl border-0 bg-[#fbf8f2] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e6dccb]';
@@ -84,6 +87,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
   const toggleLikeMutation = useToggleArticleLike(slug);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const errorMessage =
     error instanceof Error
       ? error.message
@@ -424,6 +428,8 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
         </article>
 
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+          <EncyclopediaChatSidebarCard onOpenChat={() => setIsChatOpen(true)} />
+
           <Card className={cn(sideCardClassName, 'gap-0 overflow-hidden py-0')}>
             <div className="flex items-center gap-2 bg-gradient-to-r from-[#2f5f49] to-[#3f7359] px-4 py-3">
               <Compass className="size-4 text-[#e8cb8d]" />
@@ -535,6 +541,13 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           </Card>
         </aside>
       </section>
+
+      <EncyclopediaChatWidget
+        articleId={article.slug}
+        articleTitle={article.title}
+        isOpen={isChatOpen}
+        onOpenChange={setIsChatOpen}
+      />
     </main>
   );
 }
