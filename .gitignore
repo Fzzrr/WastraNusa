@@ -48,3 +48,8 @@ next-env.d.ts
 
 # Prisma generated
 generated/
+src/generated/
+
+# postman
+.postman/
+postman/
