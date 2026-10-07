@@ -336,5 +336,73 @@ describe('paymentService', () => {
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();
     });
+
+    it('should not cancel order on pending notification', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'pending',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'pending',
+        status_code: '201',
+        payment_type: 'bank_transfer',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ status: 'pending' }),
+      );
+      expect(orderService.cancelOrderBySystemId).not.toHaveBeenCalled();
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
+    });
+
+    it('should cancel order on failed notification', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'pending',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'expire',
+        status_code: '407',
+      });
+
+      expect(orderService.cancelOrderBySystemId).toHaveBeenCalledWith(
+        'order-123',
+        'expired',
+      );
+    });
+
+    it('should not confirm a cancelled order when payment settles', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'cancelled',
+      } as never);
+
+      await paymentService.handleNotification(mockPayload);
+
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
+      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+      expect(
+        cartRepository.removePurchasedItemsByProductVariant,
+      ).not.toHaveBeenCalled();
+    });
   });
 });

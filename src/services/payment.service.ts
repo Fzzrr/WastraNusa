@@ -470,6 +470,7 @@ export const paymentService = {
     const paymentStatus = mapPaymentStatus(transaction_status);
     const isPaid =
       transaction_status === 'settlement' || transaction_status === 'capture';
+    const isFailed = ['deny', 'cancel', 'expire'].includes(transaction_status);
     const paidAt = isPaid ? new Date() : null;
 
     await paymentTransactionRepository.updatePaymentStatus(order_id, {
@@ -478,13 +479,24 @@ export const paymentService = {
     });
 
     if (isPaid) {
+      if (order.orderStatus === 'cancelled') {
+        logger.warn(
+          'Payment received for an order that was already cancelled',
+          {
+            order_id,
+            transaction_status,
+          },
+        );
+        return;
+      }
+
       await orderRepository.updateOrderPaymentStatus(order_id, {
         paymentStatus,
         paymentMethod: payment_type,
         paidAt,
         orderStatus: 'confirmed' as const,
       });
-    } else {
+    } else if (isFailed) {
       await orderService.cancelOrderBySystemId(
         order_id,
         transaction_status === 'expire' ? 'expired' : 'failed',
