@@ -92,6 +92,7 @@ model User {
   reviewedApplications SellerApplication[] @relation("ApplicationReviewer")
   products             Product[]           @relation("ProductSeller")
   sellerOrders         Order[]             @relation("OrderSeller")
+  shopProfile          ShopProfile?        @relation("ShopOwner")
 
   role       String?
   banned     Boolean?  @default(false)
@@ -463,4 +464,29 @@ model SellerApplication {
 
   @@index([status])
   @@map("seller_application")
+}
+
+/// A seller's public-facing shop profile. One-to-one with User; the row only
+/// exists after a seller application is approved (the application data is
+/// copied here on acceptance). Column lengths mirror the Zod restrictions in
+/// `shop-profile.schema.ts` so the DB enforces the same bounds as the API.
+model ShopProfile {
+  id String @id
+
+  userId String @unique
+  user   User   @relation("ShopOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  shopName    String  @db.VarChar(60)
+  description String? @db.VarChar(500)
+  phoneNumber String? @db.VarChar(20)
+  email       String? @db.VarChar(120)
+  address     String? @db.VarChar(255)
+  city        String? @db.VarChar(60)
+  province    String? @db.VarChar(60)
+  logoURL     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shop_profile")
 }
