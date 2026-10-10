@@ -28,6 +28,18 @@ export const shopProfileRepository = {
   },
 
   /**
+   * The public-facing shop profile owned by `userId`, with no role gate. Used
+   * by the public shop-profile page, which must stay reachable regardless of
+   * the owner's current role. Includes the owner's id and display name.
+   */
+  findPublicByUserId: async (userId: string) => {
+    return prisma.shopProfile.findFirst({
+      where: { userId },
+      include: { user: { select: { id: true, name: true } } },
+    });
+  },
+
+  /**
    * Update the seller's own profile. The role filter means a non-seller write
    * resolves to zero rows and returns `null` instead of mutating anything.
    */

@@ -9,9 +9,11 @@ import {
   Minus,
   Plus,
   ShoppingCart,
+  Store,
   Tag,
   Zap,
 } from 'lucide-react';
+import Link from 'next/link';
 
 type CatalogDetailProductSummaryProps = {
   product: ProductInventoryItem;
@@ -70,6 +72,19 @@ export function CatalogDetailProductSummary({
       <h1 className="mt-3 text-5xl font-bold tracking-tight text-[#2f5b49]">
         {product.name}
       </h1>
+
+      {product.seller ? (
+        <Link
+          href={`/shop/${product.seller.id}`}
+          className="group mt-2 inline-flex items-center gap-2 rounded-full border border-[#e3d9c7] bg-[#f5f0e7] px-3 py-1.5 text-sm font-semibold text-[#2f5f49] transition-colors hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none"
+        >
+          <Store className="size-4 text-[#a07a2c]" />
+          <span>{product.seller.shopName ?? product.seller.name}</span>
+          <span className="text-xs font-medium text-[#6e7a70] group-hover:text-[#2f5f49]">
+            · Kunjungi toko
+          </span>
+        </Link>
+      ) : null}
 
       <Card className="relative mt-4 gap-1 overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-[#e3ece5] via-[#f1ebdf] to-[#f5ead3] px-5 py-4 ring-1 ring-[#d9d0c2]">
         <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#2f5f49] to-[#caa86a]" />

@@ -59,6 +59,11 @@ const mapProduct = (product: {
   gender: 'male' | 'female' | 'unisex' | null;
   status: ProductStatus;
   sold: number;
+  seller?: {
+    id: string;
+    name: string;
+    shopProfile: { shopName: string } | null;
+  } | null;
   variants: {
     id: string;
     name: string;
@@ -90,9 +95,18 @@ const mapProduct = (product: {
   sold: product.sold,
   variants: product.variants.map(mapVariant),
   variantCount: product.variants.length,
+  seller: product.seller
+    ? {
+        id: product.seller.id,
+        name: product.seller.name,
+        shopName: product.seller.shopProfile?.shopName ?? null,
+      }
+    : null,
   createdAt: product.createdAt.toISOString(),
   updatedAt: product.updatedAt.toISOString(),
 });
+
+export { mapProduct };
 
 const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
   'newest',
