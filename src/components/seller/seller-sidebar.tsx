@@ -35,8 +35,7 @@ const SELLER_NAVIGATION: DashboardNavItem[] = [
   { title: 'Produk & Inventori', href: '/seller/product-inventory' },
   { title: 'Pesanan', href: '/seller/pesanan' },
   { title: 'Profil Toko', href: '/seller/shop-profile' },
-  // Live Chat is intentionally deferred — rendered disabled ("Segera hadir").
-  { title: 'Live Chat', disabled: true },
+  { title: 'Live Chat', href: '/seller/live-chat' },
 ];
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {

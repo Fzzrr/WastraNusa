@@ -1,9 +1,22 @@
 'use client';
 
 import { ImagePreview } from '@/components/form-sections';
+import { Button } from '@/components/ui/button';
+import { useStartConversation } from '@/hooks/use-conversations';
+import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import type { PublicShopProfile } from '@/types/shop';
-import { CalendarDays, Mail, MapPin, Phone, Store, User } from 'lucide-react';
+import {
+  CalendarDays,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Store,
+  User,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const surfaceCardClassName =
   'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
@@ -31,6 +44,40 @@ function DetailItem({
       <Icon className="size-4 shrink-0 text-[#8a6a3a]" />
       <span className="min-w-0 break-words">{children}</span>
     </span>
+  );
+}
+
+function HubungiPenjualButton({ sellerId }: { sellerId: string }) {
+  const router = useRouter();
+  const startConversation = useStartConversation();
+  const { data: session } = authClient.useSession();
+
+  const viewerId = session?.user?.id;
+  // Hide for guests and for the seller viewing their own shop.
+  if (!viewerId || viewerId === sellerId) {
+    return null;
+  }
+
+  const handleContact = async () => {
+    try {
+      const convo = await startConversation.mutateAsync(sellerId);
+      router.push(`/chat?c=${convo.id}`);
+    } catch {
+      toast.error('Gagal memulai percakapan. Silakan coba lagi.');
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      size="lg"
+      onClick={handleContact}
+      disabled={startConversation.isPending}
+      className="gap-1.5 bg-[#2f5f49] text-white hover:bg-[#27503e]"
+    >
+      <MessageCircle className="size-4" />
+      Hubungi Penjual
+    </Button>
   );
 }
 
@@ -67,6 +114,10 @@ export function ShopHeader({ shop }: { shop: PublicShopProfile }) {
               <User className="size-4 text-[#8a6a3a]" />
               {shop.sellerName}
             </p>
+          </div>
+
+          <div className="shrink-0 sm:pb-1">
+            <HubungiPenjualButton sellerId={shop.sellerId} />
           </div>
         </div>
 

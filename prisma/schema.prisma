@@ -94,6 +94,11 @@ model User {
   sellerOrders         Order[]             @relation("OrderSeller")
   shopProfile          ShopProfile?        @relation("ShopOwner")
 
+  // Live chat (1-on-1). A user sits on either side of a conversation.
+  conversationsInitiated Conversation[] @relation("ConversationParticipantOne")
+  conversationsReceived  Conversation[] @relation("ConversationParticipantTwo")
+  sentMessages           Message[]      @relation("MessageSender")
+
   role       String?
   banned     Boolean?  @default(false)
   banReason  String?
@@ -489,4 +494,53 @@ model ShopProfile {
   updatedAt DateTime @updatedAt
 
   @@map("shop_profile")
+}
+
+/// A 1-on-1 chat thread between exactly two users (no groups). Participants are
+/// stored normalized with `participantOneId <= participantTwoId` so a given
+/// pair maps to a single row regardless of who starts the conversation; the
+/// `@@unique` enforces that at the DB level.
+model Conversation {
+  id String @id
+
+  participantOneId String
+  participantTwoId String
+  participantOne   User @relation("ConversationParticipantOne", fields: [participantOneId], references: [id], onDelete: Cascade)
+  participantTwo   User @relation("ConversationParticipantTwo", fields: [participantTwoId], references: [id], onDelete: Cascade)
+
+  // Mirrors the latest message time so conversation lists sort without a join.
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages Message[]
+
+  @@unique([participantOneId, participantTwoId])
+  @@index([participantOneId])
+  @@index([participantTwoId])
+  @@index([lastMessageAt])
+  @@map("conversation")
+}
+
+/// A single message belonging to exactly one conversation, authored by one of
+/// its two participants. `readAt` powers read receipts.
+model Message {
+  id String @id
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId String
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  content String @db.VarChar(2000)
+
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("message")
 }
