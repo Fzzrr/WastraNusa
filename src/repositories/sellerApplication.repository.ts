@@ -2,6 +2,11 @@ import { Prisma, SellerApplicationStatus } from '@/generated/prisma/client';
 import { ROLES } from '@/lib/auth/roles';
 import prisma from '@/lib/prisma';
 
+import {
+  type ShopProfileSeed,
+  shopProfileRepository,
+} from './shopProfile.repository';
+
 export const sellerApplicationRepository = {
   findByUser: async (userId: string) => {
     return prisma.sellerApplication.findUnique({
@@ -61,11 +66,20 @@ export const sellerApplicationRepository = {
   /**
    * Approves an application and promotes the applicant to the seller role in a
    * single transaction, so the role change and status change never diverge.
+   * The approved shop details are also copied into the one-to-one shop profile
+   * (preserving an existing profile on re-approval — see
+   * `buildCreateFromApplicationArgs`).
+   *
+   * Note: we do NOT drop the applicant's sessions here. Seller access is
+   * resolved from the DB (`hasSellerAccess`), so the panel works on the same
+   * session immediately; the role cached in their session cookie refreshes on
+   * its own (see `cookieCache` in `auth.ts`).
    */
   approveAndPromote: async (
     id: string,
     userId: string,
     reviewedById: string,
+    shop: ShopProfileSeed,
   ) => {
     const [application] = await prisma.$transaction([
       prisma.sellerApplication.update({
@@ -86,6 +100,10 @@ export const sellerApplicationRepository = {
         },
         data: { role: ROLES.SELLER },
       }),
+      // Move the application data into the seller's shop profile.
+      prisma.shopProfile.upsert(
+        shopProfileRepository.buildCreateFromApplicationArgs(userId, shop),
+      ),
     ]);
 
     return application;

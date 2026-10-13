@@ -368,6 +368,41 @@ export const productRepository = {
             title: true,
           },
         },
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            shopProfile: {
+              select: {
+                shopName: true,
+              },
+            },
+          },
+        },
+        variants: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+  },
+
+  findActiveBySeller: async (sellerId: string) => {
+    return prisma.product.findMany({
+      where: {
+        sellerId,
+        variants: { some: { stock: { gt: 0 } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: {
+        article: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
         variants: {
           orderBy: {
             createdAt: 'asc',

@@ -11,8 +11,10 @@ import {
   ListChecks,
   type LucideIcon,
   Sparkles,
+  Store,
   SunDim,
 } from 'lucide-react';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 export type DetailTab = 'deskripsi' | 'spesifikasi';
@@ -69,6 +71,20 @@ export function CatalogDetailContent({
     ['Nama Produk', product.name],
     ['Kategori', product.clothingType],
     ['Asal', `${product.province}, ${product.island}`],
+    [
+      'Penjual',
+      product.seller ? (
+        <Link
+          href={`/shop/${product.seller.id}`}
+          className="inline-flex items-center gap-1.5 text-[#2f5a48] underline-offset-2 transition-colors hover:text-[#2f5f49] hover:underline focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none"
+        >
+          <Store className="size-3.5 text-[#a07a2c]" />
+          {product.seller.shopName ?? product.seller.name}
+        </Link>
+      ) : (
+        '—'
+      ),
+    ],
     ['Harga', formatIDR(displayPrice)],
     ['Total Stok', `${product.stock} Unit`],
     ['Berat', `${product.weight} gram`],

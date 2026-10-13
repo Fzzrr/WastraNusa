@@ -10,6 +10,12 @@ export interface ProductVariantItem {
   imageURL?: string | null;
 }
 
+export interface ProductSellerInfo {
+  id: string; // seller's user id (used in the shop URL)
+  name: string; // seller's user name
+  shopName: string | null; // from ShopProfile; null if the seller has no profile
+}
+
 export interface ProductInventoryItem {
   id: string;
   articleId: string;
@@ -30,6 +36,7 @@ export interface ProductInventoryItem {
   sold: number;
   variants: ProductVariantItem[];
   variantCount: number;
+  seller: ProductSellerInfo | null;
   createdAt: string;
   updatedAt: string;
 }
