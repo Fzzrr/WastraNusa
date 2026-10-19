@@ -1,3 +1,4 @@
+import { ChatFloatingWidget } from '@/components/chat/chat-floating-widget';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
@@ -28,6 +29,7 @@ export default function RootLayout({
       >
         <QueryProvider>
           {children}
+          <ChatFloatingWidget />
           <Toaster />
         </QueryProvider>
       </body>

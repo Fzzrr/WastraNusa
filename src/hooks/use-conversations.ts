@@ -60,12 +60,16 @@ async function mutateApi<T>(
 
 /**
  * The authenticated user's conversation list, newest activity first.
+ * `refetchInterval` polls while the tab is visible (e.g. for an unread badge).
  */
-export function useConversations() {
+export function useConversations(options?: {
+  refetchInterval?: number | false;
+}) {
   return useQuery({
     queryKey: chatKeys.conversations(),
     queryFn: () => fetchApi<ConversationSummary[]>('/api/conversations'),
     staleTime: 1000 * 15,
+    refetchInterval: options?.refetchInterval,
   });
 }
 

@@ -1,55 +1,62 @@
 'use client';
 
+import { formatTime } from '@/components/chat/chat-format';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/types/chat';
 import { Check, CheckCheck } from 'lucide-react';
 
-const timeFormatter = new Intl.DateTimeFormat('id-ID', {
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-function formatTime(iso: string): string {
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? '' : timeFormatter.format(date);
-}
-
 export function ChatMessageBubble({
   message,
   isOwn,
+  isFirstInGroup = true,
+  isLastInGroup = true,
 }: {
   message: ConversationMessage;
   isOwn: boolean;
+  /** First of consecutive messages from the same sender (adds top spacing). */
+  isFirstInGroup?: boolean;
+  /** Last of consecutive messages from the same sender (gets the tail). */
+  isLastInGroup?: boolean;
 }) {
   const time = formatTime(message.createdAt);
   const isRead = Boolean(message.readAt);
 
   return (
-    <div className={cn('flex w-full', isOwn ? 'justify-end' : 'justify-start')}>
+    <div
+      className={cn(
+        'flex w-full animate-in duration-300 fade-in slide-in-from-bottom-1',
+        isOwn ? 'justify-end' : 'justify-start',
+        isFirstInGroup ? 'mt-3' : 'mt-1',
+      )}
+    >
       <div
         className={cn(
-          'flex max-w-[78%] flex-col gap-1 rounded-2xl px-3.5 py-2 text-sm shadow-[0_1px_2px_rgba(60,41,15,0.06)] sm:max-w-[70%]',
+          'group/bubble flex max-w-[82%] flex-col gap-1 rounded-2xl px-3.5 py-2 text-sm leading-relaxed transition-shadow sm:max-w-[68%]',
           isOwn
-            ? 'rounded-br-md bg-[#2f5f49] text-white'
-            : 'rounded-bl-md bg-white text-[#2f3a33] ring-1 ring-[#ebe3d6]',
+            ? 'bg-gradient-to-br from-[#2f5f49] to-[#3f7359] text-white shadow-[0_6px_16px_-10px_rgba(47,95,73,0.9)]'
+            : 'bg-white text-[#2f3a33] shadow-[0_1px_2px_rgba(60,41,15,0.06)] ring-1 ring-[#ebe3d6]',
+          isLastInGroup && (isOwn ? 'rounded-br-md' : 'rounded-bl-md'),
         )}
       >
         <p className="break-words whitespace-pre-wrap">{message.content}</p>
         <div
           className={cn(
-            'flex items-center gap-1 self-end text-[10px]',
-            isOwn ? 'text-white/70' : 'text-[#9a8f80]',
+            'flex items-center gap-1 self-end text-[10px] tabular-nums',
+            isOwn ? 'text-white/75' : 'text-[#a39784]',
           )}
         >
           <span>{time}</span>
           {isOwn ? (
             isRead ? (
-              <span className="flex items-center gap-0.5" title="Dibaca">
-                <CheckCheck className="size-3" aria-hidden />
+              <span className="flex items-center text-[#e8cb8d]" title="Dibaca">
+                <CheckCheck className="size-3.5" aria-hidden />
                 <span className="sr-only">Dibaca</span>
               </span>
             ) : (
-              <Check className="size-3" aria-label="Terkirim" />
+              <span className="flex items-center" title="Terkirim">
+                <Check className="size-3.5" aria-hidden />
+                <span className="sr-only">Terkirim</span>
+              </span>
             )
           ) : null}
         </div>
