@@ -7,6 +7,7 @@ import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { type ChatRequestInput } from '@/schemas/chat.schema';
 import type { ChatAnswer, ChatProduct } from '@/types/chat';
+import { createHash } from 'node:crypto';
 
 const SYSTEM_INSTRUCTION = `Kamu adalah asisten cerdas khusus Q&A untuk artikel ensiklopedia WastraNusa.
 Fokus percakapanmu adalah topik artikel yang diberikan di dalam tag <artikel>.
@@ -212,6 +213,18 @@ export const chatService = {
     return [...exact, ...related].slice(0, MAX_CATALOG_ITEMS);
   },
 
+  /**
+   * Fingerprint of the exact catalog snapshot handed to the model. Folded into
+   * the reply cache key so a cached answer is never reused once prices, stock,
+   * or availability change.
+   */
+  buildCatalogFingerprint(products: CatalogProduct[]): string {
+    return createHash('sha256')
+      .update(JSON.stringify(products))
+      .digest('hex')
+      .slice(0, 24);
+  },
+
   resolveRecommendations(rawReply: string, catalog: CatalogProduct[]) {
     const selected = new Set<number>();
     const reply = rawReply
@@ -263,16 +276,22 @@ export const chatService = {
     }
 
     const isHistoryEmpty = !history || history.length === 0;
+    const articleFingerprint = createHash('sha256')
+      .update(JSON.stringify(article))
+      .digest('hex')
+      .slice(0, 24);
     // Format article context while the independent catalog queries are in flight.
     const catalogPromise = chatService.findCatalogProducts(article);
-    const articleContextKey = article.id;
+    const articleContextKey = `${article.id}:${articleFingerprint}`;
     let articleContext = articleContextCache.get(articleContextKey);
     if (!articleContext) {
       articleContext = chatService.buildArticleContext(article);
       articleContextCache.set(articleContextKey, articleContext);
     }
     const catalogProducts = await catalogPromise;
-    const cacheKey = `${CHAT_PROMPT_VERSION}:${article.id}:${normalizedQuestion}`;
+    const catalogFingerprint =
+      chatService.buildCatalogFingerprint(catalogProducts);
+    const cacheKey = `${CHAT_PROMPT_VERSION}:${article.id}:${articleFingerprint}:${catalogFingerprint}:${normalizedQuestion}`;
     return {
       article,
       catalogProducts,

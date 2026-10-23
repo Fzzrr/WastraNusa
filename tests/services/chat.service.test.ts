@@ -493,6 +493,19 @@ describe('chatService', () => {
       expect(result.cached).toBe(false);
     });
 
+    it('busts the cache when variant price changes without a product timestamp change', () => {
+      const original = chatService.buildCatalogFingerprint([
+        MOCK_CATALOG_PRODUCT,
+      ] as never);
+      const changed = chatService.buildCatalogFingerprint([
+        {
+          ...MOCK_CATALOG_PRODUCT,
+          variants: [{ ...MOCK_CATALOG_PRODUCT.variants[0], price: 700000 }],
+        },
+      ] as never);
+      expect(changed).not.toBe(original);
+    });
+
     const RELATED_PRODUCT = {
       ...MOCK_CATALOG_PRODUCT,
       id: 'prod-2',
@@ -578,6 +591,73 @@ describe('chatService', () => {
       expect(context.indexOf('Produk Artikel Ini')).toBeLessThan(
         context.indexOf('Produk Topik Lain'),
       );
+    });
+
+    it('does not serve a cached reply once catalog stock changes', async () => {
+      const question = 'Apakah stoknya masih tersedia?';
+      mockArticleRepo.findChatArticle.mockResolvedValue(
+        MOCK_PUBLISHED_ARTICLE as never,
+      );
+      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+        reply: 'Masih tersedia.',
+        model: 'gemini-2.5-flash',
+      });
+
+      mockProductRepo.findChatProducts.mockResolvedValue([
+        MOCK_CATALOG_PRODUCT,
+      ] as never);
+      const first = await chatService.answerQuestion({
+        articleId: 'art-1',
+        message: question,
+      });
+      expect(first.cached).toBe(false);
+
+      // Identical question, but the stock snapshot has changed.
+      mockProductRepo.findChatProducts.mockResolvedValue([
+        {
+          ...MOCK_CATALOG_PRODUCT,
+          variants: [
+            {
+              ...MOCK_CATALOG_PRODUCT.variants[0],
+              stock: 1,
+              updatedAt: new Date('2026-03-01T00:00:00Z'),
+            },
+          ],
+        },
+      ] as never);
+      const second = await chatService.answerQuestion({
+        articleId: 'art-1',
+        message: question,
+      });
+
+      expect(second.cached).toBe(false);
+      expect(chatSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('still serves the cached reply when the catalog snapshot is unchanged', async () => {
+      const question = 'Apakah stoknya masih tersedia?';
+      mockArticleRepo.findChatArticle.mockResolvedValue(
+        MOCK_PUBLISHED_ARTICLE as never,
+      );
+      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+        reply: 'Masih tersedia.',
+        model: 'gemini-2.5-flash',
+      });
+      mockProductRepo.findChatProducts.mockResolvedValue([
+        MOCK_CATALOG_PRODUCT,
+      ] as never);
+
+      await chatService.answerQuestion({
+        articleId: 'art-1',
+        message: question,
+      });
+      const second = await chatService.answerQuestion({
+        articleId: 'art-1',
+        message: question,
+      });
+
+      expect(second.cached).toBe(true);
+      expect(chatSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
