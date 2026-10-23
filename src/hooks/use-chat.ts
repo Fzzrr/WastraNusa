@@ -1,4 +1,5 @@
 import type { JSendResponse } from '@/lib/jsend';
+import type { ChatAnswer, ChatProduct } from '@/types/chat';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -9,13 +10,10 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
   cached?: boolean;
+  products?: ChatProduct[];
 }
 
-export interface ChatApiResponse {
-  reply: string;
-  articleId: string;
-  cached?: boolean;
-}
+export type ChatApiResponse = ChatAnswer;
 
 interface SendChatPayload {
   articleId: string;
@@ -95,6 +93,7 @@ export function useArticleChat(articleId: string) {
         text: result.reply,
         timestamp: new Date(),
         cached: result.cached,
+        products: result.products,
       };
 
       setMessages((prev) => [...prev, modelMessage]);
