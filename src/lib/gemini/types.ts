@@ -15,6 +15,8 @@ export interface LlmChatOptions {
    * Wrapped in <katalog> tags and treated as raw data, same as <artikel>.
    */
   catalogContext?: string;
+  onText?: (delta: string) => void;
+  signal?: AbortSignal;
 }
 
 export interface LlmChatResult {

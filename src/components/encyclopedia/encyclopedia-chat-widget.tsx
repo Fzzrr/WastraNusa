@@ -381,7 +381,7 @@ export function EncyclopediaChatWidget({
         })}
 
         {/* Loading typing indicator */}
-        {chat.isPending && (
+        {chat.isPending && !chat.isStreaming && (
           <div className="flex items-center gap-2.5">
             <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#2f5b49] text-white">
               <Bot className="size-3.5" />

@@ -66,6 +66,18 @@ type PreparedChat = {
   articleContext: string;
 };
 
+// Hide internal product selectors even when Gemini splits one across chunks.
+function visibleReply(raw: string): string {
+  let text = raw.replace(/\[produk:[^\]]*\]/gi, '');
+  const start = text.lastIndexOf('[');
+  if (start >= 0) {
+    const tail = text.slice(start).toLowerCase();
+    if ('[produk:'.startsWith(tail) || tail.startsWith('[produk:'))
+      text = text.slice(0, start);
+  }
+  return text.trim();
+}
+
 // Maximum number of catalog items injected into the prompt.
 const MAX_CATALOG_ITEMS = 24;
 
@@ -269,6 +281,8 @@ export const chatService = {
     input: ChatRequestInput,
     options: {
       prepared?: PreparedChat;
+      onText?: (text: string) => void;
+      signal?: AbortSignal;
     } = {},
   ): Promise<ChatAnswer> => {
     const {
@@ -279,6 +293,7 @@ export const chatService = {
       articleContext,
       cachedReply,
     } = options.prepared ?? (await chatService.prepareQuestion(input));
+    options.signal?.throwIfAborted();
     if (cachedReply) {
       return {
         ...chatService.resolveRecommendations(cachedReply, catalogProducts),
@@ -286,6 +301,8 @@ export const chatService = {
         cached: true,
       };
     }
+    let partial = '';
+    let previousText = '';
 
     // 6. Query LLM provider
     const result = await llmService.chat({
@@ -297,10 +314,21 @@ export const chatService = {
       ),
       message: input.message,
       history: input.history,
+      signal: options.signal,
+      onText: options.onText
+        ? (delta) => {
+            partial += delta;
+            const text = visibleReply(partial);
+            if (text !== previousText) {
+              previousText = text;
+              options.onText?.(text);
+            }
+          }
+        : undefined,
     });
 
     // 7. Cache answer for single-turn queries to conserve API quota
-    if (isHistoryEmpty && result.reply) {
+    if (isHistoryEmpty && result.reply && !options.signal?.aborted) {
       chatReplyCache.set(cacheKey, result.reply);
     }
 

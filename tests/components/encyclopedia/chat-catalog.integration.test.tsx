@@ -96,6 +96,60 @@ describe('chat UI → API → article/catalog service → UI', () => {
     fireEvent.submit(input.closest('form')!);
   }
 
+  it('shows partial text before completion, hides split selectors, and attaches cards at the end', async () => {
+    const finish = Promise.withResolvers<void>();
+    vi.spyOn(llmService, 'chat').mockImplementation(async (options) => {
+      options.onText?.('Kawung melambangkan pengendalian diri. [pro');
+      await finish.promise;
+      options.onText?.('duk:1]');
+      return {
+        reply: 'Kawung melambangkan pengendalian diri. [produk:1]',
+        model: 'test',
+      };
+    });
+    mount();
+    send('Apa maknanya dan ada kemeja yang cocok?');
+    try {
+      await screen.findByText('Kawung melambangkan pengendalian diri.');
+      expect(screen.queryByText(/\[pro/)).toBeNull();
+      expect(screen.queryByRole('link')).toBeNull();
+      expect(
+        screen
+          .getByPlaceholderText('Tanyakan sesuatu tentang artikel ini...')
+          .hasAttribute('disabled'),
+      ).toBe(true);
+    } finally {
+      finish.resolve();
+    }
+    const link = await screen.findByRole('link', { name: /Kemeja Kawung/ });
+    expect(link.getAttribute('href')).toBe('/catalog/kemeja-kawung');
+  });
+
+  it('reports a mid-stream error without retaining or caching an incomplete answer', async () => {
+    const fail = Promise.withResolvers<void>();
+    const model = vi
+      .spyOn(llmService, 'chat')
+      .mockImplementation(async (options) => {
+        options.onText?.('Jawaban belum selesai.');
+        await fail.promise;
+        throw new Error('upstream disconnected');
+      });
+    mount();
+    send('Jelaskan motifnya');
+    try {
+      await screen.findByText('Jawaban belum selesai.');
+    } finally {
+      fail.resolve();
+    }
+    await waitFor(() =>
+      expect(screen.queryByText('Jawaban belum selesai.')).toBeNull(),
+    );
+    model.mockResolvedValue({ reply: 'Jawaban lengkap.', model: 'test' });
+    send('Jelaskan motifnya');
+    await screen.findByText('Jawaban lengkap.');
+    expect(model).toHaveBeenCalledTimes(2);
+  });
+
   it('combines the contextual answer with real image, available variant price, description and detail link', async () => {
     const model = vi.spyOn(llmService, 'chat').mockResolvedValue({
       reply:

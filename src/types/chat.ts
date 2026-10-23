@@ -15,3 +15,8 @@ export interface ChatAnswer {
   cached?: boolean;
   products?: ChatProduct[];
 }
+
+export type ChatStreamEvent =
+  | { type: 'text'; text: string }
+  | { type: 'done'; data: ChatAnswer }
+  | { type: 'error'; message: string };

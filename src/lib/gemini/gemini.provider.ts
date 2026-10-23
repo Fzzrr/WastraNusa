@@ -103,19 +103,37 @@ export class GeminiProvider implements LlmProvider {
     let lastError: unknown = null;
 
     for (const model of candidateModels) {
+      let emitted = false;
       try {
-        const response = await ai.models.generateContent({
+        const request = {
           model,
           contents,
           config: {
             systemInstruction: options.systemInstruction,
             temperature: 0.2, // low temperature for factual accuracy
             maxOutputTokens: 2048,
+            abortSignal: options.signal,
           },
-        });
-
-        const candidate = response.candidates?.[0];
-        const finishReason = candidate?.finishReason;
+        };
+        let text = '';
+        let finishReason: string | undefined;
+        if (options.onText) {
+          const stream = await ai.models.generateContentStream(request);
+          for await (const chunk of stream) {
+            finishReason = chunk.candidates?.[0]?.finishReason;
+            if (finishReason === 'SAFETY') break;
+            const delta = chunk.text;
+            if (delta) {
+              emitted = true;
+              text += delta;
+              options.onText(delta);
+            }
+          }
+        } else {
+          const response = await ai.models.generateContent(request);
+          text = response.text || '';
+          finishReason = response.candidates?.[0]?.finishReason;
+        }
 
         if (finishReason === 'SAFETY') {
           logger.warn('Gemini response was blocked by safety filters', {
@@ -128,7 +146,7 @@ export class GeminiProvider implements LlmProvider {
           };
         }
 
-        const reply = response.text?.trim();
+        const reply = text.trim();
 
         if (!reply) {
           return {
@@ -143,6 +161,8 @@ export class GeminiProvider implements LlmProvider {
           model,
         };
       } catch (err: unknown) {
+        // Never append a second model's answer after a partial response.
+        if (emitted) this.handleError(err, model);
         lastError = err;
         const errorMessage = err instanceof Error ? err.message : String(err);
 
