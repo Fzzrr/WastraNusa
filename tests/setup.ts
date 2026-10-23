@@ -42,6 +42,7 @@ vi.mock('@/lib/prisma', () => ({
 
 vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
+    findChatArticle: vi.fn(),
     findAll: vi.fn(),
     countAll: vi.fn(),
     countByIsland: vi.fn(),

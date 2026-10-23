@@ -116,6 +116,8 @@ export function useArticleChat(articleId: string) {
     const request = new AbortController();
     activeRequest.current = request;
     const modelId = `mod_${crypto.randomUUID()}`;
+    let scheduled: ReturnType<typeof setTimeout> | undefined;
+    let partialText = '';
     const updateMessage = (message: ChatMessage) => {
       if (request.signal.aborted) return;
       setMessages((prev) =>
@@ -154,14 +156,22 @@ export function useArticleChat(articleId: string) {
           history: historyPayload.length > 0 ? historyPayload : undefined,
         },
         signal: request.signal,
-        onText: (text) =>
-          updateMessage({
-            id: modelId,
-            role: 'model',
-            text,
-            timestamp: new Date(),
-          }),
+        onText: (text) => {
+          partialText = text;
+          if (scheduled) return;
+          // Coalesce fast token bursts to avoid re-rendering every chunk.
+          scheduled = setTimeout(() => {
+            scheduled = undefined;
+            updateMessage({
+              id: modelId,
+              role: 'model',
+              text: partialText,
+              timestamp: new Date(),
+            });
+          }, 40);
+        },
       });
+      clearTimeout(scheduled);
 
       const modelMessage: ChatMessage = {
         id: modelId,
@@ -174,6 +184,7 @@ export function useArticleChat(articleId: string) {
 
       updateMessage(modelMessage);
     } catch {
+      clearTimeout(scheduled);
       // A disconnected partial answer must not look like a completed answer.
       setMessages((prev) => prev.filter((item) => item.id !== modelId));
     } finally {

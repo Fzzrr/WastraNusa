@@ -11,6 +11,30 @@ const getUniqueWhere = (idOrSlug: string) => {
 };
 
 export const articleRepository = {
+  findChatArticle: async (idOrSlug: string) => {
+    return prisma.article.findUnique({
+      where: getUniqueWhere(idOrSlug),
+      select: {
+        id: true,
+        status: true,
+        title: true,
+        topic: true,
+        region: true,
+        province: true,
+        island: true,
+        ethnicGroup: true,
+        motifLabel: true,
+        clothingType: true,
+        summary: true,
+        excerpt: true,
+        description: true,
+        sections: {
+          select: { title: true, content: true },
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+  },
   findAll: async ({
     offset,
     limit,

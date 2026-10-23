@@ -136,16 +136,31 @@ export const productRepository = {
       variants: { some: { stock: { gt: 0 } } },
       article: { status: 'published' },
     };
-    const include = {
+    const select = {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      imageURL: true,
+      price: true,
+      status: true,
+      clothingType: true,
+      gender: true,
+      province: true,
+      island: true,
       article: { select: { id: true, title: true } },
-      variants: { orderBy: { createdAt: 'asc' as const } },
-    };
+      variants: {
+        where: { stock: { gt: 0 } },
+        select: { id: true, type: true, name: true, price: true, stock: true },
+        orderBy: { createdAt: 'asc' as const },
+      },
+    } satisfies Prisma.ProductSelect;
     // Fetch exact matches independently so newer related rows cannot hide them.
-    const exact = await prisma.product.findMany({
+    const exact = prisma.product.findMany({
       where: { AND: [available, { articleId: article.id }] },
       take: 12,
       orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
-      include,
+      select,
     });
     const closeMatches: Prisma.ArticleWhereInput[] = [];
     if (article.motifLabel?.trim()) {
@@ -160,7 +175,7 @@ export const productRepository = {
       });
     }
     if (!closeMatches.length) return exact;
-    const related = await prisma.product.findMany({
+    const related = prisma.product.findMany({
       where: {
         AND: [
           available,
@@ -172,9 +187,13 @@ export const productRepository = {
       },
       take: 12,
       orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
-      include,
+      select,
     });
-    return [...exact, ...related];
+    const [exactProducts, relatedProducts] = await Promise.all([
+      exact,
+      related,
+    ]);
+    return [...exactProducts, ...relatedProducts];
   },
 
   findProductById: async (productId: string) => {

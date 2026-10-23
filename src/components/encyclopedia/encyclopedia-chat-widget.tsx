@@ -117,9 +117,17 @@ export function EncyclopediaChatWidget({
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (isOpen && !chat.isMinimized) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({
+        behavior: chat.isStreaming ? 'auto' : 'smooth',
+      });
     }
-  }, [chat.messages, chat.isPending, isOpen, chat.isMinimized]);
+  }, [
+    chat.messages,
+    chat.isPending,
+    chat.isStreaming,
+    isOpen,
+    chat.isMinimized,
+  ]);
 
   // Focus input when opened
   useEffect(() => {

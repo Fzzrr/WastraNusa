@@ -45,6 +45,9 @@ describe('Gemini streaming transport', () => {
     expect(result.reply).toBe('Hello there.');
     expect(sdk.generate).not.toHaveBeenCalled();
     const request = sdk.stream.mock.calls[0][0];
+    expect(request.config.httpOptions).toEqual({
+      retryOptions: { attempts: 1 },
+    });
     expect(request.contents[0].parts[0].text).toContain(
       '<artikel>\nArticle\n</artikel>',
     );

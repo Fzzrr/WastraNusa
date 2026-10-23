@@ -45,7 +45,7 @@ ATURAN PERILAKU DAN KEAMANAN (MUTLAK):
 
 // Bump this whenever SYSTEM_INSTRUCTION changes so that replies cached under an
 // older prompt (e.g. the previous "not in the article" refusals) are never served.
-export const CHAT_PROMPT_VERSION = 'v4';
+export const CHAT_PROMPT_VERSION = 'v5';
 
 // Safety character ceiling for context (~200,000 tokens well below Gemini's 1,000,000 token window)
 const MAX_CONTEXT_CHARS = 800_000;
@@ -55,7 +55,7 @@ type CatalogProduct = Awaited<
 >[number];
 
 type ChatArticle = NonNullable<
-  Awaited<ReturnType<typeof articleRepository.findByIdOrSlug>>
+  Awaited<ReturnType<typeof articleRepository.findChatArticle>>
 >;
 type PreparedChat = {
   article: ChatArticle;
@@ -106,7 +106,8 @@ export const chatService = {
     if (article.clothingType)
       parts.push(`Jenis Pakaian: ${article.clothingType}`);
     if (article.summary) parts.push(`Ringkasan: ${article.summary}`);
-    if (article.excerpt) parts.push(`Kutipan Singkat: ${article.excerpt}`);
+    if (article.excerpt && article.excerpt !== article.summary)
+      parts.push(`Kutipan Singkat: ${article.excerpt}`);
 
     parts.push('\nKonten Artikel:');
     if (article.sections && article.sections.length > 0) {
@@ -118,7 +119,10 @@ export const chatService = {
       parts.push(article.description);
     }
 
-    let fullContext = parts.join('\n');
+    let fullContext = parts
+      .join('\n')
+      .replace(/[\t ]+/g, ' ')
+      .replace(/\n{3,}/g, '\n\n');
 
     // Safe handling if article somehow exceeds the defensive token threshold
     if (fullContext.length > MAX_CONTEXT_CHARS) {
@@ -157,7 +161,7 @@ export const chatService = {
         );
       lines.push(`   Jenis: ${product.clothingType}`);
       if (product.description)
-        lines.push(`   Deskripsi: ${product.description.slice(0, 1000)}`);
+        lines.push(`   Deskripsi: ${product.description.slice(0, 400)}`);
       if (product.gender) lines.push(`   Gender: ${product.gender}`);
 
       const origin = [product.province, product.island]
@@ -244,7 +248,7 @@ export const chatService = {
     const normalizedQuestion = message.trim().toLowerCase();
 
     // 1. Fetch article directly from DB by articleId or slug
-    const article = await articleRepository.findByIdOrSlug(articleId);
+    const article = await articleRepository.findChatArticle(articleId);
 
     if (!article) {
       throw new ApiError('Artikel tidak ditemukan', 404);
@@ -259,13 +263,15 @@ export const chatService = {
     }
 
     const isHistoryEmpty = !history || history.length === 0;
-    const catalogProducts = await chatService.findCatalogProducts(article);
+    // Format article context while the independent catalog queries are in flight.
+    const catalogPromise = chatService.findCatalogProducts(article);
     const articleContextKey = article.id;
     let articleContext = articleContextCache.get(articleContextKey);
     if (!articleContext) {
       articleContext = chatService.buildArticleContext(article);
       articleContextCache.set(articleContextKey, articleContext);
     }
+    const catalogProducts = await catalogPromise;
     const cacheKey = `${CHAT_PROMPT_VERSION}:${article.id}:${normalizedQuestion}`;
     return {
       article,

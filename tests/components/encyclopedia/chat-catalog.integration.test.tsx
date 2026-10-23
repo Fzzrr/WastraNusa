@@ -55,7 +55,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
     chatReplyCache.clear();
     chatRateLimiter.reset();
     Element.prototype.scrollIntoView = vi.fn();
-    vi.mocked(articleRepository.findByIdOrSlug).mockResolvedValue(
+    vi.mocked(articleRepository.findChatArticle).mockResolvedValue(
       article as never,
     );
     vi.mocked(productRepository.findChatProducts).mockResolvedValue([
@@ -241,7 +241,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
     const view = mount();
     send('Apa makna Kawung?');
     await screen.findByText('Jawaban artikel pertama.');
-    vi.mocked(articleRepository.findByIdOrSlug).mockResolvedValue({
+    vi.mocked(articleRepository.findChatArticle).mockResolvedValue({
       ...article,
       id: 'art-2',
       slug: 'mega-mendung',

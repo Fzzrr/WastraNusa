@@ -113,6 +113,8 @@ export class GeminiProvider implements LlmProvider {
             temperature: 0.2, // low temperature for factual accuracy
             maxOutputTokens: 2048,
             abortSignal: options.signal,
+            // Avoid multiplying SDK retries by fallback candidates.
+            httpOptions: { retryOptions: { attempts: 1 } },
           },
         };
         let text = '';

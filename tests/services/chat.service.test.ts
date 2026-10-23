@@ -106,7 +106,7 @@ describe('chatService', () => {
 
   describe('answerQuestion', () => {
     it('should throw 404 if article does not exist', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(null);
+      mockArticleRepo.findChatArticle.mockResolvedValue(null);
 
       await expect(
         chatService.answerQuestion({
@@ -117,7 +117,7 @@ describe('chatService', () => {
     });
 
     it('should throw 403 if article is draft or not published', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_DRAFT_ARTICLE as never,
       );
 
@@ -130,7 +130,7 @@ describe('chatService', () => {
     });
 
     it('should answer question successfully using LLM and return result', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
@@ -160,7 +160,7 @@ describe('chatService', () => {
     });
 
     it('should return cached answer on identical question without invoking LLM again', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
@@ -188,7 +188,7 @@ describe('chatService', () => {
     });
 
     it('should version the reply cache key so stale prompt answers are not reused', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       vi.spyOn(llmService, 'chat').mockResolvedValue({
@@ -234,7 +234,7 @@ describe('chatService', () => {
 
   describe('system instruction contract (answer sources)', () => {
     const getInstruction = async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
@@ -314,7 +314,7 @@ describe('chatService', () => {
 
   describe('answer source behaviors', () => {
     const ask = async (message: string, reply: string) => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
@@ -465,7 +465,7 @@ describe('chatService', () => {
     });
 
     it('forwards user needs and history to selection and returns DB-backed cards', async () => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       mockProductRepo.findChatProducts.mockResolvedValue([
@@ -506,7 +506,7 @@ describe('chatService', () => {
       message = 'Apakah ada produk kain tapis yang dijual?',
       reply = 'Ada, Kain Tapis Klasik.',
     ) => {
-      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+      mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
       mockProductRepo.findChatProducts.mockResolvedValue(products as never);
