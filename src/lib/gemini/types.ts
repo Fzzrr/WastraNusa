@@ -10,6 +10,11 @@ export interface LlmChatOptions {
   articleContext: string;
   message: string;
   history?: ChatHistoryItem[];
+  /**
+   * Optional pre-formatted catalog context for the current article.
+   * Wrapped in <katalog> tags and treated as raw data, same as <artikel>.
+   */
+  catalogContext?: string;
 }
 
 export interface LlmChatResult {

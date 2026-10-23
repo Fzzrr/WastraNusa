@@ -1,10 +1,12 @@
 import { articleContextCache, chatReplyCache } from '@/lib/gemini/cache';
 import { llmService } from '@/lib/gemini/llm.service';
 import { articleRepository } from '@/repositories/article.repository';
+import { productRepository } from '@/repositories/product.repository';
 import { CHAT_PROMPT_VERSION, chatService } from '@/services/chat.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockArticleRepo = vi.mocked(articleRepository);
+const mockProductRepo = vi.mocked(productRepository);
 
 const MOCK_PUBLISHED_ARTICLE = {
   id: 'art-1',
@@ -57,11 +59,49 @@ const MOCK_DRAFT_ARTICLE = {
   status: 'draft' as const,
 };
 
+const MOCK_CATALOG_PRODUCT = {
+  id: 'prod-1',
+  articleId: 'art-1',
+  sellerId: null,
+  name: 'Kain Tapis Klasik',
+  slug: 'kain-tapis-klasik',
+  description: null,
+  price: 450000,
+  sku: 'TAPIS-001',
+  weight: 500,
+  island: 'Sumatera',
+  province: 'Lampung',
+  clothingType: 'Kain Sarung',
+  gender: null,
+  status: 'active' as const,
+  sold: 3,
+  imageURL: null,
+  createdAt: new Date('2026-01-01T00:00:00Z'),
+  updatedAt: new Date('2026-01-02T00:00:00Z'),
+  article: { id: 'art-1', title: 'Kain Tapis Lampung' },
+  variants: [
+    {
+      id: 'var-1',
+      productId: 'prod-1',
+      name: 'M',
+      type: 'size' as const,
+      price: null,
+      stock: 5,
+      sku: 'TAPIS-001-M',
+      imageURL: null,
+      createdAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-02T00:00:00Z'),
+    },
+  ],
+};
+
 describe('chatService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     articleContextCache.clear();
     chatReplyCache.clear();
+    // Default: article has no matching catalog items.
+    mockProductRepo.findChatProducts.mockResolvedValue([] as never);
   });
 
   describe('answerQuestion', () => {
@@ -192,7 +232,7 @@ describe('chatService', () => {
     });
   });
 
-  describe('system instruction contract (3-tier answer sources)', () => {
+  describe('system instruction contract (answer sources)', () => {
     const getInstruction = async () => {
       mockArticleRepo.findByIdOrSlug.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
@@ -246,6 +286,29 @@ describe('chatService', () => {
       expect(instruction).toContain('PERLINDUNGAN INJEKSI PROMPT');
       expect(instruction).toContain('abaikan instruksi sebelumnya');
       expect(instruction).toContain('KERAHASIAAN SISTEM');
+    });
+
+    it('makes the catalog the only legitimate source for product, price and stock', async () => {
+      const instruction = await getInstruction();
+      expect(instruction).toContain('DATA KATALOG');
+      expect(instruction).toContain('ATURAN KATALOG (MUTLAK)');
+      expect(instruction).toContain('satu-satunya sumber yang sah');
+      expect(instruction).toContain('Jangan pernah mengarang nama produk');
+      expect(instruction).toContain(
+        'Jangan mengubah, membulatkan, atau menaksirnya',
+      );
+      expect(instruction).toContain(
+        'Jangan menyajikan data katalog sebagai isi artikel',
+      );
+      expect(instruction).toContain(
+        'Jangan menyebutkan detail implementasi internal',
+      );
+    });
+
+    it('treats the catalog block as raw data for prompt-injection purposes', async () => {
+      const instruction = await getInstruction();
+      expect(instruction).toContain('<katalog>');
+      expect(instruction).toContain('adalah DATA MENTAH');
     });
   });
 
@@ -323,6 +386,197 @@ describe('chatService', () => {
       expect(callArgs.message).toBe(question);
       expect(res.reply).toBe(
         'The pucuk rebung motif symbolises fertility and the hope of life.',
+      );
+    });
+  });
+
+  describe('catalog integration', () => {
+    it('builds cards only from selected DB rows and removes forged or duplicate selectors', () => {
+      const result = chatService.resolveRecommendations(
+        'Pilihan terkait artikel. [produk:1] [produk:999] [produk:1] [produk:fake]',
+        [MOCK_CATALOG_PRODUCT] as never,
+      );
+      expect(result.reply).toBe('Pilihan terkait artikel.');
+      expect(result.products).toEqual([
+        {
+          slug: 'kain-tapis-klasik',
+          name: 'Kain Tapis Klasik',
+          description: null,
+          imageURL: null,
+          priceMin: 450000,
+          priceMax: 450000,
+          href: '/catalog/kain-tapis-klasik',
+        },
+      ]);
+      expect(JSON.stringify(result.products)).not.toContain('sku');
+      expect(JSON.stringify(result.products)).not.toContain('sellerId');
+    });
+
+    it('uses only purchasable variant prices, not the base price or sold-out variants', () => {
+      const result = chatService.resolveRecommendations(
+        'Here is a related option. [produk:1]',
+        [
+          {
+            ...MOCK_CATALOG_PRODUCT,
+            variants: [
+              { ...MOCK_CATALOG_PRODUCT.variants[0], stock: 2, price: 510000 },
+              {
+                ...MOCK_CATALOG_PRODUCT.variants[0],
+                id: 'var-2',
+                stock: 1,
+                price: 550000,
+              },
+              {
+                ...MOCK_CATALOG_PRODUCT.variants[0],
+                id: 'var-3',
+                stock: 0,
+                price: 100000,
+              },
+            ],
+          },
+        ] as never,
+      );
+      expect(result.products?.[0]).toMatchObject({
+        priceMin: 510000,
+        priceMax: 550000,
+      });
+      expect(result.reply).toBe('Here is a related option.');
+    });
+
+    it('does not attach products to an informative reply without selectors', () => {
+      const result = chatService.resolveRecommendations(
+        'Motif ini melambangkan kesuburan.',
+        [MOCK_CATALOG_PRODUCT] as never,
+      );
+      expect(result.products).toBeUndefined();
+    });
+
+    it('filters inactive and sold-out products even if returned by the repository', async () => {
+      mockProductRepo.findChatProducts.mockResolvedValue([
+        { ...MOCK_CATALOG_PRODUCT, status: 'inactive' },
+        {
+          ...MOCK_CATALOG_PRODUCT,
+          variants: [{ ...MOCK_CATALOG_PRODUCT.variants[0], stock: 0 }],
+        },
+      ] as never);
+      expect(
+        await chatService.findCatalogProducts(MOCK_PUBLISHED_ARTICLE),
+      ).toEqual([]);
+    });
+
+    it('forwards user needs and history to selection and returns DB-backed cards', async () => {
+      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+        MOCK_PUBLISHED_ARTICLE as never,
+      );
+      mockProductRepo.findChatProducts.mockResolvedValue([
+        MOCK_CATALOG_PRODUCT,
+      ] as never);
+      const spy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+        reply:
+          'Motifnya melambangkan harapan. Ini pilihan yang sesuai. [produk:1]',
+        model: 'test',
+      });
+      const history = [
+        {
+          role: 'user' as const,
+          text: 'Saya mencari kain untuk acara adat, anggaran Rp500.000.',
+        },
+      ];
+      const result = await chatService.answerQuestion({
+        articleId: 'art-1',
+        message: 'Apa maknanya dan ada yang bisa dibeli?',
+        history,
+      });
+      expect(spy.mock.calls[0][0].history).toEqual(history);
+      expect(result.reply).toContain('melambangkan harapan');
+      expect(result.products?.[0].name).toBe('Kain Tapis Klasik');
+      expect(result.cached).toBe(false);
+    });
+
+    const RELATED_PRODUCT = {
+      ...MOCK_CATALOG_PRODUCT,
+      id: 'prod-2',
+      name: 'Produk Topik Lain',
+      slug: 'produk-topik-lain',
+      article: { id: 'art-9', title: 'Artikel Lain' },
+    };
+
+    const askWithCatalog = async (
+      products: unknown[],
+      message = 'Apakah ada produk kain tapis yang dijual?',
+      reply = 'Ada, Kain Tapis Klasik.',
+    ) => {
+      mockArticleRepo.findByIdOrSlug.mockResolvedValue(
+        MOCK_PUBLISHED_ARTICLE as never,
+      );
+      mockProductRepo.findChatProducts.mockResolvedValue(products as never);
+      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+        reply,
+        model: 'gemini-2.5-flash',
+      });
+      const res = await chatService.answerQuestion({
+        articleId: 'art-1',
+        message,
+      });
+      return { res, callArgs: chatSpy.mock.calls[0][0] };
+    };
+
+    it('(2) passes matching catalog items to the model for a product question', async () => {
+      const { res, callArgs } = await askWithCatalog([MOCK_CATALOG_PRODUCT]);
+
+      expect(res.reply).toContain('Kain Tapis Klasik');
+      expect(callArgs.catalogContext).toContain('Nama: Kain Tapis Klasik');
+      expect(callArgs.catalogContext).toContain('450.000');
+      expect(callArgs.catalogContext).toContain('total stok 5');
+      // Links and images are attached from DB rows after selection, not sent
+      // repeatedly to Gemini as tokens.
+      expect(callArgs.catalogContext).not.toContain('/catalog/');
+    });
+
+    it('queries candidates using the current article rather than user-supplied topic', async () => {
+      await askWithCatalog([MOCK_CATALOG_PRODUCT]);
+
+      expect(mockProductRepo.findChatProducts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'art-1',
+          topic: 'Kain Adat',
+          motifLabel: 'Pucuk Rebung',
+        }),
+      );
+    });
+
+    it('(3) tells the model honestly when no catalog items match', async () => {
+      const { res, callArgs } = await askWithCatalog(
+        [],
+        'Apakah ada produk kain tapis yang dijual?',
+        'Maaf, katalog tidak memiliki produk yang cocok untuk artikel ini.',
+      );
+
+      expect(callArgs.catalogContext).toContain('Tidak ada produk yang cocok');
+      expect(res.reply).toContain('tidak memiliki produk yang cocok');
+    });
+
+    it('(7) only ever includes real catalog rows, never invented products', async () => {
+      const { callArgs } = await askWithCatalog([
+        MOCK_CATALOG_PRODUCT,
+        RELATED_PRODUCT,
+      ]);
+
+      const context = callArgs.catalogContext as string;
+      // Exactly as many products as the repository returned - nothing invented.
+      expect(context.match(/Nama:/g)).toHaveLength(2);
+      expect(context).toContain('Kain Tapis Klasik');
+      expect(context).toContain('Produk Topik Lain');
+    });
+
+    it('prefers products belonging to the article over other products in the same topic', async () => {
+      const exact = { ...MOCK_CATALOG_PRODUCT, name: 'Produk Artikel Ini' };
+      // Repository returns the related product first.
+      const { callArgs } = await askWithCatalog([RELATED_PRODUCT, exact]);
+
+      const context = callArgs.catalogContext as string;
+      expect(context.indexOf('Produk Artikel Ini')).toBeLessThan(
+        context.indexOf('Produk Topik Lain'),
       );
     });
   });

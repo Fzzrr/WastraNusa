@@ -67,16 +67,33 @@ export class GeminiProvider implements LlmProvider {
     }
 
     // Format current turn with delimited article context and user message
-    const currentTurnText = [
+    const turnParts = [
       'Berikut adalah teks artikel referensi:',
       '<artikel>',
       options.articleContext,
       '</artikel>',
+    ];
+
+    // Catalog data is only appended when present, keeping the single-article
+    // shape unchanged for callers that do not supply a catalog.
+    if (options.catalogContext) {
+      turnParts.push(
+        '',
+        'Berikut adalah data katalog produk WastraNusa yang terkait:',
+        '<katalog>',
+        options.catalogContext,
+        '</katalog>',
+      );
+    }
+
+    turnParts.push(
       '',
       '<pertanyaan_pengguna>',
       options.message,
       '</pertanyaan_pengguna>',
-    ].join('\n');
+    );
+
+    const currentTurnText = turnParts.join('\n');
 
     contents.push({
       role: 'user',

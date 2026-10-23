@@ -124,6 +124,59 @@ function buildOrderBy(sortBy: ProductCatalogSortBy = DEFAULT_SORT) {
 }
 
 export const productRepository = {
+  async findChatProducts(article: {
+    id: string;
+    topic: string;
+    motifLabel: string;
+    province: string | null;
+    clothingType: string | null;
+  }) {
+    const available: Prisma.ProductWhereInput = {
+      status: 'active',
+      variants: { some: { stock: { gt: 0 } } },
+      article: { status: 'published' },
+    };
+    const include = {
+      article: { select: { id: true, title: true } },
+      variants: { orderBy: { createdAt: 'asc' as const } },
+    };
+    // Fetch exact matches independently so newer related rows cannot hide them.
+    const exact = await prisma.product.findMany({
+      where: { AND: [available, { articleId: article.id }] },
+      take: 12,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      include,
+    });
+    const closeMatches: Prisma.ArticleWhereInput[] = [];
+    if (article.motifLabel?.trim()) {
+      closeMatches.push({
+        motifLabel: { equals: article.motifLabel, mode: 'insensitive' },
+      });
+    }
+    if (article.province && article.clothingType) {
+      closeMatches.push({
+        province: article.province,
+        clothingType: article.clothingType,
+      });
+    }
+    if (!closeMatches.length) return exact;
+    const related = await prisma.product.findMany({
+      where: {
+        AND: [
+          available,
+          { articleId: { not: article.id } },
+          {
+            article: { topic: article.topic, OR: closeMatches },
+          },
+        ],
+      },
+      take: 12,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      include,
+    });
+    return [...exact, ...related];
+  },
+
   findProductById: async (productId: string) => {
     return prisma.product.findUnique({
       where: { id: productId },

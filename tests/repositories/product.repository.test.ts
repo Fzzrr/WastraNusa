@@ -93,6 +93,32 @@ afterAll(async () => {
 });
 
 describe('productRepository', { tags: ['db'] }, () => {
+  describe('findChatProducts', () => {
+    it('returns active purchasable products for the article and excludes inactive or empty products', async () => {
+      const available = await createTestProduct({ stock: 3 });
+      const inactive = await createTestProduct({
+        status: 'inactive',
+        stock: 3,
+      });
+      const empty = await createTestProduct({ stock: 0 });
+      const article = await prisma.article.findUniqueOrThrow({
+        where: { id: SEED_ARTICLE_1.id },
+      });
+      const matches = await productRepository.findChatProducts(article);
+      const ids = matches.map((product) => product.id);
+      expect(ids).toContain(available.id);
+      expect(ids).not.toContain(inactive.id);
+      expect(ids).not.toContain(empty.id);
+      expect(
+        matches.every(
+          (product) =>
+            product.status === 'active' &&
+            product.variants.some((variant) => variant.stock > 0),
+        ),
+      ).toBe(true);
+    });
+  });
+
   describe('findProductById', () => {
     it('should find product by ID', async () => {
       const product = await productRepository.findProductById(
