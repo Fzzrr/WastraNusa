@@ -543,6 +543,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
       </section>
 
       <EncyclopediaChatWidget
+        key={article.slug}
         articleId={article.slug}
         articleTitle={article.title}
         isOpen={isChatOpen}

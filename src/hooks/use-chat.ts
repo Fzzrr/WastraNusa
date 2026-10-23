@@ -75,7 +75,13 @@ export function useArticleChat(articleId: string) {
     // Keep up to 8 recent messages for conversation history
     const historyPayload = messages.slice(-8).map((m) => ({
       role: m.role,
-      text: m.text,
+      text: (
+        m.text +
+        (m.products?.length
+          ? '\nProduk yang ditampilkan: ' +
+            m.products.map((product) => product.name).join(', ')
+          : '')
+      ).slice(0, 1000),
     }));
 
     setMessages((prev) => [...prev, userMessage]);

@@ -6,7 +6,7 @@ import { chatRateLimiter } from '@/lib/gemini/rate-limiter';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const article = {
@@ -150,5 +150,66 @@ describe('chat UI → API → article/catalog service → UI', () => {
     expect(model.mock.calls[0][0].catalogContext).toContain(
       'Tidak ada produk yang cocok',
     );
+  });
+
+  it('uses the current user needs and previously displayed product names in follow-up history', async () => {
+    const model = vi
+      .spyOn(llmService, 'chat')
+      .mockResolvedValueOnce({
+        reply: 'Berikut pilihan sesuai anggaran. [produk:1]',
+        model: 'test',
+      })
+      .mockResolvedValueOnce({
+        reply: 'Ukuran M tersedia untuk pilihan tersebut. [produk:1]',
+        model: 'test',
+      });
+    mount();
+    send('Cari kemeja katun di bawah Rp250.000.');
+    await screen.findByRole('link', { name: /Kemeja Kawung/ });
+    await waitFor(() =>
+      expect(
+        screen
+          .getByPlaceholderText('Tanyakan sesuatu tentang artikel ini...')
+          .hasAttribute('disabled'),
+      ).toBe(false),
+    );
+    send('Ada ukuran M untuk pilihan tadi?');
+    await screen.findByText('Ukuran M tersedia untuk pilihan tersebut.');
+    const history = model.mock.calls[1][0].history!;
+    expect(history[0].text).toContain('di bawah Rp250.000');
+    expect(history[1].text).toContain('Kemeja Kawung');
+  });
+
+  it('resets conversation when the opened article changes', async () => {
+    const model = vi
+      .spyOn(llmService, 'chat')
+      .mockResolvedValue({ reply: 'Jawaban artikel pertama.', model: 'test' });
+    const view = mount();
+    send('Apa makna Kawung?');
+    await screen.findByText('Jawaban artikel pertama.');
+    vi.mocked(articleRepository.findByIdOrSlug).mockResolvedValue({
+      ...article,
+      id: 'art-2',
+      slug: 'mega-mendung',
+      title: 'Mega Mendung',
+      motifLabel: 'Mega Mendung',
+    } as never);
+    vi.mocked(productRepository.findChatProducts).mockResolvedValue([]);
+    const client = new QueryClient();
+    view.rerender(
+      <QueryClientProvider client={client}>
+        <EncyclopediaChatWidget
+          key="mega-mendung"
+          articleId="mega-mendung"
+          articleTitle="Mega Mendung"
+          isOpen
+        />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryByText('Jawaban artikel pertama.')).toBeNull();
+    send('Apa maknanya?');
+    await waitFor(() => expect(model).toHaveBeenCalledTimes(2));
+    expect(model.mock.calls[1][0].history).toBeUndefined();
+    expect(model.mock.calls[1][0].articleContext).toContain('Mega Mendung');
   });
 });
