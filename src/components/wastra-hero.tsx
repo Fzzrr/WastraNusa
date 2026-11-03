@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import { type ReactNode, useId } from 'react';
 
@@ -50,7 +49,6 @@ function isRenderableImage(url?: string | null): url is string {
  * screens, and glass stat cards passed as `children`.
  */
 export function WastraHeroPanel({
-  eyebrow,
   title,
   accent,
   description,
@@ -58,9 +56,8 @@ export function WastraHeroPanel({
   children,
   className,
 }: {
-  eyebrow: string;
   title: string;
-  /** Word rendered after `title` with the gold gradient. */
+  /** Word rendered after `title`. */
   accent: string;
   description: ReactNode;
   /** Photos for the collage (first three renderable URLs are used). */
@@ -85,15 +82,8 @@ export function WastraHeroPanel({
 
       <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-center">
         <div>
-          <span className="inline-flex animate-in items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-[#f3dfb4] ring-1 ring-[#e8cb8d]/30 backdrop-blur duration-500 fade-in slide-in-from-bottom-1">
-            <Sparkles className="size-3.5 text-[#e8cb8d]" />
-            {eyebrow}
-          </span>
-          <h1 className="mt-4 animate-in text-4xl font-bold tracking-tight text-[#f7f2e7] duration-500 fill-mode-both fade-in slide-in-from-bottom-2 sm:text-5xl lg:text-6xl">
-            {title}{' '}
-            <span className="bg-gradient-to-r from-[#f3dfb4] via-[#e8cb8d] to-[#caa86a] bg-clip-text text-transparent">
-              {accent}
-            </span>
+          <h1 className="animate-in text-4xl font-bold tracking-tight text-[#f7f2e7] duration-500 fill-mode-both fade-in slide-in-from-bottom-2 sm:text-5xl lg:text-6xl">
+            {title} {accent}
           </h1>
           <div className="mt-4 h-1.5 w-20 origin-left animate-in rounded-full bg-gradient-to-r from-[#e8cb8d] to-[#caa86a] delay-200 duration-700 fill-mode-both zoom-in-0" />
           <p className="mt-4 max-w-2xl animate-in text-base leading-relaxed text-[#c9d9ce] delay-100 duration-500 fill-mode-both fade-in slide-in-from-bottom-2 md:text-lg">

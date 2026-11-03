@@ -7,6 +7,7 @@ import {
   EncyclopediaSidebar,
   EncyclopediaStats,
 } from '@/components/encyclopedia';
+import { Reveal } from '@/components/reveal';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -268,7 +269,6 @@ export function EncyclopediaMain({
 
         <WastraHeroPanel
           className="mt-3"
-          eyebrow="Pustaka Wastra Nusantara"
           title="Ensiklopedia Budaya"
           accent="Wastra"
           description="Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari teknik tenun hingga makna filosofi setiap motif kain."
@@ -363,7 +363,7 @@ export function EncyclopediaMain({
 
               {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <Reveal className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {!isPending &&
                   !error &&
                   displayedArticles.map((article) => (
@@ -384,7 +384,7 @@ export function EncyclopediaMain({
                         : 'Belum ada artikel ensiklopedia yang tersedia.'}
                     </div>
                   )}
-              </div>
+              </Reveal>
 
               {!isSearching && totalPages > 1 ? (
                 <EncyclopediaPagination

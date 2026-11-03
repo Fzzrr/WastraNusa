@@ -51,7 +51,6 @@ export function CatalogMainHeader({
 
       <WastraHeroPanel
         className="mt-4"
-        eyebrow="Karya Pengrajin Nusantara"
         title="Katalog Produk"
         accent="Wastra"
         description="Jelajahi ragam kain tradisional Indonesia, mulai dari tenun, batik, hingga songket, hasil karya pengrajin lokal terpercaya."
