@@ -10,7 +10,7 @@ import {
   CarouselItem,
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useArticles } from '@/hooks/use-article';
+import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -41,7 +41,7 @@ export function HeroSection() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const autoplayTimerRef = useRef<number | null>(null);
 
-  const { data, isPending } = useArticles(1, 4);
+  const { data, isPending } = useArticles(1, LANDING_ARTICLE_LIMIT);
 
   const slides: HeroSlide[] =
     isPending || !data?.items || data.items.length === 0

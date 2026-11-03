@@ -8,7 +8,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
-import { useArticles } from '@/hooks/use-article';
+import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { cn } from '@/lib/utils';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import {
@@ -91,7 +91,7 @@ export function IslandCards() {
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-  const { data, error, isPending } = useArticles(1, 50);
+  const { data, error, isPending } = useArticles(1, LANDING_ARTICLE_LIMIT);
   const islands =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
   const shouldLoop = islands.length > 5;

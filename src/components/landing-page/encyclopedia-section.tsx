@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { KawungPattern } from '@/components/wastra-hero';
-import { useArticles } from '@/hooks/use-article';
+import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -23,13 +23,13 @@ export interface HomepageArticlePreview {
 export function EncyclopediaSection() {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
-  const { data, error, isPending } = useArticles(1, 2);
+  const { data, error, isPending } = useArticles(1, LANDING_ARTICLE_LIMIT);
   const islandFilters =
     data?.meta.islands.filter((island) => island.name !== 'Semua Pulau') ?? [];
   const popularTags = islandFilters.slice(0, 5);
   const popularTopics = data?.meta.topics.slice(0, 5) ?? [];
   const latestArticles: HomepageArticlePreview[] =
-    data?.items.map((article) => ({
+    data?.items.slice(0, 2).map((article) => ({
       slug: article.slug,
       category: article.motifLabel,
       title: article.title,

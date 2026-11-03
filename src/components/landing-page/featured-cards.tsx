@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useArticles } from '@/hooks/use-article';
+import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -22,14 +22,13 @@ const CARD_BACKGROUNDS = [
 ];
 
 export function FeaturedCards() {
-  const { data, error, isPending } = useArticles(1, 6);
+  const { data, error, isPending } = useArticles(1, LANDING_ARTICLE_LIMIT);
 
-  const withImage = (data?.items ?? []).filter((article) => article.imageURL);
+  const items = data?.items.slice(0, 6) ?? [];
+  const withImage = items.filter((article) => article.imageURL);
   // The hero carousel shows the first four articles; pick others when there
   // are enough so the two cards beside it never repeat a slide.
-  const notInHero = (data?.items.slice(4) ?? []).filter(
-    (article) => article.imageURL,
-  );
+  const notInHero = items.slice(4).filter((article) => article.imageURL);
   const featuredArticles: FeaturedArticleCard[] = (
     notInHero.length >= 2 ? notInHero : withImage
   )
