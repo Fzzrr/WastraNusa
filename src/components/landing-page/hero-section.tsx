@@ -139,7 +139,7 @@ export function HeroSection() {
         <CarouselContent className="-ml-0 h-full">
           {slides.map((slide, slideIndex) => (
             <CarouselItem key={slide.id} className="pl-0 h-full">
-              <div className="relative flex h-full min-h-[300px] flex-col justify-end pb-8 pt-5 pr-5 pl-14 sm:min-h-[360px] sm:pb-12 sm:pt-6 sm:pr-6 sm:pl-20 md:min-h-[420px] md:pb-14 md:pt-8 md:pr-8 md:pl-20">
+              <div className="relative flex h-full min-h-[300px] flex-col justify-end pb-12 pt-5 pr-5 pl-5 sm:min-h-[360px] sm:pb-12 sm:pt-6 sm:pr-6 sm:pl-20 md:min-h-[420px] md:pb-14 md:pt-8 md:pr-8 md:pl-20">
                 <div
                   className={`absolute inset-0 ${slide.backgroundClassName}`}
                   aria-hidden="true"
@@ -253,7 +253,7 @@ export function HeroSection() {
         {slides.length}
       </Badge>
       <Button
-        className="absolute left-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
+        className="absolute left-5 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 sm:grid bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
         type="button"
         aria-label="Slide sebelumnya"
         onClick={goToPreviousSlide}
@@ -261,7 +261,7 @@ export function HeroSection() {
         <ChevronLeft className="h-4 w-4" />
       </Button>
       <Button
-        className="absolute right-5 top-1/2 z-20 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
+        className="absolute right-5 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/20 sm:grid bg-white/12 text-[#efe9db] backdrop-blur transition hover:scale-110 hover:border-[#e8cb8d]/50 hover:bg-white/25 active:scale-95"
         type="button"
         aria-label="Slide berikutnya"
         onClick={goToNextSlide}
@@ -269,7 +269,7 @@ export function HeroSection() {
         <ChevronRight className="h-4 w-4" />
       </Button>
 
-      <div className="pointer-events-none absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2.5">
+      <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1 sm:bottom-6">
         {slides.map((slide, index) => {
           const isActive = activeSlide === index;
 
@@ -277,23 +277,28 @@ export function HeroSection() {
             <button
               key={slide.id}
               type="button"
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={`Ke slide ${index + 1}`}
               aria-current={isActive}
-              className={`pointer-events-auto relative h-1.5 overflow-hidden rounded-full transition-all duration-300 ${
-                isActive
-                  ? 'w-8 bg-white/30 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
-                  : 'w-1.5 bg-white/40 hover:bg-white/60'
-              }`}
+              // The bar is 6px tall; the button pads it to a tappable 24px.
+              className="group pointer-events-auto grid h-6 place-items-center px-1.5"
               onClick={() => goToSlide(index)}
             >
-              {isActive ? (
-                // Fills over the autoplay delay; remounts per slide to restart.
-                <span
-                  key={activeSlide}
-                  className="absolute inset-0 animate-in rounded-full bg-gradient-to-r from-[#f3dfb4] to-white ease-linear fill-mode-both slide-in-from-left-[100%]"
-                  style={{ animationDuration: `${HERO_AUTOPLAY_DELAY}ms` }}
-                />
-              ) : null}
+              <span
+                className={`relative block h-1.5 overflow-hidden rounded-full transition-all duration-300 ${
+                  isActive
+                    ? 'w-8 bg-white/30 shadow-[0_0_12px_rgba(255,255,255,0.3)]'
+                    : 'w-1.5 bg-white/40 group-hover:bg-white/60'
+                }`}
+              >
+                {isActive ? (
+                  // Fills over the autoplay delay; remounts per slide to restart.
+                  <span
+                    key={activeSlide}
+                    className="absolute inset-0 animate-in rounded-full bg-gradient-to-r from-[#f3dfb4] to-white ease-linear fill-mode-both slide-in-from-left-[100%]"
+                    style={{ animationDuration: `${HERO_AUTOPLAY_DELAY}ms` }}
+                  />
+                ) : null}
+              </span>
             </button>
           );
         })}
