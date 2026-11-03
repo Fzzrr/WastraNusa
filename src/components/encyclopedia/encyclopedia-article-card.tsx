@@ -1,8 +1,11 @@
+'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowUpRight, Eye, Heart, MapPin } from 'lucide-react';
 import Image from 'next/image';
+import { useState } from 'react';
 
 interface EncyclopediaArticleCardProps {
   article: EncyclopediaArticle;
@@ -14,6 +17,8 @@ export function EncyclopediaArticleCard({
   onClick,
 }: EncyclopediaArticleCardProps) {
   const region = article.region.replace(/^(Kabupaten|Kota)\s+/i, '');
+  // Images are hotlinked; a dead link falls back to the motif placeholder.
+  const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <Card
@@ -22,12 +27,13 @@ export function EncyclopediaArticleCard({
     >
       {/* Image Placeholder */}
       <div className="relative h-44 overflow-hidden bg-[#ece1d0]">
-        {article.imageURL ? (
+        {article.imageURL && !imageFailed ? (
           <Image
             src={article.imageURL}
             alt={article.title}
             fill
             unoptimized
+            onError={() => setImageFailed(true)}
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         ) : (

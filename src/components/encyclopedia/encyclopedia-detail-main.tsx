@@ -88,6 +88,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
     authClient.useSession();
   const toggleLikeMutation = useToggleArticleLike(slug);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [heroImageFailed, setHeroImageFailed] = useState(false);
   const errorMessage =
     error instanceof Error
       ? error.message
@@ -247,12 +248,13 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
         <div className="relative min-h-[340px] overflow-hidden md:min-h-[380px]">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_22%,rgba(242,229,205,0.9)_0%,rgba(218,202,178,0.72)_42%,rgba(154,133,108,0.88)_100%)]" />
 
-          {article.imageURL ? (
+          {article.imageURL && !heroImageFailed ? (
             <Image
               src={article.imageURL}
               alt={article.title}
               fill
               unoptimized
+              onError={() => setHeroImageFailed(true)}
               className="object-cover transition-transform duration-[1500ms] ease-out group-hover/hero:scale-105"
             />
           ) : (
