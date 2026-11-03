@@ -9,7 +9,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { useCart } from '@/hooks/use-cart';
 import { authClient } from '@/lib/auth/auth-client';
+import { cn } from '@/lib/utils';
 import {
   BookOpenText,
   Grid2X2,
@@ -44,6 +46,19 @@ type HeaderProps = {
   homeHref?: string;
 };
 
+// Re-keyed on every change so the badge pops when an item is added.
+function CartBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      key={count}
+      className="absolute -top-2 -right-2.5 grid h-4 min-w-4 animate-in place-items-center rounded-full bg-[#b35d2f] px-1 text-xs leading-none font-bold text-white tabular-nums zoom-in-50 duration-300 motion-reduce:animate-none"
+    >
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
+
 export function Header({ homeHref = '/' }: HeaderProps) {
   const { data: session } = authClient.useSession();
   const isAdmin = session?.user?.role === 'admin';
@@ -55,6 +70,10 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     pathname.startsWith('/encyclopedia') ||
     pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: cart } = useCart({ enabled: Boolean(session) });
+  const cartCount = session ? (cart?.items.length ?? 0) : 0;
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
 
   const visibleMenuItems = menuItems
     .filter((item) => !item.adminOnly || isAdmin)
@@ -93,39 +112,47 @@ export function Header({ homeHref = '/' }: HeaderProps) {
 
           <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
             {visibleMenuItems.map(({ label, icon: Icon, href }) => {
-              const content = (
-                <>
-                  <div className="relative">
+              const active = isActive(href);
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'group relative flex flex-col items-center gap-1 py-1 text-[#2f4f3f] transition hover:text-[#224233]',
+                    // Underline grows in on hover and stays on the current page.
+                    "after:absolute after:-bottom-1 after:left-1/2 after:h-0.5 after:w-full after:-translate-x-1/2 after:scale-x-0 after:rounded-full after:bg-[#b35d2f] after:transition-transform after:duration-200 after:content-[''] hover:after:scale-x-50",
+                    active &&
+                      'font-semibold after:scale-x-100 hover:after:scale-x-100',
+                  )}
+                >
+                  <div className="relative transition-transform duration-200 group-hover:-translate-y-0.5">
                     <Icon className="h-4 w-4" />
+                    {href === '/cart' ? <CartBadge count={cartCount} /> : null}
                   </div>
                   <span className="text-xs font-medium">{label}</span>
-                </>
-              );
-
-              const classes =
-                'group relative flex flex-col items-center gap-1 text-[#2f4f3f] transition hover:text-[#224233]';
-
-              // Logika ini akan otomatis menangani navigasi ke /cart
-              if (href) {
-                return (
-                  <Link key={label} href={href} className={classes}>
-                    {content}
-                  </Link>
-                );
-              }
-
-              return (
-                <button key={label} className={classes} type="button">
-                  {content}
-                </button>
+                </Link>
               );
             })}
           </nav>
 
+          <Link
+            href="/cart"
+            aria-label={
+              cartCount > 0 ? `Keranjang, ${cartCount} produk` : 'Keranjang'
+            }
+            className="ml-auto grid h-10 w-10 place-items-center rounded-xl border border-[#d8cfbf] text-[#355846] transition active:scale-95 md:hidden"
+          >
+            <span className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              <CartBadge count={cartCount} />
+            </span>
+          </Link>
+
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <button
-                className="ml-auto grid h-10 w-10 place-items-center rounded-xl border border-[#d8cfbf] text-[#355846] md:hidden"
+                className="grid h-10 w-10 place-items-center rounded-xl border border-[#d8cfbf] text-[#355846] md:hidden"
                 type="button"
                 aria-label="Buka menu"
               >
@@ -149,7 +176,11 @@ export function Header({ homeHref = '/' }: HeaderProps) {
                   <SheetClose key={label} asChild>
                     <Link
                       href={href}
-                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-[#2f4f3f] transition hover:bg-[#2f4f3f]/[8%] active:scale-[0.98]"
+                      aria-current={isActive(href) ? 'page' : undefined}
+                      className={cn(
+                        'flex items-center gap-3 rounded-xl px-3 py-3 text-[#2f4f3f] transition hover:bg-[#2f4f3f]/[8%] active:scale-[0.98]',
+                        isActive(href) && 'bg-[#2f4f3f]/[8%] font-semibold',
+                      )}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="text-sm font-medium">{label}</span>
