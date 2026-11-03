@@ -46,6 +46,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof CartList>> = {}) {
     onToggleAll: vi.fn(),
     onUpdateQty: vi.fn(),
     onDeleteSelected: vi.fn(),
+    onRemoveItem: vi.fn(),
     ...overrides,
   };
   render(<CartList {...props} />);
@@ -74,16 +75,16 @@ describe('CartList', { tags: ['frontend'] }, () => {
     expect(allCheckbox.checked).toBe(true);
   });
 
-  it('hides the delete button when nothing is selected', () => {
+  it('hides the bulk delete button when nothing is selected', () => {
     setup({ selectedIds: [] });
 
-    expect(screen.queryByRole('button', { name: /hapus/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Hapus' })).toBeNull();
   });
 
   it('shows the delete button and fires onDeleteSelected when items are selected', () => {
     const props = setup({ selectedIds: ['item-1'] });
 
-    fireEvent.click(screen.getByRole('button', { name: /hapus/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Hapus' }));
 
     expect(props.onDeleteSelected).toHaveBeenCalledTimes(1);
   });
@@ -104,5 +105,27 @@ describe('CartList', { tags: ['frontend'] }, () => {
     fireEvent.click(checkboxes[1]);
 
     expect(props.onToggleItem).toHaveBeenCalledWith('item-1');
+  });
+
+  it('fires onRemoveItem with the item id from its delete button', () => {
+    const props = setup();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Hapus Tenun Ikat dari keranjang' }),
+    );
+
+    expect(props.onRemoveItem).toHaveBeenCalledWith('item-2');
+  });
+
+  it('counts only in-stock items for select-all', () => {
+    setup({
+      items: [items[0], { ...items[1], stock: 0 }],
+      selectedIds: ['item-1'],
+    });
+
+    const allCheckbox = screen.getByRole('checkbox', {
+      name: /Pilih Semua/,
+    }) as HTMLInputElement;
+    expect(allCheckbox.checked).toBe(true);
   });
 });

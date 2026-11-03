@@ -21,7 +21,8 @@ import { CartList } from './cart-list';
 import { CartSummary } from './cart-summary';
 
 export function CartMain() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // Items start selected; track the ones the buyer unticks instead.
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [localQuantities, setLocalQuantities] = useState<
     Record<string, number>
   >({});
@@ -139,8 +140,17 @@ export function CartMain() {
     });
   }, [cart, localQuantities]);
 
+  const selectableIds = useMemo(
+    () => items.filter((item) => item.stock > 0).map((item) => item.id),
+    [items],
+  );
+  const selectedIds = useMemo(
+    () => selectableIds.filter((id) => !excludedIds.includes(id)),
+    [selectableIds, excludedIds],
+  );
+
   const toggleItem = (id: string) => {
-    setSelectedIds((prev) =>
+    setExcludedIds((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
         : [...prev, id],
@@ -166,17 +176,18 @@ export function CartMain() {
   };
 
   const toggleAll = () => {
-    if (selectedIds.length === items.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(items.map((item) => item.id));
-    }
+    setExcludedIds(
+      selectedIds.length === selectableIds.length ? selectableIds : [],
+    );
   };
 
   const handleDeleteSelected = () => {
     if (selectedIds.length === 0) return;
     removeMultiple({ cartItemIds: selectedIds });
-    setSelectedIds([]);
+  };
+
+  const handleRemoveItem = (id: string) => {
+    removeMultiple({ cartItemIds: [id] });
   };
 
   // Calculate totals based on selected items
@@ -274,6 +285,7 @@ export function CartMain() {
               onToggleAll={toggleAll}
               onUpdateQty={handleUpdateQuantity}
               onDeleteSelected={handleDeleteSelected}
+              onRemoveItem={handleRemoveItem}
             />
           </div>
           <div className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">

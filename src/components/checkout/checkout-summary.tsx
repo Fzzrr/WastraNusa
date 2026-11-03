@@ -1,6 +1,7 @@
 'use client';
 
 import { KawungPattern } from '@/components/wastra-hero';
+import { displayVariant } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import type { CheckoutSelectedItem } from '@/types/checkout';
 import { Package, Receipt } from 'lucide-react';
@@ -70,8 +71,10 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
                 <p className="truncate text-xs font-bold text-[#2f4f3f]">
                   {item.name}
                 </p>
-                <p className="mt-0.5 truncate text-[11px] text-[#9a8f80]">
-                  {item.variant || 'Default'} · ×{item.quantity} Barang
+                <p className="mt-0.5 truncate text-xs text-[#9a8f80]">
+                  {[displayVariant(item.variant), `${item.quantity} barang`]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </p>
               </div>
               <span className="text-xs font-bold whitespace-nowrap text-[#2f4f3f]">

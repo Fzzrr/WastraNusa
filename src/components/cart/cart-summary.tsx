@@ -3,7 +3,7 @@
 import { profilePrimaryButtonClassName } from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
 import { KawungPattern } from '@/components/wastra-hero';
-import { setCheckoutSession } from '@/lib/checkout-session';
+import { displayVariant, setCheckoutSession } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import {
@@ -99,8 +99,10 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
                   <p className="truncate text-xs font-bold text-[#2f4f3f]">
                     {item.name}
                   </p>
-                  <p className="mt-0.5 text-[11px] text-[#9a8f80]">
-                    {item.variant || 'Default'} · ×{item.quantity}
+                  <p className="mt-0.5 text-xs text-[#9a8f80]">
+                    {[displayVariant(item.variant), `${item.quantity} barang`]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </p>
                 </div>
                 <span className="text-xs font-bold whitespace-nowrap text-[#2f4f3f]">

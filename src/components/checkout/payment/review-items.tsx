@@ -1,6 +1,7 @@
 'use client';
 
 import { ProfileSection } from '@/components/profile/profile-section';
+import { displayVariant } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import type {
   CheckoutAddressSelection,
@@ -54,13 +55,13 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="truncate text-sm leading-snug font-bold text-[#2f4f3f] sm:text-base sm:whitespace-normal">
+              <h3 className="line-clamp-2 text-sm leading-snug font-bold text-[#2f4f3f] sm:text-base">
                 {item.name}
               </h3>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                {item.variant && (
+                {displayVariant(item.variant) && (
                   <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-[#4d6356] ring-1 ring-[#e3d9c7]">
-                    {item.variant}
+                    {displayVariant(item.variant)}
                   </span>
                 )}
                 <span className="text-xs text-[#8e8476]">

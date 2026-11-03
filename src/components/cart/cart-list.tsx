@@ -29,6 +29,7 @@ interface CartListProps {
   onToggleAll: () => void;
   onUpdateQty: (id: string, delta: number) => void;
   onDeleteSelected: () => void;
+  onRemoveItem: (id: string) => void;
 }
 
 export function CartList({
@@ -38,9 +39,11 @@ export function CartList({
   onToggleAll,
   onUpdateQty,
   onDeleteSelected,
+  onRemoveItem,
 }: CartListProps) {
-  // Tidak lagi menggunakan ': any'
-  const isAllSelected = items.length > 0 && selectedIds.length === items.length;
+  const selectableCount = items.filter((item) => item.stock > 0).length;
+  const isAllSelected =
+    selectableCount > 0 && selectedIds.length === selectableCount;
 
   const selectedCount = selectedIds.length;
 
@@ -83,6 +86,7 @@ export function CartList({
             isSelected={selectedIds.includes(product.id)}
             onToggle={() => onToggleItem(product.id)}
             onUpdateQty={(delta: number) => onUpdateQty(product.id, delta)}
+            onRemove={() => onRemoveItem(product.id)}
           />
         ))}
       </div>
