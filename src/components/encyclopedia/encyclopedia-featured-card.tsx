@@ -27,7 +27,6 @@ export function EncyclopediaFeaturedCard({
                 src={article.imageURL}
                 alt={article.title}
                 fill
-                unoptimized
                 sizes="128px"
                 className="object-cover object-center"
               />

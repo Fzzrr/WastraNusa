@@ -32,7 +32,7 @@ export function EncyclopediaArticleCard({
             src={article.imageURL}
             alt={article.title}
             fill
-            unoptimized
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             onError={() => setImageFailed(true)}
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />

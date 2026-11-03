@@ -26,7 +26,6 @@ export function EncyclopediaArticleListCard({
               src={article.imageURL}
               alt={article.title}
               fill
-              unoptimized
               sizes="128px"
               className="object-cover object-center transition duration-700 ease-out group-hover:scale-110"
             />

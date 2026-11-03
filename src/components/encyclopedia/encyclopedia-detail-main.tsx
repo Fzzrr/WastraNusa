@@ -253,7 +253,6 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               src={article.imageURL}
               alt={article.title}
               fill
-              unoptimized
               onError={() => setHeroImageFailed(true)}
               className="object-cover transition-transform duration-[1500ms] ease-out group-hover/hero:scale-105"
             />
@@ -395,7 +394,6 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                             src={section.imageURL}
                             alt={visualCaption}
                             fill
-                            unoptimized
                             className="object-cover transition-transform duration-700 ease-out group-hover/visual:scale-105"
                             sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 280px, 280px"
                             priority={false}
@@ -466,7 +464,6 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                           src={product.imageURL}
                           alt={product.name}
                           fill
-                          unoptimized
                           className="object-cover transition-transform duration-500 group-hover/product:scale-110"
                           sizes="80px"
                         />
