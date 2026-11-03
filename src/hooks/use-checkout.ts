@@ -69,6 +69,8 @@ export function useCheckout() {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
-    retry: 1,
+    // Not idempotent: a retry after a lost response would create a second
+    // order and reserve stock twice.
+    retry: false,
   });
 }
