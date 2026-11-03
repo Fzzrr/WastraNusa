@@ -49,6 +49,7 @@ export interface OrderDetail {
   totals: {
     subtotal: string;
     shippingCost: string;
+    serviceFee: string;
     totalAmount: string;
   };
   products: Array<{

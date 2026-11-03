@@ -3,6 +3,7 @@ import { isAdmin } from '@/lib/auth/roles';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
+import { shopProfileRepository } from '@/repositories/shopProfile.repository';
 import {
   type CreateSellerApplicationInput,
   type ReviewSellerApplicationInput,
@@ -57,6 +58,9 @@ export const sellerApplicationService = {
         ...reviewState,
         rejectionReason: null,
       });
+      if (reviewState.status === SellerApplicationStatus.approved) {
+        await shopProfileRepository.createFromApplication(userId, data);
+      }
       logger.info('Seller application re-submitted', {
         applicationId: existing.id,
         userId,
@@ -71,6 +75,9 @@ export const sellerApplicationService = {
       id,
       userId,
     });
+    if (reviewState.status === SellerApplicationStatus.approved) {
+      await shopProfileRepository.createFromApplication(userId, data);
+    }
     logger.info('Seller application created', { applicationId: id, userId });
     return application;
   },
@@ -110,6 +117,11 @@ export const sellerApplicationService = {
         id,
         application.userId,
         reviewerId,
+        {
+          shopName: application.shopName,
+          description: application.description,
+          phoneNumber: application.phoneNumber,
+        },
       );
       logger.info('Seller application approved', {
         applicationId: id,

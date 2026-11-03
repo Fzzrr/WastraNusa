@@ -2,19 +2,10 @@
 
 import { ProfileSection } from '@/components/profile/profile-section';
 import { cn, formatIDR } from '@/lib/utils';
+import type { ShippingOption } from '@/types/checkout';
 import { Check, Clock, Truck } from 'lucide-react';
 
-// 1. Definisikan tipe untuk masing-masing opsi kurir
-export interface ShippingOption {
-  id: string;
-  name: string;
-  courier: string;
-  price: number;
-  desc: string;
-  tag?: string; // Boleh ada boleh tidak (optional)
-}
-
-// 2. Definisikan tipe untuk props yang diterima komponen
+// Definisikan tipe untuk props yang diterima komponen
 interface ShippingMethodSectionProps {
   options: ShippingOption[];
   selectedId: string;

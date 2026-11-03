@@ -26,6 +26,7 @@ const navigationIcons = {
   Dashboard: LayoutDashboard,
   'Produk & Inventori': Package2,
   Pesanan: ClipboardList,
+  'Profil Toko': Store,
   'Live Chat': MessageCircle,
 } as const;
 
@@ -33,8 +34,8 @@ const SELLER_NAVIGATION: DashboardNavItem[] = [
   { title: 'Dashboard', href: '/seller/dashboard' },
   { title: 'Produk & Inventori', href: '/seller/product-inventory' },
   { title: 'Pesanan', href: '/seller/pesanan' },
-  // Live Chat is intentionally deferred — rendered disabled ("Segera hadir").
-  { title: 'Live Chat', disabled: true },
+  { title: 'Profil Toko', href: '/seller/shop-profile' },
+  { title: 'Live Chat', href: '/seller/live-chat' },
 ];
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {

@@ -1,6 +1,7 @@
 import { SellerApplicationStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
+import { shopProfileRepository } from '@/repositories/shopProfile.repository';
 import { sellerApplicationService } from '@/services/sellerApplication.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,7 +18,17 @@ vi.mock('@/repositories/sellerApplication.repository', () => ({
   },
 }));
 
+vi.mock('@/repositories/shopProfile.repository', () => ({
+  shopProfileRepository: {
+    createFromApplication: vi.fn(),
+    buildCreateFromApplicationArgs: vi.fn(),
+    findBySeller: vi.fn(),
+    updateBySeller: vi.fn(),
+  },
+}));
+
 const mockRepo = vi.mocked(sellerApplicationRepository);
+const mockShopRepo = vi.mocked(shopProfileRepository);
 
 const USER_ID = 'user-1';
 const REVIEWER_ID = 'admin-1';
@@ -114,6 +125,11 @@ describe('sellerApplicationService', { tags: ['backend'] }, () => {
         }),
       );
       expect(mockRepo.approveAndPromote).not.toHaveBeenCalled();
+      // Admin's shop is opened instantly, so the profile is created too.
+      expect(mockShopRepo.createFromApplication).toHaveBeenCalledWith(
+        USER_ID,
+        expect.objectContaining({ shopName: 'Toko Admin' }),
+      );
     });
 
     it('keeps normal users pending', async () => {
@@ -136,6 +152,9 @@ describe('sellerApplicationService', { tags: ['backend'] }, () => {
         id: APP_ID,
         userId: USER_ID,
         status: SellerApplicationStatus.pending,
+        shopName: 'Toko Disetujui',
+        description: 'Deskripsi',
+        phoneNumber: '08123456789',
       } as never);
       mockRepo.approveAndPromote.mockResolvedValue({ id: APP_ID } as never);
 
@@ -147,6 +166,11 @@ describe('sellerApplicationService', { tags: ['backend'] }, () => {
         APP_ID,
         USER_ID,
         REVIEWER_ID,
+        expect.objectContaining({
+          shopName: 'Toko Disetujui',
+          description: 'Deskripsi',
+          phoneNumber: '08123456789',
+        }),
       );
     });
 

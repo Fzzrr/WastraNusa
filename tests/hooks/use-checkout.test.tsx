@@ -55,9 +55,7 @@ describe('useCheckout hook', { tags: ['frontend'] }, () => {
   const MOCK_CHECKOUT_INPUT: CheckoutInput = {
     items: [{ productId: 'prod-1', quantity: 1 }],
     shippingAddressId: 'addr-1',
-    courier: 'JNE',
-    courierService: 'REG',
-    shippingCost: 10000,
+    shippingOptionId: 'jne-reg',
   };
 
   it('should successfully execute checkout mutation', async () => {
