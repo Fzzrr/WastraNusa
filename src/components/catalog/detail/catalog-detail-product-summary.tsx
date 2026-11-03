@@ -69,7 +69,7 @@ export function CatalogDetailProductSummary({
         </Badge>
       </div>
 
-      <h1 className="mt-3 text-5xl font-bold tracking-tight text-[#2f5b49]">
+      <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#2f5b49] sm:text-4xl lg:text-5xl">
         {product.name}
       </h1>
 
@@ -153,7 +153,7 @@ export function CatalogDetailProductSummary({
             size="icon-sm"
             variant="ghost"
             aria-label="Kurangi jumlah"
-            className="cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
+            className="size-10 cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
             onClick={onDecreaseQuantity}
             disabled={safeQuantity <= 1 || isPurchaseDisabled}
           >
@@ -167,7 +167,7 @@ export function CatalogDetailProductSummary({
             size="icon-sm"
             variant="ghost"
             aria-label="Tambah jumlah"
-            className="cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
+            className="size-10 cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
             onClick={onIncreaseQuantity}
             disabled={
               isPurchaseDisabled || safeQuantity >= selectedVariantStock
@@ -191,10 +191,11 @@ export function CatalogDetailProductSummary({
         </span>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      {/* On phones the actions stay pinned to the bottom while the summary is in view. */}
+      <div className="sticky bottom-0 z-30 -mx-4 mt-4 grid grid-cols-2 gap-2 border-t border-[#e3d9c7] bg-[#f6f2e9]/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
         <Button
           disabled={isPurchaseDisabled || isCartActionPending}
-          className="h-12 cursor-pointer rounded-xl bg-[#2f5f49] text-[#edf4ec] shadow-[0_10px_20px_-10px_rgba(47,95,73,0.7)] transition-all hover:-translate-y-0.5 hover:bg-[#254a39] active:translate-y-0"
+          className="h-12 cursor-pointer rounded-xl bg-[#2f5f49] px-2 text-sm text-[#edf4ec] sm:px-4 sm:text-base shadow-[0_10px_20px_-10px_rgba(47,95,73,0.7)] transition-all hover:-translate-y-0.5 hover:bg-[#254a39] active:translate-y-0"
           onClick={onAddToCart}
         >
           <ShoppingCart data-icon="inline-start" />
@@ -202,7 +203,7 @@ export function CatalogDetailProductSummary({
         </Button>
         <Button
           disabled={isPurchaseDisabled || isCartActionPending}
-          className="h-12 cursor-pointer rounded-xl bg-gradient-to-r from-[#cc7543] to-[#d98b52] text-white shadow-[0_10px_20px_-10px_rgba(204,117,67,0.8)] transition-all hover:-translate-y-0.5 hover:from-[#b56539] hover:to-[#c97a45] active:translate-y-0"
+          className="h-12 cursor-pointer rounded-xl bg-[#b35d2f] px-2 text-sm text-white shadow-[0_10px_20px_-10px_rgba(179,93,47,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#9c4f27] active:translate-y-0 sm:px-4 sm:text-base"
           onClick={onBuyNow}
         >
           <Zap data-icon="inline-start" />
