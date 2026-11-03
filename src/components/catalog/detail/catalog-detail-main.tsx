@@ -313,6 +313,8 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
           name: product.name,
           imageURL: activeImageURL ?? null,
           price: selectedVariantPrice,
+          variantId: selectedVariant?.id ?? null,
+          variantName: selectedVariant?.name ?? null,
         },
       });
     } catch {

@@ -37,6 +37,11 @@ export function ChatProductCard({
         <span className="block truncate text-xs font-semibold">
           {product.name}
         </span>
+        {product.variantName ? (
+          <span className="block truncate text-xs text-[#7d7465]">
+            Varian: {product.variantName}
+          </span>
+        ) : null}
         <span className="block text-xs font-bold text-[#2f5f49]">
           {formatIDR(product.price)}
         </span>

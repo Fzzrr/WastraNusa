@@ -10,7 +10,10 @@ export interface ChatAttachedProduct {
   slug: string;
   name: string;
   imageURL: string | null;
+  /** Variant price when a variant is attached, otherwise the base price. */
   price: number;
+  variantId: string | null;
+  variantName: string | null;
 }
 
 export interface ConversationMessage {

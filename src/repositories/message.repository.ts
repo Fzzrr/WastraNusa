@@ -1,7 +1,10 @@
 import prisma from '@/lib/prisma';
 
-const productSelect = {
-  select: { id: true, slug: true, name: true, imageURL: true, price: true },
+const attachmentInclude = {
+  product: {
+    select: { id: true, slug: true, name: true, imageURL: true, price: true },
+  },
+  variant: { select: { id: true, name: true, imageURL: true, price: true } },
 } as const;
 
 /**
@@ -14,11 +17,13 @@ export const messageRepository = {
     senderId,
     content,
     productId,
+    variantId,
   }: {
     conversationId: string;
     senderId: string;
     content: string;
     productId?: string;
+    variantId?: string;
   }) => {
     return prisma.message.create({
       data: {
@@ -27,8 +32,9 @@ export const messageRepository = {
         senderId,
         content,
         productId,
+        variantId,
       },
-      include: { product: productSelect },
+      include: attachmentInclude,
     });
   },
 
@@ -38,7 +44,7 @@ export const messageRepository = {
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
       take: 100,
-      include: { product: productSelect },
+      include: attachmentInclude,
     });
   },
 

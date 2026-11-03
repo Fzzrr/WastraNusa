@@ -46,7 +46,11 @@ export function ChatComposer({
     if (!trimmed || isPending) return;
 
     try {
-      await mutateAsync({ content: trimmed, productId: attachedProduct?.id });
+      await mutateAsync({
+        content: trimmed,
+        productId: attachedProduct?.id,
+        variantId: attachedProduct?.variantId ?? undefined,
+      });
       setContent('');
       onClearAttachment?.();
       textareaRef.current?.focus();

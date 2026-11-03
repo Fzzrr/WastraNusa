@@ -8,12 +8,12 @@ type Params = { id: string };
 // POST /api/conversations/[id]/messages — send a message in a conversation
 export const POST = withApiAuth<Params>(async ({ req, userId, params }) => {
   const body = await req.json();
-  const { content, productId } = sendMessageSchema.parse(body);
+  const { content, productId, variantId } = sendMessageSchema.parse(body);
   const message = await conversationService.sendMessage(
     userId,
     params.id,
     content,
-    productId,
+    { productId, variantId },
   );
   return jsend.success(message, 201);
 });

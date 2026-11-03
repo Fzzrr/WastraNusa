@@ -158,59 +158,105 @@ describe('conversationService', { tags: ['backend'] }, () => {
       );
     });
 
-    it('attaches the resolved product and maps its price to a number', async () => {
-      mockConversationRepo.findByIdForUser.mockResolvedValue(
-        conversationRow as never,
-      );
-      mockProductRepo.findByIdOrSlug.mockResolvedValue({
+    describe('with an attached product', () => {
+      // USER_A (buyer) asks USER_B (seller) about USER_B's product.
+      const sellerProduct = {
         id: 'prod-1',
-      } as never);
-      mockMessageRepo.create.mockResolvedValue({
-        id: 'msg-2',
-        conversationId: CONVERSATION_ID,
-        senderId: USER_A,
-        content: 'Ready stock?',
-        product: {
+        sellerId: USER_B,
+        status: 'active',
+        variants: [{ id: 'var-1' }],
+      };
+
+      beforeEach(() => {
+        mockConversationRepo.findByIdForUser.mockResolvedValue(
+          conversationRow as never,
+        );
+        mockConversationRepo.touchLastMessageAt.mockResolvedValue({} as never);
+      });
+
+      it('stores product + variant and maps the variant price and name', async () => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(
+          sellerProduct as never,
+        );
+        mockMessageRepo.create.mockResolvedValue({
+          id: 'msg-2',
+          conversationId: CONVERSATION_ID,
+          senderId: USER_A,
+          content: 'Ready stock?',
+          product: {
+            id: 'prod-1',
+            slug: 'batik-parang',
+            name: 'Batik Parang',
+            imageURL: 'base.jpg',
+            price: { toString: () => '150000' },
+          },
+          variant: {
+            id: 'var-1',
+            name: 'Merah',
+            imageURL: null,
+            price: { toString: () => '175000' },
+          },
+          readAt: null,
+          createdAt: new Date('2026-01-02T00:00:00.000Z'),
+        } as never);
+
+        const message = await conversationService.sendMessage(
+          USER_A,
+          CONVERSATION_ID,
+          'Ready stock?',
+          { productId: 'batik-parang', variantId: 'var-1' },
+        );
+
+        expect(mockMessageRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({ productId: 'prod-1', variantId: 'var-1' }),
+        );
+        expect(message.product).toEqual({
           id: 'prod-1',
           slug: 'batik-parang',
           name: 'Batik Parang',
-          imageURL: null,
-          price: { toString: () => '150000' },
-        },
-        readAt: null,
-        createdAt: new Date('2026-01-02T00:00:00.000Z'),
-      } as never);
-      mockConversationRepo.touchLastMessageAt.mockResolvedValue({} as never);
-
-      const message = await conversationService.sendMessage(
-        USER_A,
-        CONVERSATION_ID,
-        'Ready stock?',
-        'batik-parang',
-      );
-
-      expect(mockMessageRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({ productId: 'prod-1' }),
-      );
-      expect(message.product).toEqual({
-        id: 'prod-1',
-        slug: 'batik-parang',
-        name: 'Batik Parang',
-        imageURL: null,
-        price: 150000,
+          imageURL: 'base.jpg',
+          price: 175000,
+          variantId: 'var-1',
+          variantName: 'Merah',
+        });
       });
-    });
 
-    it('404s when the attached product does not exist', async () => {
-      mockConversationRepo.findByIdForUser.mockResolvedValue(
-        conversationRow as never,
-      );
-      mockProductRepo.findByIdOrSlug.mockResolvedValue(null as never);
+      it.each([
+        ['does not exist', null],
+        ['is inactive (draft)', { ...sellerProduct, status: 'inactive' }],
+        ['belongs to another seller', { ...sellerProduct, sellerId: 'x' }],
+      ])('404s when the product %s', async (_, product) => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(product as never);
 
-      await expect(
-        conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', 'nope'),
-      ).rejects.toMatchObject({ status: 404 });
-      expect(mockMessageRepo.create).not.toHaveBeenCalled();
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            productId: 'prod-1',
+          }),
+        ).rejects.toMatchObject({ status: 404 });
+        expect(mockMessageRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('404s when the variant is not part of the product', async () => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(
+          sellerProduct as never,
+        );
+
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            productId: 'prod-1',
+            variantId: 'var-other',
+          }),
+        ).rejects.toMatchObject({ status: 404 });
+        expect(mockMessageRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('400s for a variant without a product', async () => {
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            variantId: 'var-1',
+          }),
+        ).rejects.toMatchObject({ status: 400 });
+      });
     });
   });
 

@@ -11,6 +11,7 @@ export const sendMessageSchema = z.object({
     .min(1, 'Pesan tidak boleh kosong')
     .max(2000, 'Pesan maksimal 2000 karakter'),
   productId: z.string().min(1).max(100).optional(),
+  variantId: z.string().min(1).max(100).optional(),
 });
 
 export type StartConversationInput = z.infer<typeof startConversationSchema>;

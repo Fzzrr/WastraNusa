@@ -22,6 +22,12 @@ type MessageRow = {
     imageURL: string | null;
     price: { toString(): string };
   } | null;
+  variant: {
+    id: string;
+    name: string;
+    imageURL: string | null;
+    price: { toString(): string } | null;
+  } | null;
   readAt: Date | null;
   createdAt: Date;
 };
@@ -49,7 +55,13 @@ const mapMessage = (message: MessageRow): ConversationMessage => ({
   senderId: message.senderId,
   content: message.content,
   product: message.product
-    ? { ...message.product, price: Number(message.product.price) }
+    ? {
+        ...message.product,
+        imageURL: message.variant?.imageURL ?? message.product.imageURL,
+        price: Number(message.variant?.price ?? message.product.price),
+        variantId: message.variant?.id ?? null,
+        variantName: message.variant?.name ?? null,
+      }
     : null,
   readAt: message.readAt ? message.readAt.toISOString() : null,
   createdAt: message.createdAt.toISOString(),
@@ -206,7 +218,7 @@ export const conversationService = {
     userId: string,
     conversationId: string,
     content: string,
-    productId?: string,
+    attachment: { productId?: string; variantId?: string } = {},
   ): Promise<ConversationMessage> => {
     const conversation = await conversationRepository.findByIdForUser(
       conversationId,
@@ -216,11 +228,29 @@ export const conversationService = {
       throw new ApiError('Percakapan tidak ditemukan', 404);
     }
 
+    const { productId, variantId } = attachment;
+    if (variantId && !productId) {
+      throw new ApiError('Varian harus disertai produk', 400);
+    }
     const product = productId
       ? await productRepository.findByIdOrSlug(productId)
       : null;
-    if (productId && !product) {
-      throw new ApiError('Produk tidak ditemukan', 404);
+    if (productId) {
+      // Only the other participant's listed products may be attached, so a
+      // draft (inactive) or foreign product can't leak its details into chat.
+      if (
+        !product ||
+        product.status === 'inactive' ||
+        product.sellerId !== pickOtherParticipant(conversation, userId).id
+      ) {
+        throw new ApiError('Produk tidak ditemukan', 404);
+      }
+      if (
+        variantId &&
+        !product.variants.some((variant) => variant.id === variantId)
+      ) {
+        throw new ApiError('Varian produk tidak ditemukan', 404);
+      }
     }
 
     const created = await messageRepository.create({
@@ -228,6 +258,7 @@ export const conversationService = {
       senderId: userId,
       content,
       productId: product?.id,
+      variantId,
     });
 
     await conversationRepository.touchLastMessageAt(

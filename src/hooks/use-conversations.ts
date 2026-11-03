@@ -114,7 +114,11 @@ export function useSendMessage(conversationId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: { content: string; productId?: string }) =>
+    mutationFn: (input: {
+      content: string;
+      productId?: string;
+      variantId?: string;
+    }) =>
       mutateApi<ConversationMessage>(
         `/api/conversations/${encodeURIComponent(conversationId)}/messages`,
         'POST',
