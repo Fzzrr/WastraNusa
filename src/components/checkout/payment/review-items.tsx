@@ -71,7 +71,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
 
             <div className="text-right shrink-0">
               <span className="text-[11px] text-[#8e8476] block mb-0.5">
-                Total
+                Subtotal
               </span>
               <span className="text-sm font-extrabold text-[#2f5f49] sm:text-base">
                 {formatIDR(item.price * item.quantity)}
