@@ -15,6 +15,8 @@ const FALLBACK_MODELS = [
   'gemini-3.5-flash-lite',
 ];
 
+const FIRST_RESPONSE_TIMEOUT_MS = 15_000;
+
 export class GeminiProvider implements LlmProvider {
   public readonly name = 'gemini';
   private client: GoogleGenAI | null = null;
@@ -42,6 +44,9 @@ export class GeminiProvider implements LlmProvider {
   }
 
   public async chat(options: LlmChatOptions): Promise<LlmChatResult> {
+    const signal = options.signal
+      ? AbortSignal.any([options.signal, AbortSignal.timeout(60_000)])
+      : AbortSignal.timeout(60_000);
     const ai = this.getClient();
     const configuredModel = process.env.GEMINI_MODEL || this.defaultModel;
 
@@ -67,16 +72,33 @@ export class GeminiProvider implements LlmProvider {
     }
 
     // Format current turn with delimited article context and user message
-    const currentTurnText = [
+    const turnParts = [
       'Berikut adalah teks artikel referensi:',
       '<artikel>',
       options.articleContext,
       '</artikel>',
+    ];
+
+    // Catalog data is only appended when present, keeping the single-article
+    // shape unchanged for callers that do not supply a catalog.
+    if (options.catalogContext) {
+      turnParts.push(
+        '',
+        'Berikut adalah data katalog produk WastraNusa yang terkait:',
+        '<katalog>',
+        options.catalogContext,
+        '</katalog>',
+      );
+    }
+
+    turnParts.push(
       '',
       '<pertanyaan_pengguna>',
       options.message,
       '</pertanyaan_pengguna>',
-    ].join('\n');
+    );
+
+    const currentTurnText = turnParts.join('\n');
 
     contents.push({
       role: 'user',
@@ -86,19 +108,59 @@ export class GeminiProvider implements LlmProvider {
     let lastError: unknown = null;
 
     for (const model of candidateModels) {
+      let emitted = false;
+      let firstResponseTimedOut = false;
+      let firstResponseTimer: ReturnType<typeof setTimeout> | undefined;
+      const attempt = new AbortController();
+      const attemptSignal = AbortSignal.any([signal, attempt.signal]);
+      const started = Date.now();
       try {
-        const response = await ai.models.generateContent({
+        signal.throwIfAborted();
+        // A silent model must leave time for the existing fallbacks. Unlike
+        // an HTTP timeout, this timer stops once answer text starts flowing.
+        firstResponseTimer = setTimeout(() => {
+          firstResponseTimedOut = true;
+          attempt.abort(
+            new DOMException('No first response from model', 'TimeoutError'),
+          );
+        }, FIRST_RESPONSE_TIMEOUT_MS);
+        const request = {
           model,
           contents,
           config: {
             systemInstruction: options.systemInstruction,
             temperature: 0.2, // low temperature for factual accuracy
             maxOutputTokens: 2048,
+            abortSignal: attemptSignal,
+            // Let the existing model fallback handle retries, rather than
+            // multiplying SDK retries by every fallback candidate.
+            // The first-response watchdog is cleared on visible progress;
+            // the overall deadline still bounds the complete operation.
+            httpOptions: { retryOptions: { attempts: 1 } },
           },
-        });
-
-        const candidate = response.candidates?.[0];
-        const finishReason = candidate?.finishReason;
+        };
+        let text = '';
+        let finishReason: string | undefined;
+        if (options.onText) {
+          const stream = await ai.models.generateContentStream(request);
+          for await (const chunk of stream) {
+            signal.throwIfAborted();
+            finishReason = chunk.candidates?.[0]?.finishReason;
+            if (finishReason === 'SAFETY') break;
+            const delta = chunk.text;
+            if (delta) {
+              clearTimeout(firstResponseTimer);
+              emitted = true;
+              text += delta;
+              options.onText(delta);
+            }
+          }
+        } else {
+          const response = await ai.models.generateContent(request);
+          clearTimeout(firstResponseTimer);
+          text = response.text || '';
+          finishReason = response.candidates?.[0]?.finishReason;
+        }
 
         if (finishReason === 'SAFETY') {
           logger.warn('Gemini response was blocked by safety filters', {
@@ -111,7 +173,7 @@ export class GeminiProvider implements LlmProvider {
           };
         }
 
-        const reply = response.text?.trim();
+        const reply = text.trim();
 
         if (!reply) {
           return {
@@ -126,6 +188,26 @@ export class GeminiProvider implements LlmProvider {
           model,
         };
       } catch (err: unknown) {
+        if (options.signal?.aborted) throw options.signal.reason;
+        if (signal.aborted) {
+          this.handleTimeout(model);
+        }
+        if (firstResponseTimedOut && !emitted) {
+          lastError = new ApiError(
+            'Waktu permintaan ke layanan AI habis (timeout). Silakan ulangi pertanyaan Anda.',
+            504,
+          );
+          logger.warn(
+            'Gemini did not return a first response; trying next candidate model',
+            {
+              model,
+              elapsedMs: Date.now() - started,
+            },
+          );
+          continue;
+        }
+        // Never append a second model's answer after a partial response.
+        if (emitted) this.handleError(err, model);
         lastError = err;
         const errorMessage = err instanceof Error ? err.message : String(err);
 
@@ -148,6 +230,8 @@ export class GeminiProvider implements LlmProvider {
 
         // For non-recoverable errors (invalid API key, 429 quota, etc.), stop and handle immediately
         this.handleError(err, model);
+      } finally {
+        clearTimeout(firstResponseTimer);
       }
     }
 
@@ -161,6 +245,19 @@ export class GeminiProvider implements LlmProvider {
 
   private handleError(err: unknown, model: string): never {
     const errorMessage = err instanceof Error ? err.message : String(err);
+    const normalizedMessage = errorMessage.toLowerCase();
+    // Caller cancellation is handled before reaching this method. An abort
+    // from the SDK/transport must not become an unexplained HTTP 500.
+    if (
+      (err instanceof Error &&
+        ['AbortError', 'TimeoutError'].includes(err.name)) ||
+      normalizedMessage.includes('operation was aborted') ||
+      normalizedMessage.includes('timeout') ||
+      normalizedMessage.includes('etimedout') ||
+      normalizedMessage.includes('deadline_exceeded')
+    ) {
+      this.handleTimeout(model);
+    }
 
     // Log error safely without exposing keys or credentials
     logger.error('Gemini API call failed', {
@@ -205,18 +302,6 @@ export class GeminiProvider implements LlmProvider {
       );
     }
 
-    // Detect timeout
-    if (
-      errorMessage.includes('timeout') ||
-      errorMessage.includes('ETIMEDOUT') ||
-      errorMessage.includes('DEADLINE_EXCEEDED')
-    ) {
-      throw new ApiError(
-        'Waktu permintaan ke layanan AI habis (timeout). Silakan ulangi pertanyaan Anda.',
-        504,
-      );
-    }
-
     // Detect model not found / deprecated model
     if (
       errorMessage.includes('404') ||
@@ -233,6 +318,14 @@ export class GeminiProvider implements LlmProvider {
     throw new ApiError(
       'Gagal memproses jawaban dari asisten AI. Silakan coba beberapa saat lagi.',
       500,
+    );
+  }
+
+  private handleTimeout(model: string): never {
+    logger.warn('Gemini request timed out or was aborted upstream', { model });
+    throw new ApiError(
+      'Waktu permintaan ke layanan AI habis (timeout). Silakan ulangi pertanyaan Anda.',
+      504,
     );
   }
 }

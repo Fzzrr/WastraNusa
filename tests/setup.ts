@@ -42,6 +42,7 @@ vi.mock('@/lib/prisma', () => ({
 
 vi.mock('@/repositories/article.repository', () => ({
   articleRepository: {
+    findChatArticle: vi.fn(),
     findAll: vi.fn(),
     countAll: vi.fn(),
     countByIsland: vi.fn(),
@@ -121,6 +122,7 @@ vi.mock('@/repositories/paymentTransaction.repository', () => ({
 
 vi.mock('@/repositories/product.repository', () => ({
   productRepository: {
+    findChatProducts: vi.fn(),
     findProductById: vi.fn(),
     findAll: vi.fn(),
     countAll: vi.fn(),
