@@ -6,7 +6,7 @@ import {
   IslandCards,
   ProductCatalog,
 } from '@/components/landing-page';
-import { AdminChatbotWidget } from '@/components/landing-page/admin-chatbot-widget';
+import { AdminFaqWidget } from '@/components/landing-page/admin-faq-widget';
 
 export default function HomePage() {
   return (
@@ -28,7 +28,7 @@ export default function HomePage() {
 
       <IslandCards />
 
-      <AdminChatbotWidget />
+      <AdminFaqWidget />
     </main>
   );
 }
