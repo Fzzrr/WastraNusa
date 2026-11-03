@@ -1,4 +1,5 @@
 import type { PaymentStatus, Prisma } from '@/generated/prisma/client';
+import { ApiError } from '@/lib/error';
 import prisma from '@/lib/prisma';
 
 const userOrderRelations = {
@@ -44,6 +45,30 @@ export const orderRepository = {
     return prisma.order.create({ data });
   },
 
+  /**
+   * Creates the order and reserves variant stock in one transaction. Each
+   * decrement only matches while `stock >= quantity`, so two buyers racing for
+   * the last unit can't both succeed; a miss rolls the whole checkout back.
+   */
+  createOrderAndReserveStock: async (
+    data: Prisma.OrderUncheckedCreateInput,
+    reservations: Array<{ variantId: string; quantity: number }>,
+  ) => {
+    return prisma.$transaction(async (tx) => {
+      for (const item of reservations) {
+        const { count } = await tx.productVariant.updateMany({
+          where: { id: item.variantId, stock: { gte: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
+        });
+        if (count === 0) {
+          throw new ApiError('Stok tidak mencukupi, silakan muat ulang', 409);
+        }
+      }
+
+      return tx.order.create({ data });
+    });
+  },
+
   findOrderById: async (orderId: string, userId?: string) => {
     return prisma.order.findFirst({
       where: {
@@ -67,6 +92,7 @@ export const orderRepository = {
         totalAmount: true,
         subtotal: true,
         shippingCost: true,
+        serviceFee: true,
         orderStatus: true,
         paymentStatus: true,
         paymentMethod: true,

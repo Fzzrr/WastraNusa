@@ -324,6 +324,7 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
           <div className="space-y-1.5">
             <SummaryRow label="Subtotal" value={order.totals.subtotal} />
             <SummaryRow label="Ongkir" value={order.totals.shippingCost} />
+            <SummaryRow label="Biaya Layanan" value={order.totals.serviceFee} />
             {order.paymentMethod && (
               <SummaryRow label="Metode" value={order.paymentMethod} />
             )}

@@ -69,7 +69,8 @@ export async function seedUsers() {
     }
 
     // Give the seed seller an approved application so the seller panel has a
-    // store name to display.
+    // store name to display, plus the matching shop profile (normally created
+    // when an application is approved).
     if (user.email === SEED_SELLER_USER.email) {
       await prisma.sellerApplication.upsert({
         where: { userId },
@@ -84,6 +85,19 @@ export async function seedUsers() {
           shopName: SEED_SELLER_USER.shopName,
           status: 'approved',
           reviewedAt: new Date(),
+        },
+      });
+
+      await prisma.shopProfile.upsert({
+        where: { userId },
+        update: {},
+        create: {
+          id: crypto.randomUUID(),
+          userId,
+          shopName: SEED_SELLER_USER.shopName,
+          description:
+            'Menjual batik tulis dan cap khas Nusantara dengan motif pilihan.',
+          phoneNumber: '081234567890',
         },
       });
     }

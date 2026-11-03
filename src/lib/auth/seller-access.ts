@@ -1,6 +1,6 @@
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
 
-import { isAdmin, isSeller } from './roles';
+import { isSeller } from './roles';
 
 /**
  * Seller-panel access: sellers always; admins only once they have an approved
@@ -11,6 +11,5 @@ export async function hasSellerAccess(user: {
   role?: string | null;
 }): Promise<boolean> {
   if (isSeller(user.role)) return true;
-  if (!isAdmin(user.role)) return false;
   return sellerApplicationRepository.hasApprovedApplication(user.id);
 }

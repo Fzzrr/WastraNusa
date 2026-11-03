@@ -90,6 +90,7 @@ describe('useOrders hook', { tags: ['frontend'] }, () => {
     totals: {
       subtotal: 'Rp 120.000',
       shippingCost: 'Rp 30.000',
+      serviceFee: 'Rp 0',
       totalAmount: 'Rp 150.000',
     },
     products: [

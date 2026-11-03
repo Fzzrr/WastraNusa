@@ -14,9 +14,7 @@ describe('Checkout API', { tags: ['backend'] }, () => {
   const mockCheckoutInput = {
     items: [{ productId: 'p-123', variantId: 'v-456', quantity: 1 }],
     shippingAddressId: 'a-789',
-    courier: 'JNE',
-    courierService: 'REG',
-    shippingCost: 10000,
+    shippingOptionId: 'jne-reg',
   };
 
   it('should return 201 and checkout data on success', async () => {

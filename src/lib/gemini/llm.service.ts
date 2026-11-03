@@ -34,6 +34,16 @@ export class LlmService {
    * Sends chat prompt to the active provider, with prepared fallback architecture.
    */
   public async chat(options: LlmChatOptions): Promise<LlmChatResult> {
+    let emitted = false;
+    const requestOptions = options.onText
+      ? {
+          ...options,
+          onText: (delta: string) => {
+            emitted = true;
+            options.onText?.(delta);
+          },
+        }
+      : options;
     const activeProviderName =
       process.env.LLM_PROVIDER || this.defaultProviderName;
     const provider = this.providers.get(activeProviderName);
@@ -46,21 +56,23 @@ export class LlmService {
           `LLM provider '${activeProviderName}' is not registered`,
         );
       }
-      return fallback.chat(options);
+      return fallback.chat(requestOptions);
     }
 
     try {
-      return await provider.chat(options);
+      return await provider.chat(requestOptions);
     } catch (primaryError) {
       // Structure for optional secondary fallback provider (e.g. OpenRouter)
       const fallbackProviderName = process.env.LLM_FALLBACK_PROVIDER;
       if (
+        !emitted &&
+        !options.signal?.aborted &&
         fallbackProviderName &&
         fallbackProviderName !== activeProviderName &&
         this.providers.has(fallbackProviderName)
       ) {
         const secondary = this.providers.get(fallbackProviderName)!;
-        return await secondary.chat(options);
+        return await secondary.chat(requestOptions);
       }
 
       // Re-throw if no fallback is configured or available

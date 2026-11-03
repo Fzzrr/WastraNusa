@@ -2,6 +2,7 @@ import type { PaymentTransactionStatus } from '@/generated/prisma/client';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
+import { SERVICE_FEE, findShippingOption } from '@/lib/shipping';
 import { addressRepository } from '@/repositories/address.repository';
 import { cartRepository } from '@/repositories/cart.repository';
 import { orderRepository } from '@/repositories/order.repository';
@@ -28,14 +29,6 @@ interface CheckoutResolvedItem {
   province: string;
   clothingType: string;
   imageURL: string | null;
-}
-
-function sumVariantStock(
-  variants: Array<{
-    stock: number;
-  }>,
-) {
-  return variants.reduce((total, variant) => total + variant.stock, 0);
 }
 
 function generateOrderNumber(): string {
@@ -201,6 +194,11 @@ function extractPurchasedCartItemIds(order: { customerNotes: string | null }) {
 
 export const paymentService = {
   checkout: async (input: CheckoutInput, userId: string) => {
+    const shippingOption = findShippingOption(input.shippingOptionId);
+    if (!shippingOption) {
+      throw new ApiError('Metode pengiriman tidak valid', 400);
+    }
+
     let shippingAddressId: string;
 
     if (input.shippingAddressId) {
@@ -226,6 +224,9 @@ export const paymentService = {
 
     const mergedItems = aggregateCheckoutItems(input);
     const resolvedItems: CheckoutResolvedItem[] = [];
+    // ponytail: one shop per checkout because Order holds a single sellerId;
+    // a multi-shop cart needs an OrderItem table or one order per seller.
+    let orderSellerId: string | null | undefined;
 
     for (const item of mergedItems) {
       const product = await productRepository.findProductById(item.productId);
@@ -236,51 +237,44 @@ export const paymentService = {
         throw new ApiError(`Produk tidak tersedia: ${product.name}`, 400);
       }
 
-      let variantName: string | null = null;
-      let unitPrice = Number(product.price);
-      let resolvedVariantId: string | null = null;
-
-      if (item.variantId) {
-        const variant = await productVariantRepository.findVariantById(
-          item.variantId,
-        );
-        if (!variant) {
-          throw new ApiError('Varian tidak ditemukan', 404);
-        }
-        if (variant.productId !== product.id) {
-          throw new ApiError('Varian tidak sesuai dengan produk ini', 400);
-        }
-        if (variant.stock < item.quantity) {
-          throw new ApiError(
-            `Insufficient variant stock for ${product.name}`,
-            400,
-          );
-        }
-
-        resolvedVariantId = variant.id;
-        variantName = variant.name;
-        if (variant.price !== null) {
-          unitPrice = Number(variant.price);
-        }
-      }
-
-      const totalProductStock = sumVariantStock(product.variants);
-
-      if (totalProductStock < item.quantity) {
+      if (orderSellerId === undefined) {
+        orderSellerId = product.sellerId;
+      } else if (orderSellerId !== product.sellerId) {
         throw new ApiError(
-          `Insufficient product stock for ${product.name}`,
+          'Checkout hanya bisa untuk produk dari satu toko. Silakan checkout per toko.',
           400,
         );
+      }
+
+      // Stock lives on variants only, so every purchasable item needs one.
+      if (!item.variantId) {
+        throw new ApiError(`Pilih varian untuk ${product.name}`, 400);
+      }
+
+      const variant = await productVariantRepository.findVariantById(
+        item.variantId,
+      );
+      if (!variant) {
+        throw new ApiError('Varian tidak ditemukan', 404);
+      }
+      if (variant.productId !== product.id) {
+        throw new ApiError('Varian tidak sesuai dengan produk ini', 400);
+      }
+      if (variant.stock < item.quantity) {
+        throw new ApiError(`Stok ${product.name} tidak mencukupi`, 400);
       }
 
       resolvedItems.push({
         cartItemIds: item.cartItemIds,
         productId: product.id,
-        variantId: resolvedVariantId,
+        variantId: variant.id,
         quantity: item.quantity,
         productName: product.name,
-        variantName,
-        unitPrice,
+        variantName: variant.name,
+        unitPrice:
+          variant.price !== null
+            ? Number(variant.price)
+            : Number(product.price),
         province: product.province,
         clothingType: product.clothingType,
         imageURL: product.imageURL,
@@ -291,7 +285,7 @@ export const paymentService = {
       (acc, item) => acc + item.unitPrice * item.quantity,
       0,
     );
-    const totalAmount = subtotal + input.shippingCost;
+    const totalAmount = subtotal + shippingOption.price + SERVICE_FEE;
 
     const totalQuantity = resolvedItems.reduce(
       (acc, item) => acc + item.quantity,
@@ -335,37 +329,39 @@ export const paymentService = {
       .filter(Boolean)
       .join(' | ');
 
-    await orderRepository.createOrder({
-      id: orderId,
-      orderNumber,
-      userId,
-      productId: primaryItem.productId,
-      variantId: primaryItem.variantId,
-      productName:
-        resolvedItems.length === 1
-          ? primaryItem.productName
-          : `${primaryItem.productName} +${resolvedItems.length - 1} item(s)`,
-      variantName: resolvedItems.length === 1 ? primaryItem.variantName : null,
-      quantity: totalQuantity,
-      productPrice: subtotal,
-      shippingAddressId,
-      courier: input.courier,
-      courierService: input.courierService,
-      estimatedDelivery: input.estimatedDelivery ?? null,
-      subtotal,
-      shippingCost: input.shippingCost,
-      totalAmount,
-      customerNotes: customerNotes || null,
-    });
+    const reservations = resolvedItems.map((item) => ({
+      variantId: item.variantId!,
+      quantity: item.quantity,
+    }));
 
-    for (const item of resolvedItems) {
-      if (item.variantId) {
-        await productVariantRepository.decrementVariantStock(
-          item.variantId,
-          item.quantity,
-        );
-      }
-    }
+    await orderRepository.createOrderAndReserveStock(
+      {
+        id: orderId,
+        orderNumber,
+        userId,
+        sellerId: orderSellerId ?? null,
+        productId: primaryItem.productId,
+        variantId: primaryItem.variantId,
+        productName:
+          resolvedItems.length === 1
+            ? primaryItem.productName
+            : `${primaryItem.productName} +${resolvedItems.length - 1} item(s)`,
+        variantName:
+          resolvedItems.length === 1 ? primaryItem.variantName : null,
+        quantity: totalQuantity,
+        productPrice: subtotal,
+        shippingAddressId,
+        courier: shippingOption.courier,
+        courierService: shippingOption.name,
+        estimatedDelivery: shippingOption.desc,
+        subtotal,
+        shippingCost: shippingOption.price,
+        serviceFee: SERVICE_FEE,
+        totalAmount,
+        customerNotes: customerNotes || null,
+      },
+      reservations,
+    );
 
     let midtransResponse;
     try {
@@ -470,6 +466,7 @@ export const paymentService = {
     const paymentStatus = mapPaymentStatus(transaction_status);
     const isPaid =
       transaction_status === 'settlement' || transaction_status === 'capture';
+    const isFailed = ['deny', 'cancel', 'expire'].includes(transaction_status);
     const paidAt = isPaid ? new Date() : null;
 
     await paymentTransactionRepository.updatePaymentStatus(order_id, {
@@ -478,13 +475,24 @@ export const paymentService = {
     });
 
     if (isPaid) {
+      if (order.orderStatus === 'cancelled') {
+        logger.warn(
+          'Payment received for an order that was already cancelled',
+          {
+            order_id,
+            transaction_status,
+          },
+        );
+        return;
+      }
+
       await orderRepository.updateOrderPaymentStatus(order_id, {
         paymentStatus,
         paymentMethod: payment_type,
         paidAt,
         orderStatus: 'confirmed' as const,
       });
-    } else {
+    } else if (isFailed) {
       await orderService.cancelOrderBySystemId(
         order_id,
         transaction_status === 'expire' ? 'expired' : 'failed',

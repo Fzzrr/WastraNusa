@@ -22,9 +22,7 @@ describe('paymentService', () => {
     const mockInput = {
       items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 2 }],
       shippingAddressId: 'addr-1',
-      courier: 'JNE',
-      courierService: 'REG',
-      shippingCost: 15000,
+      shippingOptionId: 'jne-reg',
     };
 
     it('should successfully checkout with variant', async () => {
@@ -38,6 +36,7 @@ describe('paymentService', () => {
         status: 'active',
         price: 100000,
         name: 'Product 1',
+        sellerId: 'seller-1',
         variants: [{ stock: 10 }],
       } as never);
 
@@ -61,7 +60,22 @@ describe('paymentService', () => {
         'addr-1',
         mockUserId,
       );
-      expect(orderRepository.createOrder).toHaveBeenCalled();
+      // 2 x 120.000 + ongkir JNE REG 18.000 + biaya layanan 5.000
+      expect(orderRepository.createOrderAndReserveStock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sellerId: 'seller-1',
+          courier: 'JNE',
+          courierService: 'Reguler (REG)',
+          shippingCost: 18000,
+          serviceFee: 5000,
+          totalAmount: 263000,
+        }),
+        [{ variantId: 'var-1', quantity: 2 }],
+      );
+      expect(createMidtransTransaction).toHaveBeenCalledWith(
+        expect.any(String),
+        263000,
+      );
       expect(
         paymentTransactionRepository.createPaymentTransaction,
       ).toHaveBeenCalledWith(
@@ -70,9 +84,66 @@ describe('paymentService', () => {
           expiredAt: expect.any(Date),
         }),
       );
-      expect(
-        productVariantRepository.decrementVariantStock,
-      ).toHaveBeenCalledWith('var-1', 2);
+    });
+
+    it('should reject an unknown shipping option', async () => {
+      await expect(
+        paymentService.checkout(
+          { ...mockInput, shippingOptionId: 'gratis-ongkir' },
+          mockUserId,
+        ),
+      ).rejects.toThrow(new ApiError('Metode pengiriman tidak valid', 400));
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
+    });
+
+    it('should reject a checkout spanning more than one shop', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+      vi.mocked(productRepository.findProductById)
+        .mockResolvedValueOnce({
+          id: 'prod-1',
+          status: 'active',
+          price: 100000,
+          name: 'Product 1',
+          sellerId: 'seller-1',
+          variants: [{ stock: 10 }],
+        } as never)
+        .mockResolvedValueOnce({
+          id: 'prod-2',
+          status: 'active',
+          price: 100000,
+          name: 'Product 2',
+          sellerId: 'seller-2',
+          variants: [{ stock: 10 }],
+        } as never);
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-1',
+        productId: 'prod-1',
+        name: 'Variant 1',
+        price: null,
+        stock: 5,
+      } as never);
+
+      await expect(
+        paymentService.checkout(
+          {
+            ...mockInput,
+            items: [
+              { productId: 'prod-1', variantId: 'var-1', quantity: 1 },
+              { productId: 'prod-2', variantId: 'var-2', quantity: 1 },
+            ],
+          },
+          mockUserId,
+        ),
+      ).rejects.toThrow(
+        new ApiError(
+          'Checkout hanya bisa untuk produk dari satu toko. Silakan checkout per toko.',
+          400,
+        ),
+      );
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
     });
 
     it('should throw error if product not found', async () => {
@@ -87,7 +158,7 @@ describe('paymentService', () => {
       ).rejects.toThrow(new ApiError('Produk tidak ditemukan: prod-1', 404));
     });
 
-    it('should throw error if insufficient product stock', async () => {
+    it('should require a variant for every item', async () => {
       vi.mocked(addressRepository.findById).mockResolvedValue({
         id: 'addr-1',
         userId: mockUserId,
@@ -97,7 +168,7 @@ describe('paymentService', () => {
         status: 'active',
         name: 'Product 1',
         price: 100000,
-        variants: [{ stock: 1 }], // Only 1 in stock
+        variants: [{ stock: 10 }],
       } as never);
 
       await expect(
@@ -108,9 +179,7 @@ describe('paymentService', () => {
           },
           mockUserId,
         ),
-      ).rejects.toThrow(
-        new ApiError('Insufficient product stock for Product 1', 400),
-      );
+      ).rejects.toThrow(new ApiError('Pilih varian untuk Product 1', 400));
     });
 
     it('should throw error if variant belongs to another product', async () => {
@@ -166,9 +235,7 @@ describe('paymentService', () => {
 
       await expect(
         paymentService.checkout(mockInput, mockUserId),
-      ).rejects.toThrow(
-        new ApiError('Insufficient variant stock for Product 1', 400),
-      );
+      ).rejects.toThrow(new ApiError('Stok Product 1 tidak mencukupi', 400));
     });
 
     it('should throw error when variant is not found', async () => {
@@ -234,10 +301,11 @@ describe('paymentService', () => {
         mockUserId,
       );
       expect(addressRepository.findById).not.toHaveBeenCalled();
-      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+      expect(orderRepository.createOrderAndReserveStock).toHaveBeenCalledWith(
         expect.objectContaining({
           shippingAddressId: 'addr-default',
         }),
+        expect.any(Array),
       );
     });
   });
@@ -331,6 +399,74 @@ describe('paymentService', () => {
         'order-123',
         'failed',
       );
+      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+      expect(
+        cartRepository.removePurchasedItemsByProductVariant,
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should not cancel order on pending notification', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'pending',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'pending',
+        status_code: '201',
+        payment_type: 'bank_transfer',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ status: 'pending' }),
+      );
+      expect(orderService.cancelOrderBySystemId).not.toHaveBeenCalled();
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
+    });
+
+    it('should cancel order on failed notification', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'pending',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'expire',
+        status_code: '407',
+      });
+
+      expect(orderService.cancelOrderBySystemId).toHaveBeenCalledWith(
+        'order-123',
+        'expired',
+      );
+    });
+
+    it('should not confirm a cancelled order when payment settles', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+        orderStatus: 'cancelled',
+      } as never);
+
+      await paymentService.handleNotification(mockPayload);
+
+      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
       expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
       expect(
         cartRepository.removePurchasedItemsByProductVariant,

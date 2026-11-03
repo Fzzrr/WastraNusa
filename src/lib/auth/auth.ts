@@ -40,7 +40,13 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60,
+      // The user object (incl. `role`) is cached in a signed cookie and served
+      // without a DB read for this long. Keep it short so a role change (e.g.
+      // becoming a seller) is reflected in the session — and in client UI that
+      // reads `session.user.role`, like the "Toko" navbar item — within ~a
+      // minute, instead of lingering stale. Server-side seller access does not
+      // depend on this (see `hasSellerAccess`, which reads the DB).
+      maxAge: 60,
     },
   },
   emailAndPassword: {

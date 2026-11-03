@@ -124,6 +124,78 @@ function buildOrderBy(sortBy: ProductCatalogSortBy = DEFAULT_SORT) {
 }
 
 export const productRepository = {
+  async findChatProducts(article: {
+    id: string;
+    topic: string;
+    motifLabel: string;
+    province: string | null;
+    clothingType: string | null;
+  }) {
+    const available: Prisma.ProductWhereInput = {
+      status: 'active',
+      variants: { some: { stock: { gt: 0 } } },
+      article: { status: 'published' },
+    };
+    const select = {
+      id: true,
+      name: true,
+      slug: true,
+      description: true,
+      imageURL: true,
+      price: true,
+      status: true,
+      clothingType: true,
+      gender: true,
+      province: true,
+      island: true,
+      article: { select: { id: true, title: true } },
+      variants: {
+        where: { stock: { gt: 0 } },
+        select: { id: true, type: true, name: true, price: true, stock: true },
+        orderBy: { createdAt: 'asc' as const },
+      },
+    } satisfies Prisma.ProductSelect;
+    // Fetch exact matches independently so newer related rows cannot hide them.
+    const exact = prisma.product.findMany({
+      where: { AND: [available, { articleId: article.id }] },
+      take: 12,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      select,
+    });
+    const closeMatches: Prisma.ArticleWhereInput[] = [];
+    if (article.motifLabel?.trim()) {
+      closeMatches.push({
+        motifLabel: { equals: article.motifLabel, mode: 'insensitive' },
+      });
+    }
+    if (article.province && article.clothingType) {
+      closeMatches.push({
+        province: article.province,
+        clothingType: article.clothingType,
+      });
+    }
+    if (!closeMatches.length) return exact;
+    const related = prisma.product.findMany({
+      where: {
+        AND: [
+          available,
+          { articleId: { not: article.id } },
+          {
+            article: { topic: article.topic, OR: closeMatches },
+          },
+        ],
+      },
+      take: 12,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'asc' }],
+      select,
+    });
+    const [exactProducts, relatedProducts] = await Promise.all([
+      exact,
+      related,
+    ]);
+    return [...exactProducts, ...relatedProducts];
+  },
+
   findProductById: async (productId: string) => {
     return prisma.product.findUnique({
       where: { id: productId },
@@ -361,6 +433,41 @@ export const productRepository = {
       where: {
         OR: [{ id: idOrSlug }, { slug: idOrSlug }],
       },
+      include: {
+        article: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            shopProfile: {
+              select: {
+                shopName: true,
+              },
+            },
+          },
+        },
+        variants: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+        },
+      },
+    });
+  },
+
+  findActiveBySeller: async (sellerId: string) => {
+    return prisma.product.findMany({
+      where: {
+        sellerId,
+        variants: { some: { stock: { gt: 0 } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
       include: {
         article: {
           select: {

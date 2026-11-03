@@ -82,6 +82,9 @@ const mapProduct = (product: {
   sold: product.sold,
   variants: product.variants.map(mapVariant),
   variantCount: product.variants.length,
+  // Seller inventory lists the seller's own products; the public seller badge
+  // is only populated on the public catalog detail path.
+  seller: null,
   createdAt: product.createdAt.toISOString(),
   updatedAt: product.updatedAt.toISOString(),
 });

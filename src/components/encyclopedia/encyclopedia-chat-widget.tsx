@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { ChatProductRecommendations } from './chat-product-recommendations';
+
 interface EncyclopediaChatWidgetProps {
   articleId: string;
   articleTitle: string;
@@ -29,6 +31,7 @@ const SUGGESTED_QUESTIONS = [
   '🧵 Apa filosofi dan makna motif kain ini?',
   '🏛️ Dari mana asal-usul dan sejarahnya?',
   '✨ Apa bahan dan teknik pembuatannya?',
+  '🛍️ Ada produk terkait artikel ini yang bisa dibeli?',
 ];
 
 /**
@@ -114,9 +117,17 @@ export function EncyclopediaChatWidget({
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (isOpen && !chat.isMinimized) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current?.scrollIntoView({
+        behavior: chat.isStreaming ? 'auto' : 'smooth',
+      });
     }
-  }, [chat.messages, chat.isPending, isOpen, chat.isMinimized]);
+  }, [
+    chat.messages,
+    chat.isPending,
+    chat.isStreaming,
+    isOpen,
+    chat.isMinimized,
+  ]);
 
   // Focus input when opened
   useEffect(() => {
@@ -286,8 +297,8 @@ export function EncyclopediaChatWidget({
                 </p>
                 <p className="mt-1 text-[#665e52]">
                   Silakan tanyakan apa pun seputar sejarah, filosofi motif,
-                  makna budaya, atau teknik pembuatannya. Jawaban saya
-                  sepenuhnya dirangkum dari isi artikel.
+                  makna budaya, teknik pembuatannya, atau produk terkait yang
+                  tersedia di katalog.
                 </p>
               </div>
             </div>
@@ -346,6 +357,10 @@ export function EncyclopediaChatWidget({
                   )}
                 </div>
 
+                {!isUser && message.products?.length ? (
+                  <ChatProductRecommendations products={message.products} />
+                ) : null}
+
                 {/* Footer status (timestamp & cache badge) */}
                 <div
                   className={cn(
@@ -374,7 +389,7 @@ export function EncyclopediaChatWidget({
         })}
 
         {/* Loading typing indicator */}
-        {chat.isPending && (
+        {chat.isPending && !chat.isStreaming && (
           <div className="flex items-center gap-2.5">
             <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#2f5b49] text-white">
               <Bot className="size-3.5" />
@@ -429,8 +444,8 @@ export function EncyclopediaChatWidget({
         </form>
 
         <p className="mt-1.5 text-center text-[9px] text-[#9c9181]">
-          Jawaban dijawab oleh AI dan bersumber secara eksklusif dari isi
-          artikel ini.
+          AI menggunakan artikel, katalog terkini, dan pengetahuan umum yang
+          relevan. Periksa detail produk sebelum membeli.
         </p>
       </footer>
     </aside>
