@@ -72,10 +72,22 @@ describe('paymentService', () => {
         }),
         [{ variantId: 'var-1', quantity: 2 }],
       );
+      const [orderId, , startTime, expiredAt] = vi.mocked(
+        createMidtransTransaction,
+      ).mock.calls[0];
       expect(createMidtransTransaction).toHaveBeenCalledWith(
         expect.any(String),
         263000,
+        expect.any(Date),
+        expect.any(Date),
       );
+      // Midtrans gets the same window the app stores and enforces.
+      expect(
+        paymentTransactionRepository.createPaymentTransaction,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({ orderId, externalId: orderId, expiredAt }),
+      );
+      expect(expiredAt.getTime() - startTime.getTime()).toBe(30 * 60 * 1000);
       expect(
         paymentTransactionRepository.createPaymentTransaction,
       ).toHaveBeenCalledWith(

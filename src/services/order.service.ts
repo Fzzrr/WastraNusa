@@ -22,10 +22,14 @@ const ADMIN_EDITABLE_ORDER_STATUSES = new Set<OrderStatus>([
   OrderStatus.delivered,
 ]);
 
-const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 60;
+// Single source of truth for the payment window; also sent to Midtrans as `expiry`.
+const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 30;
 
 function getPaymentTimeoutMinutes() {
-  const rawValue = Number(process.env.ORDER_PAYMENT_TIMEOUT_MINUTES ?? '30');
+  const rawValue = Number(
+    process.env.ORDER_PAYMENT_TIMEOUT_MINUTES ??
+      DEFAULT_PAYMENT_TIMEOUT_MINUTES,
+  );
 
   if (!Number.isFinite(rawValue) || rawValue <= 0) {
     return DEFAULT_PAYMENT_TIMEOUT_MINUTES;

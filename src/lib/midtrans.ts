@@ -15,11 +15,20 @@ const midtrans_snap = new midtransClient.Snap({
 // @see https://docs.midtrans.com/reference/json-object
 type SnapParameters = SnapTransactionParameters & {
   callbacks?: { finish: string };
+  expiry?: { start_time: string; unit: 'minute'; duration: number };
 };
+
+// Midtrans expects "yyyy-MM-dd HH:mm:ss +0700".
+function formatMidtransTime(date: Date) {
+  const wib = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  return `${wib.toISOString().slice(0, 19).replace('T', ' ')} +0700`;
+}
 
 export function createParameter(
   order_id: string,
   gross_amount: number,
+  startTime: Date,
+  expiredAt: Date,
 ): SnapParameters {
   const baseUrl = process.env.BETTER_AUTH_URL?.replace(/\/+$/, '');
 
@@ -27,6 +36,12 @@ export function createParameter(
     transaction_details: {
       order_id,
       gross_amount,
+    },
+    // Keep Midtrans' payment window identical to the one the app enforces.
+    expiry: {
+      start_time: formatMidtransTime(startTime),
+      unit: 'minute',
+      duration: Math.round((expiredAt.getTime() - startTime.getTime()) / 60000),
     },
     ...(baseUrl && {
       callbacks: {
@@ -39,8 +54,15 @@ export function createParameter(
 export async function createMidtransTransaction(
   order_id: string,
   gross_amount: number,
+  startTime: Date,
+  expiredAt: Date,
 ): Promise<SnapTransactionResponse> {
-  const parameter = createParameter(order_id, gross_amount);
+  const parameter = createParameter(
+    order_id,
+    gross_amount,
+    startTime,
+    expiredAt,
+  );
   const transaction = await midtrans_snap.createTransaction(parameter);
   return transaction;
 }

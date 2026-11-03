@@ -83,6 +83,8 @@ describe('verifySignatureKey', { tags: ['backend'] }, () => {
 
 describe('createParameter', { tags: ['backend'] }, () => {
   const originalBaseUrl = process.env.BETTER_AUTH_URL;
+  const startTime = new Date('2026-11-03T05:00:00.000Z');
+  const expiredAt = new Date('2026-11-03T05:30:00.000Z');
 
   afterAll(() => {
     process.env.BETTER_AUTH_URL = originalBaseUrl;
@@ -91,7 +93,12 @@ describe('createParameter', { tags: ['backend'] }, () => {
   it('redirects to the order detail page after payment', () => {
     process.env.BETTER_AUTH_URL = 'https://wastranusa.test/';
 
-    const parameter = createParameter('order-123', 263000);
+    const parameter = createParameter(
+      'order-123',
+      263000,
+      startTime,
+      expiredAt,
+    );
 
     expect(parameter.transaction_details).toEqual({
       order_id: 'order-123',
@@ -102,10 +109,30 @@ describe('createParameter', { tags: ['backend'] }, () => {
     });
   });
 
+  it('sends an expiry matching the app payment deadline', () => {
+    const parameter = createParameter(
+      'order-123',
+      263000,
+      startTime,
+      expiredAt,
+    );
+
+    expect(parameter.expiry).toEqual({
+      start_time: '2026-11-03 12:00:00 +0700',
+      unit: 'minute',
+      duration: 30,
+    });
+  });
+
   it('omits callbacks when BETTER_AUTH_URL is not set', () => {
     delete process.env.BETTER_AUTH_URL;
 
-    const parameter = createParameter('order-123', 263000);
+    const parameter = createParameter(
+      'order-123',
+      263000,
+      startTime,
+      expiredAt,
+    );
 
     expect(parameter.callbacks).toBeUndefined();
   });

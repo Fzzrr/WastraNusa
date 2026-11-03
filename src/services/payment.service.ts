@@ -300,7 +300,8 @@ export const paymentService = {
     const orderId = crypto.randomUUID();
     const orderNumber = generateOrderNumber();
     const paymentTransactionId = crypto.randomUUID();
-    const paymentExpiredAt = getOrderPaymentExpiryDate(new Date());
+    const paymentStartedAt = new Date();
+    const paymentExpiredAt = getOrderPaymentExpiryDate(paymentStartedAt);
 
     const itemSnapshot = resolvedItems.map((item) => ({
       cartItemIds: item.cartItemIds,
@@ -365,7 +366,12 @@ export const paymentService = {
 
     let midtransResponse;
     try {
-      midtransResponse = await createMidtransTransaction(orderId, totalAmount);
+      midtransResponse = await createMidtransTransaction(
+        orderId,
+        totalAmount,
+        paymentStartedAt,
+        paymentExpiredAt,
+      );
     } catch (error) {
       logger.error('Failed to create Midtrans transaction', {
         orderId,
