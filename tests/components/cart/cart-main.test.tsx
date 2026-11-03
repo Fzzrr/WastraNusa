@@ -59,4 +59,32 @@ describe('CartMain', { tags: ['frontend'] }, () => {
     fireEvent.click(inStock);
     expect(inStock.checked).toBe(false);
   });
+
+  it('charges the variant price, not the product base price', () => {
+    vi.mocked(useCart).mockReturnValue({
+      data: {
+        items: [
+          {
+            ...cartItem('a', 'Batik Parang', 485000, 5),
+            variantId: 'v-1',
+            variant: {
+              id: 'v-1',
+              name: 'Biru Indigo',
+              type: 'color',
+              price: 500000,
+              stock: 12,
+              imageURL: null,
+            },
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    } as never);
+
+    render(<CartMain />);
+
+    expect(screen.getAllByText('Rp 500.000').length).toBeGreaterThan(1);
+    expect(screen.queryByText('Rp 485.000')).toBeNull();
+  });
 });

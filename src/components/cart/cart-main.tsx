@@ -128,7 +128,8 @@ export function CartMain() {
         productId: cartItem.productId,
         variantId: cartItem.variantId,
         name: cartItem.product.name,
-        price: Number(cartItem.product.price),
+        // Same rule as checkout: the variant price wins when it is set.
+        price: Number(cartItem.variant?.price ?? cartItem.product.price),
         size: cartItem.variant?.name || 'Default',
         stock: availableStock,
         quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
