@@ -24,17 +24,23 @@ const CARD_BACKGROUNDS = [
 export function FeaturedCards() {
   const { data, error, isPending } = useArticles(1, 6);
 
-  const featuredArticles: FeaturedArticleCard[] =
-    data?.items
-      .filter((article) => article.imageURL)
-      .slice(0, 2)
-      .map((article) => ({
-        slug: article.slug,
-        title: article.title,
-        subtitle: article.region || article.motifLabel,
-        topic: article.topic,
-        imageURL: article.imageURL,
-      })) ?? [];
+  const withImage = (data?.items ?? []).filter((article) => article.imageURL);
+  // The hero carousel shows the first four articles; pick others when there
+  // are enough so the two cards beside it never repeat a slide.
+  const notInHero = (data?.items.slice(4) ?? []).filter(
+    (article) => article.imageURL,
+  );
+  const featuredArticles: FeaturedArticleCard[] = (
+    notInHero.length >= 2 ? notInHero : withImage
+  )
+    .slice(0, 2)
+    .map((article) => ({
+      slug: article.slug,
+      title: article.title,
+      subtitle: article.region || article.motifLabel,
+      topic: article.topic,
+      imageURL: article.imageURL,
+    }));
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
@@ -74,8 +80,7 @@ export function FeaturedCards() {
                       fill
                       className="object-cover transition duration-700 ease-out group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      // Above the fold and shares its src with the first hero slide;
-                      // a lazy entry here makes Next flag the hero LCP as lazy.
+                      // Above the fold beside the hero.
                       loading="eager"
                     />
                   ) : null}

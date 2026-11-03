@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { KawungPattern } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
-import { BookOpenText, ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -85,22 +85,11 @@ export function EncyclopediaSection() {
         <span className="pointer-events-none absolute -top-24 left-1/3 size-72 rounded-full bg-[#e8cb8d]/10 blur-3xl" />
         <div className="relative grid lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="p-6 md:p-10">
-            <Badge
-              variant="outline"
-              className="inline-flex gap-1.5 rounded-lg border-[#e8cb8d]/30 bg-white/7 px-3 py-1 text-xs font-semibold text-[#f3dfb4]"
-            >
-              <BookOpenText className="size-3 text-[#e8cb8d]" />
-              Ensiklopedia Budaya
-            </Badge>
+            <h2 className="text-2xl font-semibold tracking-tight text-[#f2f8ee] sm:text-3xl">
+              Jelajahi Kekayaan Wastra Nusantara
+            </h2>
 
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-[#f2f8ee]">
-              Jelajahi Kekayaan{' '}
-              <span className="bg-gradient-to-r from-[#f3dfb4] to-[#caa86a] bg-clip-text text-transparent">
-                Wastra Nusantara
-              </span>
-            </h3>
-
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#bed0c4]">
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#cfdccf]">
               Pakaian adat adalah busana tradisional yang mencerminkan identitas
               dan budaya suatu daerah. Indonesia memiliki ratusan jenis pakaian
               adat dari berbagai suku dan provinsi, masing-masing dengan

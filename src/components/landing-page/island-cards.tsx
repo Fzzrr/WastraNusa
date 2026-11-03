@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -17,7 +16,6 @@ import {
   BookOpenText,
   ChevronLeft,
   ChevronRight,
-  Compass,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -45,18 +43,21 @@ function IslandCardImage({
   index: number;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  // Article images are hotlinked; drop dead links instead of showing a broken image.
+  const [failed, setFailed] = useState<string[]>([]);
+  const usable = images.filter((src) => !failed.includes(src));
 
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (usable.length <= 1) return;
 
     const interval = setInterval(() => {
-      setActiveIndex((current) => (current + 1) % images.length);
+      setActiveIndex((current) => (current + 1) % usable.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [usable.length]);
 
-  if (images.length === 0) {
+  if (usable.length === 0) {
     return (
       <div
         className="absolute inset-0 transition duration-700 ease-out group-hover:scale-110"
@@ -67,7 +68,7 @@ function IslandCardImage({
 
   return (
     <>
-      {images.map((src, imageIndex) => (
+      {usable.map((src, imageIndex) => (
         <Image
           key={src}
           src={src}
@@ -75,8 +76,11 @@ function IslandCardImage({
           fill
           sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className={`object-cover transition duration-700 ease-out group-hover:scale-110 ${
-            imageIndex === activeIndex ? 'opacity-100' : 'opacity-0'
+            imageIndex === activeIndex % usable.length
+              ? 'opacity-100'
+              : 'opacity-0'
           }`}
+          onError={() => setFailed((prev) => [...prev, src])}
         />
       ))}
     </>
@@ -137,20 +141,9 @@ export function IslandCards() {
     <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Badge
-            variant="outline"
-            className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#826428]"
-          >
-            <Compass className="size-3 text-[#caa86a]" />
-            Jelajahi Pulau
-          </Badge>
-
-          <h3 className="mt-3 text-2xl font-bold tracking-tight text-[#2d5f48]">
-            Wastra dari Seluruh{' '}
-            <span className="bg-gradient-to-r from-[#2d5f48] via-[#7a8f4e] to-[#caa86a] bg-clip-text text-transparent">
-              Nusantara
-            </span>
-          </h3>
+          <h2 className="text-2xl font-bold tracking-tight text-[#2d5f48] sm:text-3xl">
+            Wastra dari Seluruh Nusantara
+          </h2>
           <p className="mt-1 text-sm text-[#5f7366]">
             Temukan ragam kain tradisional dari setiap pulau di Indonesia.
           </p>
@@ -252,9 +245,6 @@ export function IslandCards() {
                       />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(12,20,15,0.95)_0%,rgba(12,20,15,0.7)_38%,rgba(12,20,15,0.15)_70%,rgba(0,0,0,0)_100%)]" />
 
-                      <span className="absolute top-3 left-3 z-10 rounded-full bg-black/30 px-2.5 py-1 font-mono text-xs font-semibold text-[#f3dfb4] ring-1 ring-white/20 backdrop-blur">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
                       <span className="absolute top-3 right-3 z-10 grid size-8 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6f2e8] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                         <ArrowUpRight className="size-4" />
                       </span>

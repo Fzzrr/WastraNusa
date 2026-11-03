@@ -129,6 +129,10 @@ export function HeroSection() {
 
   return (
     <Card className="relative min-h-[300px] overflow-hidden rounded-2xl border border-[#ddd5c6] bg-[#17130f] p-0 text-[#f7f3ea] shadow-[0_20px_44px_-30px_rgba(22,19,15,0.85)] ring-0 sm:min-h-[360px] md:min-h-[420px]">
+      {/* Slide titles rotate, so the page's single h1 names the site itself. */}
+      <h1 className="sr-only">
+        WastraNusa: belanja dan ensiklopedia wastra Nusantara
+      </h1>
       <Carousel
         setApi={setCarouselApi}
         opts={{
@@ -177,7 +181,7 @@ export function HeroSection() {
                   ) : (
                     <Badge
                       variant="outline"
-                      className="mb-3 w-fit gap-1.5 rounded-full border-[#e8cb8d]/40 bg-black/35 px-3 py-1 text-xs font-semibold text-[#f3dfb4] shadow-[0_0_20px_-6px_rgba(232,203,141,0.6)] backdrop-blur"
+                      className="mb-3 w-fit gap-1.5 rounded-full border-[#e8cb8d]/40 bg-black/35 px-3 py-1 text-xs font-semibold text-[#f3dfb4] backdrop-blur"
                     >
                       <Sparkles className="size-3 text-[#e8cb8d]" />
                       {slide.badge}
@@ -190,12 +194,12 @@ export function HeroSection() {
                       <Skeleton className="h-10 w-48 bg-white/20 md:h-12 md:w-64" />
                     </div>
                   ) : (
-                    <h1 className="max-w-xl text-2xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] drop-shadow-[0_2px_16px_rgba(0,0,0,0.45)] sm:text-3xl md:text-4xl lg:text-[46px]">
+                    <h2 className="max-w-xl text-2xl font-bold leading-[1.15] tracking-tight text-[#f7f2e7] drop-shadow-[0_2px_16px_rgba(0,0,0,0.45)] sm:text-3xl md:text-4xl lg:text-[46px]">
                       <span className="block line-clamp-2">{slide.title}</span>
-                      <span className="mt-1 block line-clamp-1 bg-gradient-to-r from-[#f3dfb4] via-[#e8cb8d] to-[#caa86a] bg-clip-text text-[0.72em] text-transparent md:text-[0.68em]">
+                      <span className="mt-1 block line-clamp-1 text-[0.72em] text-[#e8cb8d] md:text-[0.68em]">
                         {slide.subtitle}
                       </span>
-                    </h1>
+                    </h2>
                   )}
 
                   {slide.isSkeleton ? (
