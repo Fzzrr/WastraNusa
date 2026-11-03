@@ -57,7 +57,7 @@ export function CatalogProductToolbar({
 
         {/* Sort control */}
         <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#7d8a7f]">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#68746a]">
             <ArrowUpDown className="size-3.5" />
             Urutkan
           </span>

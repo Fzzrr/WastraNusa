@@ -125,7 +125,7 @@ function FloatingChat({
           <span className="block text-xs leading-tight font-bold tracking-wide text-[#f5ead3]">
             Pesan
           </span>
-          <span className="block text-[10px] font-medium text-white/80">
+          <span className="block text-xs font-medium text-white/80">
             {totalUnread > 0
               ? `${totalUnread} belum dibaca`
               : 'Chat dengan penjual'}
@@ -135,7 +135,7 @@ function FloatingChat({
         {totalUnread > 0 ? (
           <span className="absolute -top-1.5 -right-1 flex">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#caa86a] opacity-60" />
-            <span className="relative min-w-5 rounded-full bg-[#caa86a] px-1.5 text-center text-[10px] leading-5 font-bold text-[#274c3d] tabular-nums ring-2 ring-white">
+            <span className="relative min-w-5 rounded-full bg-[#caa86a] px-1.5 text-center text-xs leading-5 font-bold text-[#274c3d] tabular-nums ring-2 ring-white">
               {totalUnread > 99 ? '99+' : totalUnread}
             </span>
           </span>
@@ -186,7 +186,7 @@ function ChatPanel({
             <h2 className="text-sm font-bold tracking-tight text-[#fbf8f2]">
               Pesan WastraNusa
             </h2>
-            <p className="truncate text-[11px] text-white/70">
+            <p className="truncate text-xs text-white/70">
               {totalUnread > 0
                 ? `${totalUnread} pesan belum dibaca`
                 : 'Ngobrol langsung dengan penjual'}

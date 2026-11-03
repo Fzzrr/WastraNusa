@@ -71,7 +71,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
             </div>
 
             <div className="text-right shrink-0">
-              <span className="text-[11px] text-[#8e8476] block mb-0.5">
+              <span className="text-xs text-[#8e8476] block mb-0.5">
                 Subtotal
               </span>
               <span className="text-sm font-extrabold text-[#2f5f49] sm:text-base">
@@ -96,7 +96,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
                 </h4>
               </div>
               {address?.label && (
-                <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[#eadecb] text-[#5c7365]">
+                <span className="px-2 py-0.5 text-xs font-bold rounded-md bg-[#eadecb] text-[#5c7365]">
                   {address.label}
                 </span>
               )}
@@ -140,7 +140,7 @@ export function ReviewItems({ items, shipping, address }: ReviewItemsProps) {
                   Metode Pengiriman
                 </h4>
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-[#f0ebe1] text-[#726759] uppercase tracking-wider">
+              <span className="px-2 py-0.5 text-xs font-bold rounded-md bg-[#f0ebe1] text-[#726759] uppercase tracking-wider">
                 {shipping?.courier ?? 'Kurir'}
               </span>
             </div>

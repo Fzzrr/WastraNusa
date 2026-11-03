@@ -47,7 +47,7 @@ export function EncyclopediaArticleCard({
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
+        <div className="flex flex-wrap gap-1 text-xs font-semibold">
           <Badge
             variant="outline"
             className="gap-1 rounded-full border-0 bg-[#e3ece5] px-2 py-0.5 text-[#2f5b49]"
@@ -57,7 +57,7 @@ export function EncyclopediaArticleCard({
           </Badge>
           <Badge
             variant="outline"
-            className="rounded-full border-0 bg-[#f6e4da] px-2 py-0.5 text-[#b8613f]"
+            className="rounded-full border-0 bg-[#f6e4da] px-2 py-0.5 text-[#9c5235]"
           >
             {article.topic}
           </Badge>
@@ -72,7 +72,7 @@ export function EncyclopediaArticleCard({
         </p>
 
         <div className="mt-auto flex items-center gap-2 pt-4 text-xs font-semibold">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f6e4da] py-1 pr-2.5 pl-1 text-[#b8613f]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f6e4da] py-1 pr-2.5 pl-1 text-[#9c5235]">
             <span className="flex size-5 items-center justify-center rounded-full bg-white">
               <Heart className="size-3" />
             </span>

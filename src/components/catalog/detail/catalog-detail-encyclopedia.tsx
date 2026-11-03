@@ -37,7 +37,7 @@ export function CatalogDetailEncyclopedia({
           </h3>
         </div>
         <div className="flex flex-col gap-3 p-4">
-          <p className="inline-flex w-fit items-center rounded-full bg-[#f5ead3] px-2.5 py-0.5 text-xs font-semibold text-[#8a6a2a]">
+          <p className="inline-flex w-fit items-center rounded-full bg-[#f5ead3] px-2.5 py-0.5 text-xs font-semibold text-[#826428]">
             Terkait Produk Ini
           </p>
           {linkedArticle?.imageURL ? (
@@ -73,7 +73,7 @@ export function CatalogDetailEncyclopedia({
                   key={label}
                   className="grid grid-cols-[110px_minmax(0,1fr)] gap-2 px-3 py-2 odd:bg-[#f5f0e7]"
                 >
-                  <span className="text-[#6e7a70]">{label}</span>
+                  <span className="text-[#646f66]">{label}</span>
                   <span className="font-semibold">{value}</span>
                 </div>
               ))}

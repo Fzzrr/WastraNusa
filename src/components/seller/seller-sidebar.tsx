@@ -27,7 +27,7 @@ const navigationIcons = {
   'Produk & Inventori': Package2,
   Pesanan: ClipboardList,
   'Profil Toko': Store,
-  'Live Chat': MessageCircle,
+  'Chat Pembeli': MessageCircle,
 } as const;
 
 const SELLER_NAVIGATION: DashboardNavItem[] = [
@@ -35,7 +35,7 @@ const SELLER_NAVIGATION: DashboardNavItem[] = [
   { title: 'Produk & Inventori', href: '/seller/product-inventory' },
   { title: 'Pesanan', href: '/seller/pesanan' },
   { title: 'Profil Toko', href: '/seller/shop-profile' },
-  { title: 'Live Chat', href: '/seller/live-chat' },
+  { title: 'Chat Pembeli', href: '/seller/live-chat' },
 ];
 
 function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
@@ -60,7 +60,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
       <Icon className="size-[18px]" />
       <span className="flex-1 text-left">{item.title}</span>
       {item.disabled ? (
-        <span className="rounded-full bg-[#d2a36d]/20 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-[#e3bf8c]">
+        <span className="rounded-full bg-[#d2a36d]/20 px-2 py-0.5 text-xs font-semibold tracking-wide text-[#e3bf8c]">
           Segera Hadir
         </span>
       ) : null}

@@ -72,7 +72,7 @@ export function Footer({ year = 2026 }: FooterProps) {
               </span>
             </Link>
 
-            <p className="mt-5 max-w-sm leading-relaxed text-sm text-[#adc2b3]">
+            <p className="mt-5 max-w-sm leading-relaxed text-sm text-[#baccbf]">
               Platform terpercaya untuk wastra tradisional Indonesia
               menghubungkan pengrajin lokal dengan pecinta budaya Nusantara.
             </p>

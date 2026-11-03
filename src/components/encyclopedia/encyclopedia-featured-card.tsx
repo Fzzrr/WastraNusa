@@ -45,7 +45,7 @@ export function EncyclopediaFeaturedCard({
 
           {/* Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap gap-1 text-[11px] font-semibold">
+            <div className="flex flex-wrap gap-1 text-xs font-semibold">
               <Badge className="gap-1 rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-[#3c2e14]">
                 <Star className="size-3 fill-current" />
                 Unggulan
@@ -59,7 +59,7 @@ export function EncyclopediaFeaturedCard({
               </Badge>
               <Badge
                 variant="outline"
-                className="rounded-full border-0 bg-[#f6e4da] px-2 py-0.5 text-[#b8613f]"
+                className="rounded-full border-0 bg-[#f6e4da] px-2 py-0.5 text-[#9c5235]"
               >
                 {article.topic}
               </Badge>
@@ -124,7 +124,7 @@ export function EncyclopediaFeaturedCard({
 
         {/* Content */}
         <div className="relative p-5">
-          <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
+          <div className="flex flex-wrap gap-2 text-xs font-semibold">
             <Badge className="gap-1 rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2.5 py-1 text-[#3c2e14] shadow-[0_4px_12px_-4px_rgba(202,168,106,0.8)]">
               <Star className="size-3 fill-current" />
               Unggulan
@@ -138,7 +138,7 @@ export function EncyclopediaFeaturedCard({
             </Badge>
             <Badge
               variant="outline"
-              className="rounded-full border-0 bg-[#f6e4da] px-2.5 py-1 text-[#b8613f]"
+              className="rounded-full border-0 bg-[#f6e4da] px-2.5 py-1 text-[#9c5235]"
             >
               {article.topic}
             </Badge>

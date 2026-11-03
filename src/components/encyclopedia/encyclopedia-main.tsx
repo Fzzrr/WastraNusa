@@ -245,7 +245,7 @@ export function EncyclopediaMain({
         <div>
           <div>
             <Breadcrumb className="mb-2">
-              <BreadcrumbList className="text-[#6e8276] text-sm font-medium">
+              <BreadcrumbList className="text-[#607167] text-sm font-medium">
                 <BreadcrumbItem>
                   <BreadcrumbLink
                     href="/"

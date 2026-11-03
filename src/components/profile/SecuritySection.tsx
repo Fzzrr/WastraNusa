@@ -239,7 +239,7 @@ export default function SecuritySection() {
               title="Password"
               subtitle="••••••••••••"
               status={
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#e3ece5] px-2.5 py-1 text-[11px] font-semibold text-[#2f5f49]">
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#e3ece5] px-2.5 py-1 text-xs font-semibold text-[#2f5f49]">
                   <CheckCircle className="size-3" />
                   Aktif
                 </span>
@@ -251,7 +251,7 @@ export default function SecuritySection() {
             title="Login Terakhir"
             subtitle={isPending ? 'Memuat...' : loginDate}
             status={
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e3ece5] px-2.5 py-1 text-[11px] font-semibold text-[#2f5f49]">
+              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e3ece5] px-2.5 py-1 text-xs font-semibold text-[#2f5f49]">
                 <span className="size-1.5 animate-pulse rounded-full bg-[#3f8f63]" />
                 Sesi Aktif
               </span>

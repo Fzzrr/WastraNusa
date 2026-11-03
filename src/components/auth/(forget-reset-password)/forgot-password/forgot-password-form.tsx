@@ -84,7 +84,7 @@ export function ForgotPasswordForm() {
             placeholder="name@example.com"
             className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError className="text-[10px] font-medium leading-none">
+          <FieldError className="text-xs font-medium leading-none">
             {errors.email?.message}
           </FieldError>
         </Field>
@@ -107,11 +107,11 @@ export function ForgotPasswordForm() {
           {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
         </Button>
 
-        <p className="mt-4 text-center text-xs text-[#7a6e62]">
+        <p className="mt-4 text-center text-xs text-[#6a6056]">
           Ingat password Anda?{' '}
           <Link
             href="/login"
-            className="text-[#c07a4a] hover:underline font-medium"
+            className="text-[#8b5530] hover:underline font-medium"
           >
             Masuk
           </Link>

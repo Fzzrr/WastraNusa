@@ -24,7 +24,7 @@ export function SellerProductInventoryContent() {
       header={
         <SellerHeader
           title="Produk & Inventori"
-          subtitle="Kelola Produk, Varian, dan Stok Toko Anda"
+          subtitle="Kelola produk, varian, dan stok toko Anda"
         />
       }
       useProducts={useSellerProducts}

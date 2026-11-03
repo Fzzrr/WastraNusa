@@ -78,7 +78,7 @@ export function KpiChart({
           <span
             key={tick}
             className={cn(
-              'absolute right-0 -translate-y-1/2 text-[10px] tabular-nums',
+              'absolute right-0 -translate-y-1/2 text-xs tabular-nums',
               isDark ? 'text-white/60' : 'text-[#9a948a]',
             )}
             style={{ top: `${(1 - fraction(tick)) * 100}%` }}
@@ -188,7 +188,7 @@ export function KpiChart({
             >
               <p
                 className={cn(
-                  'text-[10px]',
+                  'text-xs',
                   isDark ? 'text-[#9a8f80]' : 'text-white/60',
                 )}
               >
@@ -207,7 +207,7 @@ export function KpiChart({
               <span
                 key={label}
                 className={cn(
-                  'flex-1 text-center text-[10px] transition-colors',
+                  'flex-1 text-center text-xs transition-colors',
                   active === i
                     ? isDark
                       ? 'font-semibold text-white'
@@ -223,7 +223,7 @@ export function KpiChart({
               <span
                 key={label}
                 className={cn(
-                  'absolute -translate-x-1/2 text-[10px] transition-colors',
+                  'absolute -translate-x-1/2 text-xs transition-colors',
                   active === i
                     ? 'font-semibold text-[#2f4f3f]'
                     : 'text-[#9a948a]',

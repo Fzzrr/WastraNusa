@@ -55,14 +55,14 @@ export function CatalogDetailProductSummary({
       <div className="flex flex-wrap gap-1.5">
         <Badge
           variant="outline"
-          className="gap-1 rounded-full border-[#e6d6b8] bg-[#f5ead3] px-2.5 py-1 text-[#8a6a2a]"
+          className="gap-1 rounded-full border-[#e6d6b8] bg-[#f5ead3] px-2.5 py-1 text-[#826428]"
         >
           <Tag className="size-3" />
           {product.clothingType}
         </Badge>
         <Badge
           variant="outline"
-          className="gap-1 rounded-full border-[#efd5c6] bg-[#f6e4da] px-2.5 py-1 text-[#b8613f]"
+          className="gap-1 rounded-full border-[#efd5c6] bg-[#f6e4da] px-2.5 py-1 text-[#9c5235]"
         >
           <MapPin className="size-3" />
           {product.province}
@@ -80,7 +80,7 @@ export function CatalogDetailProductSummary({
         >
           <Store className="size-4 text-[#a07a2c]" />
           <span>{product.seller.shopName ?? product.seller.name}</span>
-          <span className="text-xs font-medium text-[#6e7a70] group-hover:text-[#2f5f49]">
+          <span className="text-xs font-medium text-[#646f66] group-hover:text-[#2f5f49]">
             · Kunjungi toko
           </span>
         </Link>
@@ -88,7 +88,7 @@ export function CatalogDetailProductSummary({
 
       <Card className="relative mt-4 gap-1 overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-[#e3ece5] via-[#f1ebdf] to-[#f5ead3] px-5 py-4 ring-1 ring-[#d9d0c2]">
         <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#2f5f49] to-[#caa86a]" />
-        <span className="text-xs font-semibold tracking-wider text-[#6e7a70] uppercase">
+        <span className="text-xs font-semibold tracking-wider text-[#646f66] uppercase">
           Harga{selectedVariant ? ` · ${selectedVariant}` : ''}
         </span>
         <h2
@@ -129,10 +129,10 @@ export function CatalogDetailProductSummary({
                   {variant.name}
                   <span
                     className={cn(
-                      'rounded-full px-1.5 text-[11px] font-semibold',
+                      'rounded-full px-1.5 text-xs font-semibold',
                       isSelected
                         ? 'bg-white/20 text-white'
-                        : 'bg-[#efe8dd] text-[#7b857e]',
+                        : 'bg-[#efe8dd] text-[#6a726c]',
                     )}
                   >
                     {variant.stock}

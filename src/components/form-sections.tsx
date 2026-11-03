@@ -162,7 +162,7 @@ export function FormSection({
         <div className="flex items-start gap-3">
           <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#f4efe5] text-[#8a6a3a]">
             <Icon className="size-4" />
-            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#3a5a4a] text-[10px] font-semibold text-white">
+            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#3a5a4a] text-xs font-semibold text-white">
               {step}
             </span>
           </span>

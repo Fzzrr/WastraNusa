@@ -219,7 +219,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   return (
     <main className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-6 md:px-6 lg:px-8">
       <Breadcrumb>
-        <BreadcrumbList className="text-sm font-medium text-[#6e8276]">
+        <BreadcrumbList className="text-sm font-medium text-[#607167]">
           <BreadcrumbItem>
             <BreadcrumbLink href="/" className="hover:text-[#2f5b49]">
               Beranda
@@ -271,11 +271,11 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
 
           <div className="absolute inset-x-0 bottom-0 p-5 md:p-8">
             <div className="mb-3 flex flex-wrap gap-2">
-              <Badge className="rounded-full bg-[#caa86a] px-3 py-1 text-[11px] font-semibold text-[#2c241c] hover:bg-[#caa86a]">
+              <Badge className="rounded-full bg-[#caa86a] px-3 py-1 text-xs font-semibold text-[#2c241c] hover:bg-[#caa86a]">
                 <Sparkles className="size-3" />
                 {article.topic}
               </Badge>
-              <Badge className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-medium text-[#f8f3e8] ring-1 ring-white/25 backdrop-blur-md hover:bg-white/15">
+              <Badge className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-[#f8f3e8] ring-1 ring-white/25 backdrop-blur-md hover:bg-white/15">
                 {article.region}
               </Badge>
             </div>
@@ -302,7 +302,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               <Badge
                 key={tag}
                 variant="outline"
-                className="rounded-full border-[#e0d6c5] bg-[#fbf8f2] px-2.5 py-1 text-xs font-semibold text-[#a07a5c] transition-colors hover:border-[#caa86a] hover:bg-[#f5ead3] hover:text-[#7a5a2c]"
+                className="rounded-full border-[#e0d6c5] bg-[#fbf8f2] px-2.5 py-1 text-xs font-semibold text-[#8b6a50] transition-colors hover:border-[#caa86a] hover:bg-[#f5ead3] hover:text-[#7a5a2c]"
               >
                 <Hash className="size-3 text-[#caa86a]" />
                 {tag}
@@ -340,13 +340,13 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
           <Card className="relative overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-[#f5ead3]/70 to-[#fbf8f2] p-5 ring-1 ring-[#e6d6b8]">
             <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#caa86a] to-[#2f5b49]" />
             <Quote className="pointer-events-none absolute -top-2 right-3 size-16 rotate-180 text-[#caa86a]/15" />
-            <p className="relative inline-flex items-start gap-3 text-justify text-[15px] leading-relaxed text-[#5a5244] italic">
+            <p className="relative inline-flex items-start gap-3 text-base leading-relaxed text-[#5a5244] italic">
               <Quote className="mt-0.5 size-5 shrink-0 text-[#caa86a]" />
               {article.excerpt}
             </p>
           </Card>
 
-          <p className="mt-7 text-justify text-[15px] leading-8 text-[#3d5449] first-letter:float-left first-letter:mt-1 first-letter:mr-3 first-letter:text-6xl first-letter:leading-[0.8] first-letter:font-bold first-letter:text-[#2f5b49]">
+          <p className="mt-7 text-base leading-8 text-[#3d5449] first-letter:float-left first-letter:mt-1 first-letter:mr-3 first-letter:text-6xl first-letter:leading-[0.8] first-letter:font-bold first-letter:text-[#2f5b49]">
             {article.intro}
           </p>
 
@@ -379,10 +379,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                 <div className="mt-5 grid items-stretch gap-6 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_280px]">
                   <div className="space-y-4">
                     {section.content.split('\n\n').map((paragraph, i) => (
-                      <p
-                        key={i}
-                        className="text-justify text-[15px] leading-8 text-[#465d51]"
-                      >
+                      <p key={i} className="text-base leading-8 text-[#465d51]">
                         {paragraph.trim()}
                       </p>
                     ))}
@@ -442,7 +439,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                   key={fact.label}
                   className="grid grid-cols-[120px_minmax(0,1fr)] gap-2 px-4 py-3 text-xs transition-colors hover:bg-[#f5ead3]/50"
                 >
-                  <span className="text-[#7b857e]">{fact.label}</span>
+                  <span className="text-[#6a726c]">{fact.label}</span>
                   <span className="font-semibold text-[#2f4f40]">
                     {fact.value}
                   </span>
@@ -475,7 +472,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                         <div className="absolute inset-0 grid place-items-center">
                           <div className="flex flex-col items-center gap-1.5 text-[#6f604e]">
                             <span className="h-4 w-4 rotate-45 border border-[#b7a387]" />
-                            <span className="text-[9px] font-medium">Foto</span>
+                            <span className="text-xs font-medium">Foto</span>
                           </div>
                         </div>
                       )}
@@ -485,7 +482,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                       <p className="text-sm leading-snug font-semibold text-[#365746] transition-colors group-hover/product:text-[#2f5b49]">
                         {product.name}
                       </p>
-                      <p className="mt-1 text-xs text-[#7d7a70]">
+                      <p className="mt-1 text-xs text-[#6c6960]">
                         {product.location}
                       </p>
                       <p className="mt-2 flex items-center justify-between text-sm font-bold text-[#2f5f49]">
@@ -508,14 +505,14 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                 <p className="mt-1 text-xl font-bold text-[#2f5f49] tabular-nums">
                   {article.views}
                 </p>
-                <p className="text-[11px] text-[#677a6e]">Kunjungan</p>
+                <p className="text-xs text-[#5b6c62]">Kunjungan</p>
               </div>
               <div className="rounded-xl bg-[#f6e4da] p-3 text-center transition-transform hover:-translate-y-0.5">
-                <Heart className="mx-auto size-4 text-[#b8613f]" />
-                <p className="mt-1 text-xl font-bold text-[#b8613f] tabular-nums">
+                <Heart className="mx-auto size-4 text-[#9c5235]" />
+                <p className="mt-1 text-xl font-bold text-[#9c5235] tabular-nums">
                   {article.likes}
                 </p>
-                <p className="text-[11px] text-[#8a6f62]">Disukai</p>
+                <p className="text-xs text-[#786155]">Disukai</p>
               </div>
             </div>
           </Card>
@@ -534,7 +531,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               </Link>
             </Button>
 
-            <div className="inline-flex items-center gap-1.5 text-xs text-[#6f7a73]">
+            <div className="inline-flex items-center gap-1.5 text-xs text-[#69736d]">
               <MessageCircle className="size-3.5" />
               {nextArticleDescription}
             </div>

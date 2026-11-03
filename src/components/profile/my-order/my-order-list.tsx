@@ -150,7 +150,7 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                 <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
                   <Badge
                     variant="secondary"
-                    className="rounded-full border-none bg-[#f6e4da] px-2 py-0 text-[10px] font-medium text-[#b8613f] hover:bg-[#f6e4da]"
+                    className="rounded-full border-none bg-[#f6e4da] px-2 py-0 text-xs font-medium text-[#9c5235] hover:bg-[#f6e4da]"
                   >
                     {product.category}
                   </Badge>

@@ -549,7 +549,7 @@ export function ProductFormModal({
                   values.sku ? (
                     <span className="inline-flex items-center gap-1.5">
                       SKU otomatis:
-                      <span className="rounded-md bg-[#f4efe5] px-1.5 py-0.5 font-mono text-[11px] text-[#6f6a62]">
+                      <span className="rounded-md bg-[#f4efe5] px-1.5 py-0.5 font-mono text-xs text-[#6f6a62]">
                         {values.sku}
                       </span>
                     </span>

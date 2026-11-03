@@ -257,7 +257,7 @@ export function EncyclopediaSection() {
                             </p>
                             <Badge
                               variant="secondary"
-                              className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-[11px] font-medium text-[#dbe5d8]"
+                              className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-xs font-medium text-[#dbe5d8]"
                             >
                               {article.category}
                             </Badge>

@@ -64,7 +64,7 @@ export function CartList({
         {selectedCount > 0 ? (
           <div className="flex animate-in items-center gap-3 fade-in zoom-in-95">
             <span className="hidden text-xs text-[#9a8f80] sm:inline">
-              {selectedCount} Dipilih
+              {selectedCount} dipilih
             </span>
             <Button
               variant="outline"

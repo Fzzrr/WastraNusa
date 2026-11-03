@@ -174,9 +174,7 @@ export function EncyclopediaChatWidget({
             <p className="text-xs font-bold leading-tight tracking-wide text-[#f5ead3]">
               Tanya Asisten
             </p>
-            <p className="text-[10px] font-medium text-white/80">
-              Q&A Artikel Ini
-            </p>
+            <p className="text-xs font-medium text-white/80">Q&A Artikel Ini</p>
           </div>
           {/* Subtle pulsating status dot */}
           <span className="absolute -top-1 -right-1 flex size-3">
@@ -238,14 +236,11 @@ export function EncyclopediaChatWidget({
               <h2 className="text-sm font-bold tracking-tight text-[#fbf8f2]">
                 Asisten WastraNusa
               </h2>
-              <span className="rounded-full bg-[#caa86a]/25 px-1.5 py-0.2 text-[9px] font-semibold text-[#f5ead3]">
+              <span className="rounded-full bg-[#caa86a]/25 px-1.5 py-0.2 text-xs font-semibold text-[#f5ead3]">
                 AI
               </span>
             </div>
-            <p
-              className="truncate text-[11px] text-white/70"
-              title={articleTitle}
-            >
+            <p className="truncate text-xs text-white/70" title={articleTitle}>
               Seputar: {articleTitle}
             </p>
           </div>
@@ -305,7 +300,7 @@ export function EncyclopediaChatWidget({
 
             {/* Suggested prompts */}
             <div className="space-y-2 pt-2">
-              <p className="px-1 text-[11px] font-semibold text-[#8a7f70]">
+              <p className="px-1 text-xs font-semibold text-[#8a7f70]">
                 Pertanyaan yang sering diajukan:
               </p>
               <div className="flex flex-col gap-1.5">
@@ -314,7 +309,7 @@ export function EncyclopediaChatWidget({
                     key={question}
                     type="button"
                     onClick={() => handleSuggestedClick(question)}
-                    className="flex items-center justify-between rounded-xl border border-[#e5dcce] bg-[#fdfbf7] p-2.5 text-left text-[11px] font-medium text-[#463f35] transition-all hover:border-[#caa86a] hover:bg-[#fffdfa] hover:text-[#2f5b49] hover:shadow-xs active:scale-[0.99]"
+                    className="flex items-center justify-between rounded-xl border border-[#e5dcce] bg-[#fdfbf7] p-2.5 text-left text-xs font-medium text-[#463f35] transition-all hover:border-[#caa86a] hover:bg-[#fffdfa] hover:text-[#2f5b49] hover:shadow-xs active:scale-[0.99]"
                   >
                     <span>{question}</span>
                     <CornerDownLeft className="size-3 text-[#b3a896]" />
@@ -364,7 +359,7 @@ export function EncyclopediaChatWidget({
                 {/* Footer status (timestamp & cache badge) */}
                 <div
                   className={cn(
-                    'mt-2 flex items-center gap-1.5 text-[9px]',
+                    'mt-2 flex items-center gap-1.5 text-xs',
                     isUser
                       ? 'justify-end text-white/70'
                       : 'justify-start text-[#948979]',
@@ -398,7 +393,7 @@ export function EncyclopediaChatWidget({
               <span className="size-1.5 animate-bounce rounded-full bg-[#2f5b49] [animation-delay:-0.3s]" />
               <span className="size-1.5 animate-bounce rounded-full bg-[#caa86a] [animation-delay:-0.15s]" />
               <span className="size-1.5 animate-bounce rounded-full bg-[#2f5b49]" />
-              <span className="ml-2 text-[11px] text-[#7a7164]">
+              <span className="ml-2 text-xs text-[#7a7164]">
                 Sedang membaca artikel...
               </span>
             </div>
@@ -424,7 +419,7 @@ export function EncyclopediaChatWidget({
               className="w-full rounded-2xl border border-[#d6cbba] bg-white py-2.5 pr-8 pl-3.5 text-xs text-[#2c2823] placeholder:text-[#998f80] focus:border-[#2f5b49] focus:outline-none focus:ring-2 focus:ring-[#2f5b49]/20 disabled:opacity-60"
             />
             {inputText.length > 800 && (
-              <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-[9px] font-medium text-amber-700">
+              <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-xs font-medium text-amber-700">
                 {1000 - inputText.length}
               </span>
             )}
@@ -443,7 +438,7 @@ export function EncyclopediaChatWidget({
           </Button>
         </form>
 
-        <p className="mt-1.5 text-center text-[9px] text-[#9c9181]">
+        <p className="mt-1.5 text-center text-xs text-[#9c9181]">
           AI menggunakan artikel, katalog terkini, dan pengetahuan umum yang
           relevan. Periksa detail produk sebelum membeli.
         </p>

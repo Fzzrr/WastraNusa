@@ -93,7 +93,7 @@ export function EncyclopediaSidebar({
               </span>
             ) : null}
           </span>
-          <span className="text-xs font-medium text-[#86917f]">
+          <span className="text-xs font-medium text-[#667060]">
             {activeFilterCount > 0
               ? `${activeFilterCount} filter aktif`
               : 'Pilih pulau & topik'}

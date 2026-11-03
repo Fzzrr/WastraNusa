@@ -32,9 +32,7 @@ export function EncyclopediaChatSidebarCard({
           <h3 className="text-sm font-bold text-[#2f5b49]">
             Tanya Asisten Wastra
           </h3>
-          <p className="text-[11px] text-[#7d7465]">
-            Q&A Cerdas Berbasis Artikel
-          </p>
+          <p className="text-xs text-[#7d7465]">Q&A Cerdas Berbasis Artikel</p>
         </div>
       </div>
 

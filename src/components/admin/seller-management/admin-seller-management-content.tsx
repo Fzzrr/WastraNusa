@@ -84,7 +84,7 @@ function ChangeBadge({ percent }: { percent: number | null }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-medium',
+        'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
         up ? 'bg-[#e7efe4] text-[#3f6b4a]' : 'bg-[#f6e1dd] text-[#b04a3a]',
       )}
     >
@@ -137,7 +137,7 @@ function KpiCard({
           </span>
           <p
             className={cn(
-              'text-[11px] font-medium tracking-wider uppercase',
+              'text-xs font-medium tracking-wider uppercase',
               dark ? 'text-white/80' : 'text-[#5f5a52]',
             )}
           >
@@ -190,7 +190,7 @@ function KpiCards() {
         value={verifiedSellers.total.toLocaleString('id-ID')}
         badge={
           verifiedSellers.newThisMonth > 0 ? (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-medium text-white">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-xs font-medium text-white">
               <ArrowUp className="size-2.5" />
               {verifiedSellers.newThisMonth} Baru
             </span>
@@ -305,7 +305,7 @@ function StatusTabs({
             {option.value === 'pending' && pendingCount > 0 ? (
               <span
                 className={cn(
-                  'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold',
+                  'flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold',
                   isActive
                     ? 'bg-[#e8cb8d] text-[#2f4b3d]'
                     : 'bg-[#f6e7de] text-[#a15d3b]',
@@ -416,7 +416,7 @@ function InfoItem({
         <Icon className="size-4" />
       </span>
       <div className="min-w-0">
-        <p className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
+        <p className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
           {label}
         </p>
         <p className="truncate text-sm text-[#2f3a33]">{children}</p>
@@ -536,7 +536,7 @@ function UserDetail({
 
         {application ? (
           <div className="rounded-lg bg-[#faf7f2] px-4 py-3">
-            <p className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
+            <p className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
               Deskripsi Toko
             </p>
             <p className="mt-1 text-sm leading-relaxed text-[#2f3a33]">
@@ -694,7 +694,7 @@ function UserRow({
         <td className="px-5 py-4 text-xs text-[#6f6a62]">
           {user.location ?? '—'}
           {user.locationSource ? (
-            <p className="mt-0.5 text-[10px] text-[#a39c92]">
+            <p className="mt-0.5 text-xs text-[#a39c92]">
               {user.locationSource === 'ip'
                 ? 'Perkiraan dari login terakhir'
                 : 'Alamat pengiriman'}
@@ -719,7 +719,7 @@ function UserRow({
               {isSeller ? 'Seller' : 'User'}
             </span>
             {application?.status === 'pending' ? (
-              <span className="rounded-full bg-[#f8ecd6] px-2 py-0.5 text-[10px] font-medium text-[#a0702a]">
+              <span className="rounded-full bg-[#f8ecd6] px-2 py-0.5 text-xs font-medium text-[#a0702a]">
                 Menunggu Review
               </span>
             ) : null}
@@ -783,7 +783,7 @@ function UsersTable({
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-[#faf7f2] text-[10px] font-medium tracking-wider text-[#8a8378] uppercase">
+          <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
             <tr>
               <th className="w-[38%] px-5 py-4">User</th>
               <th className="px-5 py-4">Lokasi</th>
@@ -865,7 +865,7 @@ export function AdminSellerManagementContent() {
   return (
     <main className="flex flex-col">
       <AdminHeader
-        title="Seller Management"
+        title="Manajemen Penjual"
         subtitle={
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
             <AdminBrandChip />

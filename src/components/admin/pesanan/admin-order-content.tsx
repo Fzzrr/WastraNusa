@@ -251,7 +251,7 @@ export function AdminOrderContent() {
     <main className="flex flex-col">
       <AdminHeader
         title="Manajemen Pesanan"
-        subtitle="Kelola Status Pesanan Pelanggan"
+        subtitle="Kelola status pesanan pelanggan"
       />
 
       <section className="flex-1 bg-[#f0ede5] px-5 py-5 md:px-8">

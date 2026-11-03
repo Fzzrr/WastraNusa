@@ -137,7 +137,7 @@ function OrderProgress({ status }: { status: OrderStatusLabel }) {
             </span>
             <span
               className={cn(
-                'text-center text-[11px] leading-tight',
+                'text-center text-xs leading-tight',
                 isCurrent
                   ? 'font-semibold text-[#2f4f3f]'
                   : isDone

@@ -63,7 +63,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
                   sizes="80px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[#b8613f] shadow-sm">
+                <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[#9c5235] shadow-sm">
                   <Heart className="size-3 fill-current" />
                 </span>
               </>
@@ -85,13 +85,13 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
             <div className="flex flex-wrap gap-1.5">
               <Badge
                 variant="secondary"
-                className="rounded-full border-none bg-[#f6e4da] px-2 py-0.5 text-[10px] font-medium text-[#b8613f] hover:bg-[#f6e4da]"
+                className="rounded-full border-none bg-[#f6e4da] px-2 py-0.5 text-xs font-medium text-[#9c5235] hover:bg-[#f6e4da]"
               >
                 {article.topic}
               </Badge>
               <Badge
                 variant="secondary"
-                className="gap-1 rounded-full border-none bg-[#e3ece5] px-2 py-0.5 text-[10px] font-medium text-[#2f5b49] hover:bg-[#e3ece5]"
+                className="gap-1 rounded-full border-none bg-[#e3ece5] px-2 py-0.5 text-xs font-medium text-[#2f5b49] hover:bg-[#e3ece5]"
               >
                 <MapPin className="size-2.5" />
                 {article.region}

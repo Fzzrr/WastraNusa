@@ -19,7 +19,7 @@ export function ShopProductGrid({
     <section>
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-[#2f4f3f]">Produk Toko</h2>
-        <span className="rounded-full bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#8a6a2a]">
+        <span className="rounded-full bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#826428]">
           {productCount} produk
         </span>
       </div>

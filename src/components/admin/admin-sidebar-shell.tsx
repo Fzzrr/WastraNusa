@@ -19,7 +19,7 @@ export function AdminSidebarShell() {
 
   const navCounts = {
     Artikel: articleDashboardData?.totalArticles,
-    'Seller Management': pendingApplications?.length,
+    'Manajemen Penjual': pendingApplications?.length,
   };
 
   return <AdminSidebar data={sidebarData} navCounts={navCounts} />;

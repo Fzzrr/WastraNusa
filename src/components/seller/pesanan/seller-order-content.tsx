@@ -249,7 +249,7 @@ export function SellerOrderContent() {
     <main className="flex flex-col">
       <SellerHeader
         title="Manajemen Pesanan"
-        subtitle="Kelola Status Pesanan Pelanggan Toko Anda"
+        subtitle="Kelola status pesanan pelanggan toko Anda"
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">

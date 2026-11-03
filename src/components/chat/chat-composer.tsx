@@ -109,7 +109,7 @@ export function ChatComposer({
           {showCounter ? (
             <span
               className={cn(
-                'pointer-events-none absolute right-3 bottom-1 text-[10px] tabular-nums',
+                'pointer-events-none absolute right-3 bottom-1 text-xs tabular-nums',
                 content.length >= MAX_LENGTH
                   ? 'text-[#b04a3a]'
                   : 'text-[#a39784]',
@@ -134,7 +134,7 @@ export function ChatComposer({
       </form>
 
       {showHint ? (
-        <p className="mt-1.5 hidden px-1 text-[10px] text-[#b3aa9e] sm:block">
+        <p className="mt-1.5 hidden px-1 text-xs text-[#b3aa9e] sm:block">
           <kbd className="font-sans font-semibold">Enter</kbd> untuk kirim ·{' '}
           <kbd className="font-sans font-semibold">Shift + Enter</kbd> untuk
           baris baru

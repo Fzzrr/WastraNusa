@@ -8,7 +8,7 @@ export default async function SellerLiveChatPage() {
   return (
     <main className="flex flex-1 flex-col">
       <SellerHeader
-        title="Live Chat"
+        title="Chat Pembeli"
         subtitle="Percakapan langsung dengan pelanggan"
       />
       <section className="flex min-h-[560px] flex-1 flex-col">

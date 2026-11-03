@@ -96,7 +96,7 @@ function StatTile({
   const toneClassName = {
     green: 'bg-[#e3ece5] text-[#2f5f49]',
     gold: 'bg-[#f5ead3] text-[#a07a2c]',
-    terracotta: 'bg-[#f6e4da] text-[#b8613f]',
+    terracotta: 'bg-[#f6e4da] text-[#9c5235]',
     blue: 'bg-[#e6ecf3] text-[#34507a]',
   }[tone];
 
@@ -121,7 +121,7 @@ function StatTile({
         <p className="text-2xl leading-tight font-bold text-[#2f4f3f] tabular-nums">
           {value}
         </p>
-        <p className="truncate text-[11px] text-[#b3aa9e]">{caption}</p>
+        <p className="truncate text-xs text-[#b3aa9e]">{caption}</p>
       </div>
     </div>
   );
@@ -366,7 +366,7 @@ export function ProductInventoryPanel({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
-                <thead className="bg-[#faf7f2] text-[10px] font-medium tracking-wider text-[#8a8378] uppercase">
+                <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
                   <tr>
                     <th className="w-12 px-4 py-3.5">
                       <Checkbox
@@ -511,7 +511,7 @@ export function ProductInventoryPanel({
                                   variant="ghost"
                                   aria-label="Edit produk"
                                   title="Edit produk"
-                                  className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#8a6a2a]"
+                                  className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#826428]"
                                   onClick={() => handleEdit(product)}
                                 >
                                   <Pencil />

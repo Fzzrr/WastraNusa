@@ -5,10 +5,11 @@ const timeFormatter = new Intl.DateTimeFormat('id-ID', {
 const weekdayFormatter = new Intl.DateTimeFormat('id-ID', {
   weekday: 'short',
 });
+// Same "3 Nov 2026" style as order and article dates.
 const shortDateFormatter = new Intl.DateTimeFormat('id-ID', {
-  day: '2-digit',
-  month: '2-digit',
-  year: '2-digit',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
 });
 const longDateFormatter = new Intl.DateTimeFormat('id-ID', {
   weekday: 'long',

@@ -18,7 +18,7 @@ export function CatalogDetailBreadcrumb({
 }: CatalogDetailBreadcrumbProps) {
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-[#66786d] text-xs font-medium">
+      <BreadcrumbList className="text-[#607167] text-xs font-medium">
         <BreadcrumbItem>
           <BreadcrumbLink href="/" className="hover:text-[#2f5b49]">
             Beranda

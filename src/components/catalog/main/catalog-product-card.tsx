@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import { formatVariantPriceRange } from '../utils';
 
 const chipClassName =
-  'inline-flex h-5 shrink-0 items-center rounded-full border border-[#e3d9c7] bg-white px-2 text-[10px] whitespace-nowrap text-[#5f7467]';
+  'inline-flex h-5 shrink-0 items-center rounded-full border border-[#e3d9c7] bg-white px-2 text-xs whitespace-nowrap text-[#5f7467]';
 const CHIP_GAP = 4;
 
 /**
@@ -82,7 +82,7 @@ function VariantChips({ labels }: { labels: string[] }) {
           title={hidden.join(', ')}
           className={cn(
             chipClassName,
-            'border-[#e6d6b8] bg-[#f5ead3] font-semibold text-[#8a6a2a]',
+            'border-[#e6d6b8] bg-[#f5ead3] font-semibold text-[#826428]',
           )}
         >
           +{hidden.length}
@@ -108,7 +108,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
         <div className="relative h-56 overflow-hidden bg-[#ece2d4]">
           <Badge
             variant="outline"
-            className="absolute top-3 left-3 z-10 rounded-full border-white/40 bg-white/75 px-2.5 py-0.5 text-[11px] font-semibold text-[#8a6a2a] shadow-sm backdrop-blur-md"
+            className="absolute top-3 left-3 z-10 rounded-full border-white/40 bg-white/75 px-2.5 py-0.5 text-xs font-semibold text-[#826428] shadow-sm backdrop-blur-md"
           >
             {product.clothingType}
           </Badge>
@@ -116,14 +116,14 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
           {isOutOfStock ? (
             <Badge
               className={cn(
-                'absolute top-10 left-3 z-10 rounded-full px-2.5 py-0.5 text-[11px] font-bold',
+                'absolute top-10 left-3 z-10 rounded-full px-2.5 py-0.5 text-xs font-bold',
                 'bg-[#b04a3a]/90 text-white shadow-sm backdrop-blur-md',
               )}
             >
               Habis
             </Badge>
           ) : product.status === 'inactive' ? (
-            <Badge className="absolute top-10 left-3 z-10 rounded-full bg-[#8b8479]/90 px-2.5 py-0.5 text-[11px] font-bold text-[#fbfbfb] backdrop-blur-md">
+            <Badge className="absolute top-10 left-3 z-10 rounded-full bg-[#8b8479]/90 px-2.5 py-0.5 text-xs font-bold text-[#fbfbfb] backdrop-blur-md">
               Nonaktif
             </Badge>
           ) : null}
@@ -155,7 +155,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
         </div>
 
         <div className="flex flex-1 flex-col gap-2 p-3.5">
-          <div className="flex items-center justify-between text-xs text-[#7c7a72]">
+          <div className="flex items-center justify-between text-xs text-[#6d6c65]">
             <span>{product.clothingType}</span>
             <span className="inline-flex items-center gap-1">
               <MapPin className="size-3 text-[#b08a5e]" />
@@ -196,7 +196,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
                       : 'bg-[#3f8f63]',
                 )}
               />
-              {isOutOfStock ? 'Habis' : `Tersedia: ${product.stock}`}
+              {isOutOfStock ? 'Stok habis' : `Stok: ${product.stock}`}
             </p>
           </div>
         </div>

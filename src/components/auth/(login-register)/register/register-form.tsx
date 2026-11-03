@@ -129,7 +129,7 @@ export function RegisterForm() {
                 {...register('firstName')}
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {errors.firstName?.message}
               </FieldError>
             </Field>
@@ -156,7 +156,7 @@ export function RegisterForm() {
                 }
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {errors.phone?.message}
               </FieldError>
             </Field>
@@ -177,7 +177,7 @@ export function RegisterForm() {
                 {...register('email')}
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {errors.email?.message}
               </FieldError>
             </Field>
@@ -198,7 +198,7 @@ export function RegisterForm() {
                 {...register('password')}
                 className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
               />
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {errors.password?.message}
               </FieldError>
             </Field>
@@ -269,7 +269,7 @@ export function RegisterForm() {
                   )}
                 />
               </div>
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {(errors.day || errors.month || errors.year) &&
                   'Lengkapi tanggal lahir Anda.'}
               </FieldError>
@@ -296,7 +296,7 @@ export function RegisterForm() {
                   </label>
                 ))}
               </div>
-              <FieldError className="text-[10px] font-medium leading-none">
+              <FieldError className="text-xs font-medium leading-none">
                 {errors.gender?.message}
               </FieldError>
             </Field>
@@ -344,11 +344,11 @@ export function RegisterForm() {
             <GoogleButton label="Lanjutkan dengan Google" />
           </div>
 
-          <p className="mt-4 text-center text-xs text-[#7a6e62]">
+          <p className="mt-4 text-center text-xs text-[#6a6056]">
             Sudah punya akun?{' '}
             <Link
               href="/login"
-              className="text-[#c07a4a] hover:underline font-medium"
+              className="text-[#8b5530] hover:underline font-medium"
             >
               Masuk
             </Link>

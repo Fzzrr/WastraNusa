@@ -130,7 +130,7 @@ export function SellerDashboardContent() {
     <main className="flex flex-1 flex-col">
       <SellerHeader
         title="Dashboard Penjualan"
-        subtitle="Ringkasan Performa Toko Anda"
+        subtitle="Ringkasan performa toko Anda"
       />
 
       <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-8">
@@ -235,7 +235,7 @@ export function SellerDashboardContent() {
               <CardContent className="px-0 py-0">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] text-left">
-                    <thead className="bg-[#faf7f2] text-[11px] font-medium tracking-wider text-[#8a8378] uppercase">
+                    <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
                       <tr>
                         <th className="px-5 py-3">Produk</th>
                         <th className="px-5 py-3">Kategori</th>

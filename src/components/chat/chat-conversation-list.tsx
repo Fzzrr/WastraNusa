@@ -104,7 +104,7 @@ export function ChatConversationList({
                 {item.count ? (
                   <span
                     className={cn(
-                      'min-w-4 rounded-full px-1 text-[10px] leading-4 tabular-nums',
+                      'min-w-4 rounded-full px-1 text-xs leading-4 tabular-nums',
                       isActive
                         ? 'bg-white/20 text-white'
                         : 'bg-[#b08a5e] text-white',
@@ -215,7 +215,7 @@ export function ChatConversationList({
                         </span>
                         <span
                           className={cn(
-                            'shrink-0 text-[11px] tabular-nums',
+                            'shrink-0 text-xs tabular-nums',
                             isUnread
                               ? 'font-semibold text-[#b08a5e]'
                               : 'text-[#a39784]',
@@ -234,12 +234,12 @@ export function ChatConversationList({
                           )}
                         >
                           {isOwnLast ? (
-                            <span className="text-[#6e8276]">Anda: </span>
+                            <span className="text-[#607167]">Anda: </span>
                           ) : null}
                           {lastMessage?.content ?? 'Belum ada pesan'}
                         </span>
                         {isUnread ? (
-                          <span className="min-w-5 shrink-0 rounded-full bg-gradient-to-r from-[#2f5f49] to-[#3f7359] px-1.5 text-center text-[10px] leading-5 font-bold text-white tabular-nums">
+                          <span className="min-w-5 shrink-0 rounded-full bg-gradient-to-r from-[#2f5f49] to-[#3f7359] px-1.5 text-center text-xs leading-5 font-bold text-white tabular-nums">
                             {unreadCount > 99 ? '99+' : unreadCount}
                           </span>
                         ) : null}

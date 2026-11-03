@@ -25,7 +25,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const navigationIcons = {
   Dashboard: LayoutDashboard,
   Artikel: BookOpen,
-  'Seller Management': Package,
+  'Manajemen Penjual': Package,
   'Produk & Inventori': Package2,
   Pesanan: ShoppingBag,
 } as const;
@@ -33,7 +33,7 @@ const navigationIcons = {
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
   { title: 'Artikel', href: '/admin/article' },
-  { title: 'Seller Management', href: '/admin/seller-management' },
+  { title: 'Manajemen Penjual', href: '/admin/seller-management' },
   // deprecated: superseded by seller panel
   // { title: 'Produk & Inventori', href: '/admin/product-inventory' },
   // { title: 'Pesanan', href: '/admin/pesanan' },
@@ -100,7 +100,7 @@ function AdminSidebarContent({
   const { data: session } = authClient.useSession();
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
-  const adminRole = session?.user?.role === 'admin' ? 'Super User' : 'Staff';
+  const adminRole = session?.user?.role === 'admin' ? 'Administrator' : 'Staf';
 
   const handleSignOut = async () => {
     await authClient.signOut({

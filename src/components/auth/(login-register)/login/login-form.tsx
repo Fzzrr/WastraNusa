@@ -82,8 +82,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full">
-      <p className="text-xs font-semibold text-[#7a6e62]">Start your journey</p>
-      <h1 className="mt-1 mb-5 text-2xl font-bold text-[#2d2318]">
+      <h1 className="mb-5 text-2xl font-bold text-[#2d2318]">
         Masuk ke WastraNusa
       </h1>
 
@@ -104,7 +103,7 @@ export function LoginForm() {
             {...register('email')}
             className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError className="text-[10px] font-medium leading-none">
+          <FieldError className="text-xs font-medium leading-none">
             {errors.email?.message}
           </FieldError>
         </Field>
@@ -125,7 +124,7 @@ export function LoginForm() {
             {...register('password')}
             className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError className="text-[10px] font-medium leading-none">
+          <FieldError className="text-xs font-medium leading-none">
             {errors.password?.message}
           </FieldError>
         </Field>
@@ -141,7 +140,7 @@ export function LoginForm() {
           </div>
           <Link
             href="/forgot-password"
-            className="text-[#c07a4a] hover:underline font-medium"
+            className="text-[#8b5530] hover:underline font-medium"
           >
             Lupa password?
           </Link>
@@ -163,11 +162,11 @@ export function LoginForm() {
       </div>
 
       {/* Register link */}
-      <p className="mt-5 text-center text-xs text-[#7a6e62]">
+      <p className="mt-5 text-center text-xs text-[#6a6056]">
         Belum punya akun?{' '}
         <Link
           href="/register"
-          className="text-[#c07a4a] hover:underline font-medium"
+          className="text-[#8b5530] hover:underline font-medium"
         >
           Daftar
         </Link>

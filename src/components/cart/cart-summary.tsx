@@ -131,7 +131,7 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
             {formatIDR(totals.total || 0)}
           </span>
         </div>
-        <p className="mt-1 text-right text-[11px] text-[#9a8f80]">
+        <p className="mt-1 text-right text-xs text-[#9a8f80]">
           Belum termasuk ongkir & biaya layanan
         </p>
 
@@ -147,7 +147,7 @@ export function CartSummary({ totals, selectedItems = [] }: CartSummaryProps) {
           <ArrowRight className="size-4 transition-transform group-hover/cta:translate-x-1" />
         </Button>
 
-        <p className="mt-3 flex items-center justify-center gap-1.5 text-[11px] text-[#9a8f80]">
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-[#9a8f80]">
           <ShieldCheck className="size-3.5 text-[#2f5f49]" />
           Pembayaran aman & terenkripsi
         </p>

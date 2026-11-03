@@ -31,7 +31,7 @@ export function LikedArticlesMain() {
         <span className="flex items-center gap-2">
           Artikel Disukai
           {!isPending ? (
-            <span className="rounded-full bg-[#f6e4da] px-2 py-0.5 text-xs font-semibold text-[#b8613f]">
+            <span className="rounded-full bg-[#f6e4da] px-2 py-0.5 text-xs font-semibold text-[#9c5235]">
               {totalItems}
             </span>
           ) : null}

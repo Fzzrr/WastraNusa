@@ -69,7 +69,7 @@ export function CartItem({
 
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div className="min-w-0">
-          <span className="inline-flex rounded-full bg-[#f5ead3] px-2 py-0.5 text-xs font-semibold text-[#8a6a2a]">
+          <span className="inline-flex rounded-full bg-[#f5ead3] px-2 py-0.5 text-xs font-semibold text-[#826428]">
             {item.clothingType}
           </span>
           <h3 className="mt-1 leading-tight font-bold text-[#2f4f3f]">

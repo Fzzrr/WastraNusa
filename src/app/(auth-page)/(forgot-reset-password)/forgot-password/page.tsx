@@ -7,7 +7,7 @@ export default function ForgotPasswordPage() {
         <h1 className="text-2xl font-bold tracking-tight text-[#2d2318]">
           Lupa Password
         </h1>
-        <p className="mt-2 text-xs text-[#7a6e62]">
+        <p className="mt-2 text-xs text-[#6a6056]">
           Masukkan email terdaftar untuk menerima link pemulihan.
         </p>
       </div>

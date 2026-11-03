@@ -181,7 +181,11 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     ['Provinsi', product.province],
     [
       'Tanggal Diunggah',
-      new Date(product.updatedAt).toLocaleDateString('id-ID'),
+      new Date(product.updatedAt).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }),
     ],
   ];
 

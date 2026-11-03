@@ -92,7 +92,7 @@ export function FeaturedCards() {
 
                 <div className="relative flex min-h-[150px] items-end p-4 sm:min-h-[180px] lg:min-h-[225px]">
                   <div className="transition-transform duration-500 ease-out group-hover:-translate-y-0.5">
-                    <Badge className="mb-3 rounded-full border border-white/15 bg-white/14 px-2.5 py-1 text-[11px] font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:border-[#e8cb8d]/50 group-hover:bg-[#e8cb8d]/25 group-hover:text-[#fff6e3]">
+                    <Badge className="mb-3 rounded-full border border-white/15 bg-white/14 px-2.5 py-1 text-xs font-semibold text-[#f6eee1] backdrop-blur-sm transition-colors group-hover:border-[#e8cb8d]/50 group-hover:bg-[#e8cb8d]/25 group-hover:text-[#fff6e3]">
                       {article.topic}
                     </Badge>
                     <p className="text-base font-semibold leading-tight text-[#f6eee1] drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] lg:text-lg">

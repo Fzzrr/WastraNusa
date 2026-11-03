@@ -40,7 +40,7 @@ export function ProductCatalog() {
       <div className="relative mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
         <Badge
           variant="outline"
-          className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#8a6a2a]"
+          className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#826428]"
         >
           <Sparkles className="size-3 text-[#caa86a]" />
           Produk Terbaru

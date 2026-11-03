@@ -224,7 +224,7 @@ export function AdminArticleContent() {
         <div className="animate-in overflow-hidden rounded-2xl bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6] duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left">
-              <thead className="bg-[#faf7f2] text-[10px] font-medium tracking-wider text-[#8a8378] uppercase">
+              <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
                 <tr>
                   <th className="w-12 px-4 py-4">
                     <Checkbox
@@ -306,7 +306,7 @@ export function AdminArticleContent() {
                           </div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex rounded-full bg-[#f5ead3] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[#8a6a2a]">
+                          <span className="inline-flex rounded-full bg-[#f5ead3] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[#826428]">
                             {article.topic}
                           </span>
                         </td>
@@ -352,7 +352,7 @@ export function AdminArticleContent() {
                               variant="ghost"
                               aria-label="Edit artikel"
                               title="Edit artikel"
-                              className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#8a6a2a]"
+                              className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#826428]"
                               onClick={() => handleEdit(article.slug)}
                             >
                               <Pencil />

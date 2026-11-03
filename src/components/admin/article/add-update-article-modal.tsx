@@ -385,7 +385,7 @@ export default function AddUpdateArticleModal({
                 </p>
                 <p className="mt-0.5 text-xs text-[#6f6a62]">
                   Tempel URL artikel (mis.{' '}
-                  <span className="font-mono text-[11px]">
+                  <span className="font-mono text-xs">
                     https://id.wikipedia.org/wiki/Batik
                   </span>
                   ), lalu tarik ringkasan REST API tanpa menyalin manual.
@@ -462,7 +462,7 @@ export default function AddUpdateArticleModal({
                       className="h-28 w-full rounded-lg border border-[#e5ded5] bg-[#f5f3ec] object-cover sm:w-28"
                     />
                   ) : (
-                    <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] px-2 text-center text-[11px] text-muted-foreground sm:w-28">
+                    <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] px-2 text-center text-xs text-muted-foreground sm:w-28">
                       Tidak ada gambar thumbnail
                     </div>
                   )}
@@ -589,7 +589,7 @@ export default function AddUpdateArticleModal({
             step={2}
             icon={MapPin}
             title="Asal Daerah"
-            description="Tentukan Daerah Asal Wastra"
+            description="Tentukan daerah asal wastra"
           >
             <div className="grid gap-4 md:grid-cols-3">
               <Field label="Pulau" required error={errors.island?.message}>

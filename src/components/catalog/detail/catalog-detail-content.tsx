@@ -48,7 +48,7 @@ const GENDER_LABELS: Record<string, string> = {
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   active: { label: 'Tersedia', className: 'bg-[#e3ece5] text-[#2f5f49]' },
-  inactive: { label: 'Nonaktif', className: 'bg-[#efe8dd] text-[#6e7a70]' },
+  inactive: { label: 'Nonaktif', className: 'bg-[#efe8dd] text-[#646f66]' },
   out_of_stock: {
     label: 'Stok Habis',
     className: 'bg-[#f6e1dd] text-[#b04a3a]',
@@ -167,7 +167,7 @@ export function CatalogDetailContent({
                 >
                   <span className="relative flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#f5ead3] text-[#a07a2c] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
                     <Icon className="size-4" />
-                    <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#2f5f49] text-[10px] font-semibold text-white ring-2 ring-[#fbf8f2]">
+                    <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#2f5f49] text-xs font-semibold text-white ring-2 ring-[#fbf8f2]">
                       {index + 1}
                     </span>
                   </span>
@@ -190,7 +190,7 @@ export function CatalogDetailContent({
                 key={label}
                 className="grid grid-cols-[160px_minmax(0,1fr)] gap-3 px-4 py-3 transition-colors odd:bg-[#f5f0e7] hover:bg-[#f5ead3]/60"
               >
-                <p className="text-[#6e7a70]">{label}</p>
+                <p className="text-[#646f66]">{label}</p>
                 <div className="font-semibold text-[#2f5a48]">{value}</div>
               </div>
             ))}

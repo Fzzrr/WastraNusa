@@ -46,7 +46,7 @@ export function ShippingMethodSection({
               <div className="flex items-center justify-between gap-2">
                 <span
                   className={cn(
-                    'rounded-lg px-2.5 py-1 text-[11px] font-extrabold tracking-wide uppercase',
+                    'rounded-lg px-2.5 py-1 text-xs font-extrabold tracking-wide uppercase',
                     isSelected
                       ? 'bg-[#2f5f49] text-[#e8cb8d]'
                       : 'bg-[#f4efe5] text-[#8a6a3a]',
@@ -68,7 +68,7 @@ export function ShippingMethodSection({
               <div className="flex items-end justify-between gap-2">
                 <div>
                   <p className="text-sm font-bold text-[#2f4f3f]">{opt.name}</p>
-                  <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-[#9a8f80]">
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-[#9a8f80]">
                     <Clock className="size-3" />
                     {opt.desc}
                   </p>
@@ -78,7 +78,7 @@ export function ShippingMethodSection({
                 </span>
               </div>
               {opt.tag ? (
-                <span className="absolute -top-2 right-3 rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-[10px] font-bold text-[#3c2e14] shadow-sm">
+                <span className="absolute -top-2 right-3 rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-xs font-bold text-[#3c2e14] shadow-sm">
                   {opt.tag}
                 </span>
               ) : null}

@@ -13,7 +13,7 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
         <h1 className="text-2xl font-bold tracking-tight text-[#2d2318]">
           Atur Ulang Password
         </h1>
-        <p className="mt-2 text-xs text-[#7a6e62]">
+        <p className="mt-2 text-xs text-[#6a6056]">
           Masukkan password baru untuk mengamankan akun Anda.
         </p>
       </div>

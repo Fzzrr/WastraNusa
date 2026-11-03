@@ -41,7 +41,7 @@ function Highlight({
     part.toLowerCase() === needle.toLowerCase() ? (
       <mark
         key={index}
-        className="rounded-sm bg-[#f5ead3] px-0.5 text-[#8a6a2a]"
+        className="rounded-sm bg-[#f5ead3] px-0.5 text-[#826428]"
       >
         {part}
       </mark>
@@ -195,7 +195,7 @@ export function NavbarSearch({
           <kbd
             aria-hidden
             title="Tekan / untuk mencari"
-            className="hidden h-6 shrink-0 items-center rounded-md border border-[#e0d6c5] bg-[#faf6ee] px-2 font-mono text-[11px] text-[#9a8f80] transition-opacity group-focus-within/search:opacity-0 lg:inline-flex"
+            className="hidden h-6 shrink-0 items-center rounded-md border border-[#e0d6c5] bg-[#faf6ee] px-2 font-mono text-xs text-[#9a8f80] transition-opacity group-focus-within/search:opacity-0 lg:inline-flex"
           >
             /
           </kbd>
@@ -215,10 +215,10 @@ export function NavbarSearch({
             <>
               {products.length > 0 ? (
                 <div>
-                  <p className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 text-[11px] font-semibold tracking-wider text-[#7d8a7f] uppercase">
+                  <p className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 text-xs font-semibold tracking-wider text-[#68746a] uppercase">
                     <ShoppingBag className="size-3.5" />
                     Produk
-                    <span className="rounded-full bg-[#e3ece5] px-1.5 text-[10px] text-[#2f5b49]">
+                    <span className="rounded-full bg-[#e3ece5] px-1.5 text-xs text-[#2f5b49]">
                       {products.length}
                     </span>
                   </p>
@@ -260,10 +260,10 @@ export function NavbarSearch({
 
               {articles.length > 0 ? (
                 <div className="mt-1 border-t border-[#f0ebe2] pt-1">
-                  <p className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 text-[11px] font-semibold tracking-wider text-[#7d8a7f] uppercase">
+                  <p className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 text-xs font-semibold tracking-wider text-[#68746a] uppercase">
                     <BookOpenText className="size-3.5" />
                     Ensiklopedia
-                    <span className="rounded-full bg-[#f5ead3] px-1.5 text-[10px] text-[#8a6a2a]">
+                    <span className="rounded-full bg-[#f5ead3] px-1.5 text-xs text-[#826428]">
                       {articles.length}
                     </span>
                   </p>

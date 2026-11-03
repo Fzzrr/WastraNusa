@@ -50,7 +50,7 @@ function InfoTile({
         <Icon className="size-4" />
       </span>
       <div className="min-w-0">
-        <p className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
+        <p className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
           {label}
         </p>
         <p

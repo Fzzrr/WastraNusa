@@ -30,7 +30,7 @@ export function CatalogMainHeader({
   return (
     <section className="mx-auto w-full max-w-[1320px] px-4 pt-6 pb-5 md:px-6 lg:px-8">
       <Breadcrumb>
-        <BreadcrumbList className="text-[#66786d] text-sm font-medium">
+        <BreadcrumbList className="text-[#607167] text-sm font-medium">
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/"

@@ -228,7 +228,7 @@ export function CartMain() {
         title="Keranjang Belanja"
         description={
           items.length > 0
-            ? `${items.length} Produk di keranjang Anda`
+            ? `${items.length} produk di keranjang Anda`
             : 'Pilih produk yang ingin Anda beli'
         }
       />

@@ -24,7 +24,7 @@ export function AdminProductInventoryContent() {
       header={
         <AdminHeader
           title="Produk & Inventori"
-          subtitle="Kelola Produk, Varian, dan Stok"
+          subtitle="Kelola produk, varian, dan stok"
           variant="plain"
         />
       }

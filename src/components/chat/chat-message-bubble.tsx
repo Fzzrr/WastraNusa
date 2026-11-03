@@ -41,7 +41,7 @@ export function ChatMessageBubble({
         <p className="break-words whitespace-pre-wrap">{message.content}</p>
         <div
           className={cn(
-            'flex items-center gap-1 self-end text-[10px] tabular-nums',
+            'flex items-center gap-1 self-end text-xs tabular-nums',
             isOwn ? 'text-white/75' : 'text-[#a39784]',
           )}
         >

@@ -102,7 +102,7 @@ export function CheckoutSummary({
           <div className="flex items-start justify-between gap-4">
             <span className="leading-tight">
               Ongkos Kirim
-              <span className="block text-[10px] text-[#9a8f80]">
+              <span className="block text-xs text-[#9a8f80]">
                 {totals.shippingName || '-'}
               </span>
             </span>

@@ -181,7 +181,7 @@ export function AddressSection({
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span
                         className={cn(
-                          'rounded-lg px-2 py-0.5 text-[10px] font-bold',
+                          'rounded-lg px-2 py-0.5 text-xs font-bold',
                           isActive
                             ? 'bg-[#2f5f49] text-[#e8cb8d]'
                             : 'bg-[#f4efe5] text-[#8a6a3a]',
@@ -190,7 +190,7 @@ export function AddressSection({
                         {addr.label}
                       </span>
                       {addr.isDefault && (
-                        <span className="rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-[10px] font-bold text-[#3c2e14]">
+                        <span className="rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-xs font-bold text-[#3c2e14]">
                           Utama
                         </span>
                       )}

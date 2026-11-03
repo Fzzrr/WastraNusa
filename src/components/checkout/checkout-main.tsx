@@ -163,7 +163,7 @@ export function CheckoutMain() {
 
             <div className="flex items-center justify-center gap-2 text-[#9a8f80]">
               <ShieldCheck className="size-3.5 text-[#2f5f49]" />
-              <p className="text-[11px] font-medium">
+              <p className="text-xs font-medium">
                 Pembayaran Aman & Terenkripsi
               </p>
             </div>

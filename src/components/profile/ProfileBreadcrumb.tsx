@@ -45,7 +45,7 @@ export default function ProfileBreadcrumb() {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-sm font-medium text-[#6e8276]">
+      <BreadcrumbList className="text-sm font-medium text-[#607167]">
         <BreadcrumbItem>
           <BreadcrumbLink
             href="/"

@@ -49,7 +49,7 @@ export default function Sidebar() {
       aria-label="Menu profil"
       className="flex w-full flex-row flex-wrap gap-1 rounded-2xl bg-[#fffdf8] p-2 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#e8dfd0] md:sticky md:top-6 md:w-[220px] md:flex-col md:self-start lg:w-[240px]"
     >
-      <p className="hidden px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wider text-[#9a8f80] uppercase md:block">
+      <p className="hidden px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#9a8f80] uppercase md:block">
         Akun Saya
       </p>
       {NAV_ITEMS.map(({ icon: Icon, label, href }) => {

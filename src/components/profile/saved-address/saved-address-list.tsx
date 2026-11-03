@@ -48,7 +48,7 @@ function AddressField({
     <div className="flex min-w-0 gap-2.5">
       <Icon className="mt-0.5 size-4 shrink-0 text-[#b08a5e]" />
       <div className="min-w-0">
-        <div className="text-[11px] font-medium tracking-wider text-[#9a8f80] uppercase">
+        <div className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
           {label}
         </div>
         <div className="text-sm text-[#3d4f45]">{children}</div>
@@ -96,7 +96,7 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
           {address.isDefault && (
             <Badge
               variant="secondary"
-              className="flex items-center gap-1 rounded-full border-none bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-[10px] font-semibold text-[#3c2e14] hover:bg-[#e8cb8d]"
+              className="flex items-center gap-1 rounded-full border-none bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-xs font-semibold text-[#3c2e14] hover:bg-[#e8cb8d]"
             >
               <Star className="size-3 fill-current" />
               Utama

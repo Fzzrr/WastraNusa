@@ -162,7 +162,7 @@ function StatCards({ data }: { data: AdminDashboardData }) {
     <section className="grid gap-6 md:grid-cols-3">
       <StatCard
         icon={Wallet}
-        label="GMV Bulan Ini"
+        label="Total Transaksi Bulan Ini"
         value={`Rp ${compactNumber.format(data.gmv.currentMonth)}`}
         footnote="Total transaksi seluruh seller"
         badge={
@@ -179,9 +179,9 @@ function StatCards({ data }: { data: AdminDashboardData }) {
       <StatCard
         icon={Store}
         delay={80}
-        label="Seller Aktif"
+        label="Penjual Aktif"
         value={data.sellers.active.toLocaleString('id-ID')}
-        footnote={`dari ${data.sellers.registered.toLocaleString('id-ID')} seller terdaftar`}
+        footnote={`dari ${data.sellers.registered.toLocaleString('id-ID')} penjual terdaftar`}
         badge={
           data.sellers.newThisMonth > 0 ? (
             <TrendBadge tone="blue">+{data.sellers.newThisMonth}</TrendBadge>
@@ -224,7 +224,7 @@ function TrafficCard({
     >
       <SectionHeader
         title="Trafik Artikel"
-        subtitle="Total Interaksi"
+        subtitle="Total interaksi"
         aside={
           <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
             7 Hari
@@ -266,8 +266,8 @@ function TopSellerCard({
       style={{ animationDelay: '280ms' }}
     >
       <SectionHeader
-        title="Top Seller"
-        subtitle="Penjualan (Juta Rupiah)"
+        title="Penjual Teratas"
+        subtitle="Penjualan (juta rupiah)"
         aside={
           <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
             Bulan Ini
@@ -419,7 +419,7 @@ export function AdminDashboardContent() {
   return (
     <main className="flex flex-1 flex-col">
       <AdminHeader
-        title="Dashboard Overview"
+        title="Ringkasan Dasbor"
         subtitle={headerSubtitle}
         variant="plain"
       />

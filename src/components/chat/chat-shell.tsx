@@ -61,7 +61,7 @@ export function ChatShell({
             Percakapan
           </h2>
           {totalUnread > 0 ? (
-            <span className="rounded-full bg-[#f5ead3] px-2 py-0.5 text-[11px] font-semibold text-[#8a6a3a]">
+            <span className="rounded-full bg-[#f5ead3] px-2 py-0.5 text-xs font-semibold text-[#8a6a3a]">
               {totalUnread} belum dibaca
             </span>
           ) : null}

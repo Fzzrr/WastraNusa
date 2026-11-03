@@ -193,7 +193,7 @@ export function AreaChart({
                   opacity: active === null ? 0 : 1,
                 }}
               >
-                <p className="text-[11px] text-white/60">
+                <p className="text-xs text-white/60">
                   {data[shown].tooltipLabel ?? data[shown].label}
                 </p>
                 <p className="font-semibold">

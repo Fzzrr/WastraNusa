@@ -139,7 +139,7 @@ export function IslandCards() {
         <div>
           <Badge
             variant="outline"
-            className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#8a6a2a]"
+            className="inline-flex gap-1.5 rounded-lg border-[#e6d6b8] bg-[#f5ead3] px-3 py-1 text-xs font-semibold text-[#826428]"
           >
             <Compass className="size-3 text-[#caa86a]" />
             Jelajahi Pulau
@@ -252,7 +252,7 @@ export function IslandCards() {
                       />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(12,20,15,0.95)_0%,rgba(12,20,15,0.7)_38%,rgba(12,20,15,0.15)_70%,rgba(0,0,0,0)_100%)]" />
 
-                      <span className="absolute top-3 left-3 z-10 rounded-full bg-black/30 px-2.5 py-1 font-mono text-[11px] font-semibold text-[#f3dfb4] ring-1 ring-white/20 backdrop-blur">
+                      <span className="absolute top-3 left-3 z-10 rounded-full bg-black/30 px-2.5 py-1 font-mono text-xs font-semibold text-[#f3dfb4] ring-1 ring-white/20 backdrop-blur">
                         {String(index + 1).padStart(2, '0')}
                       </span>
                       <span className="absolute top-3 right-3 z-10 grid size-8 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6f2e8] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">

@@ -263,7 +263,7 @@ export function ChatThread({
                   key={item.key}
                   className="sticky top-2 z-10 my-3 flex justify-center"
                 >
-                  <span className="rounded-full bg-[#fffdf8]/95 px-3 py-1 text-[11px] font-semibold text-[#8a7a62] shadow-[0_1px_2px_rgba(60,41,15,0.08)] ring-1 ring-[#ebe3d6] backdrop-blur">
+                  <span className="rounded-full bg-[#fffdf8]/95 px-3 py-1 text-xs font-semibold text-[#8a7a62] shadow-[0_1px_2px_rgba(60,41,15,0.08)] ring-1 ring-[#ebe3d6] backdrop-blur">
                     {item.label}
                   </span>
                 </div>
