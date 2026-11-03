@@ -8,6 +8,7 @@ import {
   Map,
   MapPin,
   Package,
+  ShoppingBag,
 } from 'lucide-react';
 import { type CSSProperties, useEffect, useState } from 'react';
 
@@ -61,6 +62,25 @@ const STAT_STYLES: Record<string, StatStyle> = {
     caption: 'Sebaran asal produk',
     color: '#b8613f',
     tint: '#f6e4da',
+  },
+  // Halaman toko
+  Produk: {
+    icon: Package,
+    caption: 'Karya di toko ini',
+    color: '#2f5b49',
+    tint: '#e3ece5',
+  },
+  Terjual: {
+    icon: ShoppingBag,
+    caption: 'Dibeli pelanggan',
+    color: '#b8613f',
+    tint: '#f6e4da',
+  },
+  'Jenis Wastra': {
+    icon: Layers,
+    caption: 'Ragam kain & pakaian',
+    color: '#a07a2c',
+    tint: '#f5ead3',
   },
 };
 

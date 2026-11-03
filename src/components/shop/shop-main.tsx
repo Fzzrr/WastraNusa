@@ -1,10 +1,19 @@
 'use client';
 
+import { CatalogProductGridSkeleton } from '@/components/catalog/main/catalog-product-grid';
 import { ProfileEmptyState } from '@/components/profile/profile-section';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePublicShop } from '@/hooks/use-public-shop';
 import { cn } from '@/lib/utils';
-import { Store, XCircle } from 'lucide-react';
+import { Home, Store, XCircle } from 'lucide-react';
 
 import { ShopHeader } from './shop-header';
 import { ShopProductGrid } from './shop-product-grid';
@@ -23,43 +32,24 @@ const PageShell = ({ children }: { children: React.ReactNode }) => (
 function ShopSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className={cn(surfaceCardClassName, 'overflow-hidden')}>
-        <Skeleton className="h-20 w-full rounded-none bg-[#e6dfd1] sm:h-24" />
-        <div className="px-5 pb-6 md:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <Skeleton className="-mt-12 size-24 rounded-2xl bg-[#eee2d0] sm:-mt-14 sm:size-28" />
-            <div className="flex-1 space-y-2 pt-1">
-              <Skeleton className="h-8 w-64 bg-[#eee2d0]" />
-              <Skeleton className="h-4 w-40 bg-[#f2ede4]" />
-            </div>
-          </div>
-          <Skeleton className="mt-4 h-4 w-full max-w-3xl bg-[#f2ede4]" />
-          <Skeleton className="mt-2 h-4 w-2/3 bg-[#f2ede4]" />
-          <div className="mt-5 flex flex-wrap gap-4 border-t border-[#efe8dd] pt-4">
-            <Skeleton className="h-4 w-32 bg-[#f2ede4]" />
-            <Skeleton className="h-4 w-28 bg-[#f2ede4]" />
-            <Skeleton className="h-4 w-36 bg-[#f2ede4]" />
-          </div>
-        </div>
+      <div className="h-72 animate-pulse rounded-3xl bg-gradient-to-br from-[#1d3a2d] via-[#2a5541] to-[#3a6a52] md:h-80" />
+      <div
+        className={cn(
+          surfaceCardClassName,
+          'grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4',
+        )}
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton
+            key={`shop-info-skeleton-${index}`}
+            className="h-16 rounded-2xl bg-[#f2ede4]"
+          />
+        ))}
       </div>
-
       <div>
-        <Skeleton className="h-6 w-40 bg-[#eee2d0]" />
-        <div className="mt-4 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`shop-skeleton-${index}`}
-              className="h-full overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed]"
-            >
-              <Skeleton className="h-56 w-full rounded-none bg-[#ece2d4]" />
-              <div className="space-y-3 p-3.5">
-                <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
-                <Skeleton className="h-5 w-11/12 bg-[#e6dfd1]" />
-                <Skeleton className="h-5 w-16 bg-[#e6dfd1]" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <Skeleton className="h-8 w-48 bg-[#eee2d0]" />
+        <Skeleton className="mt-2 h-5 w-64 bg-[#f2ede4]" />
+        <CatalogProductGridSkeleton count={6} />
       </div>
     </div>
   );
@@ -123,10 +113,35 @@ export function ShopMain({ sellerId }: { sellerId: string }) {
   return (
     <PageShell>
       <div className="flex flex-col gap-6">
-        <ShopHeader shop={data.shop} />
+        <Breadcrumb>
+          <BreadcrumbList className="text-sm font-medium text-[#607167]">
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                href="/"
+                className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+              >
+                <Home className="size-3.5" />
+                Beranda
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/catalog" className="hover:text-[#2f5b49]">
+                Katalog
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-[#2f5b49]">
+                {data.shop.shopName}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <ShopHeader shop={data.shop} products={data.products} />
         <ShopProductGrid
+          shopName={data.shop.shopName}
           products={data.products}
-          productCount={data.productCount}
         />
       </div>
     </PageShell>

@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useCart } from '@/hooks/use-cart';
+import { useMySellerApplication } from '@/hooks/use-seller-application';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import {
@@ -33,9 +34,9 @@ const menuItems = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
-  // Sellers go straight to their panel; admins land on "Buka Toko", which
-  // shows the panel button once their shop exists (or the form otherwise).
-  { label: 'Toko', icon: Store, href: '/seller/dashboard', sellerOnly: true },
+  // Sellers, and admins with an approved shop, go to their public shop page
+  // (which links to the panel); other admins land on "Buka Toko".
+  { label: 'Toko', icon: Store, href: '/shop', sellerOnly: true },
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
   { label: 'Katalog', icon: Grid2X2, href: '/catalog' },
   { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
@@ -71,6 +72,9 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: cart } = useCart({ enabled: Boolean(session) });
+  // Admins only have a public shop once their seller application is approved.
+  const { data: application } = useMySellerApplication({ enabled: isAdmin });
+  const hasShop = isSeller || application?.status === 'approved';
   const cartCount = session ? (cart?.items.length ?? 0) : 0;
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -79,8 +83,13 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     .filter((item) => !item.adminOnly || isAdmin)
     .filter((item) => !item.sellerOnly || isSeller || isAdmin)
     .map((item) =>
-      item.sellerOnly && !isSeller
-        ? { ...item, href: '/profile/seller-application' }
+      item.sellerOnly
+        ? {
+            ...item,
+            href: hasShop
+              ? `/shop/${session?.user?.id}`
+              : '/profile/seller-application',
+          }
         : item,
     );
 

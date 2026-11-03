@@ -112,12 +112,13 @@ async function mutateApi<T>(
 /**
  * The authenticated user's own seller application (null if they never applied).
  */
-export function useMySellerApplication() {
+export function useMySellerApplication({ enabled = true } = {}) {
   return useQuery({
     queryKey: sellerApplicationKeys.mine(),
     queryFn: () =>
       fetchApi<SellerApplication | null>('/api/seller-applications'),
     staleTime: 1000 * 60,
+    enabled,
   });
 }
 
