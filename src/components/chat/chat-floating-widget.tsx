@@ -11,7 +11,7 @@ import type { ConversationSummary } from '@/types/chat';
 import { Maximize2, MessageCircle, MessagesSquare, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /** Pages with their own chat UI, panels, or no signed-in user. */
 const HIDDEN_PATH_PREFIXES = [
@@ -37,21 +37,33 @@ function isHiddenPath(pathname: string) {
  * Floating live-chat launcher shown on public pages for signed-in users:
  * a bubble with an unread badge that opens a compact chat panel.
  */
+const subscribeNoop = () => () => {};
+
 export function ChatFloatingWidget() {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
   const user = session?.user;
+  // The server render never has the session, so render only once hydrated;
+  // otherwise server and client markup differ.
+  const isClient = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
 
-  if (!user || isHiddenPath(pathname)) return null;
+  if (!isClient || !user || isHiddenPath(pathname)) return null;
 
   // Article pages already have the AI assistant bubble in this corner.
   const raised = /^\/encyclopedia\/[^/]+/.test(pathname);
+  // Product pages pin the buy buttons to the bottom on phones.
+  const raisedOnMobile = /^\/catalog\/[^/]+/.test(pathname);
 
   return (
     <FloatingChat
       currentUserId={user.id}
       variant={isSeller(user.role) ? 'seller' : 'buyer'}
       raised={raised}
+      raisedOnMobile={raisedOnMobile}
     />
   );
 }
@@ -60,10 +72,12 @@ function FloatingChat({
   currentUserId,
   variant,
   raised,
+  raisedOnMobile,
 }: {
   currentUserId: string;
   variant: 'seller' | 'buyer';
   raised: boolean;
+  raisedOnMobile: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -104,7 +118,11 @@ function FloatingChat({
     <div
       className={cn(
         'fixed right-4 z-40 transition-[bottom] duration-300 sm:right-6',
-        raised ? 'bottom-24' : 'bottom-4 sm:bottom-6',
+        raised
+          ? 'bottom-24'
+          : raisedOnMobile
+            ? 'bottom-24 sm:bottom-6'
+            : 'bottom-4 sm:bottom-6',
       )}
     >
       <button
