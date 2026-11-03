@@ -130,18 +130,20 @@ export function PaymentMain() {
           }
         />
       ) : (
-        <div className="items-start gap-6 lg:grid lg:grid-cols-12">
-          <div className="space-y-6 lg:col-span-8">
+        // On phones the left column dissolves (contents) so the summary with the
+        // total can sit between the review and the pay button.
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-12 lg:items-start">
+          <div className="contents lg:col-span-8 lg:block lg:space-y-6">
             <ReviewItems items={items} shipping={shipping} address={address} />
 
             {errorMessage && (
-              <div className="flex animate-in items-start gap-3 rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] p-4 text-sm text-[#9a3b2d] fade-in">
+              <div className="order-3 flex animate-in items-start gap-3 rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] p-4 text-sm text-[#9a3b2d] fade-in">
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
                 {errorMessage}
               </div>
             )}
 
-            <div className="flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
+            <div className="order-3 flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
               <Button
                 asChild
                 variant="outline"
@@ -158,7 +160,7 @@ export function PaymentMain() {
               <Button
                 onClick={handleConfirmAndPay}
                 disabled={isProcessing}
-                className="group/pay h-12 w-full cursor-pointer gap-2 rounded-xl bg-gradient-to-r from-[#cc6644] to-[#d98b52] px-8 text-base font-bold text-white shadow-[0_12px_24px_-12px_rgba(204,102,68,0.9)] transition-all hover:-translate-y-px hover:from-[#b3593b] hover:to-[#c97a45] active:scale-95 disabled:opacity-70 sm:w-auto"
+                className="group/pay h-12 w-full cursor-pointer gap-2 rounded-xl bg-[#b35d2f] px-8 text-base font-bold text-white shadow-[0_12px_24px_-12px_rgba(179,93,47,0.9)] transition-all hover:-translate-y-px hover:bg-[#9c4f27] active:scale-95 disabled:opacity-70 sm:w-auto"
               >
                 {isProcessing ? (
                   <>
@@ -174,7 +176,7 @@ export function PaymentMain() {
               </Button>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-[#9a8f80]">
+            <div className="order-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#7d7468]">
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="size-3.5 text-[#2f5f49]" />
                 Pembayaran aman & terenkripsi
@@ -186,8 +188,8 @@ export function PaymentMain() {
             </div>
           </div>
 
-          <aside className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">
-            <CheckoutSummary totals={totals} items={items} />
+          <aside className="order-2 lg:sticky lg:top-6 lg:col-span-4">
+            <CheckoutSummary totals={totals} items={items} showItems={false} />
           </aside>
         </div>
       )}

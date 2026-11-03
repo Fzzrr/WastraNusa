@@ -17,9 +17,15 @@ interface CheckoutSummaryProps {
     shippingName: string;
   };
   items?: CheckoutSelectedItem[];
+  // The payment step already lists the items in full.
+  showItems?: boolean;
 }
 
-export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
+export function CheckoutSummary({
+  totals,
+  items = [],
+  showItems = true,
+}: CheckoutSummaryProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -51,38 +57,40 @@ export function CheckoutSummary({ totals, items = [] }: CheckoutSummaryProps) {
       </div>
 
       <div className="p-5">
-        <div className="custom-scrollbar mb-4 max-h-[240px] space-y-3 overflow-y-auto pr-1">
-          {items.map((item) => (
-            <div key={item.cartItemId} className="flex items-center gap-3">
-              <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#eadecb] ring-1 ring-[#e8e2d5]">
-                {item.imageURL ? (
-                  <Image
-                    src={item.imageURL}
-                    alt={item.name}
-                    width={44}
-                    height={44}
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  <Package className="size-5 text-[#8e8476]" />
-                )}
+        {showItems ? (
+          <div className="custom-scrollbar mb-4 max-h-[240px] space-y-3 overflow-y-auto pr-1">
+            {items.map((item) => (
+              <div key={item.cartItemId} className="flex items-center gap-3">
+                <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#eadecb] ring-1 ring-[#e8e2d5]">
+                  {item.imageURL ? (
+                    <Image
+                      src={item.imageURL}
+                      alt={item.name}
+                      width={44}
+                      height={44}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <Package className="size-5 text-[#8e8476]" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-bold text-[#2f4f3f]">
+                    {item.name}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-[#9a8f80]">
+                    {[displayVariant(item.variant), `${item.quantity} barang`]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                </div>
+                <span className="text-xs font-bold whitespace-nowrap text-[#2f4f3f]">
+                  {formatIDR(item.price * item.quantity)}
+                </span>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-[#2f4f3f]">
-                  {item.name}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-[#9a8f80]">
-                  {[displayVariant(item.variant), `${item.quantity} barang`]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </p>
-              </div>
-              <span className="text-xs font-bold whitespace-nowrap text-[#2f4f3f]">
-                {formatIDR(item.price * item.quantity)}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : null}
 
         <div className="space-y-2.5 rounded-xl bg-[#faf7f2] p-3.5 text-xs text-[#6f6a62] ring-1 ring-[#efe8dd]">
           <div className="flex justify-between gap-4">
