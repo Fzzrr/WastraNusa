@@ -42,7 +42,7 @@ export function ShopProductGrid({
           </div>
         </div>
       ) : (
-        <div className="mt-4 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {products.map((product) => (
             <CatalogProductCard key={product.id} product={product} />
           ))}

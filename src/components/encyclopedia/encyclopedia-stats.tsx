@@ -128,7 +128,7 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
           <Icon className="size-5" />
         </span>
         <div className="min-w-0">
-          <p className="flex items-baseline gap-1.5">
+          <p className="flex flex-wrap items-baseline gap-x-1.5">
             <span className="text-2xl leading-none font-extrabold tracking-tight text-white tabular-nums">
               {displayValue}
             </span>
@@ -136,9 +136,7 @@ export function StatCard({ stat, index }: { stat: Stat; index: number }) {
               {stat.label}
             </span>
           </p>
-          <p className="mt-1 truncate text-xs text-[#a9c2b3]">
-            {style.caption}
-          </p>
+          <p className="mt-1 text-xs text-[#a9c2b3]">{style.caption}</p>
         </div>
       </div>
 
