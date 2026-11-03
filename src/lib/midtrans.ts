@@ -11,15 +11,28 @@ const midtrans_snap = new midtransClient.Snap({
   clientKey: process.env.MIDTRANS_CLIENT_KEY ?? '',
 });
 
-function createParameter(
+// @types/midtrans-client only declares transaction_details.
+// @see https://docs.midtrans.com/reference/json-object
+type SnapParameters = SnapTransactionParameters & {
+  callbacks?: { finish: string };
+};
+
+export function createParameter(
   order_id: string,
   gross_amount: number,
-): SnapTransactionParameters {
+): SnapParameters {
+  const baseUrl = process.env.BETTER_AUTH_URL?.replace(/\/+$/, '');
+
   return {
     transaction_details: {
       order_id,
       gross_amount,
     },
+    ...(baseUrl && {
+      callbacks: {
+        finish: `${baseUrl}/profile/my-order/${encodeURIComponent(order_id)}`,
+      },
+    }),
   };
 }
 

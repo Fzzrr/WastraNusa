@@ -1,4 +1,4 @@
-import { verifySignatureKey } from '@/lib/midtrans';
+import { createParameter, verifySignatureKey } from '@/lib/midtrans';
 import { createHash } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
@@ -78,5 +78,35 @@ describe('verifySignatureKey', { tags: ['backend'] }, () => {
     await expect(
       verifySignatureKey(orderId, statusCode, grossAmount, signature),
     ).resolves.toBe(false);
+  });
+});
+
+describe('createParameter', { tags: ['backend'] }, () => {
+  const originalBaseUrl = process.env.BETTER_AUTH_URL;
+
+  afterAll(() => {
+    process.env.BETTER_AUTH_URL = originalBaseUrl;
+  });
+
+  it('redirects to the order detail page after payment', () => {
+    process.env.BETTER_AUTH_URL = 'https://wastranusa.test/';
+
+    const parameter = createParameter('order-123', 263000);
+
+    expect(parameter.transaction_details).toEqual({
+      order_id: 'order-123',
+      gross_amount: 263000,
+    });
+    expect(parameter.callbacks).toEqual({
+      finish: 'https://wastranusa.test/profile/my-order/order-123',
+    });
+  });
+
+  it('omits callbacks when BETTER_AUTH_URL is not set', () => {
+    delete process.env.BETTER_AUTH_URL;
+
+    const parameter = createParameter('order-123', 263000);
+
+    expect(parameter.callbacks).toBeUndefined();
   });
 });
