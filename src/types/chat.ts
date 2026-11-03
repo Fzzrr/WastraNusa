@@ -4,11 +4,21 @@ export interface ChatParticipant {
   image: string | null;
 }
 
+/** Product a buyer attached to a live-chat message. */
+export interface ChatAttachedProduct {
+  id: string;
+  slug: string;
+  name: string;
+  imageURL: string | null;
+  price: number;
+}
+
 export interface ConversationMessage {
   id: string;
   conversationId: string;
   senderId: string;
   content: string;
+  product: ChatAttachedProduct | null;
   readAt: string | null;
   createdAt: string;
 }

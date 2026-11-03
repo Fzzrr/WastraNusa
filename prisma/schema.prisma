@@ -237,6 +237,7 @@ model Product {
   variants  ProductVariant[]
   orders    Order[]
   cartItems CartItem[]
+  messages  Message[]
 
   @@index([island])
   @@index([province])
@@ -536,6 +537,10 @@ model Message {
   sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   content String @db.VarChar(2000)
+
+  // Product the buyer attached so the seller knows what is being asked about.
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   readAt DateTime?
 

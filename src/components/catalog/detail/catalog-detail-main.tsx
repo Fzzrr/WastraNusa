@@ -1,8 +1,10 @@
 'use client';
 
+import { openSellerChat } from '@/components/chat/chat-floating-widget';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail } from '@/hooks/use-article';
 import { useAddToCart, useCart, useUpdateCartItem } from '@/hooks/use-cart';
+import { useStartConversation } from '@/hooks/use-conversations';
 import { useProductCatalogDetail } from '@/hooks/use-product-catalog';
 import { authClient } from '@/lib/auth/auth-client';
 import { setCheckoutSession } from '@/lib/checkout-session';
@@ -103,6 +105,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   const { data: cart } = useCart({ enabled: Boolean(session) });
   const addToCartMutation = useAddToCart();
   const updateCartItemMutation = useUpdateCartItem();
+  const startConversation = useStartConversation();
   const router = useRouter();
   const [selectedVariantName, setSelectedVariantName] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -294,6 +297,29 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     }
   };
 
+  const seller = product.seller;
+  const handleAskSeller = async () => {
+    if (!seller || !ensureAuthenticated()) {
+      return;
+    }
+
+    try {
+      const conversation = await startConversation.mutateAsync(seller.id);
+      openSellerChat({
+        conversationId: conversation.id,
+        product: {
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          imageURL: activeImageURL ?? null,
+          price: selectedVariantPrice,
+        },
+      });
+    } catch {
+      toast.error('Gagal memulai percakapan. Silakan coba lagi.');
+    }
+  };
+
   return (
     <main className="border-t border-[#ddd4c5]">
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-6 md:px-6 lg:px-8">
@@ -326,6 +352,12 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
             isCartActionPending={isCartActionPending}
+            onAskSeller={
+              seller && seller.id !== session?.user.id
+                ? handleAskSeller
+                : undefined
+            }
+            isAskSellerPending={startConversation.isPending}
           />
         </div>
       </section>

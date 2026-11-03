@@ -1,6 +1,7 @@
 'use client';
 
 import { formatTime } from '@/components/chat/chat-format';
+import { ChatProductCard } from '@/components/chat/chat-product-card';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/types/chat';
 import { Check, CheckCheck } from 'lucide-react';
@@ -38,6 +39,9 @@ export function ChatMessageBubble({
           isLastInGroup && (isOwn ? 'rounded-br-md' : 'rounded-bl-md'),
         )}
       >
+        {message.product ? (
+          <ChatProductCard product={message.product} className="-mx-1 mt-0.5" />
+        ) : null}
         <p className="break-words whitespace-pre-wrap">{message.content}</p>
         <div
           className={cn(

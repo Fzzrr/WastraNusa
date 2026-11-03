@@ -1,6 +1,7 @@
 import eventBus, { SSE_EVENTS, getUserEvent } from '@/lib/chat/event-bus';
 import { conversationRepository } from '@/repositories/conversation.repository';
 import { messageRepository } from '@/repositories/message.repository';
+import { productRepository } from '@/repositories/product.repository';
 import { conversationService } from '@/services/conversation.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -24,6 +25,10 @@ vi.mock('@/repositories/message.repository', () => ({
   },
 }));
 
+vi.mock('@/repositories/product.repository', () => ({
+  productRepository: { findByIdOrSlug: vi.fn() },
+}));
+
 vi.mock('@/lib/chat/event-bus', () => ({
   default: { emit: vi.fn() },
   SSE_EVENTS: {
@@ -36,6 +41,7 @@ vi.mock('@/lib/chat/event-bus', () => ({
 
 const mockConversationRepo = vi.mocked(conversationRepository);
 const mockMessageRepo = vi.mocked(messageRepository);
+const mockProductRepo = vi.mocked(productRepository);
 const mockEmit = vi.mocked(eventBus.emit);
 
 const USER_A = 'user-a';
@@ -150,6 +156,61 @@ describe('conversationService', { tags: ['backend'] }, () => {
         getUserEvent(SSE_EVENTS.CONVERSATION_UPDATED, USER_B),
         { conversationId: CONVERSATION_ID },
       );
+    });
+
+    it('attaches the resolved product and maps its price to a number', async () => {
+      mockConversationRepo.findByIdForUser.mockResolvedValue(
+        conversationRow as never,
+      );
+      mockProductRepo.findByIdOrSlug.mockResolvedValue({
+        id: 'prod-1',
+      } as never);
+      mockMessageRepo.create.mockResolvedValue({
+        id: 'msg-2',
+        conversationId: CONVERSATION_ID,
+        senderId: USER_A,
+        content: 'Ready stock?',
+        product: {
+          id: 'prod-1',
+          slug: 'batik-parang',
+          name: 'Batik Parang',
+          imageURL: null,
+          price: { toString: () => '150000' },
+        },
+        readAt: null,
+        createdAt: new Date('2026-01-02T00:00:00.000Z'),
+      } as never);
+      mockConversationRepo.touchLastMessageAt.mockResolvedValue({} as never);
+
+      const message = await conversationService.sendMessage(
+        USER_A,
+        CONVERSATION_ID,
+        'Ready stock?',
+        'batik-parang',
+      );
+
+      expect(mockMessageRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ productId: 'prod-1' }),
+      );
+      expect(message.product).toEqual({
+        id: 'prod-1',
+        slug: 'batik-parang',
+        name: 'Batik Parang',
+        imageURL: null,
+        price: 150000,
+      });
+    });
+
+    it('404s when the attached product does not exist', async () => {
+      mockConversationRepo.findByIdForUser.mockResolvedValue(
+        conversationRow as never,
+      );
+      mockProductRepo.findByIdOrSlug.mockResolvedValue(null as never);
+
+      await expect(
+        conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', 'nope'),
+      ).rejects.toMatchObject({ status: 404 });
+      expect(mockMessageRepo.create).not.toHaveBeenCalled();
     });
   });
 

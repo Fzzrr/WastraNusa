@@ -2,6 +2,7 @@ import eventBus, { SSE_EVENTS, getUserEvent } from '@/lib/chat/event-bus';
 import { ApiError } from '@/lib/error';
 import { conversationRepository } from '@/repositories/conversation.repository';
 import { messageRepository } from '@/repositories/message.repository';
+import { productRepository } from '@/repositories/product.repository';
 import {
   type ChatParticipant,
   type ConversationDetail,
@@ -14,6 +15,13 @@ type MessageRow = {
   conversationId: string;
   senderId: string;
   content: string;
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    imageURL: string | null;
+    price: { toString(): string };
+  } | null;
   readAt: Date | null;
   createdAt: Date;
 };
@@ -40,6 +48,9 @@ const mapMessage = (message: MessageRow): ConversationMessage => ({
   conversationId: message.conversationId,
   senderId: message.senderId,
   content: message.content,
+  product: message.product
+    ? { ...message.product, price: Number(message.product.price) }
+    : null,
   readAt: message.readAt ? message.readAt.toISOString() : null,
   createdAt: message.createdAt.toISOString(),
 });
@@ -114,7 +125,9 @@ export const conversationService = {
     );
 
     return conversations.map((conversation) => {
-      const latest = conversation.messages[0] as MessageRow | undefined;
+      const latest = conversation.messages[0] as
+        | Pick<MessageRow, 'content' | 'createdAt' | 'senderId'>
+        | undefined;
       return {
         id: conversation.id,
         otherParticipant: pickOtherParticipant(conversation, userId),
@@ -193,6 +206,7 @@ export const conversationService = {
     userId: string,
     conversationId: string,
     content: string,
+    productId?: string,
   ): Promise<ConversationMessage> => {
     const conversation = await conversationRepository.findByIdForUser(
       conversationId,
@@ -202,10 +216,18 @@ export const conversationService = {
       throw new ApiError('Percakapan tidak ditemukan', 404);
     }
 
+    const product = productId
+      ? await productRepository.findByIdOrSlug(productId)
+      : null;
+    if (productId && !product) {
+      throw new ApiError('Produk tidak ditemukan', 404);
+    }
+
     const created = await messageRepository.create({
       conversationId,
       senderId: userId,
       content,
+      productId: product?.id,
     });
 
     await conversationRepository.touchLastMessageAt(

@@ -7,35 +7,30 @@ import { useConversations } from '@/hooks/use-conversations';
 import { authClient } from '@/lib/auth/auth-client';
 import { isSeller } from '@/lib/auth/roles';
 import { cn } from '@/lib/utils';
-import type { ConversationSummary } from '@/types/chat';
+import type { ChatAttachedProduct, ConversationSummary } from '@/types/chat';
 import { Maximize2, MessageCircle, MessagesSquare, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
-/** Pages with their own chat UI, panels, or no signed-in user. */
-const HIDDEN_PATH_PREFIXES = [
-  '/chat',
-  '/admin',
-  '/seller',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-];
-
 /** Unread badge refresh while the panel is closed (only when tab visible). */
 const UNREAD_POLL_MS = 30_000;
 
-function isHiddenPath(pathname: string) {
-  return HIDDEN_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+const OPEN_EVENT = 'wastra:open-seller-chat';
+
+type OpenSellerChatDetail = {
+  conversationId: string;
+  product?: ChatAttachedProduct;
+};
+
+/** Open the floating panel on a conversation, optionally with a product attached. */
+export function openSellerChat(detail: OpenSellerChatDetail) {
+  window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail }));
 }
 
 /**
- * Floating live-chat launcher shown on public pages for signed-in users:
- * a bubble with an unread badge that opens a compact chat panel.
+ * Floating seller live-chat launcher, shown on catalog pages for signed-in
+ * users: a bubble with an unread badge that opens a compact chat panel.
  */
 const subscribeNoop = () => () => {};
 
@@ -51,10 +46,8 @@ export function ChatFloatingWidget() {
     () => false,
   );
 
-  if (!isClient || !user || isHiddenPath(pathname)) return null;
+  if (!isClient || !user || !/^\/catalog(\/|$)/.test(pathname)) return null;
 
-  // Article pages already have the AI assistant bubble in this corner.
-  const raised = /^\/encyclopedia\/[^/]+/.test(pathname);
   // Product pages pin the buy buttons to the bottom on phones.
   const raisedOnMobile = /^\/catalog\/[^/]+/.test(pathname);
 
@@ -62,7 +55,6 @@ export function ChatFloatingWidget() {
     <FloatingChat
       currentUserId={user.id}
       variant={isSeller(user.role) ? 'seller' : 'buyer'}
-      raised={raised}
       raisedOnMobile={raisedOnMobile}
     />
   );
@@ -71,19 +63,32 @@ export function ChatFloatingWidget() {
 function FloatingChat({
   currentUserId,
   variant,
-  raised,
   raisedOnMobile,
 }: {
   currentUserId: string;
   variant: 'seller' | 'buyer';
-  raised: boolean;
   raisedOnMobile: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [attachedProduct, setAttachedProduct] =
+    useState<ChatAttachedProduct | null>(null);
   const { data: conversations, isLoading } = useConversations({
     refetchInterval: isOpen ? false : UNREAD_POLL_MS,
   });
+
+  useEffect(() => {
+    const handleOpen = (event: Event) => {
+      const { conversationId, product } = (
+        event as CustomEvent<OpenSellerChatDetail>
+      ).detail;
+      setSelectedId(conversationId);
+      setAttachedProduct(product ?? null);
+      setIsOpen(true);
+    };
+    window.addEventListener(OPEN_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_EVENT, handleOpen);
+  }, []);
 
   const totalUnread = (conversations ?? []).reduce(
     (sum, c) => sum + c.unreadCount,
@@ -108,7 +113,12 @@ function FloatingChat({
         variant={variant}
         totalUnread={totalUnread}
         selectedId={selectedId}
-        onSelect={setSelectedId}
+        onSelect={(id) => {
+          setSelectedId(id);
+          setAttachedProduct(null);
+        }}
+        attachedProduct={attachedProduct}
+        onClearAttachment={() => setAttachedProduct(null)}
         onClose={() => setIsOpen(false)}
       />
     );
@@ -117,12 +127,8 @@ function FloatingChat({
   return (
     <div
       className={cn(
-        'fixed right-4 z-40 transition-[bottom] duration-300 sm:right-6',
-        raised
-          ? 'bottom-24'
-          : raisedOnMobile
-            ? 'bottom-24 sm:bottom-6'
-            : 'bottom-4 sm:bottom-6',
+        'fixed right-4 z-40 sm:right-6 sm:bottom-6',
+        raisedOnMobile ? 'bottom-24' : 'bottom-4',
       )}
     >
       <button
@@ -171,6 +177,8 @@ function ChatPanel({
   totalUnread,
   selectedId,
   onSelect,
+  attachedProduct,
+  onClearAttachment,
   onClose,
 }: {
   conversations: ConversationSummary[];
@@ -180,6 +188,8 @@ function ChatPanel({
   totalUnread: number;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  attachedProduct: ChatAttachedProduct | null;
+  onClearAttachment: () => void;
   onClose: () => void;
 }) {
   // Live updates only while the panel is open, not on every page view.
@@ -242,6 +252,8 @@ function ChatPanel({
             variant={variant}
             compact
             onBack={() => onSelect(null)}
+            attachedProduct={attachedProduct}
+            onClearAttachment={onClearAttachment}
           />
         ) : (
           <ChatConversationList

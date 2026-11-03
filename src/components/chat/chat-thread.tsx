@@ -12,7 +12,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useConversation } from '@/hooks/use-conversations';
 import { cn } from '@/lib/utils';
-import type { ChatParticipant, ConversationMessage } from '@/types/chat';
+import type {
+  ChatAttachedProduct,
+  ChatParticipant,
+  ConversationMessage,
+} from '@/types/chat';
 import { ArrowDown, ArrowLeft, MessageCircle, Store } from 'lucide-react';
 import Link from 'next/link';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -143,6 +147,8 @@ export function ChatThread({
   variant = 'buyer',
   compact = false,
   onBack,
+  attachedProduct,
+  onClearAttachment,
 }: {
   conversationId: string;
   currentUserId: string;
@@ -150,6 +156,8 @@ export function ChatThread({
   /** Narrow layout for the floating widget: back button always visible. */
   compact?: boolean;
   onBack?: () => void;
+  attachedProduct?: ChatAttachedProduct | null;
+  onClearAttachment?: () => void;
 }) {
   const { data, isLoading, isError, error } = useConversation(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -295,6 +303,8 @@ export function ChatThread({
       <ChatComposer
         conversationId={conversationId}
         showHint={!compact}
+        attachedProduct={attachedProduct}
+        onClearAttachment={onClearAttachment}
         suggestions={
           variant === 'buyer' && isEmpty ? BUYER_SUGGESTIONS : undefined
         }

@@ -1,5 +1,9 @@
 import prisma from '@/lib/prisma';
 
+const productSelect = {
+  select: { id: true, slug: true, name: true, imageURL: true, price: true },
+} as const;
+
 /**
  * Data access for chat messages. All DB access for the message entity lives
  * here; the service layer never touches Prisma directly.
@@ -9,10 +13,12 @@ export const messageRepository = {
     conversationId,
     senderId,
     content,
+    productId,
   }: {
     conversationId: string;
     senderId: string;
     content: string;
+    productId?: string;
   }) => {
     return prisma.message.create({
       data: {
@@ -20,7 +26,9 @@ export const messageRepository = {
         conversationId,
         senderId,
         content,
+        productId,
       },
+      include: { product: productSelect },
     });
   },
 
@@ -30,6 +38,7 @@ export const messageRepository = {
       where: { conversationId },
       orderBy: { createdAt: 'asc' },
       take: 100,
+      include: { product: productSelect },
     });
   },
 

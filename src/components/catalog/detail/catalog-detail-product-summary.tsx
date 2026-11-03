@@ -6,6 +6,7 @@ import type { ProductInventoryItem } from '@/types/product';
 import {
   Check,
   MapPin,
+  MessageCircle,
   Minus,
   Plus,
   ShoppingCart,
@@ -28,6 +29,9 @@ type CatalogDetailProductSummaryProps = {
   onAddToCart: () => void;
   onBuyNow: () => void;
   isCartActionPending?: boolean;
+  /** Omitted when there is no seller to ask (or the viewer is the seller). */
+  onAskSeller?: () => void;
+  isAskSellerPending?: boolean;
 };
 
 export function CatalogDetailProductSummary({
@@ -43,6 +47,8 @@ export function CatalogDetailProductSummary({
   onAddToCart,
   onBuyNow,
   isCartActionPending = false,
+  onAskSeller,
+  isAskSellerPending = false,
 }: CatalogDetailProductSummaryProps) {
   const isOutOfStock = product.stock <= 0 || product.status === 'out_of_stock';
   const hasVariantOptions = variantOptions.length > 0;
@@ -74,16 +80,29 @@ export function CatalogDetailProductSummary({
       </h1>
 
       {product.seller ? (
-        <Link
-          href={`/shop/${product.seller.id}`}
-          className="group mt-2 inline-flex items-center gap-2 rounded-full border border-[#e3d9c7] bg-[#f5f0e7] px-3 py-1.5 text-sm font-semibold text-[#2f5f49] transition-colors hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none"
-        >
-          <Store className="size-4 text-[#a07a2c]" />
-          <span>{product.seller.shopName ?? product.seller.name}</span>
-          <span className="text-xs font-medium text-[#646f66] group-hover:text-[#2f5f49]">
-            · Kunjungi toko
-          </span>
-        </Link>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Link
+            href={`/shop/${product.seller.id}`}
+            className="group inline-flex items-center gap-2 rounded-full border border-[#e3d9c7] bg-[#f5f0e7] px-3 py-1.5 text-sm font-semibold text-[#2f5f49] transition-colors hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none"
+          >
+            <Store className="size-4 text-[#a07a2c]" />
+            <span>{product.seller.shopName ?? product.seller.name}</span>
+            <span className="text-xs font-medium text-[#646f66] group-hover:text-[#2f5f49]">
+              · Kunjungi toko
+            </span>
+          </Link>
+          {onAskSeller ? (
+            <button
+              type="button"
+              onClick={onAskSeller}
+              disabled={isAskSellerPending}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#2f5f49] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#27503e] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none disabled:opacity-60"
+            >
+              <MessageCircle className="size-4" />
+              {isAskSellerPending ? 'Membuka chat...' : 'Tanya Penjual'}
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       <Card className="relative mt-4 gap-1 overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-[#e3ece5] via-[#f1ebdf] to-[#f5ead3] px-5 py-4 ring-1 ring-[#d9d0c2]">

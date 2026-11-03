@@ -1,9 +1,11 @@
 'use client';
 
+import { ChatProductCard } from '@/components/chat/chat-product-card';
 import { Button } from '@/components/ui/button';
 import { useSendMessage } from '@/hooks/use-conversations';
 import { cn } from '@/lib/utils';
-import { Send } from 'lucide-react';
+import type { ChatAttachedProduct } from '@/types/chat';
+import { Send, X } from 'lucide-react';
 import { type KeyboardEvent, useLayoutEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -15,8 +17,13 @@ export function ChatComposer({
   conversationId,
   suggestions,
   showHint = true,
+  attachedProduct,
+  onClearAttachment,
 }: {
   conversationId: string;
+  /** Product sent along with the next message, shown above the input. */
+  attachedProduct?: ChatAttachedProduct | null;
+  onClearAttachment?: () => void;
   /** Quick-reply chips shown while the input is empty. */
   suggestions?: string[];
   /** Keyboard shortcut hint under the input (hidden in tight layouts). */
@@ -39,8 +46,9 @@ export function ChatComposer({
     if (!trimmed || isPending) return;
 
     try {
-      await mutateAsync(trimmed);
+      await mutateAsync({ content: trimmed, productId: attachedProduct?.id });
       setContent('');
+      onClearAttachment?.();
       textareaRef.current?.focus();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Gagal mengirim pesan');
@@ -69,6 +77,21 @@ export function ChatComposer({
 
   return (
     <div className="border-t border-[#efe8dd] bg-[#fffdf8] px-3 pt-3 pb-3 sm:px-4">
+      {attachedProduct ? (
+        <div className="mb-2.5 flex items-center gap-2">
+          <ChatProductCard product={attachedProduct} className="flex-1" />
+          <button
+            type="button"
+            onClick={onClearAttachment}
+            aria-label="Hapus produk yang disisipkan"
+            title="Hapus produk"
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#8a7f70] transition-colors hover:bg-[#f1ebdf] hover:text-[#b04a3a]"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      ) : null}
+
       {showSuggestions ? (
         <div className="mb-2.5 flex gap-2 overflow-x-auto pb-0.5 scrollbar-none">
           {suggestions!.map((text) => (
