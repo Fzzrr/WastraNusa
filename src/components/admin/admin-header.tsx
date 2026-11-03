@@ -45,7 +45,7 @@ export function AdminHeader({
             aria-label="Buka sidebar"
             variant="outline"
             size="icon-sm"
-            className="mt-0.5 border-[#d7cab7] bg-white/80 text-[#5e554a] shadow-none md:hidden"
+            className="size-10 border-[#d7cab7] bg-white/80 text-[#5e554a] shadow-none md:hidden"
             onClick={() => setOpen(true)}
           >
             <Menu className="size-4" />
