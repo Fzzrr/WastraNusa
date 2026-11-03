@@ -18,6 +18,8 @@ export interface IslandFilter {
 export interface EncyclopediaArticleFilters {
   island?: string;
   topic?: string;
+  /** Free-text search, matched in the database. */
+  q?: string;
 }
 
 export interface EncyclopediaArticle {

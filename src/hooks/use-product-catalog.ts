@@ -71,6 +71,10 @@ export function fetchProductCatalog(
     searchParams.set('island', filters.island);
   }
 
+  if (filters.q) {
+    searchParams.set('q', filters.q);
+  }
+
   if (filters.size) {
     searchParams.set('size', filters.size);
   }
@@ -110,11 +114,13 @@ export function useProductCatalog(
   page: number = 1,
   limit: number = DEFAULT_CATALOG_LIMIT,
   filters: ProductCatalogFilters = {},
+  { enabled = true }: { enabled?: boolean } = {},
 ) {
   return useQuery({
     queryKey: productCatalogKeys.list(page, limit, filters),
     queryFn: () => fetchProductCatalog(page, limit, filters),
     placeholderData: (previousData) => previousData,
+    enabled,
   });
 }
 

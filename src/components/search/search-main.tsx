@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useArticles } from '@/hooks/use-article';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import {
-  ARTICLE_SEARCH_LIMIT,
-  PRODUCT_SEARCH_LIMIT,
+  SEARCH_RESULT_LIMIT,
   normalizeQuery,
   searchArticles,
   searchProducts,
@@ -24,13 +23,19 @@ export function SearchMain({ query }: SearchMainProps) {
   const router = useRouter();
   const normalizedQuery = normalizeQuery(query);
 
-  const { data: productData, isPending: productsPending } = useProductCatalog(
+  const serverQuery = query.trim();
+  const shouldSearch = serverQuery.length > 0;
+  const { data: productData, isLoading: productsPending } = useProductCatalog(
     1,
-    PRODUCT_SEARCH_LIMIT,
+    SEARCH_RESULT_LIMIT,
+    { q: serverQuery },
+    { enabled: shouldSearch },
   );
-  const { data: articleData, isPending: articlesPending } = useArticles(
+  const { data: articleData, isLoading: articlesPending } = useArticles(
     1,
-    ARTICLE_SEARCH_LIMIT,
+    SEARCH_RESULT_LIMIT,
+    { q: serverQuery },
+    { enabled: shouldSearch },
   );
 
   const products = useMemo(

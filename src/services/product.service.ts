@@ -154,6 +154,7 @@ const normalizeFilters = (
     island: filters.island?.trim() || undefined,
     size: filters.size?.trim() || undefined,
     clothingType: filters.clothingType?.trim() || undefined,
+    q: filters.q?.trim() || undefined,
     gender: filters.gender,
     status: filters.status,
     inStock: typeof filters.inStock === 'boolean' ? filters.inStock : undefined,

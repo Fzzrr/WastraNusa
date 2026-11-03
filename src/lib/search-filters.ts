@@ -1,8 +1,12 @@
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import type { ProductInventoryItem } from '@/types/product';
 
-export const PRODUCT_SEARCH_LIMIT = 100;
-export const ARTICLE_SEARCH_LIMIT = 500;
+/**
+ * Matching happens in the database (`?q=`); these helpers only rank the
+ * returned page. 50 is the API's page cap, and sharing one limit lets the
+ * navbar suggestions and the /search page reuse the same cached query.
+ */
+export const SEARCH_RESULT_LIMIT = 50;
 
 export function normalizeQuery(query: string): string {
   return query.trim().toLowerCase();

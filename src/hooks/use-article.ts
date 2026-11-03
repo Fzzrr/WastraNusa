@@ -16,16 +16,29 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 const DEFAULT_ARTICLE_LIMIT = 50;
 const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 
+/**
+ * Every homepage section reads the same newest-first page so React Query
+ * serves them from one request; each section slices what it shows.
+ */
+export const LANDING_ARTICLE_LIMIT = 50;
+
 export const articleKeys = {
   all: ['articles'] as const,
   lists: () => [...articleKeys.all, 'list'] as const,
-  list: (page: number, limit: number, island?: string, topic?: string) =>
+  list: (
+    page: number,
+    limit: number,
+    island?: string,
+    topic?: string,
+    q?: string,
+  ) =>
     [
       ...articleKeys.lists(),
       page,
       limit,
       island ?? 'all',
       topic ?? 'all',
+      q ?? '',
     ] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
@@ -136,6 +149,10 @@ export function fetchArticles(
     searchParams.set('topic', filters.topic);
   }
 
+  if (filters.q) {
+    searchParams.set('q', filters.q);
+  }
+
   return fetchArticleApi<EncyclopediaArticleListResponse>(
     `/api/articles?${searchParams.toString()}`,
   );
@@ -176,11 +193,19 @@ export function useArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
   filters: EncyclopediaArticleFilters = {},
+  { enabled = true }: { enabled?: boolean } = {},
 ) {
   return useQuery({
-    queryKey: articleKeys.list(page, limit, filters.island, filters.topic),
+    queryKey: articleKeys.list(
+      page,
+      limit,
+      filters.island,
+      filters.topic,
+      filters.q,
+    ),
     queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,
+    enabled,
   });
 }
 

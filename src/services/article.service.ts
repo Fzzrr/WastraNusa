@@ -28,6 +28,7 @@ export const articleService = {
     const offset = (Math.max(1, page) - 1) * safeLimit;
     const island = filters.island || undefined;
     const topic = filters.topic || undefined;
+    const q = filters.q?.trim() || undefined;
 
     const [
       articles,
@@ -44,8 +45,9 @@ export const articleService = {
         limit: safeLimit,
         island,
         topic,
+        q,
       }),
-      articleRepository.countAll({ island, topic }),
+      articleRepository.countAll({ island, topic, q }),
       articleRepository.countAll({ status: 'published' }),
       articleRepository.countAll({ topic, status: 'published' }),
       articleRepository.countByIsland({ topic }),

@@ -10,6 +10,38 @@ const getUniqueWhere = (idOrSlug: string) => {
   return isUuid ? { id: idOrSlug } : { slug: idOrSlug };
 };
 
+/** Same fields the client-side search used to scan, matched in Postgres. */
+const buildListWhere = ({
+  island,
+  topic,
+  status,
+  q,
+}: {
+  island?: string;
+  topic?: string;
+  status?: ArticleStatus;
+  q?: string;
+}): Prisma.ArticleWhereInput => {
+  const contains = q ? { contains: q, mode: 'insensitive' as const } : null;
+  return {
+    ...(island ? { island } : {}),
+    ...(topic ? { topic } : {}),
+    ...(status ? { status } : {}),
+    ...(contains
+      ? {
+          OR: [
+            { title: contains },
+            { motifLabel: contains },
+            { topic: contains },
+            { region: contains },
+            { island: contains },
+            { province: contains },
+          ],
+        }
+      : {}),
+  };
+};
+
 export const articleRepository = {
   findChatArticle: async (idOrSlug: string) => {
     return prisma.article.findUnique({
@@ -40,19 +72,16 @@ export const articleRepository = {
     limit,
     island,
     topic,
+    q,
   }: {
     offset?: number;
     limit?: number;
     island?: string;
     topic?: string;
+    q?: string;
   } = {}) => {
-    const where: Prisma.ArticleWhereInput = {
-      ...(island ? { island } : {}),
-      ...(topic ? { topic } : {}),
-    };
-
     return prisma.article.findMany({
-      where,
+      where: buildListWhere({ island, topic, q }),
       skip: offset,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -69,14 +98,16 @@ export const articleRepository = {
     island,
     topic,
     status,
-  }: { island?: string; topic?: string; status?: ArticleStatus } = {}) => {
-    const where: Prisma.ArticleWhereInput = {
-      ...(island ? { island } : {}),
-      ...(topic ? { topic } : {}),
-      ...(status ? { status } : {}),
-    };
-
-    return prisma.article.count({ where });
+    q,
+  }: {
+    island?: string;
+    topic?: string;
+    status?: ArticleStatus;
+    q?: string;
+  } = {}) => {
+    return prisma.article.count({
+      where: buildListWhere({ island, topic, status, q }),
+    });
   },
 
   countByIsland: async ({ topic }: { topic?: string } = {}) => {

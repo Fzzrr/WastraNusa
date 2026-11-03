@@ -61,6 +61,8 @@ export interface ProductCatalogFilters {
   excludeOutOfStock?: boolean;
   sortBy?: ProductCatalogSortBy;
   topic?: string;
+  /** Free-text search, matched in the database. */
+  q?: string;
 }
 
 export interface ProductFilterOption {

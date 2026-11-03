@@ -34,9 +34,24 @@ function buildProductWhereInput(
     inStock,
     excludeOutOfStock,
     topic,
+    q,
   } = filters;
 
   const andConditions: Prisma.ProductWhereInput[] = [];
+
+  if (q) {
+    const contains = { contains: q, mode: 'insensitive' as const };
+    andConditions.push({
+      OR: [
+        { name: contains },
+        { description: contains },
+        { clothingType: contains },
+        { island: contains },
+        { province: contains },
+        { article: { title: contains } },
+      ],
+    });
+  }
 
   if (size) {
     andConditions.push({

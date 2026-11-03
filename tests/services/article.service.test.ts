@@ -97,6 +97,25 @@ describe('articleService', { tags: ['backend'] }, () => {
       });
     });
 
+    it('should search in the database with the trimmed query', async () => {
+      mockRepo.findAll.mockResolvedValue([]);
+      mockRepo.countAll.mockResolvedValue(0);
+      mockRepo.countByIsland.mockResolvedValue([]);
+      mockRepo.countByTopic.mockResolvedValue([]);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
+
+      await articleService.getArticles(1, 10, { q: '  batik ' });
+
+      expect(mockRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({ q: 'batik' }),
+      );
+      // totalItems must count the same filtered set the page came from
+      expect(mockRepo.countAll).toHaveBeenCalledWith(
+        expect.objectContaining({ q: 'batik' }),
+      );
+    });
+
     it('should default to page 1 and limit 10', async () => {
       mockRepo.findAll.mockResolvedValue([]);
       mockRepo.countAll

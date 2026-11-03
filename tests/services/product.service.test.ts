@@ -99,6 +99,19 @@ describe('productService', { tags: ['backend'] }, () => {
       expect(result.meta.hasNextPage).toBe(false);
     });
 
+    it('should pass the trimmed search query to the repository', async () => {
+      mockProductRepo.findAll.mockResolvedValue([]);
+      mockProductRepo.countAll.mockResolvedValue(0);
+
+      await productService.getProducts(1, 10, { q: '  songket ' });
+
+      expect(mockProductRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({ q: 'songket' }),
+        }),
+      );
+    });
+
     it('should clamp limit to max 50', async () => {
       mockProductRepo.findAll.mockResolvedValue([]);
       mockProductRepo.countAll.mockResolvedValue(0);

@@ -19,7 +19,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { WastraHeroPanel } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
-import { searchArticles as filterArticlesByQuery } from '@/lib/search-filters';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import {
+  SEARCH_RESULT_LIMIT,
+  searchArticles as filterArticlesByQuery,
+} from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
 import { Home, Library, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -143,8 +147,14 @@ export function EncyclopediaMain({
     },
   );
 
-  // Fetch all articles for search (large limit)
-  const { data: searchData } = useArticles(1, 500);
+  // Search runs in the database and only while the user is searching.
+  const serverSearch = useDebouncedValue(searchTerm.trim());
+  const { data: searchData } = useArticles(
+    1,
+    SEARCH_RESULT_LIMIT,
+    { q: serverSearch },
+    { enabled: serverSearch.length > 0 },
+  );
 
   const articles = data?.items ?? [];
   const searchArticles = searchData?.items ?? [];

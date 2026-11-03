@@ -2,10 +2,10 @@
 
 import { Input } from '@/components/ui/input';
 import { useArticles } from '@/hooks/use-article';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import {
-  ARTICLE_SEARCH_LIMIT,
-  PRODUCT_SEARCH_LIMIT,
+  SEARCH_RESULT_LIMIT,
   normalizeQuery,
   searchArticles,
   searchProducts,
@@ -70,10 +70,26 @@ export function NavbarSearch({
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: productData } = useProductCatalog(1, PRODUCT_SEARCH_LIMIT);
-  const { data: articleData } = useArticles(1, ARTICLE_SEARCH_LIMIT);
-
   const normalizedQuery = normalizeQuery(query);
+  // Only hit the API once typing pauses, and never on pages where the user
+  // doesn't search at all (this component lives in the header of every page).
+  const serverQuery = useDebouncedValue(query.trim());
+  const shouldSearch = serverQuery.length > 0;
+
+  const { data: productData, isFetching: productsFetching } = useProductCatalog(
+    1,
+    SEARCH_RESULT_LIMIT,
+    { q: serverQuery },
+    { enabled: shouldSearch },
+  );
+  const { data: articleData, isFetching: articlesFetching } = useArticles(
+    1,
+    SEARCH_RESULT_LIMIT,
+    { q: serverQuery },
+    { enabled: shouldSearch },
+  );
+  const isSearching =
+    serverQuery !== query.trim() || productsFetching || articlesFetching;
 
   const products = useMemo(
     () =>
@@ -314,6 +330,10 @@ export function NavbarSearch({
                 <ArrowRight className="size-3.5 transition-transform group-hover/all:translate-x-0.5" />
               </button>
             </>
+          ) : isSearching ? (
+            <p className="px-4 py-7 text-center text-sm text-[#4d6356]">
+              Mencari…
+            </p>
           ) : (
             <div className="flex flex-col items-center gap-2 px-4 py-7 text-center">
               <span className="grid size-10 place-items-center rounded-full bg-[#f4efe5] text-[#b08a5e]">

@@ -33,6 +33,7 @@ export const GET = withApiPublic(async ({ req }) => {
   const size = url.searchParams.get('size') || undefined;
   const clothingType = url.searchParams.get('clothingType') || undefined;
   const topic = url.searchParams.get('topic') || undefined;
+  const q = url.searchParams.get('q') || undefined;
 
   const rawGender = url.searchParams.get('gender');
   const gender =
@@ -65,6 +66,7 @@ export const GET = withApiPublic(async ({ req }) => {
     size,
     clothingType,
     topic,
+    q,
     gender,
     status,
     inStock,

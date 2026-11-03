@@ -9,10 +9,12 @@ export const GET = withApiPublic(async ({ req }) => {
   const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
   const island = url.searchParams.get('island') || undefined;
   const topic = url.searchParams.get('topic') || undefined;
+  const q = url.searchParams.get('q') || undefined;
 
   const articles = await articleService.getArticles(page, limit, {
     island,
     topic,
+    q,
   });
   return jsend.success(articles);
 });
