@@ -74,6 +74,35 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     );
   });
 
+  it.each([
+    ['seller', undefined, '/seller/dashboard'],
+    ['admin', undefined, '/admin/dashboard'],
+    ['user', '/catalog/kebaya', '/catalog/kebaya'],
+  ])(
+    'sends a %s with redirect=%s to %s',
+    async (role, redirectTo, expected) => {
+      mockedSignIn.mockImplementation(async (_data, opts) => {
+        await opts?.onSuccess?.({} as never);
+        return { error: null } as never;
+      });
+      mockedGetSession.mockResolvedValue({
+        data: { user: { role } },
+      } as never);
+
+      render(<LoginForm redirectTo={redirectTo} />);
+
+      fireEvent.change(screen.getByLabelText('Email'), {
+        target: { value: 'user@test.com' },
+      });
+      fireEvent.change(screen.getByLabelText('Password'), {
+        target: { value: 'User@12345' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
+
+      await waitFor(() => expect(pushMock).toHaveBeenCalledWith(expected));
+    },
+  );
+
   it('shows an error message on wrong credentials', async () => {
     mockedSignIn.mockResolvedValue({
       error: { status: 401, message: 'Email atau password salah' },

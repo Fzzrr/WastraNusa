@@ -7,6 +7,7 @@ import { useAddToCart, useCart, useUpdateCartItem } from '@/hooks/use-cart';
 import { useStartConversation } from '@/hooks/use-conversations';
 import { useProductCatalogDetail } from '@/hooks/use-product-catalog';
 import { authClient } from '@/lib/auth/auth-client';
+import { loginUrlFor } from '@/lib/auth/redirect';
 import { setCheckoutSession } from '@/lib/checkout-session';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -195,7 +196,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   const ensureAuthenticated = () => {
     if (!session && !isSessionPending) {
       toast.error('Silakan login terlebih dahulu untuk melanjutkan.');
-      router.push('/login');
+      router.push(loginUrlFor(`/catalog/${slug}`));
       return false;
     }
 

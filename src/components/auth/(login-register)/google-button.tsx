@@ -4,17 +4,19 @@ import { authClient } from '@/lib/auth/auth-client';
 
 type GoogleButtonProps = {
   label?: string;
+  callbackURL?: string;
 };
 
 export function GoogleButton({
   label = 'Lanjutkan dengan Google',
+  callbackURL = '/encyclopedia',
 }: GoogleButtonProps) {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/encyclopedia',
+      callbackURL,
       errorCallbackURL: '/error',
-      newUserCallbackURL: '/encyclopedia',
+      newUserCallbackURL: callbackURL,
       disableRedirect: false,
     });
   };

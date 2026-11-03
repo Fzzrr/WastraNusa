@@ -1,3 +1,4 @@
+import { loginUrlFor } from '@/lib/auth/redirect';
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -19,7 +20,9 @@ export async function proxy(request: NextRequest) {
   );
 
   if (!sessionCookie && isProtectedRoute) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(
+      new URL(loginUrlFor(pathName + request.nextUrl.search), request.url),
+    );
   }
 
   if (sessionCookie && isAuthRoute) {

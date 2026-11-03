@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth/auth-client';
+import { isAdmin, isSeller } from '@/lib/auth/roles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -40,7 +41,13 @@ function getSignInErrorMessage(error: {
   return error.message || 'Email atau password salah';
 }
 
-export function LoginForm() {
+function getDefaultLandingPage(role?: string | null): string {
+  if (isAdmin(role)) return '/admin/dashboard';
+  if (isSeller(role)) return '/seller/dashboard';
+  return '/encyclopedia';
+}
+
+export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const {
@@ -66,11 +73,9 @@ export function LoginForm() {
         onSuccess: async () => {
           queryClient.clear();
           const session = await authClient.getSession();
-          if (session.data?.user.role === 'admin') {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/encyclopedia');
-          }
+          router.push(
+            redirectTo ?? getDefaultLandingPage(session.data?.user.role),
+          );
         },
       },
     );
@@ -158,7 +163,10 @@ export function LoginForm() {
 
       {/* Google — no divider, just directly below */}
       <div className="mt-3">
-        <GoogleButton label="Lanjutkan dengan Google" />
+        <GoogleButton
+          label="Lanjutkan dengan Google"
+          callbackURL={redirectTo}
+        />
       </div>
 
       {/* Register link */}
