@@ -152,7 +152,9 @@ export function HeroSection() {
                     className={`object-cover opacity-60 transition-transform duration-[6000ms] ease-out ${
                       activeSlide === slideIndex ? 'scale-110' : 'scale-100'
                     }`}
-                    priority={!slide.isSkeleton}
+                    // Next 16: `priority` is deprecated in favour of `preload`.
+                    preload={slideIndex === 0}
+                    loading="eager"
                     sizes="100vw"
                   />
                 ) : null}

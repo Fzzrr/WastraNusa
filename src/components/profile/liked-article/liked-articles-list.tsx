@@ -60,6 +60,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
                   src={article.imageUrl}
                   alt={article.title}
                   fill
+                  sizes="80px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[#b8613f] shadow-sm">

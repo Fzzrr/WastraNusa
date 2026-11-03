@@ -74,7 +74,7 @@ export function Header({ homeHref = '/' }: HeaderProps) {
               src="/logo.png"
               alt="WastraNusa"
               width={60}
-              height={70}
+              height={60}
               priority
               className="object-contain"
             />

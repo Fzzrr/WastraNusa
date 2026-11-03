@@ -77,7 +77,7 @@ export function Footer({ year = 2026 }: FooterProps) {
                 src="/logo.png"
                 alt="WastraNusa"
                 width={60}
-                height={70}
+                height={60}
                 className="object-contain"
               />
               <span className="text-3xl font-extrabold text-[#edf4e8]">

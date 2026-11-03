@@ -74,6 +74,9 @@ export function FeaturedCards() {
                       fill
                       className="object-cover transition duration-700 ease-out group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      // Above the fold and shares its src with the first hero slide;
+                      // a lazy entry here makes Next flag the hero LCP as lazy.
+                      loading="eager"
                     />
                   ) : null}
                 </div>

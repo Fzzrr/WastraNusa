@@ -258,6 +258,7 @@ export function MyOrderDetailMain({ orderId }: MyOrderDetailMainProps) {
                     src={product.imageURL}
                     alt={product.name}
                     fill
+                    sizes="72px"
                     className="object-cover"
                   />
                 ) : (

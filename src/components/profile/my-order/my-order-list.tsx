@@ -130,6 +130,7 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                       src={product.imageURL}
                       alt={product.name}
                       fill
+                      sizes="64px"
                       className="object-cover"
                     />
                   ) : (

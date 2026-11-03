@@ -133,6 +133,7 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
               src={product.imageURL}
               alt={product.name}
               fill
+              sizes="(min-width: 1280px) 340px, (min-width: 640px) 50vw, 100vw"
               className={cn(
                 'object-cover transition-transform duration-700 ease-out group-hover:scale-110',
                 isOutOfStock && 'grayscale-[60%]',

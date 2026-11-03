@@ -107,6 +107,7 @@ export function EncyclopediaFeaturedCard({
               src={article.imageURL}
               alt={article.title}
               fill
+              sizes="(min-width: 768px) 320px, 100vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
           ) : (
