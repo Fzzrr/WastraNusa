@@ -12,6 +12,7 @@ import {
   getCheckoutSession,
   subscribeToCheckoutSession,
 } from '@/lib/checkout-session';
+import { SERVICE_FEE } from '@/lib/shipping';
 import { cn } from '@/lib/utils';
 import type {
   CheckoutSessionData,
@@ -64,7 +65,7 @@ export function PaymentMain() {
       (acc, item) => acc + item.price * item.quantity,
       0,
     );
-    const serviceFee = items.length > 0 ? 5000 : 0;
+    const serviceFee = items.length > 0 ? SERVICE_FEE : 0;
     const shippingFee = shipping.price;
 
     return {
@@ -92,10 +93,7 @@ export function PaymentMain() {
           frontendPrice: item.price,
         })),
         shippingAddressId: address?.id,
-        shippingCost: shipping.price,
-        courier: shipping.courier,
-        courierService: shipping.service,
-        estimatedDelivery: shipping.description,
+        shippingOptionId: shipping.id,
       });
 
       window.location.href = result.redirect_url;

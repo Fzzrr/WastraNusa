@@ -200,6 +200,7 @@ describe('orderRepository', { tags: ['db'] }, () => {
           totalAmount: true,
           subtotal: true,
           shippingCost: true,
+          serviceFee: true,
           orderStatus: true,
           paymentStatus: true,
           paymentMethod: true,

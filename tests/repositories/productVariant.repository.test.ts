@@ -51,28 +51,6 @@ describe('productVariantRepository', { tags: ['db'] }, () => {
     });
   });
 
-  describe('decrementVariantStock', () => {
-    it('should decrement variant stock', async () => {
-      const before = await prisma.productVariant.findUnique({
-        where: { id: variantId },
-      });
-
-      await productVariantRepository.decrementVariantStock(variantId, 5);
-
-      const after = await prisma.productVariant.findUnique({
-        where: { id: variantId },
-      });
-
-      expect(after!.stock).toBe(before!.stock - 5);
-
-      // Restore stock for other tests
-      await prisma.productVariant.update({
-        where: { id: variantId },
-        data: { stock: before!.stock },
-      });
-    });
-  });
-
   describe('incrementVariantStock', () => {
     it('should increment variant stock', async () => {
       const before = await prisma.productVariant.findUnique({

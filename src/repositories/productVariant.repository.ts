@@ -7,13 +7,6 @@ export const productVariantRepository = {
     });
   },
 
-  decrementVariantStock: async (variantId: string, quantity: number) => {
-    return prisma.productVariant.update({
-      where: { id: variantId },
-      data: { stock: { decrement: quantity } },
-    });
-  },
-
   incrementVariantStock: async (variantId: string, quantity: number) => {
     return prisma.productVariant.update({
       where: { id: variantId },

@@ -11,6 +11,15 @@ export interface CheckoutSelectedItem {
   imageURL?: string | null;
 }
 
+export interface ShippingOption {
+  id: string;
+  name: string;
+  courier: string;
+  price: number;
+  desc: string;
+  tag?: string;
+}
+
 export interface CheckoutShippingSelection {
   id: string;
   courier: string;

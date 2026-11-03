@@ -674,6 +674,7 @@ export const orderService = {
       totals: {
         subtotal: formatIDR(Number(order.subtotal)),
         shippingCost: formatIDR(Number(order.shippingCost)),
+        serviceFee: formatIDR(Number(order.serviceFee)),
         totalAmount: formatIDR(Number(order.totalAmount)),
       },
       products,

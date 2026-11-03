@@ -14,10 +14,7 @@ export interface CheckoutItemInput {
 export interface CheckoutInput {
   items: CheckoutItemInput[];
   shippingAddressId?: string;
-  courier: string;
-  courierService: string;
-  estimatedDelivery?: string;
-  shippingCost: number;
+  shippingOptionId: string;
   customerNotes?: string;
 }
 

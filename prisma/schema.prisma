@@ -321,6 +321,7 @@ model Order {
 
   subtotal     Decimal
   shippingCost Decimal
+  serviceFee   Decimal @default(0)
   totalAmount  Decimal
 
   orderStatus   OrderStatus   @default(pending)

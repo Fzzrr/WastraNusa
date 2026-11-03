@@ -12,6 +12,7 @@ import {
   setCheckoutSession,
   subscribeToCheckoutSession,
 } from '@/lib/checkout-session';
+import { SERVICE_FEE, SHIPPING_OPTIONS } from '@/lib/shipping';
 import { cn } from '@/lib/utils';
 import {
   type CheckoutAddressSelection,
@@ -32,38 +33,7 @@ import { AddressSection } from './address-section';
 import { CheckoutSummary } from './checkout-summary';
 import { ShippingMethodSection } from './shipping-method-section';
 
-const shippingOptions = [
-  {
-    id: 'sic',
-    name: 'Reguler',
-    courier: 'SiCepat',
-    price: 16000,
-    desc: '2-4 hari kerja',
-    tag: 'Hemat',
-  },
-  {
-    id: 'jne-reg',
-    name: 'Reguler (REG)',
-    courier: 'JNE',
-    price: 18000,
-    desc: '3-5 hari kerja',
-  },
-  {
-    id: 'jne-yes',
-    name: 'YES (1 Hari)',
-    courier: 'JNE',
-    price: 42000,
-    desc: '1 hari kerja',
-  },
-  {
-    id: 'gosend',
-    name: 'Same Day',
-    courier: 'GoSend',
-    price: 56000,
-    desc: 'Hari ini (max 8 jam)',
-    tag: 'Dalam kota',
-  },
-];
+const shippingOptions = SHIPPING_OPTIONS;
 
 export function CheckoutMain() {
   const router = useRouter();
@@ -95,7 +65,7 @@ export function CheckoutMain() {
       (acc, item) => acc + item.price * item.quantity,
       0,
     );
-    const serviceFee = selectedItems.length > 0 ? 5000 : 0;
+    const serviceFee = selectedItems.length > 0 ? SERVICE_FEE : 0;
     const shippingFee = selectedShipping?.price ?? 0;
 
     return {

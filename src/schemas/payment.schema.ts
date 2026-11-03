@@ -16,10 +16,7 @@ export const checkoutSchema = z.object({
     .string()
     .min(1, 'Alamat pengiriman wajib dipilih')
     .nullish(),
-  courier: z.string().min(1, 'Kurir wajib dipilih'),
-  courierService: z.string().min(1, 'Layanan kurir wajib dipilih'),
-  estimatedDelivery: z.string().nullish(),
-  shippingCost: z.number().min(0, 'Ongkos kirim tidak boleh negatif'),
+  shippingOptionId: z.string().min(1, 'Metode pengiriman wajib dipilih'),
   customerNotes: z.string().nullish(),
 });
 
