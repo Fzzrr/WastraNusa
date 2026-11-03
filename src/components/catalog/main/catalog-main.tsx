@@ -51,11 +51,11 @@ function parsePriceInput(value: string): number | undefined {
   return Number.isFinite(numericValue) ? numericValue : undefined;
 }
 
-export function CatalogMain() {
+export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
   const [activeSort, setActiveSort] = useState<ProductCatalogSortBy>(
     Catalog_SORT_OPTIONS[0].value,
   );
-  const [selectedCategory, setSelectedCategory] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedIsland, setSelectedIsland] = useState<string>();
   const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedGender, setSelectedGender] = useState<Gender>();

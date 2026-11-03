@@ -2,19 +2,16 @@ import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// Labels for the catalog links must match existing clothingType values.
 const footerColumns = [
-  {
-    title: 'WastraNusa',
-    links: ['Tentang Kami', 'Misi & Visi', 'Tim Kami', 'Karir', 'Blog'],
-  },
   {
     title: 'Belanja',
     links: [
-      'Semua Produk',
-      'Batik',
-      'Tenun & Songket',
-      'Kebaya & Ulos',
-      'Promo',
+      { label: 'Semua Produk', href: '/catalog' },
+      ...['Batik', 'Kain Tenun', 'Kain Songket', 'Kebaya'].map((type) => ({
+        label: type,
+        href: `/catalog?type=${encodeURIComponent(type)}`,
+      })),
     ],
   },
   {
@@ -25,17 +22,7 @@ const footerColumns = [
       'Per Topik',
       'Kontribusi',
       'Pengrajin',
-    ],
-  },
-  {
-    title: 'Bantuan',
-    links: [
-      'Pusat Bantuan',
-      'Cara Pemesanan',
-      'Kebijakan Retur',
-      'Hubungi Kami',
-      'FAQ',
-    ],
+    ].map((label) => ({ label, href: '/encyclopedia' })),
   },
 ];
 
@@ -70,7 +57,7 @@ export function Footer({ year = 2026 }: FooterProps) {
   return (
     <footer className="mt-4 bg-[#2d5b48] text-[#d4dfd1]">
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-14 md:px-6 lg:px-8">
-        <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.35fr_1fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 md:grid-cols-2 xl:grid-cols-[1.35fr_1fr_1fr]">
           <div>
             <Link href="/" className="flex items-center gap-3">
               <Image
@@ -123,22 +110,13 @@ export function Footer({ year = 2026 }: FooterProps) {
               </h4>
               <ul className="mt-4 space-y-2.5 text-[#c3d2c6]">
                 {column.links.map((link) => (
-                  <li key={link}>
-                    {column.title === 'Ensiklopedia' ? (
-                      <Link
-                        href="/encyclopedia"
-                        className="text-left text-sm transition hover:text-white"
-                      >
-                        {link}
-                      </Link>
-                    ) : (
-                      <button
-                        className="text-left text-sm transition hover:text-white"
-                        type="button"
-                      >
-                        {link}
-                      </button>
-                    )}
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-left text-sm transition hover:text-white"
+                    >
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -150,20 +128,6 @@ export function Footer({ year = 2026 }: FooterProps) {
           <p>
             © {year} WastraNusa. <br /> Hak cipta dilindungi undang-undang.
           </p>
-
-          <div className="flex items-center gap-5">
-            {['Syarat & Ketentuan', 'Kebijakan Privasi', 'Peta Situs'].map(
-              (item) => (
-                <button
-                  key={item}
-                  className="transition hover:text-white"
-                  type="button"
-                >
-                  {item}
-                </button>
-              ),
-            )}
-          </div>
         </div>
       </div>
     </footer>
