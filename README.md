@@ -80,18 +80,7 @@ pnpm prisma migrate status  # cek status migrasi (hanya membaca)
 
 > **Jangan** menjalankan `migrate dev` atau `migrate reset` ke database Neon. `migrate reset` menghapus seluruh isi database. Jika Prisma menawarkan reset karena "drift", jawab **No**.
 
-### 3. Data contoh (seed)
-
-```bash
-pnpm prisma-seed:dev
-```
-
-Membuat akun `admin@test.com`, `user@test.com`, `seller@test.com`, serta contoh artikel, produk, alamat, keranjang, dan pesanan. Password akun ada di `prisma/dev-seeds/user.seed.ts`.
-
-- Seed **hanya** untuk database lokal atau dev. Jangan dijalankan ke production.
-- Seed meng-update `role` akun seed yang sudah ada dan **menghapus** pesanan milik user seed. Jangan dijalankan jika akun itu dipakai untuk menyimpan data penting.
-
-### 4. Neon (dev dan production)
+### 3. Neon (dev dan production)
 
 Ada dua project Neon: `wastranusa-dev` dan `wastranusa-prod`. Nama branch di dalamnya sama-sama `main`; yang membedakan lingkungan adalah **project**, bukan nama branch.
 
@@ -120,7 +109,6 @@ pnpm install
 docker compose -f docker/dev/docker-compose.yml up -d database
 pnpm prisma generate
 pnpm prisma migrate dev
-pnpm prisma-seed:dev      # opsional
 pnpm dev
 ```
 
@@ -185,7 +173,6 @@ Untuk lokal: `http://localhost:3000` dan `http://localhost:3000/api/auth/callbac
 ## Catatan Diketahui
 
 - **Live chat** memakai Server-Sent Events dengan event bus di memori proses. Di Vercel (serverless) pesan baru tidak diteruskan antar instance, sehingga tidak realtime. Di `pnpm dev` berjalan normal. Solusi yang dipertimbangkan: polling atau layanan pub/sub.
-- Script `prisma-seed:prod` di `package.json` merujuk ke `prisma/prod-seeds/seed.ts` yang belum ada.
 - `docker/prod/docker-compose.yml` merupakan sisa konfigurasi Supabase lama; production saat ini di-deploy lewat integrasi Git Vercel dan Neon.
 
 ## Contributing

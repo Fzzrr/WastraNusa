@@ -10,9 +10,7 @@
     "prepare": "husky",
     "format:write": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
-    "test": "vitest",
-    "prisma-seed:dev": "tsx prisma/dev-seeds/seed.ts",
-    "prisma-seed:prod": "tsx prisma/prod-seeds/seed.ts"
+    "test": "vitest"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs}": [
@@ -74,7 +72,6 @@
     "prisma": "^7.5.0",
     "shadcn": "^4.0.8",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.2"
