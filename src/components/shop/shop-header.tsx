@@ -12,6 +12,7 @@ import type { PublicShopProfile } from '@/types/shop';
 import {
   ArrowUpRight,
   CalendarDays,
+  ChevronDown,
   LayoutDashboard,
   Mail,
   MapPin,
@@ -22,6 +23,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 function formatJoinedAt(value: string): string | null {
@@ -36,7 +38,7 @@ function formatJoinedAt(value: string): string | null {
 }
 
 const ctaClassName =
-  'group/cta gap-1.5 rounded-xl bg-gradient-to-r from-[#f3dfb4] to-[#d7ccb7] px-5 font-bold text-[#2c503f] shadow-[0_10px_24px_-12px_rgba(232,203,141,0.9)] transition hover:-translate-y-0.5 hover:from-[#f7e8c6] hover:to-[#e8cb8d] active:scale-95';
+  'group/cta w-full gap-1.5 sm:w-auto sm:self-start lg:w-full rounded-xl bg-gradient-to-r from-[#f3dfb4] to-[#d7ccb7] px-5 font-bold text-[#2c503f] shadow-[0_10px_24px_-12px_rgba(232,203,141,0.9)] transition hover:-translate-y-0.5 hover:from-[#f7e8c6] hover:to-[#e8cb8d] active:scale-95';
 
 function HubungiPenjualButton({ sellerId }: { sellerId: string }) {
   const router = useRouter();
@@ -79,6 +81,54 @@ function HubungiPenjualButton({ sellerId }: { sellerId: string }) {
       <MessageCircle className="size-4 transition-transform group-hover/cta:-rotate-12" />
       Hubungi Penjual
     </Button>
+  );
+}
+
+/** Shop description clamped to 3 lines; the toggle only shows when it overflows. */
+function ShopDescription({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || expanded) return;
+    // Fires once on observe and again on resize, so no sync setState here.
+    const observer = new ResizeObserver(() =>
+      setOverflows(element.scrollHeight > element.clientHeight + 1),
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [text, expanded]);
+
+  return (
+    <div className="mt-5 animate-in delay-100 duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
+      <p
+        ref={ref}
+        className={cn(
+          'text-base leading-relaxed whitespace-pre-line text-[#c9d9ce]',
+          !expanded && 'line-clamp-3',
+        )}
+      >
+        {text}
+      </p>
+      {overflows || expanded ? (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          aria-expanded={expanded}
+          className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-[#e8cb8d] transition hover:text-[#fff6e3]"
+        >
+          {expanded ? 'Sembunyikan' : 'Baca selengkapnya'}
+          <ChevronDown
+            className={cn(
+              'size-4 transition-transform duration-300',
+              expanded && 'rotate-180',
+            )}
+          />
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -169,58 +219,60 @@ export function ShopHeader({
         <span className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-[#7fb89a]/10 blur-3xl" />
         <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#e8cb8d]/50 to-transparent" />
 
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
-          <div className="shrink-0 animate-in duration-500 fill-mode-both zoom-in-95 fade-in">
-            {shop.logoURL ? (
-              <ImagePreview
-                url={shop.logoURL}
-                className="size-24 rounded-2xl bg-[#fffdfa] shadow-[0_20px_40px_-18px_rgba(0,0,0,0.7)] ring-4 ring-[#f7f2e7]/90 sm:size-28"
-              />
-            ) : (
-              <div className="grid size-24 place-items-center rounded-2xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d] shadow-[0_20px_40px_-18px_rgba(0,0,0,0.7)] ring-4 ring-[#f7f2e7]/90 sm:size-28">
-                <Store className="size-10" />
+        {/* lg: identity + description on the left, CTA + stats fill the right. */}
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-10">
+          <div className="min-w-0">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <div className="shrink-0 animate-in duration-500 fill-mode-both zoom-in-95 fade-in">
+                {shop.logoURL ? (
+                  <ImagePreview
+                    url={shop.logoURL}
+                    className="size-24 rounded-2xl bg-[#fffdfa] shadow-[0_20px_40px_-18px_rgba(0,0,0,0.7)] ring-4 ring-[#f7f2e7]/90 sm:size-28"
+                  />
+                ) : (
+                  <div className="grid size-24 place-items-center rounded-2xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d] shadow-[0_20px_40px_-18px_rgba(0,0,0,0.7)] ring-4 ring-[#f7f2e7]/90 sm:size-28">
+                    <Store className="size-10" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="min-w-0 flex-1">
-            <span className="inline-flex animate-in items-center gap-1.5 rounded-full border border-[#e8cb8d]/40 bg-black/20 px-3 py-1 text-xs font-semibold text-[#f3dfb4] backdrop-blur duration-500 fill-mode-both fade-in">
-              <Store className="size-3 text-[#e8cb8d]" />
-              Toko Pengrajin
-            </span>
-            <h1 className="mt-3 animate-in text-3xl font-bold tracking-tight break-words text-[#f7f2e7] duration-500 fill-mode-both fade-in slide-in-from-bottom-2 sm:text-4xl lg:text-5xl">
-              {shop.shopName}
-            </h1>
-            <div className="mt-3 h-1.5 w-20 origin-left animate-in rounded-full bg-gradient-to-r from-[#e8cb8d] to-[#caa86a] delay-200 duration-700 fill-mode-both zoom-in-0" />
-            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#c9d9ce]">
-              <span className="inline-flex items-center gap-1.5">
-                <User className="size-4 text-[#e8cb8d]" />
-                {shop.sellerName}
-              </span>
-              {location ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="size-4 text-[#e8cb8d]" />
-                  {location}
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex animate-in items-center gap-1.5 rounded-full border border-[#e8cb8d]/40 bg-black/20 px-3 py-1 text-xs font-semibold text-[#f3dfb4] backdrop-blur duration-500 fill-mode-both fade-in">
+                  <Store className="size-3 text-[#e8cb8d]" />
+                  Toko Pengrajin
                 </span>
-              ) : null}
-            </p>
+                <h1 className="mt-3 animate-in text-3xl font-bold tracking-tight break-words text-[#f7f2e7] duration-500 fill-mode-both fade-in slide-in-from-bottom-2 sm:text-4xl lg:text-5xl">
+                  {shop.shopName}
+                </h1>
+                <div className="mt-3 h-1.5 w-20 origin-left animate-in rounded-full bg-gradient-to-r from-[#e8cb8d] to-[#caa86a] delay-200 duration-700 fill-mode-both zoom-in-0" />
+                <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#c9d9ce]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <User className="size-4 text-[#e8cb8d]" />
+                    {shop.sellerName}
+                  </span>
+                  {location ? (
+                    <span className="inline-flex items-center gap-1.5">
+                      <MapPin className="size-4 text-[#e8cb8d]" />
+                      {location}
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+            </div>
+
+            {shop.description ? (
+              <ShopDescription text={shop.description} />
+            ) : null}
           </div>
 
-          <div className="shrink-0">
+          <div className="flex flex-col gap-3 border-t border-white/10 pt-6 lg:border-t-0 lg:pt-0">
             <HubungiPenjualButton sellerId={shop.sellerId} />
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              {stats.map((stat, index) => (
+                <StatCard key={stat.label} stat={stat} index={index} />
+              ))}
+            </div>
           </div>
-        </div>
-
-        {shop.description ? (
-          <p className="relative mt-5 max-w-3xl animate-in text-base leading-relaxed whitespace-pre-line text-[#c9d9ce] delay-100 duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
-            {shop.description}
-          </p>
-        ) : null}
-
-        <div className="relative mt-7 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 sm:grid-cols-3 md:gap-4">
-          {stats.map((stat, index) => (
-            <StatCard key={stat.label} stat={stat} index={index} />
-          ))}
         </div>
       </section>
 

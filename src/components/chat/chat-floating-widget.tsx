@@ -151,7 +151,7 @@ function FloatingChat({
           </span>
           <span className="block text-xs font-medium text-white/80">
             {totalUnread > 0
-              ? `${totalUnread} belum dibaca`
+              ? `${totalUnread} Notifikasi`
               : 'Chat dengan penjual'}
           </span>
         </span>

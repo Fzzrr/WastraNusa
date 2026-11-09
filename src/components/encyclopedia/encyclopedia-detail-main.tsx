@@ -38,7 +38,6 @@ import Link from 'next/link';
 import { type ReactNode, useState } from 'react';
 import { toast } from 'sonner';
 
-import { EncyclopediaChatSidebarCard } from './encyclopedia-chat-sidebar-card';
 import { EncyclopediaChatWidget } from './encyclopedia-chat-widget';
 
 const sideCardClassName =
@@ -425,8 +424,6 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
         </article>
 
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-          <EncyclopediaChatSidebarCard onOpenChat={() => setIsChatOpen(true)} />
-
           <Card className={cn(sideCardClassName, 'gap-0 overflow-hidden py-0')}>
             <div className="flex items-center gap-2 bg-gradient-to-r from-[#2f5f49] to-[#3f7359] px-4 py-3">
               <Compass className="size-4 text-[#e8cb8d]" />
