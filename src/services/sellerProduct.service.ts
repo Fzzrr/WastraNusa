@@ -151,21 +151,6 @@ export const sellerProductService = {
     };
   },
 
-  getProductDetail: async (
-    sellerId: string,
-    idOrSlug: string,
-  ): Promise<ProductInventoryItem> => {
-    const product = await sellerProductRepository.findByIdOrSlugForSeller(
-      sellerId,
-      idOrSlug,
-    );
-    if (!product) {
-      throw new ApiError('Produk tidak ditemukan', 404);
-    }
-
-    return mapProduct(product);
-  },
-
   createProduct: async (
     sellerId: string,
     data: CreateProductInput,

@@ -5,7 +5,8 @@ import {
   PaymentTransactionStatus,
 } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
-import { logError } from '@/lib/logger';
+import { logError, logger } from '@/lib/logger';
+import { expireMidtransTransaction } from '@/lib/midtrans';
 import { formatIDR } from '@/lib/utils';
 import { orderRepository } from '@/repositories/order.repository';
 
@@ -17,11 +18,13 @@ type UiOrderStatus =
   | 'Diterima'
   | 'Dibatalkan';
 
-const ADMIN_EDITABLE_ORDER_STATUSES = new Set<OrderStatus>([
+// Fulfilment only moves forward: confirmed → processing → shipped → delivered.
+const FULFILMENT_STEPS: OrderStatus[] = [
+  OrderStatus.confirmed,
   OrderStatus.processing,
   OrderStatus.shipped,
   OrderStatus.delivered,
-]);
+];
 
 // Single source of truth for the payment window; also sent to Midtrans as `expiry`.
 const DEFAULT_PAYMENT_TIMEOUT_MINUTES = 30;
@@ -43,29 +46,21 @@ export function getOrderPaymentExpiryDate(createdAt: Date) {
   return new Date(createdAt.getTime() + getPaymentTimeoutMinutes() * 60 * 1000);
 }
 
-function mapToUiOrderStatus(order: {
+export function mapToUiOrderStatus(order: {
   orderStatus: string;
   paymentStatus: string;
 }): UiOrderStatus {
   if (order.orderStatus === 'cancelled' || order.paymentStatus === 'failed') {
     return 'Dibatalkan';
   }
-  if (order.orderStatus === 'delivered') {
-    return 'Diterima';
-  }
-  if (order.orderStatus === 'shipped') {
-    return 'Dikirim';
-  }
-  if (order.orderStatus === 'processing') {
-    return 'Pengemasan';
-  }
-  if (order.orderStatus === 'confirmed') {
-    return 'Dikonfirmasi';
-  }
+  if (order.orderStatus === 'delivered') return 'Diterima';
+  if (order.orderStatus === 'shipped') return 'Dikirim';
+  if (order.orderStatus === 'processing') return 'Pengemasan';
+  if (order.orderStatus === 'confirmed') return 'Dikonfirmasi';
   return 'Menunggu Bayar';
 }
 
-function formatOrderDate(date: Date): string {
+export function formatOrderDate(date: Date): string {
   return new Intl.DateTimeFormat('id-ID', {
     day: 'numeric',
     month: 'short',
@@ -73,75 +68,195 @@ function formatOrderDate(date: Date): string {
   }).format(new Date(date));
 }
 
-function mapToPaymentStatusLabel(paymentStatus: string) {
+// Midtrans `payment_type` values, as a buyer would call them.
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  bank_transfer: 'Transfer Bank (VA)',
+  echannel: 'Mandiri Bill',
+  permata: 'Permata VA',
+  credit_card: 'Kartu Kredit',
+  gopay: 'GoPay',
+  shopeepay: 'ShopeePay',
+  qris: 'QRIS',
+  cstore: 'Gerai Retail',
+  akulaku: 'Akulaku',
+  kredivo: 'Kredivo',
+};
+
+export function formatPaymentMethod(method: string | null) {
+  if (!method) return null;
+  return PAYMENT_METHOD_LABELS[method] ?? method.replace(/_/g, ' ');
+}
+
+export function mapToPaymentStatusLabel(paymentStatus: string) {
   if (paymentStatus === 'paid') return 'Lunas';
   if (paymentStatus === 'failed') return 'Gagal';
   if (paymentStatus === 'refunded') return 'Refund';
   return 'Belum Bayar';
 }
 
-function isValidCheckoutItem<
-  T extends { productId?: string; quantity?: number },
->(item: T): item is T & { productId: string; quantity: number } {
-  return (
-    typeof item.productId === 'string' &&
-    Boolean(item.productId) &&
-    typeof item.quantity === 'number' &&
-    item.quantity > 0
-  );
-}
-
-function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
-  if (!customerNotes) return null;
-
-  const marker = `${tag}=`;
-  const start = customerNotes.indexOf(marker);
-  if (start < 0) return null;
-
-  const jsonStart = start + marker.length;
-  const jsonEnd = customerNotes.indexOf(' | ', jsonStart);
-  const jsonRaw =
-    jsonEnd >= 0
-      ? customerNotes.slice(jsonStart, jsonEnd)
-      : customerNotes.slice(jsonStart);
-
-  try {
-    return JSON.parse(jsonRaw);
-  } catch {
-    return null;
-  }
-}
-
-function extractReservedItemsFromOrder(order: {
+type OrderItemRow = {
   productId: string;
-  variantId: string | null;
+  productName: string;
+  variantName: string | null;
   quantity: number;
-  customerNotes: string | null;
-}) {
-  const checkoutItems = parseJsonTag(
-    order.customerNotes,
-    'checkout_items',
-  ) as Array<{
-    productId?: string;
-    variantId?: string | null;
-    quantity?: number;
-  }> | null;
+  unitPrice: { toString(): string } | number;
+  imageURL: string | null;
+  province: string;
+  clothingType: string;
+};
 
-  if (checkoutItems && checkoutItems.length > 0) {
-    return checkoutItems.filter(isValidCheckoutItem).map((item) => ({
-      productId: item.productId as string,
-      variantId: item.variantId ?? null,
-      quantity: item.quantity as number,
-    }));
+export function mapOrderItems(items: OrderItemRow[]) {
+  return items.map((item) => ({
+    id: item.productId,
+    name: item.productName,
+    variant: item.variantName,
+    category: item.clothingType,
+    location: item.province,
+    quantity: item.quantity,
+    unitPrice: formatIDR(Number(item.unitPrice)),
+    imageURL: item.imageURL,
+  }));
+}
+
+/** Order row as seen by an admin or seller managing it. */
+export function mapManagedOrder(order: {
+  id: string;
+  orderNumber: string;
+  totalAmount: { toString(): string } | number;
+  orderStatus: string;
+  paymentStatus: string;
+  trackingNumber: string | null;
+  createdAt: Date;
+  courier: string;
+  courierService: string;
+  shippingAddress: {
+    recipientName: string;
+    phone: string;
+    fullAddress: string;
+    subdistrict: string | null;
+    district: string;
+    city: string;
+    province: string;
+    postalCode: string;
+  };
+  user: { id: string; name: string; email: string };
+  items: OrderItemRow[];
+}) {
+  const address = order.shippingAddress;
+  const effectiveOrderStatus =
+    order.paymentStatus === PaymentStatus.failed ||
+    order.orderStatus === OrderStatus.cancelled
+      ? OrderStatus.cancelled
+      : (order.orderStatus as OrderStatus);
+  const totalAmount = Number(order.totalAmount);
+
+  return {
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    customer: {
+      id: order.user.id,
+      name: order.user.name,
+      email: order.user.email,
+    },
+    // The seller needs to know where to ship.
+    shipping: {
+      recipientName: address.recipientName,
+      phone: address.phone,
+      address: [
+        address.fullAddress,
+        address.subdistrict,
+        address.district,
+        address.city,
+        address.province,
+        address.postalCode,
+      ]
+        .filter(Boolean)
+        .join(', '),
+      courier: `${order.courier} ${order.courierService}`,
+    },
+    products: mapOrderItems(order.items),
+    totalAmount,
+    totalAmountLabel: formatIDR(totalAmount),
+    orderStatus: effectiveOrderStatus,
+    orderStatusLabel: mapToUiOrderStatus(order),
+    paymentStatus: order.paymentStatus,
+    paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
+    trackingNumber: order.trackingNumber,
+    createdAt: order.createdAt.toISOString(),
+    createdAtLabel: formatOrderDate(order.createdAt),
+  };
+}
+
+/**
+ * Validates an admin/seller fulfilment update against the current order and
+ * returns the Prisma update. Status only moves forward, and an order can't be
+ * shipped or delivered without a tracking number.
+ */
+export function buildFulfilmentUpdate(
+  existing: {
+    orderStatus: string;
+    paymentStatus: string;
+    trackingNumber: string | null;
+  },
+  data: { orderStatus?: OrderStatus; trackingNumber?: string | null },
+): Prisma.OrderUpdateInput {
+  if (
+    existing.orderStatus === OrderStatus.cancelled ||
+    existing.paymentStatus === PaymentStatus.failed
+  ) {
+    throw new ApiError('Pesanan dibatalkan dan tidak dapat diubah', 400);
   }
 
-  return [
-    {
-      productId: order.productId,
-      variantId: order.variantId,
-      quantity: order.quantity,
-    },
-  ];
+  if (existing.paymentStatus !== PaymentStatus.paid) {
+    throw new ApiError(
+      'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
+      400,
+    );
+  }
+
+  const currentStep = FULFILMENT_STEPS.indexOf(
+    existing.orderStatus as OrderStatus,
+  );
+  const nextStatus = data.orderStatus ?? (existing.orderStatus as OrderStatus);
+  const nextStep = FULFILMENT_STEPS.indexOf(nextStatus);
+
+  if (data.orderStatus !== undefined) {
+    if (nextStep <= 0) {
+      throw new ApiError(
+        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
+        400,
+      );
+    }
+    if (nextStep < currentStep) {
+      throw new ApiError('Status pesanan tidak dapat dimundurkan', 400);
+    }
+  }
+
+  const trackingNumber =
+    data.trackingNumber === undefined
+      ? undefined
+      : data.trackingNumber?.trim() || null;
+  const effectiveTracking =
+    trackingNumber === undefined ? existing.trackingNumber : trackingNumber;
+
+  if (
+    nextStep >= FULFILMENT_STEPS.indexOf(OrderStatus.shipped) &&
+    !effectiveTracking
+  ) {
+    throw new ApiError(
+      'Nomor resi wajib diisi untuk pesanan yang dikirim',
+      400,
+    );
+  }
+
+  const update: Prisma.OrderUpdateInput = {
+    orderStatus: data.orderStatus,
+    trackingNumber,
+  };
+  const now = new Date();
+  if (data.orderStatus === OrderStatus.shipped) update.shippedAt = now;
+  if (data.orderStatus === OrderStatus.delivered) update.deliveredAt = now;
+  return update;
 }
 
 type PaymentTransactionSummary = {
@@ -195,28 +310,9 @@ function canCancelPendingOrder(order: {
 }
 
 async function cancelOrderAndRestoreStock(
-  order: {
-    id: string;
-    productId: string;
-    variantId: string | null;
-    quantity: number;
-    customerNotes: string | null;
-    orderStatus: string;
-    paymentStatus: string;
-    paymentTransactions: Array<{
-      status: string;
-      expiredAt?: Date | null;
-    }>;
-  },
+  order: { id: string; orderStatus: string; paymentStatus: string },
   reason: 'user_cancelled' | 'expired' | 'failed',
 ) {
-  if (
-    order.orderStatus === OrderStatus.cancelled ||
-    order.paymentStatus === PaymentStatus.paid
-  ) {
-    return false;
-  }
-
   if (
     order.orderStatus !== OrderStatus.pending ||
     order.paymentStatus !== PaymentStatus.unpaid
@@ -224,29 +320,20 @@ async function cancelOrderAndRestoreStock(
     return false;
   }
 
-  const restoredItems = extractReservedItemsFromOrder(order).filter(
-    (item) => item.variantId && item.quantity > 0,
-  );
-  const paymentTransactionStatus =
+  return orderRepository.cancelOrderAndRestoreStock(
+    order.id,
     reason === 'expired'
       ? PaymentTransactionStatus.expired
-      : PaymentTransactionStatus.failed;
-  const now = new Date();
-
-  await orderRepository.cancelOrderAndRestoreStock(
-    order.id,
-    restoredItems.map((item) => ({
-      variantId: item.variantId!,
-      quantity: item.quantity,
-    })),
-    paymentTransactionStatus,
-    reason === 'expired' ? now : undefined,
+      : PaymentTransactionStatus.failed,
+    reason === 'expired' ? new Date() : undefined,
   );
-
-  return true;
 }
 
-async function reconcileExpiredOrders(userId?: string) {
+/**
+ * Cancels orders whose payment window has passed. The Midtrans `expire`
+ * webhook normally does this; this catches the ones it missed.
+ */
+export async function reconcileExpiredOrders(userId?: string) {
   const expiredOrders = await orderRepository.findExpiredPendingOrders(
     new Date(),
     userId,
@@ -259,144 +346,6 @@ async function reconcileExpiredOrders(userId?: string) {
       logError(error, { action: 'reconcileExpiredOrders', orderId: order.id });
     }
   }
-}
-
-async function mapAdminOrder(order: {
-  id: string;
-  orderNumber: string;
-  quantity: number;
-  totalAmount: { toNumber(): number } | number;
-  orderStatus: string;
-  paymentStatus: string;
-  trackingNumber: string | null;
-  createdAt: Date;
-  customerNotes: string | null;
-  productId: string;
-  variantId: string | null;
-  productPrice: { toNumber(): number } | number | null;
-  user: { id: string; name: string; email: string };
-  product: {
-    id: string;
-    name: string;
-    province: string;
-    clothingType: string;
-    imageURL: string | null;
-  };
-}) {
-  const effectiveOrderStatus =
-    order.paymentStatus === PaymentStatus.failed ||
-    order.orderStatus === OrderStatus.cancelled
-      ? OrderStatus.cancelled
-      : (order.orderStatus as OrderStatus);
-
-  const totalAmount =
-    typeof order.totalAmount === 'number'
-      ? order.totalAmount
-      : order.totalAmount.toNumber();
-
-  // Extract checkout items from customerNotes if available
-  const checkoutItems = parseJsonTag(
-    order.customerNotes,
-    'checkout_items',
-  ) as Array<{
-    productId?: string;
-    quantity?: number;
-    unitPrice?: number;
-    productName?: string;
-    province?: string;
-    clothingType?: string;
-  }> | null;
-
-  // Build products array from checkout items or fallback to single product
-  let products: Array<{
-    id: string;
-    name: string;
-    location: string;
-    category: string;
-    quantity: number;
-    unitPrice: string;
-  }>;
-
-  if (checkoutItems && checkoutItems.length > 0) {
-    const validCheckoutItems = checkoutItems.filter(isValidCheckoutItem);
-
-    // Map each item, filling in missing data from database if needed
-    products = await Promise.all(
-      validCheckoutItems.map(async (item) => {
-        // Use item's unitPrice if available, otherwise use order's productPrice
-        const itemUnitPrice =
-          typeof item.unitPrice === 'number'
-            ? item.unitPrice
-            : typeof order.productPrice === 'number'
-              ? order.productPrice
-              : (order.productPrice?.toNumber() ?? 0);
-
-        // If we have complete data from checkout_items, use it
-        if (item.productName && item.province && item.clothingType) {
-          return {
-            id: item.productId as string,
-            name: item.productName,
-            location: item.province,
-            category: item.clothingType,
-            quantity: item.quantity as number,
-            unitPrice: formatIDR(itemUnitPrice),
-          };
-        }
-
-        // Otherwise, query database to fill in missing data
-        const dbProduct = await orderRepository.findProductDetailsForOrder(
-          item.productId as string,
-        );
-
-        return {
-          id: item.productId as string,
-          name: dbProduct?.name || item.productName || 'Unknown Product',
-          location: dbProduct?.province || item.province || 'Unknown Location',
-          category:
-            dbProduct?.clothingType || item.clothingType || 'Unknown Category',
-          quantity: item.quantity as number,
-          unitPrice: formatIDR(itemUnitPrice),
-        };
-      }),
-    );
-  } else {
-    // Fallback to single product from order table
-    const singleProductPrice =
-      typeof order.productPrice === 'number'
-        ? order.productPrice
-        : (order.productPrice?.toNumber() ?? 0);
-
-    products = [
-      {
-        id: order.product.id,
-        name: order.product.name,
-        location: order.product.province,
-        category: order.product.clothingType,
-        quantity: order.quantity,
-        unitPrice: formatIDR(singleProductPrice),
-      },
-    ];
-  }
-
-  return {
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    customer: {
-      id: order.user.id,
-      name: order.user.name,
-      email: order.user.email,
-    },
-    products,
-    totalAmount,
-    totalAmountLabel: formatIDR(totalAmount),
-    orderStatus: effectiveOrderStatus,
-    orderStatusLabel: mapToUiOrderStatus(order),
-    paymentStatus: order.paymentStatus,
-    paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
-    trackingNumber: order.trackingNumber,
-    createdAt: order.createdAt.toISOString(),
-    createdAtLabel: formatOrderDate(order.createdAt),
-  };
 }
 
 export const orderService = {
@@ -446,112 +395,25 @@ export const orderService = {
       orderRepository.countOrdersByUserId(userId, filters),
     ]);
 
-    const totalPages = Math.ceil(totalItems / limit);
+    const formattedOrders = orders.map((order) => {
+      const uiStatus = mapToUiOrderStatus(order);
+      const paymentDeadlineAt =
+        uiStatus === 'Menunggu Bayar' ? getPaymentDeadlineAt(order) : null;
 
-    const formattedOrders = await Promise.all(
-      orders.map(async (order) => {
-        const uiStatus = mapToUiOrderStatus(order);
-        const paymentDeadlineAt =
-          uiStatus === 'Menunggu Bayar' ? getPaymentDeadlineAt(order) : null;
-
-        // Extract checkout_items to get all products
-        const checkoutItems = parseJsonTag(
-          order.customerNotes,
-          'checkout_items',
-        ) as Array<{
-          productId?: string;
-          quantity?: number;
-          productName?: string;
-          province?: string;
-          clothingType?: string;
-          imageURL?: string | null;
-          unitPrice?: number;
-        }> | null;
-
-        const fallbackUnitPrice =
-          Number(order.totalAmount) / Math.max(order.quantity, 1);
-
-        let products;
-        if (checkoutItems && checkoutItems.length > 0) {
-          // Build from checkout_items with enrichment when a snapshot exists.
-          products = [];
-          for (const item of checkoutItems) {
-            if (!isValidCheckoutItem(item)) {
-              continue;
-            }
-
-            // Check if item has complete metadata
-            const hasCompleteMetadata =
-              item.productName &&
-              item.province &&
-              item.clothingType &&
-              item.imageURL;
-
-            let product = {
-              category: item.clothingType || order.product.clothingType,
-              name: item.productName || 'Unknown Product',
-              location: item.province || order.product.province,
-              quantity: item.quantity as number,
-              imageURL: item.imageURL || null,
-              unitPrice: formatIDR(item.unitPrice ?? fallbackUnitPrice),
-            };
-
-            // If metadata is incomplete, enrich from database
-            if (!hasCompleteMetadata) {
-              const productDetail =
-                await orderRepository.findProductDetailsForOrder(
-                  item.productId,
-                );
-              if (productDetail) {
-                product = {
-                  category: item.clothingType || productDetail.clothingType,
-                  name: item.productName || productDetail.name,
-                  location: item.province || productDetail.province,
-                  quantity: item.quantity as number,
-                  imageURL:
-                    item.imageURL ||
-                    (
-                      productDetail as typeof productDetail & {
-                        imageURL?: string | null;
-                      }
-                    ).imageURL ||
-                    null,
-                  unitPrice: formatIDR(item.unitPrice ?? fallbackUnitPrice),
-                };
-              }
-            }
-
-            products.push(product);
-          }
-        } else {
-          // Single item - use primary product
-          products = [
-            {
-              category: order.product.clothingType,
-              name: order.product.name,
-              location: order.product.province,
-              quantity: order.quantity,
-              imageURL: order.product.imageURL,
-              unitPrice: formatIDR(fallbackUnitPrice),
-            },
-          ];
-        }
-
-        return {
-          orderId: order.id,
-          id: order.orderNumber || order.id,
-          date: formatOrderDate(order.createdAt),
-          totalPrice: formatIDR(Number(order.totalAmount)),
-          status: uiStatus,
-          paymentStatus: order.paymentStatus,
-          paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
-          paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
-          canCancel: canCancelPendingOrder(order),
-          products,
-          actions: ['Detail'] as 'Detail'[],
-        };
-      }),
-    );
+      return {
+        orderId: order.id,
+        id: order.orderNumber || order.id,
+        date: formatOrderDate(order.createdAt),
+        totalPrice: formatIDR(Number(order.totalAmount)),
+        status: uiStatus,
+        paymentStatus: order.paymentStatus,
+        paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
+        paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
+        canCancel: canCancelPendingOrder(order),
+        products: mapOrderItems(order.items),
+        actions: ['Detail'] as 'Detail'[],
+      };
+    });
 
     return {
       data: formattedOrders,
@@ -559,7 +421,7 @@ export const orderService = {
         total: totalItems,
         page,
         limit,
-        totalPages,
+        totalPages: Math.ceil(totalItems / limit),
       },
     };
   },
@@ -583,93 +445,6 @@ export const orderService = {
         ? getPaymentDeadlineAt(order)
         : null;
 
-    // Extract checkout_items to get all products
-    const checkoutItems = parseJsonTag(
-      order.customerNotes,
-      'checkout_items',
-    ) as Array<{
-      productId?: string;
-      quantity?: number;
-      unitPrice?: number;
-      productName?: string;
-      province?: string;
-      clothingType?: string;
-      imageURL?: string | null;
-    }> | null;
-
-    let products;
-    if (checkoutItems && checkoutItems.length > 1) {
-      // Multiple items - build from checkout_items with enrichment
-      products = [];
-      for (const item of checkoutItems) {
-        if (!isValidCheckoutItem(item)) {
-          continue;
-        }
-
-        // Check if item has complete metadata
-        const hasCompleteMetadata =
-          item.productName &&
-          item.province &&
-          item.clothingType &&
-          item.imageURL;
-
-        // Use item's unitPrice if available, otherwise use order's productPrice
-        const itemUnitPrice =
-          typeof item.unitPrice === 'number'
-            ? item.unitPrice
-            : Number(order.productPrice);
-
-        let product = {
-          id: item.productId,
-          name: item.productName || 'Unknown Product',
-          category: item.clothingType || order.product.clothingType,
-          location: item.province || order.product.province,
-          quantity: item.quantity as number,
-          unitPrice: formatIDR(itemUnitPrice),
-          imageURL: item.imageURL || null,
-        };
-
-        // If metadata is incomplete, enrich from database
-        if (!hasCompleteMetadata) {
-          const productDetail =
-            await orderRepository.findProductDetailsForOrder(item.productId);
-          if (productDetail) {
-            product = {
-              id: item.productId,
-              name: item.productName || productDetail.name,
-              category: item.clothingType || productDetail.clothingType,
-              location: item.province || productDetail.province,
-              quantity: item.quantity as number,
-              unitPrice: formatIDR(itemUnitPrice),
-              imageURL:
-                item.imageURL ||
-                (
-                  productDetail as typeof productDetail & {
-                    imageURL?: string | null;
-                  }
-                ).imageURL ||
-                null,
-            };
-          }
-        }
-
-        products.push(product);
-      }
-    } else {
-      // Single item - use primary product
-      products = [
-        {
-          id: order.product.id,
-          name: order.product.name,
-          category: order.product.clothingType,
-          location: order.product.province,
-          quantity: order.quantity,
-          unitPrice: formatIDR(Number(order.productPrice)),
-          imageURL: order.product.imageURL,
-        },
-      ];
-    }
-
     return {
       orderId: order.id,
       orderNumber: order.orderNumber,
@@ -677,7 +452,7 @@ export const orderService = {
       orderStatus: mapToUiOrderStatus(order),
       paymentStatus: order.paymentStatus,
       paymentStatusLabel: mapToPaymentStatusLabel(order.paymentStatus),
-      paymentMethod: order.paymentMethod,
+      paymentMethod: formatPaymentMethod(order.paymentMethod),
       paymentDeadlineAt: paymentDeadlineAt?.toISOString() ?? null,
       canCancel: canCancelPendingOrder(order),
       totals: {
@@ -686,7 +461,7 @@ export const orderService = {
         serviceFee: formatIDR(Number(order.serviceFee)),
         totalAmount: formatIDR(Number(order.totalAmount)),
       },
-      products,
+      products: mapOrderItems(order.items),
       shipping: {
         courier: order.courier,
         courierService: order.courierService,
@@ -735,7 +510,17 @@ export const orderService = {
       );
     }
 
-    await cancelOrderAndRestoreStock(order, 'user_cancelled');
+    const cancelled = await cancelOrderAndRestoreStock(order, 'user_cancelled');
+
+    // Close the Midtrans transaction too, or the buyer could still pay it.
+    if (cancelled) {
+      await expireMidtransTransaction(order.id).catch((error) => {
+        logger.warn('Could not expire Midtrans transaction', {
+          orderId: order.id,
+          error,
+        });
+      });
+    }
 
     return orderService.getUserOrderDetail(userId, identifier);
   },
@@ -751,122 +536,5 @@ export const orderService = {
     }
 
     await cancelOrderAndRestoreStock(order, reason);
-  },
-
-  /**
-   * @deprecated Admin-wide order listing (pesanan). Superseded by
-   * `sellerOrderService.getSellerOrders`, which scopes orders to the
-   * authenticated seller. Kept functional for backward compatibility.
-   */
-  getAdminOrders: async (
-    page: number = 1,
-    limit: number = 10,
-    filters?: {
-      orderStatus?: OrderStatus;
-      paymentStatus?: PaymentStatus;
-    },
-  ) => {
-    const safeLimit = Math.min(Math.max(1, limit), 50);
-    const safePage = Math.max(1, page);
-    const offset = (safePage - 1) * safeLimit;
-
-    const where: Prisma.OrderWhereInput = {};
-    if (filters?.orderStatus) {
-      where.orderStatus = filters.orderStatus;
-    }
-    if (filters?.paymentStatus) {
-      where.paymentStatus = filters.paymentStatus;
-    }
-
-    const [orders, totalItems] = await Promise.all([
-      orderRepository.findOrdersForAdmin(where, offset, safeLimit),
-      orderRepository.countOrdersForAdmin(where),
-    ]);
-
-    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
-
-    const mappedItems = await Promise.all(orders.map(mapAdminOrder));
-
-    return {
-      items: mappedItems,
-      meta: {
-        page: safePage,
-        limit: safeLimit,
-        totalItems,
-        totalPages,
-        hasNextPage: safePage < totalPages,
-      },
-    };
-  },
-
-  /**
-   * @deprecated Admin-wide order update (pesanan). Superseded by
-   * `sellerOrderService.updateOrderForSeller`, which enforces seller ownership.
-   * Kept functional for backward compatibility.
-   */
-  updateOrderForAdmin: async (
-    identifier: string,
-    data: {
-      orderStatus?: OrderStatus;
-      trackingNumber?: string | null;
-      customerNotes?: string | null;
-    },
-  ) => {
-    const existing =
-      await orderRepository.findOrderForAdminByIdentifier(identifier);
-
-    if (!existing) {
-      throw new ApiError('Pesanan tidak ditemukan', 404);
-    }
-
-    if (
-      existing.orderStatus === OrderStatus.cancelled ||
-      existing.paymentStatus === PaymentStatus.failed
-    ) {
-      throw new ApiError('Pesanan dibatalkan dan tidak dapat diubah', 400);
-    }
-
-    if (existing.paymentStatus !== PaymentStatus.paid) {
-      throw new ApiError(
-        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
-        400,
-      );
-    }
-
-    if (
-      data.orderStatus !== undefined &&
-      !ADMIN_EDITABLE_ORDER_STATUSES.has(data.orderStatus)
-    ) {
-      throw new ApiError(
-        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
-        400,
-      );
-    }
-
-    const now = new Date();
-    const nextData: Prisma.OrderUpdateInput = {
-      orderStatus: data.orderStatus,
-      trackingNumber:
-        data.trackingNumber === undefined
-          ? undefined
-          : data.trackingNumber?.trim()
-            ? data.trackingNumber.trim()
-            : null,
-      customerNotes: data.customerNotes,
-    };
-
-    if (data.orderStatus === OrderStatus.shipped) {
-      nextData.shippedAt = now;
-    }
-    if (data.orderStatus === OrderStatus.delivered) {
-      nextData.deliveredAt = now;
-    }
-
-    const updated = await orderRepository.updateOrderForAdmin(
-      identifier,
-      nextData,
-    );
-
-    return await mapAdminOrder(updated);
   },
 };

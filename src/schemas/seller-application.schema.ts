@@ -9,9 +9,6 @@ export const createSellerApplicationSchema = z.object({
   phoneNumber: z.string().nullish(),
 });
 
-export const updateSellerApplicationSchema =
-  createSellerApplicationSchema.partial();
-
 /**
  * Admin decision on a pending application. A rejection must carry a reason.
  */
@@ -33,9 +30,6 @@ export const reviewSellerApplicationSchema = z
 
 export type CreateSellerApplicationInput = z.infer<
   typeof createSellerApplicationSchema
->;
-export type UpdateSellerApplicationInput = z.infer<
-  typeof updateSellerApplicationSchema
 >;
 export type ReviewSellerApplicationInput = z.infer<
   typeof reviewSellerApplicationSchema

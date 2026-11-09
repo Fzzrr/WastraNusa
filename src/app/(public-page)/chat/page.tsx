@@ -1,11 +1,16 @@
 import { ChatShell } from '@/components/chat/chat-shell';
 import { requireUser } from '@/lib/auth/auth-page-helper';
 import { MessagesSquare } from 'lucide-react';
+import type { Metadata } from 'next';
 
 type ChatPageProps = {
   searchParams: Promise<{
     c?: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: 'Pesan',
 };
 
 export default async function ChatPage({ searchParams }: ChatPageProps) {

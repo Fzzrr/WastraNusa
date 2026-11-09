@@ -6,13 +6,13 @@ export type SellerDashboardPeriod = 7 | 30 | 90;
 export type SellerDashboardData = {
   period: SellerDashboardPeriod;
   stats: {
-    /** Seller net revenue = gross GMV * (1 - COMMISSION_RATE). */
+    /** What the seller keeps: item sales - commission + shipping they pay out. */
     netRevenue: number;
     /** Number of paid orders in the period. */
     totalOrders: number;
-    /** Average order value (gross GMV / paid orders). */
+    /** Average order value (what buyers paid / paid orders). */
     averageOrderValue: number;
-    /** Admin commission = gross GMV * COMMISSION_RATE. */
+    /** Admin commission = item sales * COMMISSION_RATE. */
     adminCommission: number;
   };
   /** Net revenue bucketed into consecutive 7-day windows (oldest → newest). */
@@ -23,9 +23,9 @@ export type SellerDashboardData = {
     name: string;
     category: string;
     unitsSold: number;
-    /** Seller net revenue for this product (gross * (1 - COMMISSION_RATE)). */
+    /** Item sales of this product after commission (shipping isn't per product). */
     revenue: number;
-    /** Admin commission for this product (gross * COMMISSION_RATE). */
+    /** Admin commission for this product (item sales * COMMISSION_RATE). */
     commission: number;
     /** Weekly net revenue series for the sparkline trend. */
     trend: number[];
@@ -39,8 +39,10 @@ function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
-function toGross(totalAmount: { toNumber(): number } | number): number {
-  return typeof totalAmount === 'number' ? totalAmount : totalAmount.toNumber();
+type Money = { toNumber(): number } | number;
+
+function toNumber(value: Money): number {
+  return typeof value === 'number' ? value : value.toNumber();
 }
 
 export const sellerDashboardService = {
@@ -71,9 +73,13 @@ export const sellerDashboardService = {
     // Consecutive 7-day buckets from `start`. Each order lands in the bucket
     // that contains its paidAt day.
     const bucketCount = Math.max(1, Math.ceil(period / 7));
-    const weeklyGross = new Array<number>(bucketCount).fill(0);
+    const weeklyNet = new Array<number>(bucketCount).fill(0);
 
-    let gross = 0;
+    // Commission is taken on item sales only: shipping goes to the courier
+    // (paid by the seller) and the service fee is the platform's own.
+    let buyerPaid = 0;
+    let netRevenue = 0;
+    let adminCommission = 0;
     const productMap = new Map<
       string,
       {
@@ -81,15 +87,12 @@ export const sellerDashboardService = {
         name: string;
         category: string;
         unitsSold: number;
-        gross: number;
-        weeklyGross: number[];
+        sales: number;
+        weeklySales: number[];
       }
     >();
 
     for (const order of orders) {
-      const orderGross = toGross(order.totalAmount);
-      gross += orderGross;
-
       const paidAt = order.paidAt ?? now;
       const dayOffset = Math.floor(
         (startOfDay(new Date(paidAt)).getTime() - start.getTime()) / DAY_MS,
@@ -98,37 +101,46 @@ export const sellerDashboardService = {
         bucketCount - 1,
         Math.max(0, Math.floor(dayOffset / 7)),
       );
-      weeklyGross[bucketIndex] += orderGross;
 
-      const key = order.productId;
-      const existing = productMap.get(key);
-      if (existing) {
-        existing.unitsSold += order.quantity;
-        existing.gross += orderGross;
-        existing.weeklyGross[bucketIndex] += orderGross;
-      } else {
-        const weekly = new Array<number>(bucketCount).fill(0);
-        weekly[bucketIndex] += orderGross;
-        productMap.set(key, {
-          productId: order.productId,
-          name: order.productName || order.product?.name || 'Produk',
-          category: order.product?.clothingType ?? '-',
-          unitsSold: order.quantity,
-          gross: orderGross,
-          weeklyGross: weekly,
-        });
+      let itemSales = 0;
+      for (const item of order.items) {
+        const sales = toNumber(item.unitPrice) * item.quantity;
+        itemSales += sales;
+
+        const existing = productMap.get(item.productId);
+        if (existing) {
+          existing.unitsSold += item.quantity;
+          existing.sales += sales;
+          existing.weeklySales[bucketIndex] += sales;
+        } else {
+          const weekly = new Array<number>(bucketCount).fill(0);
+          weekly[bucketIndex] += sales;
+          productMap.set(item.productId, {
+            productId: item.productId,
+            name: item.productName,
+            category: item.clothingType,
+            unitsSold: item.quantity,
+            sales,
+            weeklySales: weekly,
+          });
+        }
       }
+
+      const commission = itemSales * COMMISSION_RATE;
+      const orderNet = itemSales - commission + toNumber(order.shippingCost);
+      buyerPaid += toNumber(order.totalAmount);
+      adminCommission += commission;
+      netRevenue += orderNet;
+      weeklyNet[bucketIndex] += orderNet;
     }
 
     const totalOrders = orders.length;
-    const netRevenue = gross * (1 - COMMISSION_RATE);
-    const adminCommission = gross * COMMISSION_RATE;
-    const averageOrderValue = totalOrders > 0 ? gross / totalOrders : 0;
+    const averageOrderValue = totalOrders > 0 ? buyerPaid / totalOrders : 0;
 
-    const weeklyRevenue = weeklyGross.map((value, index) => ({
+    const weeklyRevenue = weeklyNet.map((value, index) => ({
       label: `Mgg ${index + 1}`,
       // Net revenue per week, consistent with the "Total Pendapatan" card.
-      value: value * (1 - COMMISSION_RATE),
+      value,
     }));
 
     const products = Array.from(productMap.values())
@@ -137,9 +149,9 @@ export const sellerDashboardService = {
         name: product.name,
         category: product.category,
         unitsSold: product.unitsSold,
-        revenue: product.gross * (1 - COMMISSION_RATE),
-        commission: product.gross * COMMISSION_RATE,
-        trend: product.weeklyGross.map(
+        revenue: product.sales * (1 - COMMISSION_RATE),
+        commission: product.sales * COMMISSION_RATE,
+        trend: product.weeklySales.map(
           (value) => value * (1 - COMMISSION_RATE),
         ),
       }))

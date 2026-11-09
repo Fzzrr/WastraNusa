@@ -1,6 +1,11 @@
 import { Gender, VariantType } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
+// Forms send '' for an empty optional URL field; store that as null.
+const optionalUrl = z
+  .union([z.url('Format URL tidak valid'), z.literal('').transform(() => null)])
+  .nullish();
+
 const decimalNumberSchema = z.number().min(0, 'Nilai tidak boleh negatif');
 const requiredVariantPriceSchema = z
   .number({
@@ -19,7 +24,7 @@ const productVariantInputSchema = z
     price: requiredVariantPriceSchema,
     stock: z.number().int().min(0, 'Stok varian tidak boleh negatif'),
     sku: z.string().min(1, 'SKU varian wajib diisi'),
-    imageURL: z.string().url('Format URL tidak valid').nullish(),
+    imageURL: optionalUrl,
   })
   .strict();
 
@@ -40,7 +45,7 @@ const productPayloadSchema = z.object({
     .min(1, 'Berat produk wajib diisi dalam gram dan minimal 1'),
   clothingType: z.string().min(1, 'Jenis pakaian wajib diisi'),
   gender: z.nativeEnum(Gender).nullish(),
-  imageURL: z.url('Format URL tidak valid').nullish(),
+  imageURL: optionalUrl,
   variants: requiredVariantsSchema,
 });
 

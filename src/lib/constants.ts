@@ -5,8 +5,10 @@
 /**
  * Admin marketplace commission taken on each seller sale (15%).
  *
- * Commission is computed on the fly from this single source of truth — there
- * are no commission columns in the database. Seller net revenue is
- * `gross * (1 - COMMISSION_RATE)`; admin commission is `gross * COMMISSION_RATE`.
+ * Computed on the fly from this single source of truth (no commission columns
+ * in the database), on item sales only: admin commission is
+ * `itemSales * COMMISSION_RATE`, and the seller keeps
+ * `itemSales - commission + shippingCost`. The buyer's service fee is the
+ * platform's own and never reaches the seller.
  */
 export const COMMISSION_RATE = 0.15;

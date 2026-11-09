@@ -85,8 +85,9 @@ vi.mock('@/services/article.service', () => ({
 }));
 
 vi.mock('@/repositories/order.repository', () => ({
+  orderItemSelect: {},
+  managedOrderSelect: {},
   orderRepository: {
-    createOrder: vi.fn(),
     createOrderAndReserveStock: vi.fn(),
     findOrderById: vi.fn(),
     findOrderDetailByIdentifier: vi.fn(),
@@ -97,13 +98,7 @@ vi.mock('@/repositories/order.repository', () => ({
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
     findExpiredPendingOrders: vi.fn(),
-    cancelOrder: vi.fn(),
     cancelOrderAndRestoreStock: vi.fn(),
-    findOrdersForAdmin: vi.fn(),
-    countOrdersForAdmin: vi.fn(),
-    findOrderForAdminByIdentifier: vi.fn(),
-    updateOrderForAdmin: vi.fn(),
-    findProductDetailsForOrder: vi.fn(),
   },
 }));
 
@@ -116,8 +111,6 @@ vi.mock('@/services/order.service', () => ({
     getUserOrderDetail: vi.fn(),
     cancelUserOrder: vi.fn(),
     cancelOrderBySystemId: vi.fn(),
-    getAdminOrders: vi.fn(),
-    updateOrderForAdmin: vi.fn(),
   },
 }));
 
@@ -139,16 +132,8 @@ vi.mock('@/repositories/product.repository', () => ({
     countByIsland: vi.fn(),
     countBySize: vi.fn(),
     countByGender: vi.fn(),
-    countByStatus: vi.fn(),
-    countLowStock: vi.fn(),
-    countCreatedSince: vi.fn(),
-    countOutOfStock: vi.fn(),
-    findLowStock: vi.fn(),
     getPriceRange: vi.fn(),
     findByIdOrSlug: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
   },
 }));
 
@@ -163,10 +148,6 @@ vi.mock('@/services/product.service', () => ({
   productService: {
     getProducts: vi.fn(),
     getProductDetail: vi.fn(),
-    getDashboardOverview: vi.fn(),
-    createProduct: vi.fn(),
-    updateProduct: vi.fn(),
-    deleteProduct: vi.fn(),
   },
 }));
 
@@ -188,6 +169,9 @@ vi.mock('@/repositories/address.repository', () => ({
     clearDefaultsByUser: vi.fn(),
     setDefault: vi.fn(),
     countByUser: vi.fn(),
+    isUsedByOrder: vi.fn(),
+    archive: vi.fn(),
+    replace: vi.fn(),
   },
 }));
 
@@ -203,6 +187,7 @@ vi.mock('@/services/address.service', () => ({
 
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
+  expireMidtransTransaction: vi.fn(),
   verifySignatureKey: vi.fn(),
 }));
 
@@ -215,7 +200,6 @@ vi.mock('@/repositories/cart.repository', () => ({
     removeItem: vi.fn(),
     clearCart: vi.fn(),
     removeItems: vi.fn(),
-    removePurchasedItemsById: vi.fn(),
     removePurchasedItemsByProductVariant: vi.fn(),
     getCartItemCount: vi.fn(),
   },

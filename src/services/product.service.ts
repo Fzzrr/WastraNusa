@@ -1,15 +1,9 @@
 import { ProductStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
-import { logger } from '@/lib/logger';
+import { isForSale } from '@/lib/product-availability';
 import { mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
-import {
-  type CreateProductInput,
-  type ProductVariantInput,
-  type UpdateProductInput,
-} from '@/schemas/product.schema';
-import { type ProductDashboardData } from '@/types/dashboard';
 import {
   type ProductCatalogFilters,
   type ProductCatalogSortBy,
@@ -117,12 +111,6 @@ const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
   'name_desc',
 ];
 
-const PRODUCT_STATUS_OPTIONS: readonly ProductStatus[] = [
-  ProductStatus.active,
-  ProductStatus.inactive,
-  ProductStatus.out_of_stock,
-];
-
 const normalizeFilters = (
   filters: ProductCatalogFilters = {},
 ): ProductCatalogFilters => {
@@ -156,7 +144,6 @@ const normalizeFilters = (
     clothingType: filters.clothingType?.trim() || undefined,
     q: filters.q?.trim() || undefined,
     gender: filters.gender,
-    status: filters.status,
     inStock: typeof filters.inStock === 'boolean' ? filters.inStock : undefined,
     excludeOutOfStock:
       typeof filters.excludeOutOfStock === 'boolean'
@@ -187,30 +174,6 @@ const mapFilterOptions = (
     active: item.name === activeName,
   }));
 
-const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
-  variants?.map((variant) => ({
-    id: variant.id ?? crypto.randomUUID(),
-    name: variant.name,
-    type: variant.type,
-    price: variant.price,
-    stock: variant.stock,
-    sku: variant.sku,
-    imageURL: variant.imageURL,
-  }));
-
-const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
-  deleteMany: {},
-  create: variants.map((variant) => ({
-    id: variant.id ?? crypto.randomUUID(),
-    name: variant.name,
-    type: variant.type,
-    price: variant.price,
-    stock: variant.stock,
-    sku: variant.sku,
-    imageURL: variant.imageURL,
-  })),
-});
-
 export const productService = {
   getProducts: async (
     page: number = 1,
@@ -229,7 +192,11 @@ export const productService = {
     const filtersWithoutIsland = withFilterOmitted(normalizedFilters, 'island');
     const filtersWithoutSize = withFilterOmitted(normalizedFilters, 'size');
     const filtersWithoutGender = withFilterOmitted(normalizedFilters, 'gender');
-    const filtersWithoutStatus = withFilterOmitted(normalizedFilters, 'status');
+    // Headline totals ignore the shopper's filters but match what the list
+    // can show (out-of-stock products are hidden by default).
+    const catalogBase: ProductCatalogFilters = {
+      excludeOutOfStock: normalizedFilters.excludeOutOfStock,
+    };
     const filtersWithoutPrice = withFilterOmitted(
       withFilterOmitted(normalizedFilters, 'minPrice'),
       'maxPrice',
@@ -243,7 +210,6 @@ export const productService = {
       islandCounts,
       sizeCounts,
       genderCounts,
-      statusCounts,
       priceRange,
       globalCategoryCounts,
       globalIslandCounts,
@@ -254,15 +220,14 @@ export const productService = {
         filters: normalizedFilters,
       }),
       productRepository.countAll(normalizedFilters),
-      productRepository.countAll(),
+      productRepository.countAll(catalogBase),
       productRepository.countByClothingType(filtersWithoutCategory),
       productRepository.countByIsland(filtersWithoutIsland),
       productRepository.countBySize(filtersWithoutSize),
       productRepository.countByGender(filtersWithoutGender),
-      productRepository.countByStatus(filtersWithoutStatus),
       productRepository.getPriceRange(filtersWithoutPrice),
-      productRepository.countByClothingType(),
-      productRepository.countByIsland(),
+      productRepository.countByClothingType(catalogBase),
+      productRepository.countByIsland(catalogBase),
     ]);
 
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
@@ -303,15 +268,6 @@ export const productService = {
       normalizedFilters.size,
     );
 
-    const statusMap = new Map(
-      statusCounts.map((item) => [item.status, item._count.status]),
-    );
-    const statuses = PRODUCT_STATUS_OPTIONS.map((status) => ({
-      name: status,
-      count: statusMap.get(status) ?? 0,
-      active: normalizedFilters.status === status,
-    }));
-
     return {
       items: products.map(mapProduct),
       meta: {
@@ -324,7 +280,6 @@ export const productService = {
         islands,
         sizes,
         genders,
-        statuses,
         priceRange,
         stats: {
           totalProducts: globalTotalItems,
@@ -337,165 +292,11 @@ export const productService = {
 
   getProductDetail: async (idOrSlug: string): Promise<ProductInventoryItem> => {
     const product = await productRepository.findByIdOrSlug(idOrSlug);
-    if (!product) {
+    if (!product || !isForSale(product)) {
       throw new ApiError('Produk tidak ditemukan', 404);
     }
 
     return mapProduct(product);
-  },
-
-  /**
-   * @deprecated Admin-wide product dashboard. Superseded by the seller-scoped
-   * dashboard (`sellerDashboardService`). Kept functional for backward
-   * compatibility; the admin product-inventory UI has been retired.
-   */
-  getDashboardOverview: async (): Promise<ProductDashboardData> => {
-    const LOW_STOCK_THRESHOLD = 20;
-    const [totalProducts, lowStockItems] = await Promise.all([
-      productRepository.countAll(),
-      productRepository.findLowStock(LOW_STOCK_THRESHOLD, 6),
-    ]);
-    // compute weekly/monthly deltas
-    const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-    const [weeklyDelta, monthlyDelta] = await Promise.all([
-      productRepository.countCreatedSince(weekAgo),
-      productRepository.countCreatedSince(monthAgo),
-    ]);
-
-    const lowStockCount =
-      await productRepository.countLowStock(LOW_STOCK_THRESHOLD);
-    const outOfStockCount = await productRepository.countOutOfStock();
-
-    return {
-      totalProducts,
-      weeklyDelta,
-      monthlyDelta,
-      lowStockCount,
-      outOfStockCount,
-      lowStockItems: lowStockItems.map((item) => ({
-        name: item.name,
-        category: item.clothingType,
-        stock: item.stock,
-        severity:
-          item.status === ProductStatus.out_of_stock || item.stock <= 0
-            ? 'out'
-            : 'low',
-      })),
-    };
-  },
-
-  /**
-   * @deprecated Admin-owned product creation. Superseded by
-   * `sellerProductService.createProduct`, which scopes ownership to the
-   * authenticated seller. Kept functional for backward compatibility.
-   */
-  createProduct: async (
-    data: CreateProductInput,
-  ): Promise<ProductInventoryItem> => {
-    const article = await articleRepository.findByIdOrSlug(data.articleId);
-    if (!article) {
-      throw new ApiError('Artikel tidak ditemukan', 404);
-    }
-    const island = article.island?.trim();
-    const province = article.province?.trim();
-    if (!island || !province) {
-      throw new ApiError(
-        'Artikel belum memiliki data pulau/provinsi yang valid',
-        400,
-      );
-    }
-
-    const product = await productRepository.create({
-      id: crypto.randomUUID(),
-      articleId: data.articleId,
-      name: data.name,
-      slug: data.slug,
-      description: data.description ?? null,
-      price: data.price,
-      sku: data.sku,
-      weight: data.weight,
-      imageURL: data.imageURL,
-      island,
-      province,
-      clothingType: data.clothingType,
-      gender: data.gender ?? null,
-      status: ProductStatus.active,
-      variants: data.variants?.length
-        ? { create: normalizeVariantsForCreate(data.variants) }
-        : undefined,
-    });
-
-    logger.info('Product created successfully', { productId: product.id });
-    return mapProduct(product);
-  },
-
-  /**
-   * @deprecated Admin-owned product update. Superseded by
-   * `sellerProductService.updateProduct`, which enforces seller ownership.
-   * Kept functional for backward compatibility.
-   */
-  updateProduct: async (
-    idOrSlug: string,
-    data: UpdateProductInput,
-  ): Promise<ProductInventoryItem> => {
-    const existing = await productRepository.findByIdOrSlug(idOrSlug);
-    if (!existing) {
-      throw new ApiError('Produk tidak ditemukan', 404);
-    }
-
-    const nextArticle =
-      data.articleId && data.articleId !== existing.articleId
-        ? await articleRepository.findByIdOrSlug(data.articleId)
-        : undefined;
-
-    if (data.articleId && !nextArticle) {
-      throw new ApiError('Artikel tidak ditemukan', 404);
-    }
-
-    const nextIsland = nextArticle?.island?.trim();
-    const nextProvince = nextArticle?.province?.trim();
-
-    if (nextArticle && (!nextIsland || !nextProvince)) {
-      throw new ApiError(
-        'Artikel belum memiliki data pulau/provinsi yang valid',
-        400,
-      );
-    }
-
-    const product = await productRepository.update(idOrSlug, {
-      articleId: data.articleId,
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      price: data.price,
-      sku: data.sku,
-      weight: data.weight,
-      imageURL: data.imageURL,
-      island: nextIsland,
-      province: nextProvince,
-      clothingType: data.clothingType,
-      gender: data.gender,
-      variants: data.variants
-        ? normalizeVariantsForUpdate(data.variants)
-        : undefined,
-    });
-
-    logger.info('Product updated successfully', { productId: existing.id });
-    return mapProduct(product);
-  },
-
-  /**
-   * @deprecated Admin-owned product deletion. Superseded by
-   * `sellerProductService.deleteProduct`, which enforces seller ownership.
-   * Kept functional for backward compatibility.
-   */
-  deleteProduct: async (idOrSlug: string) => {
-    const product = await productRepository.delete(idOrSlug);
-    logger.info('Product deleted successfully', { productId: product.id });
-    return product;
   },
 
   /** Clothing types used anywhere — every seller's products and articles. */

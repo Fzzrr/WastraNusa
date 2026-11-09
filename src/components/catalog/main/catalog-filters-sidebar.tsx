@@ -60,12 +60,10 @@ type CatalogFiltersSidebarProps = {
   islands: ProductFilterOption[];
   sizes: ProductFilterOption[];
   genders: ProductFilterOption[];
-  statuses: ProductFilterOption[];
   selectedCategory?: string;
   selectedIsland?: string;
   selectedSize?: string;
   selectedGender?: string;
-  selectedStatus?: string;
   inStockOnly: boolean;
   minPriceInput: string;
   maxPriceInput: string;
@@ -74,7 +72,6 @@ type CatalogFiltersSidebarProps = {
   onIslandChange: (value?: string) => void;
   onSizeChange: (value?: string) => void;
   onGenderChange: (value?: string) => void;
-  onStatusChange: (value?: string) => void;
   onInStockOnlyChange: (value: boolean) => void;
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
@@ -91,7 +88,6 @@ export function CatalogFiltersSidebar({
   selectedIsland,
   selectedSize,
   selectedGender,
-  selectedStatus,
   inStockOnly,
   minPriceInput,
   maxPriceInput,
@@ -151,7 +147,6 @@ export function CatalogFiltersSidebar({
     (selectedIsland ? 1 : 0) +
     (selectedSize ? 1 : 0) +
     (selectedGender ? 1 : 0) +
-    (selectedStatus ? 1 : 0) +
     (inStockOnly ? 1 : 0) +
     (hasPriceFilter ? 1 : 0);
 

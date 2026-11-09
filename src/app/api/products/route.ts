@@ -1,7 +1,6 @@
-import { Gender, ProductStatus } from '@/generated/prisma/enums';
-import { withApiAdmin, withApiPublic } from '@/lib/api-handler';
+import { Gender } from '@/generated/prisma/enums';
+import { withApiPublic } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
-import { createProductSchema } from '@/schemas/product.schema';
 import { productService } from '@/services/product.service';
 import type { ProductCatalogSortBy } from '@/types/product';
 
@@ -39,12 +38,6 @@ export const GET = withApiPublic(async ({ req }) => {
   const gender =
     rawGender && rawGender in Gender ? (rawGender as Gender) : undefined;
 
-  const rawStatus = url.searchParams.get('status');
-  const status =
-    rawStatus && rawStatus in ProductStatus
-      ? (rawStatus as ProductStatus)
-      : undefined;
-
   const rawInStock = url.searchParams.get('inStock');
   const inStock =
     rawInStock === 'true' ? true : rawInStock === 'false' ? false : undefined;
@@ -68,22 +61,9 @@ export const GET = withApiPublic(async ({ req }) => {
     topic,
     q,
     gender,
-    status,
     inStock,
     excludeOutOfStock: !includeOutOfStock,
     sortBy,
   });
   return jsend.success(products);
-});
-
-/**
- * @deprecated Admin product creation endpoint. Superseded by
- * `/api/seller/products`, which scopes ownership to the authenticated seller.
- * Kept functional for backward compatibility. (The public GET above stays.)
- */
-export const POST = withApiAdmin(async ({ req }) => {
-  const body = await req.json();
-  const data = createProductSchema.parse(body);
-  const product = await productService.createProduct(data);
-  return jsend.success(product, 201);
 });

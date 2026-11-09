@@ -1,5 +1,5 @@
 import type { SellerApplicationStatus } from '@/generated/prisma/enums';
-import type { JSendResponse } from '@/lib/jsend';
+import { fetchApi, mutateApi } from '@/lib/api-client';
 import type {
   SellerManagementRoleFilter,
   SellerManagementSort,
@@ -64,48 +64,6 @@ export const sellerApplicationKeys = {
       sort,
     ] as const,
 };
-
-// --------------- Fetch Helpers ---------------
-
-async function parseJSend<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as JSendResponse<T>;
-
-  if (body.status === 'success') {
-    return body.data as T;
-  }
-
-  if (body.status === 'fail') {
-    const message =
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'message' in body.data
-        ? String((body.data as { message: unknown }).message)
-        : 'Request failed';
-    throw new Error(message);
-  }
-
-  throw new Error(body.message);
-}
-
-async function fetchApi<T>(path: string): Promise<T> {
-  const response = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return parseJSend<T>(response);
-}
-
-async function mutateApi<T>(
-  path: string,
-  method: 'POST' | 'PATCH',
-  body?: unknown,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  return parseJSend<T>(response);
-}
 
 // --------------- User Hooks ---------------
 

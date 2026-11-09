@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { OrderStatus, PaymentStatus } from '@/generated/prisma/enums';
+import { OrderStatus } from '@/generated/prisma/enums';
 import {
   type SellerOrderItem,
   fetchSellerOrders,
@@ -27,35 +27,19 @@ import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-type FilterOrderStatus = OrderStatus | 'all';
-type FilterPaymentStatus = PaymentStatus | 'all';
-
-type OrderDraft = {
-  orderStatus: OrderStatus;
-  trackingNumber: string;
-};
-
-const ORDER_STATUS_FILTER_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: OrderStatus.pending, label: 'Menunggu Bayar' },
-  { value: OrderStatus.confirmed, label: 'Dikonfirmasi' },
-  { value: OrderStatus.processing, label: 'Pengemasan' },
-  { value: OrderStatus.shipped, label: 'Dikirim' },
-  { value: OrderStatus.delivered, label: 'Diterima' },
-  { value: OrderStatus.cancelled, label: 'Dibatalkan' },
-];
-
-const ORDER_STATUS_EDIT_OPTIONS: { value: OrderStatus; label: string }[] = [
-  { value: OrderStatus.processing, label: 'Pengemasan' },
-  { value: OrderStatus.shipped, label: 'Dikirim' },
-  { value: OrderStatus.delivered, label: 'Diterima' },
-];
-
-const PAYMENT_STATUS_OPTIONS: { value: PaymentStatus; label: string }[] = [
-  { value: PaymentStatus.unpaid, label: 'Belum Bayar' },
-  { value: PaymentStatus.paid, label: 'Lunas' },
-  { value: PaymentStatus.failed, label: 'Gagal' },
-  { value: PaymentStatus.refunded, label: 'Refund' },
-];
+import {
+  FilterOrderStatus,
+  FilterPaymentStatus,
+  ORDER_STATUS_EDIT_OPTIONS,
+  ORDER_STATUS_FILTER_OPTIONS,
+  OrderDraft,
+  PAYMENT_STATUS_OPTIONS,
+  getOrderDraft,
+  getOrderStatusBadgeClass,
+  getPaymentStatusBadgeClass,
+  isEditableTargetStatus,
+  isOrderEditable,
+} from './order-helpers';
 
 function TableRowSkeleton() {
   return (
@@ -88,65 +72,6 @@ function TableRowSkeleton() {
   );
 }
 
-function getOrderStatusBadgeClass(status: OrderStatus) {
-  switch (status) {
-    case OrderStatus.delivered:
-      return 'bg-emerald-100 text-emerald-700';
-    case OrderStatus.shipped:
-      return 'bg-blue-100 text-blue-700';
-    case OrderStatus.processing:
-      return 'bg-amber-100 text-amber-700';
-    case OrderStatus.confirmed:
-      return 'bg-sky-100 text-sky-700';
-    case OrderStatus.cancelled:
-      return 'bg-red-100 text-red-700';
-    case OrderStatus.pending:
-    default:
-      return 'bg-muted text-foreground';
-  }
-}
-
-function getPaymentStatusBadgeClass(status: PaymentStatus) {
-  switch (status) {
-    case PaymentStatus.paid:
-      return 'bg-emerald-100 text-emerald-700';
-    case PaymentStatus.failed:
-      return 'bg-red-100 text-red-700';
-    case PaymentStatus.refunded:
-      return 'bg-orange-100 text-orange-700';
-    case PaymentStatus.unpaid:
-    default:
-      return 'bg-muted text-foreground';
-  }
-}
-
-function getOrderDraft(order: SellerOrderItem, draft?: OrderDraft): OrderDraft {
-  if (draft) return draft;
-  return {
-    orderStatus: order.orderStatus,
-    trackingNumber: order.trackingNumber ?? '',
-  };
-}
-
-function isOrderEditable(order: SellerOrderItem) {
-  if (order.paymentStatus !== PaymentStatus.paid) {
-    return false;
-  }
-  if (order.orderStatus === OrderStatus.cancelled) {
-    return false;
-  }
-  return true;
-}
-
-function isEditableTargetStatus(
-  status: OrderStatus,
-): status is 'processing' | 'shipped' | 'delivered' {
-  return (
-    status === OrderStatus.processing ||
-    status === OrderStatus.shipped ||
-    status === OrderStatus.delivered
-  );
-}
 export function SellerOrderContent() {
   const [page, setPage] = useState(1);
   const [orderStatusFilter, setOrderStatusFilter] =
@@ -339,7 +264,8 @@ export function SellerOrderContent() {
                           (option) => option.value === draft.orderStatus,
                         )
                           ? draft.orderStatus
-                          : undefined;
+                          : // '' (not undefined) keeps the Select controlled.
+                            '';
                       return (
                         <tr
                           key={order.orderId}
@@ -363,6 +289,19 @@ export function SellerOrderContent() {
                               </span>
                               <span className="text-xs text-muted-foreground">
                                 {order.customer.email}
+                              </span>
+                              <span className="mt-2 text-xs text-[#3d3a34]">
+                                Kirim ke{' '}
+                                <span className="font-semibold">
+                                  {order.shipping.recipientName}
+                                </span>{' '}
+                                ({order.shipping.phone})
+                              </span>
+                              <span className="max-w-64 text-xs leading-relaxed">
+                                {order.shipping.address}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {order.shipping.courier}
                               </span>
                             </div>
                           </td>

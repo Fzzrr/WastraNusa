@@ -5,19 +5,6 @@ import type {
   ProductCatalogSortBy,
 } from '@/types/product';
 
-async function resolveProductId(idOrSlug: string) {
-  const foundProduct = await prisma.product.findFirst({
-    where: {
-      OR: [{ id: idOrSlug }, { slug: idOrSlug }],
-    },
-    select: {
-      id: true,
-    },
-  });
-
-  return foundProduct?.id ?? null;
-}
-
 const DEFAULT_SORT: ProductCatalogSortBy = 'newest';
 
 function buildProductWhereInput(
@@ -30,7 +17,6 @@ function buildProductWhereInput(
     size,
     clothingType,
     gender,
-    status,
     inStock,
     excludeOutOfStock,
     topic,
@@ -103,10 +89,13 @@ function buildProductWhereInput(
   }
 
   const where: Prisma.ProductWhereInput = {
+    // The public catalog (and every count shown with it) only covers products
+    // that are actually for sale: active, with a seller to fulfil the order.
+    status: 'active',
+    sellerId: { not: null },
     ...(island ? { island } : {}),
     ...(clothingType ? { clothingType } : {}),
     ...(gender ? { gender } : {}),
-    ...(status ? { status } : {}),
     ...(andConditions.length > 0 ? { AND: andConditions } : {}),
   };
 
@@ -148,6 +137,7 @@ export const productRepository = {
   }) {
     const available: Prisma.ProductWhereInput = {
       status: 'active',
+      sellerId: { not: null },
       variants: { some: { stock: { gt: 0 } } },
       article: { status: 'published' },
     };
@@ -318,114 +308,6 @@ export const productRepository = {
     });
   },
 
-  countByStatus: async (filters?: ProductCatalogFilters) => {
-    return prisma.product.groupBy({
-      by: ['status'],
-      where: buildProductWhereInput(filters),
-      _count: {
-        status: true,
-      },
-      orderBy: {
-        status: 'asc',
-      },
-    });
-  },
-
-  countCreatedSince: async (since: Date) => {
-    return prisma.product.count({
-      where: {
-        createdAt: {
-          gte: since,
-        },
-      },
-    });
-  },
-
-  countLowStock: async (threshold: number = 5) => {
-    const products = await prisma.product.findMany({
-      select: {
-        status: true,
-        variants: {
-          select: {
-            stock: true,
-          },
-        },
-      },
-    });
-
-    return products.filter((product) => {
-      const totalStock = product.variants.reduce(
-        (total, variant) => total + variant.stock,
-        0,
-      );
-
-      return product.status === 'out_of_stock' || totalStock <= threshold;
-    }).length;
-  },
-
-  countOutOfStock: async () => {
-    const products = await prisma.product.findMany({
-      select: {
-        status: true,
-        variants: {
-          select: {
-            stock: true,
-          },
-        },
-      },
-    });
-
-    return products.filter((product) => {
-      const totalStock = product.variants.reduce(
-        (total, variant) => total + variant.stock,
-        0,
-      );
-
-      return product.status === 'out_of_stock' || totalStock === 0;
-    }).length;
-  },
-
-  findLowStock: async (threshold: number = 5, limit: number = 6) => {
-    const products = await prisma.product.findMany({
-      select: {
-        name: true,
-        clothingType: true,
-        status: true,
-        updatedAt: true,
-        variants: {
-          select: {
-            stock: true,
-          },
-        },
-      },
-    });
-
-    return products
-      .map((product) => ({
-        name: product.name,
-        clothingType: product.clothingType,
-        stock: product.variants.reduce(
-          (total, variant) => total + variant.stock,
-          0,
-        ),
-        status: product.status,
-        updatedAt: product.updatedAt,
-      }))
-      .filter(
-        (product) =>
-          product.status === 'out_of_stock' || product.stock <= threshold,
-      )
-      .sort((left, right) => {
-        if (left.stock !== right.stock) {
-          return left.stock - right.stock;
-        }
-
-        return right.updatedAt.getTime() - left.updatedAt.getTime();
-      })
-      .slice(0, limit)
-      .map(({ ...product }) => product);
-  },
-
   getPriceRange: async (filters?: ProductCatalogFilters) => {
     const aggregate = await prisma.product.aggregate({
       where: buildProductWhereInput(filters),
@@ -475,10 +357,12 @@ export const productRepository = {
     });
   },
 
+  /** A seller's products as the public sees them: for sale and in stock. */
   findActiveBySeller: async (sellerId: string) => {
     return prisma.product.findMany({
       where: {
         sellerId,
+        status: 'active',
         variants: { some: { stock: { gt: 0 } } },
       },
       orderBy: { createdAt: 'desc' },
@@ -495,51 +379,6 @@ export const productRepository = {
             createdAt: 'asc',
           },
         },
-      },
-    });
-  },
-
-  create: async (data: Record<string, unknown>) => {
-    return prisma.product.create({
-      data: data as never,
-      include: {
-        article: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        variants: true,
-      },
-    });
-  },
-
-  update: async (idOrSlug: string, data: Record<string, unknown>) => {
-    const productId = await resolveProductId(idOrSlug);
-
-    return prisma.product.update({
-      where: {
-        id: productId ?? idOrSlug,
-      },
-      data: data as never,
-      include: {
-        article: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
-        variants: true,
-      },
-    });
-  },
-
-  delete: async (idOrSlug: string) => {
-    const productId = await resolveProductId(idOrSlug);
-
-    return prisma.product.delete({
-      where: {
-        id: productId ?? idOrSlug,
       },
     });
   },

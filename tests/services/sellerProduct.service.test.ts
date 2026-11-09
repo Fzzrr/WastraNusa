@@ -40,14 +40,6 @@ describe(
       expect(mockRepo.countBySeller).toHaveBeenCalledWith(SELLER_ID);
     });
 
-    it('404s a detail read for a product the seller does not own', async () => {
-      mockRepo.findByIdOrSlugForSeller.mockResolvedValue(null as never);
-
-      await expect(
-        sellerProductService.getProductDetail(SELLER_ID, 'prod-x'),
-      ).rejects.toMatchObject({ status: 404 });
-    });
-
     it('refuses to update a product the seller does not own', async () => {
       mockRepo.findByIdOrSlugForSeller.mockResolvedValue(null as never);
 

@@ -1,7 +1,7 @@
 import { POST } from '@/app/api/chat/route';
 import { EncyclopediaChatWidget } from '@/components/encyclopedia/encyclopedia-chat-widget';
 import { articleContextCache, chatReplyCache } from '@/lib/gemini/cache';
-import { llmService } from '@/lib/gemini/llm.service';
+import { gemini } from '@/lib/gemini/gemini.provider';
 import { chatRateLimiter } from '@/lib/gemini/rate-limiter';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
@@ -98,7 +98,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
 
   it('shows partial text before completion, hides split selectors, and attaches cards at the end', async () => {
     const finish = Promise.withResolvers<void>();
-    vi.spyOn(llmService, 'chat').mockImplementation(async (options) => {
+    vi.spyOn(gemini, 'chat').mockImplementation(async (options) => {
       options.onText?.('Kawung melambangkan pengendalian diri. [pro');
       await finish.promise;
       options.onText?.('duk:1]');
@@ -128,7 +128,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
   it('reports a mid-stream error without retaining or caching an incomplete answer', async () => {
     const fail = Promise.withResolvers<void>();
     const model = vi
-      .spyOn(llmService, 'chat')
+      .spyOn(gemini, 'chat')
       .mockImplementation(async (options) => {
         options.onText?.('Jawaban belum selesai.');
         await fail.promise;
@@ -151,7 +151,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
   });
 
   it('combines the contextual answer with real image, available variant price, description and detail link', async () => {
-    const model = vi.spyOn(llmService, 'chat').mockResolvedValue({
+    const model = vi.spyOn(gemini, 'chat').mockResolvedValue({
       reply:
         'Kawung melambangkan pengendalian diri. Berikut pilihan yang sesuai. [produk:1] [produk:900]',
       model: 'test',
@@ -175,7 +175,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
   });
 
   it('answers an article-only question without product cards', async () => {
-    vi.spyOn(llmService, 'chat').mockResolvedValue({
+    vi.spyOn(gemini, 'chat').mockResolvedValue({
       reply: 'Kawung melambangkan pengendalian diri.',
       model: 'test',
     });
@@ -192,7 +192,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
         variants: [{ ...product.variants[0], stock: 0 }],
       },
     ] as never);
-    const model = vi.spyOn(llmService, 'chat').mockResolvedValue({
+    const model = vi.spyOn(gemini, 'chat').mockResolvedValue({
       reply:
         'Kawung symbolises self-control. No matching products are currently available. [produk:1]',
       model: 'test',
@@ -208,7 +208,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
 
   it('uses the current user needs and previously displayed product names in follow-up history', async () => {
     const model = vi
-      .spyOn(llmService, 'chat')
+      .spyOn(gemini, 'chat')
       .mockResolvedValueOnce({
         reply: 'Berikut pilihan sesuai anggaran. [produk:1]',
         model: 'test',
@@ -236,7 +236,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
 
   it('resets conversation when the opened article changes', async () => {
     const model = vi
-      .spyOn(llmService, 'chat')
+      .spyOn(gemini, 'chat')
       .mockResolvedValue({ reply: 'Jawaban artikel pertama.', model: 'test' });
     const view = mount();
     send('Apa makna Kawung?');

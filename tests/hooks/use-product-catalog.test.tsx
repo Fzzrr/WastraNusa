@@ -154,13 +154,12 @@ describe('use-product-catalog hooks', { tags: ['frontend'] }, () => {
       island: 'Jawa',
       clothingType: 'Batik',
       gender: 'male',
-      status: 'active',
       inStock: true,
       sortBy: 'price_desc',
     });
 
     expect(global.fetch).toHaveBeenCalledWith(
-      '/api/products?page=2&limit=12&minPrice=100000&maxPrice=500000&island=Jawa&clothingType=Batik&gender=male&status=active&inStock=true&sortBy=price_desc',
+      '/api/products?page=2&limit=12&minPrice=100000&maxPrice=500000&island=Jawa&clothingType=Batik&gender=male&inStock=true&sortBy=price_desc',
       expect.any(Object),
     );
   });

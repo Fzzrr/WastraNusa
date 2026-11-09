@@ -1,4 +1,4 @@
-import type { JSendResponse } from '@/lib/jsend';
+import { fetchApi, mutateApi } from '@/lib/api-client';
 import {
   type CreateProductInput,
   type UpdateProductInput,
@@ -20,9 +20,6 @@ export const sellerProductKeys = {
   lists: () => [...sellerProductKeys.all, 'list'] as const,
   list: (page: number, limit: number) =>
     [...sellerProductKeys.lists(), page, limit] as const,
-  details: () => [...sellerProductKeys.all, 'detail'] as const,
-  detail: (idOrSlug: string) =>
-    [...sellerProductKeys.details(), idOrSlug] as const,
   articles: () => [...sellerProductKeys.all, 'article-options'] as const,
   articlePages: (limit: number) =>
     [...sellerProductKeys.articles(), 'pages', limit] as const,
@@ -30,51 +27,6 @@ export const sellerProductKeys = {
 };
 
 const ARTICLE_OPTIONS_LIMIT = 20;
-
-async function parseJSend<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as JSendResponse<T>;
-
-  if (body.status === 'success') {
-    return body.data as T;
-  }
-
-  if (body.status === 'fail') {
-    const message =
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'message' in body.data
-        ? String(body.data.message)
-        : 'Request failed';
-
-    throw new Error(message);
-  }
-
-  throw new Error(body.message);
-}
-
-async function fetchApi<T>(path: string): Promise<T> {
-  const response = await fetch(path, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return parseJSend<T>(response);
-}
-
-async function mutateApi<T>(
-  path: string,
-  method: 'POST' | 'PUT' | 'DELETE',
-  body?: unknown,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  return parseJSend<T>(response);
-}
 
 export function fetchSellerProducts(page: number = 1, limit: number = 10) {
   const searchParams = new URLSearchParams({
@@ -89,12 +41,6 @@ export function fetchSellerProducts(page: number = 1, limit: number = 10) {
 
 export function fetchClothingTypeOptions() {
   return fetchApi<string[]>('/api/products/clothing-types');
-}
-
-export function fetchSellerProductDetail(idOrSlug: string) {
-  return fetchApi<ProductInventoryItem>(
-    `/api/seller/products/${encodeURIComponent(idOrSlug)}`,
-  );
 }
 
 type ArticleOptionsPage = {
@@ -140,14 +86,6 @@ export function useSellerProducts(page: number = 1, limit: number = 10) {
     queryKey: sellerProductKeys.list(page, limit),
     queryFn: () => fetchSellerProducts(page, limit),
     placeholderData: (previousData) => previousData,
-  });
-}
-
-export function useSellerProductDetail(idOrSlug: string) {
-  return useQuery({
-    queryKey: sellerProductKeys.detail(idOrSlug),
-    queryFn: () => fetchSellerProductDetail(idOrSlug),
-    enabled: Boolean(idOrSlug),
   });
 }
 
@@ -202,11 +140,8 @@ export function useUpdateSellerProduct() {
         'PUT',
         data,
       ),
-    onSuccess: (_, { idOrSlug }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sellerProductKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: sellerProductKeys.detail(idOrSlug),
-      });
     },
   });
 }

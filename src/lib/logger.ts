@@ -1,4 +1,5 @@
 import { Prisma } from '@/generated/prisma/client';
+import { inspect } from 'util';
 import winston from 'winston';
 
 const { combine, timestamp, colorize, errors } = winston.format;
@@ -16,9 +17,11 @@ const consoleFormat = combine(
       delete cleanMeta.service;
     }
 
-    // If there's any metadata left (like 'body' or 'result'), print it prettified
+    // If there's any metadata left (like 'body' or 'result'), print it.
+    // inspect, not JSON.stringify: error objects from HTTP clients (e.g.
+    // Midtrans) are circular, and a throwing logger turns a warning into a 500.
     if (Object.keys(cleanMeta).length > 0) {
-      msg += `\n${JSON.stringify(cleanMeta, null, 2)}`;
+      msg += `\n${inspect(cleanMeta, { depth: 4, breakLength: 100 })}`;
     }
 
     return msg;

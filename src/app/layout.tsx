@@ -12,7 +12,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'WastraNusa',
+  title: { default: 'WastraNusa', template: '%s | WastraNusa' },
   description: 'Explorasi Budaya Wastra Nusantara',
 };
 
@@ -30,7 +30,8 @@ export default function RootLayout({
         <QueryProvider>
           {children}
           <ChatFloatingWidget />
-          <Toaster />
+          {/* Top so toasts never cover the primary button in modal footers. */}
+          <Toaster position="top-center" />
         </QueryProvider>
       </body>
     </html>

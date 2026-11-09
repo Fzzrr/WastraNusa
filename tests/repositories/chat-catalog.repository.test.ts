@@ -30,6 +30,7 @@ describe('chat catalog queries', () => {
       AND: [
         {
           status: 'active',
+          sellerId: { not: null },
           variants: { some: { stock: { gt: 0 } } },
           article: { status: 'published' },
         },
@@ -40,6 +41,7 @@ describe('chat catalog queries', () => {
       AND: [
         {
           status: 'active',
+          sellerId: { not: null },
           variants: { some: { stock: { gt: 0 } } },
           article: { status: 'published' },
         },
@@ -65,5 +67,23 @@ describe('chat catalog queries', () => {
       province: null,
     });
     expect(prisma.product.findMany).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('public shop products', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("only lists a seller's active, in-stock products", async () => {
+    vi.mocked(prisma.product.findMany).mockResolvedValue([] as never);
+
+    await productRepository.findActiveBySeller('seller-1');
+
+    expect(vi.mocked(prisma.product.findMany).mock.calls[0][0]).toMatchObject({
+      where: {
+        sellerId: 'seller-1',
+        status: 'active',
+        variants: { some: { stock: { gt: 0 } } },
+      },
+    });
   });
 });

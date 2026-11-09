@@ -232,12 +232,13 @@ model Product {
   updatedAt DateTime @updatedAt
 
   // Relations
-  article   Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
-  seller    User?            @relation("ProductSeller", fields: [sellerId], references: [id], onDelete: SetNull)
-  variants  ProductVariant[]
-  orders    Order[]
-  cartItems CartItem[]
-  messages  Message[]
+  article    Article          @relation(fields: [articleId], references: [id], onDelete: Restrict)
+  seller     User?            @relation("ProductSeller", fields: [sellerId], references: [id], onDelete: SetNull)
+  variants   ProductVariant[]
+  orders     Order[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+  messages   Message[]
 
   @@index([island])
   @@index([province])
@@ -263,10 +264,11 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   // Relations
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orders    Order[]
-  cartItems CartItem[]
-  messages  Message[]
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orders     Order[]
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+  messages   Message[]
 
   @@index([type])
   @@map("product_variant")
@@ -292,6 +294,10 @@ model CustomerAddress {
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Orders point at this row, so an address used by an order is archived
+  // (and replaced on edit) instead of being changed or deleted.
+  archivedAt DateTime?
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
@@ -345,6 +351,7 @@ model Order {
   seller              User?                @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: SetNull)
   shippingAddress     CustomerAddress      @relation(fields: [shippingAddressId], references: [id], onDelete: Restrict)
   paymentTransactions PaymentTransaction[]
+  items               OrderItem[]
 
   @@index([userId])
   @@index([productId])
@@ -352,6 +359,31 @@ model Order {
   @@index([orderStatus])
   @@index([paymentStatus])
   @@map("order")
+}
+
+/// One purchased line of an order, snapshotted at checkout. The product and
+/// variant columns on Order only summarize the first line.
+model OrderItem {
+  id        String  @id
+  orderId   String
+  productId String
+  variantId String?
+
+  productName  String
+  variantName  String?
+  quantity     Int
+  unitPrice    Decimal
+  imageURL     String?
+  province     String
+  clothingType String
+
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_item")
 }
 
 model PaymentTransaction {
@@ -398,6 +430,7 @@ model UserArticleLike {
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([articleId, userId])
   @@index([articleId])
   @@index([userId])
   @@map("user_article_like")
@@ -508,8 +541,8 @@ model Conversation {
 
   participantOneId String
   participantTwoId String
-  participantOne   User @relation("ConversationParticipantOne", fields: [participantOneId], references: [id], onDelete: Cascade)
-  participantTwo   User @relation("ConversationParticipantTwo", fields: [participantTwoId], references: [id], onDelete: Cascade)
+  participantOne   User   @relation("ConversationParticipantOne", fields: [participantOneId], references: [id], onDelete: Cascade)
+  participantTwo   User   @relation("ConversationParticipantTwo", fields: [participantTwoId], references: [id], onDelete: Cascade)
 
   // Mirrors the latest message time so conversation lists sort without a join.
   lastMessageAt DateTime?
@@ -535,7 +568,7 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   senderId String
-  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  sender   User   @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   content String @db.VarChar(2000)
 

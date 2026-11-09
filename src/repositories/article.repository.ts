@@ -336,32 +336,26 @@ export const articleRepository = {
         throw new ApiError('Artikel tidak ditemukan', 404);
       }
 
-      const existingLike = await tx.userArticleLike.findFirst({
+      // Counts come from the rows actually removed/added, so two racing
+      // clicks can't double-count; the (articleId, userId) unique backs it up.
+      const removed = await tx.userArticleLike.deleteMany({
         where: { articleId: article.id, userId },
       });
 
-      if (existingLike) {
-        // Unlike
-        await tx.userArticleLike.delete({
-          where: { id: existingLike.id },
-        });
+      if (removed.count > 0) {
         const engagement = await tx.articleEngagement.update({
           where: { articleId: article.id },
-          data: { likeCount: { decrement: 1 } },
+          data: { likeCount: { decrement: removed.count } },
         });
         return { isLiked: false, engagement };
       } else {
-        // Like
-        await tx.userArticleLike.create({
-          data: {
-            id: crypto.randomUUID(),
-            articleId: article.id,
-            userId,
-          },
+        const added = await tx.userArticleLike.createMany({
+          data: [{ id: crypto.randomUUID(), articleId: article.id, userId }],
+          skipDuplicates: true,
         });
         const engagement = await tx.articleEngagement.update({
           where: { articleId: article.id },
-          data: { likeCount: { increment: 1 } },
+          data: { likeCount: { increment: added.count } },
         });
         return { isLiked: true, engagement };
       }

@@ -46,8 +46,14 @@ export function KpiChart({
   const [active, setActive] = useState<number | null>(null);
   // Last hovered index stays rendered while fading out (smooth hover).
   const [shown, setShown] = useState<number | null>(null);
-  const { lo, hi } = axisRange(values, type);
-  const ticks = [lo, (lo + hi) / 2, hi];
+  const range = axisRange(values, type);
+  // Counts (e.g. orders) get whole-number ticks only: a 0.5 tick would be
+  // rounded to a label that repeats its neighbour.
+  const integer = values.every(Number.isInteger);
+  const lo = integer ? Math.floor(range.lo) : range.lo;
+  const hi = range.hi;
+  const mid = (lo + hi) / 2;
+  const ticks = integer && !Number.isInteger(mid) ? [lo, hi] : [lo, mid, hi];
   const fraction = (value: number) => (value - lo) / (hi - lo);
   const xFraction = (i: number) =>
     values.length <= 1 ? 0.5 : i / (values.length - 1);

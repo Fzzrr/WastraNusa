@@ -1,6 +1,9 @@
 import { POST } from '@/app/api/chat/route';
 import { ApiError } from '@/lib/error';
-import { chatRateLimiter } from '@/lib/gemini/rate-limiter';
+import {
+  anonymousChatRateLimiter,
+  chatRateLimiter,
+} from '@/lib/gemini/rate-limiter';
 import { chatService } from '@/services/chat.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -22,6 +25,7 @@ describe('POST /api/chat', { tags: ['backend'] }, () => {
   beforeEach(() => {
     vi.clearAllMocks();
     chatRateLimiter.reset();
+    anonymousChatRateLimiter.reset();
   });
 
   it('should return 200 with chatbot answer on valid request', async () => {
@@ -119,5 +123,27 @@ describe('POST /api/chat', { tags: ['backend'] }, () => {
     expect(blockedJson.status).toBe('fail');
     expect(blockedJson.data.message).toContain('Terlalu banyak permintaan');
     expect(blockedJson.data.retryAfterSeconds).toBeDefined();
+  });
+
+  it('does not let a spoofed X-Forwarded-For hop dodge the limit', async () => {
+    vi.spyOn(chatService, 'answerQuestion').mockResolvedValue({
+      reply: 'Jawaban',
+      articleId: 'art-1',
+    });
+
+    // The client rotates the first hop; the proxy-appended last hop stays.
+    const statuses: number[] = [];
+    for (let i = 0; i < 11; i++) {
+      const res = await POST(
+        createJsonRequest(
+          { articleId: 'art-1', message: `Pertanyaan ke-${i}` },
+          { 'x-forwarded-for': `10.0.0.${i}, 203.0.113.7` },
+        ),
+        { params: Promise.resolve({}) },
+      );
+      statuses.push(res.status);
+    }
+
+    expect(statuses.at(-1)).toBe(429);
   });
 });

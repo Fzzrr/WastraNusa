@@ -70,7 +70,7 @@ describe('paymentService', () => {
           serviceFee: 5000,
           totalAmount: 263000,
         }),
-        [{ variantId: 'var-1', quantity: 2 }],
+        [expect.objectContaining({ variantId: 'var-1', quantity: 2 })],
       );
       const [orderId, , startTime, expiredAt] = vi.mocked(
         createMidtransTransaction,
@@ -105,6 +105,27 @@ describe('paymentService', () => {
           mockUserId,
         ),
       ).rejects.toThrow(new ApiError('Metode pengiriman tidak valid', 400));
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
+    });
+
+    it('should not let a seller buy from their own shop', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        sellerId: mockUserId,
+      } as never);
+
+      await expect(
+        paymentService.checkout(mockInput, mockUserId),
+      ).rejects.toThrow(
+        new ApiError('Anda tidak dapat membeli produk dari toko sendiri', 400),
+      );
       expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
     });
 
@@ -178,6 +199,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -203,6 +225,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -232,6 +255,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -259,6 +283,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         price: 100000,
         name: 'Product 1',
         variants: [{ stock: 10 }],
@@ -282,6 +307,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         price: 100000,
         name: 'Product 1',
         variants: [{ stock: 10 }],
@@ -341,17 +367,11 @@ describe('paymentService', () => {
       vi.mocked(orderRepository.findOrderById).mockResolvedValue({
         id: 'order-123',
         userId: 'user-123',
-        productId: 'prod-1',
-        variantId: 'var-1',
-        customerNotes:
-          'checkout_cart_item_ids=[\"cart-item-1\"] | checkout_items=[{\"productId\":\"prod-1\",\"variantId\":\"var-1\",\"quantity\":2}]',
+        items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 2 }],
       } as never);
       vi.mocked(orderRepository.confirmPaidOrder).mockResolvedValue({
         count: 1,
       });
-      vi.mocked(cartRepository.removePurchasedItemsById).mockResolvedValue({
-        count: 1,
-      } as never);
       vi.mocked(
         cartRepository.removePurchasedItemsByProductVariant,
       ).mockResolvedValue({ count: 0 } as never);
@@ -368,14 +388,10 @@ describe('paymentService', () => {
         'order-123',
         expect.objectContaining({ paymentMethod: mockPayload.payment_type }),
       );
-      expect(cartRepository.removePurchasedItemsById).toHaveBeenCalledWith(
-        'user-123',
-        ['cart-item-1'],
-      );
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).toHaveBeenCalledWith('user-123', [
-        { productId: 'prod-1', variantId: 'var-1' },
+        expect.objectContaining({ productId: 'prod-1', variantId: 'var-1' }),
       ]);
     });
 
@@ -414,7 +430,6 @@ describe('paymentService', () => {
         'order-123',
         'failed',
       );
-      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();
@@ -477,12 +492,17 @@ describe('paymentService', () => {
       vi.mocked(orderRepository.findOrderById).mockResolvedValue({
         id: 'order-123',
         orderStatus: 'cancelled',
+        paymentStatus: 'failed',
       } as never);
 
       await paymentService.handleNotification(mockPayload);
 
-      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
-      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+      expect(orderRepository.confirmPaidOrder).not.toHaveBeenCalled();
+      // Recorded as paid (still cancelled) so an admin can refund it.
+      expect(orderRepository.updateOrderPaymentStatus).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ paymentStatus: 'paid' }),
+      );
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();

@@ -24,6 +24,9 @@ export function CatalogDetailGallery({
             src={imageURL}
             alt={category}
             fill
+            // Above the fold and the page's largest paint: don't lazy-load it.
+            preload
+            loading="eager"
             className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1280px) 90vw, 800px"
           />

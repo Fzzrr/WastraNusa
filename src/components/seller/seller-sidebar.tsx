@@ -14,7 +14,6 @@ import {
   LogOut,
   MessageCircle,
   Package2,
-  ShieldCheck,
   Store,
   UserRound,
 } from 'lucide-react';
@@ -75,7 +74,6 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
   const { data: session } = authClient.useSession();
 
   const sellerName = session?.user?.name ?? 'Seller WastraNusa';
-  const isAdmin = session?.user?.role === 'admin';
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -121,15 +119,6 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
 
       <div className="space-y-3 px-3 pb-4">
         <nav className="space-y-2">
-          {isAdmin ? (
-            <Link
-              href="/admin/dashboard"
-              className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            >
-              <ShieldCheck className="size-4" />
-              <span>Panel Admin</span>
-            </Link>
-          ) : null}
           <Link
             href="/"
             className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"

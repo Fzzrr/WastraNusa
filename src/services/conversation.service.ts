@@ -285,39 +285,4 @@ export const conversationService = {
 
     return message;
   },
-
-  markRead: async (
-    userId: string,
-    conversationId: string,
-  ): Promise<{ readAt: string }> => {
-    const conversation = await conversationRepository.findByIdForUser(
-      conversationId,
-      userId,
-    );
-    if (!conversation) {
-      throw new ApiError('Percakapan tidak ditemukan', 404);
-    }
-
-    const markedCount = await messageRepository.markReadForOther(
-      conversationId,
-      userId,
-    );
-    const readAt = new Date();
-
-    if (markedCount > 0) {
-      eventBus.emit(
-        getUserEvent(
-          SSE_EVENTS.MESSAGE_STATUSES_UPDATED,
-          pickOtherParticipant(conversation, userId).id,
-        ),
-        {
-          conversationId,
-          readerId: userId,
-          readAt: readAt.toISOString(),
-        },
-      );
-    }
-
-    return { readAt: readAt.toISOString() };
-  },
 };

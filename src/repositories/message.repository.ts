@@ -39,13 +39,15 @@ export const messageRepository = {
   },
 
   /** Oldest-first message history for a conversation (capped). */
+  /** The latest 100 messages, oldest first. */
   listByConversation: async (conversationId: string) => {
-    return prisma.message.findMany({
+    const latest = await prisma.message.findMany({
       where: { conversationId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       take: 100,
       include: attachmentInclude,
     });
+    return latest.reverse();
   },
 
   /**

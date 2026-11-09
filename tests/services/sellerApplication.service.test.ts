@@ -108,28 +108,18 @@ describe('sellerApplicationService', { tags: ['backend'] }, () => {
   });
 
   describe('createApplication (admin)', () => {
-    it('self-approves an admin shop without changing their role', async () => {
-      mockRepo.findUserRole.mockResolvedValue('admin');
-      mockRepo.findByUser.mockResolvedValue(null as never);
-      mockRepo.create.mockResolvedValue({ id: APP_ID } as never);
+    it('does not let an admin open a shop', async () => {
+      mockRepo.findUserRole.mockResolvedValueOnce('admin');
 
-      await sellerApplicationService.createApplication(USER_ID, {
-        shopName: 'Toko Admin',
-      });
-
-      expect(mockRepo.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          userId: USER_ID,
-          status: SellerApplicationStatus.approved,
-          reviewedById: USER_ID,
+      await expect(
+        sellerApplicationService.createApplication(USER_ID, {
+          shopName: 'Toko Admin',
         }),
-      );
-      expect(mockRepo.approveAndPromote).not.toHaveBeenCalled();
-      // Admin's shop is opened instantly, so the profile is created too.
-      expect(mockShopRepo.createFromApplication).toHaveBeenCalledWith(
-        USER_ID,
-        expect.objectContaining({ shopName: 'Toko Admin' }),
-      );
+      ).rejects.toThrow('Admin tidak dapat membuka toko');
+
+      expect(mockRepo.create).not.toHaveBeenCalled();
+      expect(mockRepo.update).not.toHaveBeenCalled();
+      expect(mockShopRepo.createFromApplication).not.toHaveBeenCalled();
     });
 
     it('keeps normal users pending', async () => {

@@ -1,4 +1,4 @@
-import type { JSendResponse } from '@/lib/jsend';
+import { fetchApi, mutateApi, parseJSend } from '@/lib/api-client';
 import {
   type CreateArticleInput,
   type UpdateArticleInput,
@@ -80,59 +80,6 @@ export async function updateArticleApi(
   return parseJSend<EncyclopediaArticleDetail>(response);
 }
 
-async function parseJSend<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as JSendResponse<T>;
-
-  if (body.status === 'success') {
-    return body.data as T;
-  }
-
-  if (body.status === 'fail') {
-    const message =
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'message' in body.data
-        ? String(body.data.message)
-        : 'Request failed';
-
-    throw new Error(message);
-  }
-
-  throw new Error(body.message);
-}
-
-async function fetchArticleApi<T>(path: string): Promise<T> {
-  const response = await fetch(path, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return parseJSend<T>(response);
-}
-
-async function mutateArticleApi<T>(path: string, method: 'POST'): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return parseJSend<T>(response);
-}
-
-async function deleteArticleApi<T>(path: string): Promise<T> {
-  const response = await fetch(path, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  return parseJSend<T>(response);
-}
-
 export function fetchArticles(
   page: number = 1,
   limit: number = DEFAULT_ARTICLE_LIMIT,
@@ -159,19 +106,19 @@ export function fetchArticles(
     searchParams.set('includeUnpublished', 'true');
   }
 
-  return fetchArticleApi<EncyclopediaArticleListResponse>(
+  return fetchApi<EncyclopediaArticleListResponse>(
     `/api/articles?${searchParams.toString()}`,
   );
 }
 
 export function fetchArticleDetail(slug: string) {
-  return fetchArticleApi<EncyclopediaArticleDetail>(
+  return fetchApi<EncyclopediaArticleDetail>(
     `/api/articles/${encodeURIComponent(slug)}`,
   );
 }
 
 export function fetchArticleDashboard() {
-  return fetchArticleApi<ArticleDashboardData>('/api/articles/dashboard');
+  return fetchApi<ArticleDashboardData>('/api/articles/dashboard');
 }
 
 export function fetchLikedArticles(
@@ -183,13 +130,13 @@ export function fetchLikedArticles(
     limit: String(limit),
   });
 
-  return fetchArticleApi<LikedArticlesResponse>(
+  return fetchApi<LikedArticlesResponse>(
     `/api/articles/liked?${searchParams.toString()}`,
   );
 }
 
 export function toggleArticleLike(slug: string) {
-  return mutateArticleApi<ToggleArticleLikeResponse>(
+  return mutateApi<ToggleArticleLikeResponse>(
     `/api/articles/${encodeURIComponent(slug)}/like`,
     'POST',
   );
@@ -227,8 +174,7 @@ export type ArticleFieldOptions = {
 export function useArticleFieldOptions(enabled = true) {
   return useQuery({
     queryKey: articleKeys.fieldOptions(),
-    queryFn: () =>
-      fetchArticleApi<ArticleFieldOptions>('/api/articles/field-options'),
+    queryFn: () => fetchApi<ArticleFieldOptions>('/api/articles/field-options'),
     enabled,
     // Refetch on every open so values other admins added appear right away.
     staleTime: 0,
@@ -381,7 +327,7 @@ export function useDeleteArticle() {
 
   return useMutation({
     mutationFn: (idOrSlug: string) =>
-      deleteArticleApi(`/api/articles/${encodeURIComponent(idOrSlug)}`),
+      mutateApi(`/api/articles/${encodeURIComponent(idOrSlug)}`, 'DELETE'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: articleKeys.all });
     },

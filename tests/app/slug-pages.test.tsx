@@ -58,6 +58,7 @@ describe('slug detail pages', { tags: ['frontend'] }, () => {
     vi.mocked(repo.findByIdOrSlug).mockResolvedValue({
       id: 'x',
       status: 'published',
+      sellerId: 'seller-1',
     } as never);
 
     await expect(Page({ params })).resolves.toBeTruthy();

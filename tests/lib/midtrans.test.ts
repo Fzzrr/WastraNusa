@@ -79,6 +79,20 @@ describe('verifySignatureKey', { tags: ['backend'] }, () => {
       verifySignatureKey(orderId, statusCode, grossAmount, signature),
     ).resolves.toBe(false);
   });
+
+  it('rejects every signature when the server key is not configured', async () => {
+    // With an empty key the "secret" part of the hash is public knowledge.
+    const signature = computeSignature(orderId, statusCode, grossAmount, '');
+    process.env.MIDTRANS_SERVER_KEY = '';
+
+    try {
+      await expect(
+        verifySignatureKey(orderId, statusCode, grossAmount, signature),
+      ).resolves.toBe(false);
+    } finally {
+      process.env.MIDTRANS_SERVER_KEY = serverKey;
+    }
+  });
 });
 
 describe('createParameter', { tags: ['backend'] }, () => {

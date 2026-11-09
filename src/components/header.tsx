@@ -10,7 +10,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useCart } from '@/hooks/use-cart';
-import { useMySellerApplication } from '@/hooks/use-seller-application';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import {
@@ -34,8 +33,7 @@ const menuItems = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
-  // Sellers, and admins with an approved shop, go to their public shop page
-  // (which links to the panel); other admins land on "Buka Toko".
+  // Sellers go to their public shop page (which links to the seller panel).
   { label: 'Toko', icon: Store, href: '/shop', sellerOnly: true },
   { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
   { label: 'Katalog', icon: Grid2X2, href: '/catalog' },
@@ -72,25 +70,15 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: cart } = useCart({ enabled: Boolean(session) });
-  // Admins only have a public shop once their seller application is approved.
-  const { data: application } = useMySellerApplication({ enabled: isAdmin });
-  const hasShop = isSeller || application?.status === 'approved';
   const cartCount = session ? (cart?.items.length ?? 0) : 0;
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
 
   const visibleMenuItems = menuItems
     .filter((item) => !item.adminOnly || isAdmin)
-    .filter((item) => !item.sellerOnly || isSeller || isAdmin)
+    .filter((item) => !item.sellerOnly || isSeller)
     .map((item) =>
-      item.sellerOnly
-        ? {
-            ...item,
-            href: hasShop
-              ? `/shop/${session?.user?.id}`
-              : '/profile/seller-application',
-          }
-        : item,
+      item.sellerOnly ? { ...item, href: `/shop/${session?.user?.id}` } : item,
     );
 
   return (

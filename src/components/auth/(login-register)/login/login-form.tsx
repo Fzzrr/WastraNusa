@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth/auth-client';
-import { isAdmin, isSeller } from '@/lib/auth/roles';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -41,11 +40,9 @@ function getSignInErrorMessage(error: {
   return error.message || 'Email atau password salah';
 }
 
-function getDefaultLandingPage(role?: string | null): string {
-  if (isAdmin(role)) return '/admin/dashboard';
-  if (isSeller(role)) return '/seller/dashboard';
-  return '/encyclopedia';
-}
+// Every role starts on the landing page; admins and sellers reach their
+// panels from the header.
+const DEFAULT_LANDING_PAGE = '/';
 
 export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
@@ -70,12 +67,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         password: data.password,
       },
       {
-        onSuccess: async () => {
+        onSuccess: () => {
           queryClient.clear();
-          const session = await authClient.getSession();
-          router.push(
-            redirectTo ?? getDefaultLandingPage(session.data?.user.role),
-          );
+          // A page that sent the user to log in still gets them back.
+          router.push(redirectTo ?? DEFAULT_LANDING_PAGE);
         },
       },
     );

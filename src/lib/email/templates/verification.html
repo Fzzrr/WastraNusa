@@ -1,105 +1,122 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verifikasi Email Anda</title>
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-            color: #1e293b;
-        }
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-        }
-        .header {
-            background-color: #3b82f6;
-            padding: 32px;
-            text-align: center;
-        }
-        .header h1 {
-            color: #ffffff;
-            margin: 0;
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .content {
-            padding: 40px;
-        }
-        .content p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        .btn-container {
-            text-align: center;
-            margin: 32px 0;
-        }
-        .btn {
-            background-color: #3b82f6;
-            color: #ffffff !important;
-            padding: 14px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 16px;
-            display: inline-block;
-            transition: background-color 0.2s;
-        }
-        .footer {
-            padding: 32px;
-            background-color: #f1f5f9;
-            text-align: center;
-            font-size: 14px;
-            color: #64748b;
-        }
-        .footer p {
-            margin: 4px 0;
-        }
-        .divider {
-            height: 1px;
-            background-color: #e2e8f0;
-            margin: 32px 0;
-        }
-        .link-secondary {
-            color: #3b82f6;
-            text-decoration: underline;
-            word-break: break-all;
-        }
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+        color: #1e293b;
+      }
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+      }
+      .header {
+        background-color: #3b82f6;
+        padding: 32px;
+        text-align: center;
+      }
+      .header h1 {
+        color: #ffffff;
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }
+      .content {
+        padding: 40px;
+      }
+      .content p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+      .btn-container {
+        text-align: center;
+        margin: 32px 0;
+      }
+      .btn {
+        background-color: #3b82f6;
+        color: #ffffff !important;
+        padding: 14px 28px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        display: inline-block;
+        transition: background-color 0.2s;
+      }
+      .footer {
+        padding: 32px;
+        background-color: #f1f5f9;
+        text-align: center;
+        font-size: 14px;
+        color: #64748b;
+      }
+      .footer p {
+        margin: 4px 0;
+      }
+      .divider {
+        height: 1px;
+        background-color: #e2e8f0;
+        margin: 32px 0;
+      }
+      .link-secondary {
+        color: #3b82f6;
+        text-decoration: underline;
+        word-break: break-all;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>{{app_name}}</h1>
+      <div class="header">
+        <h1>{{app_name}}</h1>
+      </div>
+      <div class="content">
+        <p>Halo {{user_name}},</p>
+        <p>
+          Selamat datang di <strong>{{app_name}}</strong>! Kami senang Anda
+          bergabung. Sebelum mulai, silakan verifikasi alamat email Anda
+          terlebih dahulu.
+        </p>
+
+        <div class="btn-container">
+          <a href="{{verification_url}}" class="btn">Verifikasi Email</a>
         </div>
-        <div class="content">
-            <p>Halo {{user_name}},</p>
-            <p>Selamat datang di <strong>{{app_name}}</strong>! Kami senang Anda bergabung. Sebelum mulai, silakan verifikasi alamat email Anda terlebih dahulu.</p>
-            
-            <div class="btn-container">
-                <a href="{{verification_url}}" class="btn">Verifikasi Email</a>
-            </div>
-            
-            <p>Jika tombol di atas tidak berfungsi, salin dan tempel link berikut ke browser Anda (berlaku 15 menit):</p>
-            <p class="link-secondary">{{verification_url}}</p>
-            
-            <div class="divider"></div>
-            
-            <p>Jika Anda tidak merasa membuat akun, abaikan saja email ini.</p>
-        </div>
-        <div class="footer">
-            <p>&copy; 2026 {{app_name}}. Hak cipta dilindungi.</p>
-            <p>Bandung, Indonesia</p>
-        </div>
+
+        <p>
+          Jika tombol di atas tidak berfungsi, salin dan tempel link berikut ke
+          browser Anda (berlaku 15 menit):
+        </p>
+        <p class="link-secondary">{{verification_url}}</p>
+
+        <div class="divider"></div>
+
+        <p>Jika Anda tidak merasa membuat akun, abaikan saja email ini.</p>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 {{app_name}}. Hak cipta dilindungi.</p>
+        <p>Bandung, Indonesia</p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

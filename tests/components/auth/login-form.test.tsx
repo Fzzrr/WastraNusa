@@ -48,7 +48,7 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     expect(mockedSignIn).not.toHaveBeenCalled();
   });
 
-  it('signs in and redirects a regular user to /encyclopedia', async () => {
+  it('signs in and redirects a regular user to the landing page', async () => {
     mockedSignIn.mockImplementation(async (_data, opts) => {
       await opts?.onSuccess?.({} as never);
       return { error: null } as never;
@@ -67,7 +67,7 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/encyclopedia'));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/'));
     expect(mockedSignIn).toHaveBeenCalledWith(
       { email: 'user@test.com', password: 'User@12345' },
       expect.any(Object),
@@ -75,8 +75,8 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
   });
 
   it.each([
-    ['seller', undefined, '/seller/dashboard'],
-    ['admin', undefined, '/admin/dashboard'],
+    ['seller', undefined, '/'],
+    ['admin', undefined, '/'],
     ['user', '/catalog/kebaya', '/catalog/kebaya'],
   ])(
     'sends a %s with redirect=%s to %s',

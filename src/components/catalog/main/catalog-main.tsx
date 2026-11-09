@@ -2,7 +2,7 @@
 
 import { CatalogFiltersSidebar } from '@/components/catalog/main/catalog-filters-sidebar';
 import type { PricePresetKey } from '@/components/catalog/main/catalog-filters-sidebar';
-import { Gender, ProductStatus } from '@/generated/prisma/enums';
+import { Gender } from '@/generated/prisma/enums';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
@@ -59,7 +59,6 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
   const [selectedIsland, setSelectedIsland] = useState<string>();
   const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedGender, setSelectedGender] = useState<Gender>();
-  const [selectedStatus, setSelectedStatus] = useState<ProductStatus>();
   const [inStockOnly, setInStockOnly] = useState(false);
   const [selectedPricePreset, setSelectedPricePreset] =
     useState<PricePresetKey>('all');
@@ -75,7 +74,6 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
       clothingType: selectedCategory,
       size: selectedSize,
       gender: selectedGender,
-      status: selectedStatus,
       inStock: inStockOnly ? true : undefined,
       sortBy: activeSort,
     }),
@@ -88,7 +86,6 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
       selectedGender,
       selectedIsland,
       selectedSize,
-      selectedStatus,
     ],
   );
 
@@ -116,7 +113,6 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
     setSelectedIsland(undefined);
     setSelectedSize(undefined);
     setSelectedGender(undefined);
-    setSelectedStatus(undefined);
     setInStockOnly(false);
     setSelectedPricePreset('all');
     setMinPriceInput('');
@@ -139,12 +135,10 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
             islands={meta?.islands ?? []}
             sizes={meta?.sizes ?? []}
             genders={meta?.genders ?? []}
-            statuses={meta?.statuses ?? []}
             selectedCategory={selectedCategory}
             selectedIsland={selectedIsland}
             selectedSize={selectedSize}
             selectedGender={selectedGender}
-            selectedStatus={selectedStatus}
             inStockOnly={inStockOnly}
             minPriceInput={minPriceInput}
             maxPriceInput={maxPriceInput}
@@ -164,10 +158,6 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
             onGenderChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedGender(value as Gender | undefined);
-            }}
-            onStatusChange={(value: string | undefined) => {
-              setCurrentPage(1);
-              setSelectedStatus(value as ProductStatus | undefined);
             }}
             onInStockOnlyChange={(value: boolean) => {
               setCurrentPage(1);

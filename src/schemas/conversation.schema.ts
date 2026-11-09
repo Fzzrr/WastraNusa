@@ -13,6 +13,3 @@ export const sendMessageSchema = z.object({
   productId: z.string().min(1).max(100).optional(),
   variantId: z.string().min(1).max(100).optional(),
 });
-
-export type StartConversationInput = z.infer<typeof startConversationSchema>;
-export type SendMessageInput = z.infer<typeof sendMessageSchema>;

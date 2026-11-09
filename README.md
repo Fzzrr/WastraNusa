@@ -45,7 +45,7 @@ Salin `.env.example` menjadi `.env`, lalu isi. File `.env` **jangan pernah di-co
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Login Google | Alamat situs harus didaftarkan di Google Cloud Console |
 | `MIDTRANS_CLIENT_KEY`, `MIDTRANS_SERVER_KEY` | Pembayaran | Key **sandbox** |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` | Email verifikasi dan reset password | |
-| `GEMINI_API_KEY`, `GEMINI_MODEL`, `LLM_PROVIDER` | Chatbot ensiklopedia | `LLM_FALLBACK_PROVIDER` opsional |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Chatbot ensiklopedia | |
 | `LOG_LEVEL` | Tingkat log | Default `info` |
 
 `BETTER_AUTH_URL` berbeda di tiap lingkungan: `http://localhost:3000`, alamat dev, dan alamat production.

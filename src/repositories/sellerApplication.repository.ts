@@ -33,13 +33,6 @@ export const sellerApplicationRepository = {
     });
   },
 
-  hasApprovedApplication: async (userId: string) => {
-    const count = await prisma.sellerApplication.count({
-      where: { userId, status: SellerApplicationStatus.approved },
-    });
-    return count > 0;
-  },
-
   findUserRole: async (userId: string) => {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -70,8 +63,8 @@ export const sellerApplicationRepository = {
    * (preserving an existing profile on re-approval — see
    * `buildCreateFromApplicationArgs`).
    *
-   * Note: we do NOT drop the applicant's sessions here. Seller access is
-   * resolved from the DB (`hasSellerAccess`), so the panel works on the same
+   * Note: we do NOT drop the applicant's sessions here. Seller access reads
+   * the role from the DB (`hasSellerAccess`), so the panel works on the same
    * session immediately; the role cached in their session cookie refreshes on
    * its own (see `cookieCache` in `auth.ts`).
    */
@@ -91,8 +84,7 @@ export const sellerApplicationRepository = {
           reviewedAt: new Date(),
         },
       }),
-      // Admins keep their admin role; their approved application alone
-      // grants seller access (see `hasSellerAccess`).
+      // Never turn an admin into a seller (admins can't apply anyway).
       prisma.user.updateMany({
         where: {
           id: userId,

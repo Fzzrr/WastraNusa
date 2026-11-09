@@ -47,7 +47,9 @@ export const addressService = {
       await addressRepository.clearDefaultsByUser(userId);
     }
 
-    const address = await addressRepository.update(id, data, userId);
+    const address = (await addressRepository.isUsedByOrder(id))
+      ? await addressRepository.replace(existing, data)
+      : await addressRepository.update(id, data, userId);
     if (!address) {
       throw new ApiError('Alamat tidak ditemukan', 404);
     }
@@ -64,7 +66,10 @@ export const addressService = {
       throw new ApiError('Alamat utama tidak dapat dihapus', 400);
     }
 
-    const address = await addressRepository.delete(id, userId);
+    // Orders still point at it, so hide it instead of deleting it.
+    const address = (await addressRepository.isUsedByOrder(id))
+      ? await addressRepository.archive(id)
+      : await addressRepository.delete(id, userId);
     if (!address) {
       throw new ApiError('Alamat tidak ditemukan', 404);
     }

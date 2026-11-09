@@ -2,6 +2,9 @@ import { SellerSidebar } from '@/components/seller/seller-sidebar';
 import { SellerSidebarProvider } from '@/components/seller/seller-sidebar-context';
 import { requireSeller } from '@/lib/auth/auth-page-helper';
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = { title: 'Panel Penjual' };
 
 export default async function SellerLayout({
   children,

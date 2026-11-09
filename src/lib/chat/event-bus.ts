@@ -53,8 +53,9 @@ const eventBus =
     return emitter;
   })();
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForEventBus.chatEventBus = eventBus;
-}
+// Also in production: route bundles may load this module more than once.
+// ponytail: in-process only, so live chat needs a single server instance;
+// swap for Postgres LISTEN/NOTIFY or Redis pub/sub to scale out.
+globalForEventBus.chatEventBus = eventBus;
 
 export default eventBus;

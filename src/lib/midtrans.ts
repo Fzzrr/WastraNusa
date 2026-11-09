@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'crypto';
 import midtransClient from 'midtrans-client';
 import type {
   SnapTransactionParameters,
@@ -68,6 +69,19 @@ export async function createMidtransTransaction(
 }
 
 /**
+ * Best-effort: closes a still-pending Midtrans transaction so a cancelled
+ * order can no longer be paid. Midtrans answers 404 while the buyer has not
+ * picked a payment method yet; that is expected and only logged by callers.
+ */
+export async function expireMidtransTransaction(orderId: string) {
+  // @types/midtrans-client doesn't declare `transaction`.
+  const { transaction } = midtrans_snap as unknown as {
+    transaction: { expire(id: string): Promise<unknown> };
+  };
+  return transaction.expire(orderId);
+}
+
+/**
  * Verifies the Midtrans notification signature key.
  * Formula: SHA512(order_id + status_code + gross_amount + server_key)
  * @see https://docs.midtrans.com/reference/receiving-notifications
@@ -78,16 +92,16 @@ export async function verifySignatureKey(
   grossAmount: string,
   signatureKey: string,
 ): Promise<boolean> {
-  const serverKey = process.env.MIDTRANS_SERVER_KEY ?? '';
-  const payload = orderId + statusCode + grossAmount + serverKey;
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+  // Without a key anyone could compute a "valid" signature.
+  if (!serverKey) return false;
 
-  const encoder = new TextEncoder();
-  const data = encoder.encode(payload);
-  const hashBuffer = await crypto.subtle.digest('SHA-512', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const expectedSignature = hashArray
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  const expected = createHash('sha512')
+    .update(orderId + statusCode + grossAmount + serverKey)
+    .digest();
+  const received = Buffer.from(signatureKey, 'hex');
 
-  return expectedSignature === signatureKey;
+  return (
+    received.length === expected.length && timingSafeEqual(received, expected)
+  );
 }

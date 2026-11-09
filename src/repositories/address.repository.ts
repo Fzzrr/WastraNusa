@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma';
 export const addressRepository = {
   findAllByUser: async (userId: string) => {
     return prisma.customerAddress.findMany({
-      where: { userId },
+      where: { userId, archivedAt: null },
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   },
@@ -13,6 +13,7 @@ export const addressRepository = {
     return prisma.customerAddress.findFirst({
       where: {
         id,
+        archivedAt: null,
         ...(userId ? { userId } : {}),
       },
     });
@@ -20,7 +21,7 @@ export const addressRepository = {
 
   findDefaultByUser: async (userId: string) => {
     return prisma.customerAddress.findFirst({
-      where: { userId, isDefault: true },
+      where: { userId, isDefault: true, archivedAt: null },
       orderBy: { createdAt: 'desc' },
     });
   },
@@ -78,16 +79,64 @@ export const addressRepository = {
         data: { isDefault: false },
       }),
       prisma.customerAddress.updateMany({
-        where: { id, userId },
+        where: { id, userId, archivedAt: null },
         data: { isDefault: true },
       }),
       prisma.customerAddress.findFirst({
-        where: { id, userId },
+        where: { id, userId, archivedAt: null },
       }),
     ]);
   },
 
   countByUser: async (userId: string) => {
-    return prisma.customerAddress.count({ where: { userId } });
+    return prisma.customerAddress.count({
+      where: { userId, archivedAt: null },
+    });
+  },
+
+  isUsedByOrder: async (id: string) => {
+    const order = await prisma.order.findFirst({
+      where: { shippingAddressId: id },
+      select: { id: true },
+    });
+    return order !== null;
+  },
+
+  archive: async (id: string) => {
+    return prisma.customerAddress.update({
+      where: { id },
+      data: { archivedAt: new Date(), isDefault: false },
+    });
+  },
+
+  /**
+   * Edits an address that orders already point at: the old row is archived
+   * (so those orders keep the address they shipped to) and a new row with the
+   * changes takes its place.
+   */
+  replace: async (
+    existing: Prisma.CustomerAddressUncheckedCreateInput,
+    data: Prisma.CustomerAddressUpdateInput,
+  ) => {
+    const [, created] = await prisma.$transaction([
+      prisma.customerAddress.update({
+        where: { id: existing.id },
+        data: { archivedAt: new Date(), isDefault: false },
+      }),
+      prisma.customerAddress.create({
+        data: {
+          ...existing,
+          // Fields left out of a partial update keep their old value.
+          ...(Object.fromEntries(
+            Object.entries(data).filter(([, value]) => value !== undefined),
+          ) as Prisma.CustomerAddressUncheckedCreateInput),
+          id: crypto.randomUUID(),
+          createdAt: undefined,
+          updatedAt: undefined,
+          archivedAt: null,
+        },
+      }),
+    ]);
+    return created;
   },
 };

@@ -9,7 +9,7 @@ type GoogleButtonProps = {
 
 export function GoogleButton({
   label = 'Lanjutkan dengan Google',
-  callbackURL = '/encyclopedia',
+  callbackURL = '/',
 }: GoogleButtonProps) {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({

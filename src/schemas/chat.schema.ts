@@ -29,4 +29,3 @@ export const chatRequestSchema = z.object({
 });
 
 export type ChatRequestInput = z.infer<typeof chatRequestSchema>;
-export type ChatHistoryMessage = z.infer<typeof chatMessageSchema>;

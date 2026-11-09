@@ -28,13 +28,13 @@ export const shopProfileRepository = {
   },
 
   /**
-   * The public-facing shop profile owned by `userId`, with no role gate. Used
-   * by the public shop-profile page, which must stay reachable regardless of
-   * the owner's current role. Includes the owner's id and display name.
+   * The public-facing shop profile owned by `userId`, only while the owner is a
+   * seller (admins can't run shops, and a demoted seller's shop is closed).
+   * Includes the owner's id and display name.
    */
   findPublicByUserId: async (userId: string) => {
     return prisma.shopProfile.findFirst({
-      where: { userId },
+      where: { userId, user: { role: ROLES.SELLER } },
       include: { user: { select: { id: true, name: true } } },
     });
   },

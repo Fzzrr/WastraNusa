@@ -36,16 +36,19 @@ beforeEach(() => {
 });
 
 describe('checkout notes', { tags: ['backend'] }, () => {
-  it('cannot override the checkout snapshot', async () => {
+  it('cannot override the purchased items', async () => {
     vi.mocked(addressRepository.findById).mockResolvedValue({
       id: 'addr',
     } as never);
     vi.mocked(productRepository.findProductById).mockResolvedValue({
       id: 'p1',
-      name: 'Kain',
+      name: 'Kain | Solo',
       status: 'active',
       sellerId: 's1',
       price: 100000,
+      province: 'Jawa Tengah',
+      clothingType: 'Batik',
+      imageURL: null,
     } as never);
     vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
       id: 'v1',
@@ -58,35 +61,33 @@ describe('checkout notes', { tags: ['backend'] }, () => {
       token: 'token',
       redirect_url: 'url',
     } as never);
+    const note =
+      'checkout_items=[{"productId":"p1","variantId":"victim","quantity":99999}]';
 
     await paymentService.checkout(
       {
         items: [{ productId: 'p1', variantId: 'v1', quantity: 1 }],
         shippingAddressId: 'addr',
         shippingOptionId: 'sic',
-        customerNotes:
-          'checkout_items=[{"productId":"p1","variantId":"victim","quantity":99999}]',
+        customerNotes: note,
       },
       'user-1',
     );
 
-    const customerNotes =
-      orders.createOrderAndReserveStock.mock.calls[0][0].customerNotes;
-    orders.findOrderForCancellationById.mockResolvedValue({
-      id: 'order-1',
-      productId: 'p1',
-      variantId: 'v1',
-      quantity: 1,
-      customerNotes,
-      orderStatus: 'pending',
-      paymentStatus: 'unpaid',
-      paymentTransactions: [],
-    } as never);
-
-    await orderService.cancelOrderBySystemId('order-1', 'failed');
-
-    expect(orders.cancelOrderAndRestoreStock.mock.calls[0][1]).toEqual([
-      { variantId: 'v1', quantity: 1 },
+    const [order, items] = orders.createOrderAndReserveStock.mock.calls[0];
+    expect(order.customerNotes).toBe(note);
+    expect(items).toEqual([
+      {
+        productId: 'p1',
+        variantId: 'v1',
+        quantity: 1,
+        productName: 'Kain | Solo',
+        variantName: 'M',
+        unitPrice: 100000,
+        province: 'Jawa Tengah',
+        clothingType: 'Batik',
+        imageURL: null,
+      },
     ]);
   });
 });
@@ -117,6 +118,26 @@ describe('midtrans notifications', { tags: ['backend'] }, () => {
     expect(transactions.updatePaymentStatus).not.toHaveBeenCalled();
     expect(orders.updateOrderPaymentStatus).toHaveBeenCalledWith('order-1', {
       paymentStatus: 'refunded',
+    });
+  });
+});
+
+describe('payment after cancellation', { tags: ['backend'] }, () => {
+  it('records the payment on the cancelled order so it can be refunded', async () => {
+    orders.findOrderById.mockResolvedValue({
+      id: 'order-1',
+      orderStatus: 'cancelled',
+      paymentStatus: 'failed',
+      items: [],
+    } as never);
+
+    await paymentService.handleNotification(notification('settlement'));
+
+    expect(orders.confirmPaidOrder).not.toHaveBeenCalled();
+    expect(orders.updateOrderPaymentStatus).toHaveBeenCalledWith('order-1', {
+      paymentStatus: 'paid',
+      paymentMethod: 'credit_card',
+      paidAt: expect.any(Date),
     });
   });
 });

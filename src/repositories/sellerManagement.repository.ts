@@ -27,10 +27,15 @@ export const sellerManagementRepository = {
     });
   },
 
-  /** Approval times of every approved seller application. */
+  /** Approval times of every current seller's application. */
   findApprovedApplicationDates: async () => {
     return prisma.sellerApplication.findMany({
-      where: { status: 'approved', reviewedAt: { not: null } },
+      // Only users who are still sellers (not demoted, not admins).
+      where: {
+        status: 'approved',
+        reviewedAt: { not: null },
+        user: { role: ROLES.SELLER },
+      },
       select: { reviewedAt: true },
     });
   },
@@ -61,6 +66,11 @@ export const sellerManagementRepository = {
           reviewedById: reviewerId,
           reviewedAt: new Date(),
         },
+      }),
+      // A demoted seller can't fulfil orders, so stop selling their products.
+      prisma.product.updateMany({
+        where: { sellerId: userId, status: 'active' },
+        data: { status: 'inactive' },
       }),
       prisma.session.deleteMany({ where: { userId } }),
     ]);

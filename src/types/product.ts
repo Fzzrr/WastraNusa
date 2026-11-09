@@ -56,7 +56,6 @@ export interface ProductCatalogFilters {
   size?: string;
   clothingType?: string;
   gender?: Gender;
-  status?: ProductStatus;
   inStock?: boolean;
   excludeOutOfStock?: boolean;
   sortBy?: ProductCatalogSortBy;
@@ -81,7 +80,6 @@ export interface ProductInventoryListMeta {
   islands?: ProductFilterOption[];
   sizes?: ProductFilterOption[];
   genders?: ProductFilterOption[];
-  statuses?: ProductFilterOption[];
   priceRange?: {
     min: number;
     max: number;

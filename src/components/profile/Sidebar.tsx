@@ -17,12 +17,23 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
-const NAV_ITEMS: { icon: LucideIcon; label: string; href: string }[] = [
+const NAV_ITEMS: {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+  // Admins can shop like any user but can't run a shop.
+  hideForAdmin?: boolean;
+}[] = [
   { icon: User, label: 'Profil Saya', href: '/profile' },
   { icon: ShoppingBag, label: 'Pesanan Saya', href: '/profile/my-order' },
   { icon: MapPin, label: 'Alamat Tersimpan', href: '/profile/saved-address' },
   { icon: BookOpen, label: 'Artikel Disukai', href: '/profile/liked-article' },
-  { icon: Store, label: 'Buka Toko', href: '/profile/seller-application' },
+  {
+    icon: Store,
+    label: 'Buka Toko',
+    href: '/profile/seller-application',
+    hideForAdmin: true,
+  },
 ];
 
 export default function Sidebar() {
@@ -30,6 +41,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const navRef = useRef<HTMLElement>(null);
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
 
   // On phones the menu is a horizontal scroll row: centre the current page's
   // pill. scrollLeft only moves the row, never the page.
@@ -66,42 +79,44 @@ export default function Sidebar() {
       <p className="hidden px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-[#9a8f80] uppercase md:block">
         Akun Saya
       </p>
-      {NAV_ITEMS.map(({ icon: Icon, label, href }) => {
-        const active = isActive(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'group relative flex flex-none items-center gap-2.5 overflow-hidden rounded-xl px-3 py-2.5 text-sm whitespace-nowrap transition-all duration-200 active:scale-[0.98] md:justify-start',
-              active
-                ? 'bg-[#2f5f49] font-semibold text-white before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
-                : 'text-[#4d6356] hover:bg-[#e3ece5] hover:text-[#2f5f49]',
-            )}
-          >
-            <span
+      {NAV_ITEMS.filter((item) => !(isAdmin && item.hideForAdmin)).map(
+        ({ icon: Icon, label, href }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'grid size-7 shrink-0 place-items-center rounded-lg transition-colors',
+                'group relative flex flex-none items-center gap-2.5 overflow-hidden rounded-xl px-3 py-2.5 text-sm whitespace-nowrap transition-all duration-200 active:scale-[0.98] md:justify-start',
                 active
-                  ? 'bg-white/15 text-[#e8cb8d]'
-                  : 'bg-[#f5ead3] text-[#a07a2c] group-hover:bg-white',
+                  ? 'bg-[#2f5f49] font-semibold text-white before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
+                  : 'text-[#4d6356] hover:bg-[#e3ece5] hover:text-[#2f5f49]',
               )}
             >
-              <Icon className="size-4" />
-            </span>
-            <span className="flex-1">{label}</span>
-            <ChevronRight
-              className={cn(
-                'hidden size-4 transition-all md:block',
-                active
-                  ? 'text-[#e8cb8d]'
-                  : '-translate-x-1 text-[#b3aa9e] opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
-              )}
-            />
-          </Link>
-        );
-      })}
+              <span
+                className={cn(
+                  'grid size-7 shrink-0 place-items-center rounded-lg transition-colors',
+                  active
+                    ? 'bg-white/15 text-[#e8cb8d]'
+                    : 'bg-[#f5ead3] text-[#a07a2c] group-hover:bg-white',
+                )}
+              >
+                <Icon className="size-4" />
+              </span>
+              <span className="flex-1">{label}</span>
+              <ChevronRight
+                className={cn(
+                  'hidden size-4 transition-all md:block',
+                  active
+                    ? 'text-[#e8cb8d]'
+                    : '-translate-x-1 text-[#b3aa9e] opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
+                )}
+              />
+            </Link>
+          );
+        },
+      )}
 
       <div className="mx-2 my-1 hidden h-px bg-[#efe8dd] md:block" />
 

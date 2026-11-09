@@ -6,16 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
-import { type DashboardData, type DashboardNavItem } from '@/types/dashboard';
+import { type DashboardNavItem } from '@/types/dashboard';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
   LayoutDashboard,
   LogOut,
   Package,
-  Package2,
-  ShoppingBag,
-  Store,
   UserRound,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -26,17 +23,12 @@ const navigationIcons = {
   Dashboard: LayoutDashboard,
   Artikel: BookOpen,
   'Manajemen Penjual': Package,
-  'Produk & Inventori': Package2,
-  Pesanan: ShoppingBag,
 } as const;
 
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
   { title: 'Artikel', href: '/admin/article' },
   { title: 'Manajemen Penjual', href: '/admin/seller-management' },
-  // deprecated: superseded by seller panel
-  // { title: 'Produk & Inventori', href: '/admin/product-inventory' },
-  // { title: 'Pesanan', href: '/admin/pesanan' },
 ];
 
 function SidebarNavigationItem({
@@ -88,12 +80,7 @@ function SidebarNavigationItem({
 
 type NavCounts = Partial<Record<string, number>>;
 
-function AdminSidebarContent({
-  navCounts,
-}: {
-  data: Partial<DashboardData>;
-  navCounts?: NavCounts;
-}) {
+function AdminSidebarContent({ navCounts }: { navCounts?: NavCounts }) {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -148,13 +135,6 @@ function AdminSidebarContent({
       <div className="space-y-3 px-3 pb-4">
         <nav className="space-y-2">
           <Link
-            href="/profile/seller-application"
-            className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            <Store className="size-4" />
-            <span>Toko Saya</span>
-          </Link>
-          <Link
             href="/"
             className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
@@ -189,19 +169,13 @@ function AdminSidebarContent({
   );
 }
 
-export function AdminSidebar({
-  data,
-  navCounts,
-}: {
-  data: Partial<DashboardData>;
-  navCounts?: NavCounts;
-}) {
+export function AdminSidebar({ navCounts }: { navCounts?: NavCounts }) {
   const { open, setOpen } = useAdminSidebar();
 
   return (
     <>
       <aside className="sticky top-0 hidden h-screen w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
-        <AdminSidebarContent data={data} navCounts={navCounts} />
+        <AdminSidebarContent navCounts={navCounts} />
       </aside>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -210,7 +184,7 @@ export function AdminSidebar({
           showCloseButton={false}
           className="w-[var(--sidebar-width)] max-w-[85%] border-0 bg-sidebar p-0 text-sidebar-foreground"
         >
-          <AdminSidebarContent data={data} navCounts={navCounts} />
+          <AdminSidebarContent navCounts={navCounts} />
         </SheetContent>
       </Sheet>
     </>
