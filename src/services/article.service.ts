@@ -29,6 +29,7 @@ export const articleService = {
     const island = filters.island || undefined;
     const topic = filters.topic || undefined;
     const q = filters.q?.trim() || undefined;
+    const status = filters.includeUnpublished ? undefined : 'published';
 
     const [
       articles,
@@ -46,8 +47,9 @@ export const articleService = {
         island,
         topic,
         q,
+        status,
       }),
-      articleRepository.countAll({ island, topic, q }),
+      articleRepository.countAll({ island, topic, status, q }),
       articleRepository.countAll({ status: 'published' }),
       articleRepository.countAll({ topic, status: 'published' }),
       articleRepository.countByIsland({ topic }),
@@ -154,9 +156,13 @@ export const articleService = {
     };
   },
 
-  getArticleDetail: async (idOrSlug: string, userId?: string) => {
+  getArticleDetail: async (
+    idOrSlug: string,
+    userId?: string,
+    canViewUnpublished = false,
+  ) => {
     const article = await articleRepository.findByIdOrSlug(idOrSlug);
-    if (!article) {
+    if (!article || (article.status !== 'published' && !canViewUnpublished)) {
       throw new ApiError('Artikel tidak ditemukan', 404);
     }
 

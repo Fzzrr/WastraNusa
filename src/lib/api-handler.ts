@@ -20,11 +20,23 @@ type PublicApiHandlerContext<T = unknown> = {
   params: T;
   req: Request;
   userId?: string;
+  userRole?: string | null;
 };
 
 type PublicApiHandler<T = unknown> = (
   context: PublicApiHandlerContext<T>,
 ) => Promise<Response>;
+
+function isForeignKeyError(err: unknown) {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    return err.code === 'P2003';
+  }
+  return (
+    err instanceof Error &&
+    err.name === 'DriverAdapterError' &&
+    err.message.includes('foreign key constraint')
+  );
+}
 
 function handleApiError(err: unknown, req: Request) {
   const action = req.method + ' ' + new URL(req.url).pathname;
@@ -32,6 +44,11 @@ function handleApiError(err: unknown, req: Request) {
 
   if (err instanceof ApiError) {
     return jsend.fail({ message: err.message }, err.status);
+  }
+
+  // Thrown by req.json() when the request body isn't valid JSON.
+  if (err instanceof SyntaxError) {
+    return jsend.fail({ message: 'Format JSON tidak valid' }, 400);
   }
 
   if (err instanceof ZodError) {
@@ -56,10 +73,15 @@ function handleApiError(err: unknown, req: Request) {
     }
   }
 
-  return jsend.error(
-    err instanceof Error ? err.message : 'Terjadi kesalahan pada server',
-    500,
-  );
+  if (isForeignKeyError(err)) {
+    return jsend.fail(
+      { message: 'Data masih digunakan sehingga tidak dapat dihapus' },
+      409,
+    );
+  }
+
+  // The real error is already in the logs; never send it to the client.
+  return jsend.error('Terjadi kesalahan pada server', 500);
 }
 
 /**
@@ -131,6 +153,7 @@ export function withApiPublic<T = unknown>(handler: PublicApiHandler<T>) {
       return await handler({
         params: resolvedParams,
         req,
+        userRole: user?.role,
         userId: user?.id,
       });
     } catch (err) {

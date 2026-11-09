@@ -12,6 +12,16 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+const databaseHost = new URL(process.env.DATABASE_URL).hostname;
+const isLocal = ['localhost', '127.0.0.1', 'database'].includes(databaseHost);
+
+// The seed deletes orders. Neon dev needs ALLOW_REMOTE_SEED=true; never set it
+// for production.
+if (!isLocal && process.env.ALLOW_REMOTE_SEED !== 'true') {
+  console.error(`Refusing to seed remote database: ${databaseHost}`);
+  process.exit(1);
+}
+
 async function main() {
   console.log('Starting seed process...');
 

@@ -31,6 +31,16 @@ interface CheckoutResolvedItem {
   imageURL: string | null;
 }
 
+const HANDLED_TRANSACTION_STATUSES = [
+  'capture',
+  'settlement',
+  'pending',
+  'deny',
+  'cancel',
+  'expire',
+  'failure',
+];
+
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
   const random = crypto.randomUUID().slice(0, 4).toUpperCase();
@@ -53,6 +63,8 @@ function mapTransactionStatus(
       return 'failed';
     case 'expire':
       return 'expired';
+    case 'failure':
+      return 'failed';
     default:
       return 'pending';
   }
@@ -71,6 +83,7 @@ function mapPaymentStatus(
     case 'deny':
     case 'cancel':
     case 'expire':
+    case 'failure':
       return 'failed';
     default:
       return 'unpaid';
@@ -319,13 +332,13 @@ export const paymentService = {
     );
 
     const customerNotes = [
-      input.customerNotes,
       resolvedItems.length > 0
         ? `checkout_items=${JSON.stringify(itemSnapshot)}`
         : null,
       checkoutCartItemIds.length > 0
         ? `checkout_cart_item_ids=${JSON.stringify(checkoutCartItemIds)}`
         : null,
+      input.customerNotes,
     ]
       .filter(Boolean)
       .join(' | ');
@@ -468,12 +481,38 @@ export const paymentService = {
       return;
     }
 
+    // The money did arrive, so the transaction stays `success`; only the order
+    // changes.
+    if (['refund', 'chargeback'].includes(transaction_status)) {
+      await orderRepository.updateOrderPaymentStatus(order_id, {
+        paymentStatus: 'refunded',
+      });
+      logger.warn('Order refunded', { order_id, transaction_status });
+      return;
+    }
+
+    // e.g. partial_refund or authorize: no matching state yet, so change nothing.
+    if (!HANDLED_TRANSACTION_STATUSES.includes(transaction_status)) {
+      logger.warn('Ignored Midtrans notification', {
+        order_id,
+        transaction_status,
+      });
+      return;
+    }
+
     const paymentTxStatus = mapTransactionStatus(transaction_status);
+    // Notifications can arrive late; never move a successful payment backwards.
+    if (paymentTxStatus === 'pending' && transaction.status === 'success') {
+      return;
+    }
+
     const paymentStatus = mapPaymentStatus(transaction_status);
     const isPaid =
       transaction_status === 'settlement' || transaction_status === 'capture';
-    const isFailed = ['deny', 'cancel', 'expire'].includes(transaction_status);
-    const paidAt = isPaid ? new Date() : null;
+    const isFailed = ['deny', 'cancel', 'expire', 'failure'].includes(
+      transaction_status,
+    );
+    const paidAt = isPaid ? (transaction.paidAt ?? new Date()) : null;
 
     await paymentTransactionRepository.updatePaymentStatus(order_id, {
       status: paymentTxStatus,
@@ -492,12 +531,12 @@ export const paymentService = {
         return;
       }
 
-      await orderRepository.updateOrderPaymentStatus(order_id, {
-        paymentStatus,
+      // capture is followed by settlement, and Midtrans retries notifications.
+      const { count } = await orderRepository.confirmPaidOrder(order_id, {
         paymentMethod: payment_type,
         paidAt,
-        orderStatus: 'confirmed' as const,
       });
+      if (count === 0) return;
     } else if (isFailed) {
       await orderService.cancelOrderBySystemId(
         order_id,

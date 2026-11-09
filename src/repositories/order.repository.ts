@@ -154,6 +154,16 @@ export const orderRepository = {
     });
   },
 
+  confirmPaidOrder: async (
+    orderId: string,
+    data: { paymentMethod: string; paidAt: Date | null },
+  ) => {
+    return prisma.order.updateMany({
+      where: { id: orderId, orderStatus: 'pending', paymentStatus: 'unpaid' },
+      data: { ...data, paymentStatus: 'paid', orderStatus: 'confirmed' },
+    });
+  },
+
   findOrdersByUserId: async (
     userId: string,
     filters: Prisma.OrderWhereInput,
@@ -263,13 +273,15 @@ export const orderRepository = {
     expiredAt?: Date,
   ) => {
     return prisma.$transaction(async (tx) => {
-      await tx.order.update({
-        where: { id: orderId },
+      // Only one caller can win this update, so stock is restored only once.
+      const { count } = await tx.order.updateMany({
+        where: { id: orderId, orderStatus: 'pending', paymentStatus: 'unpaid' },
         data: {
           orderStatus: 'cancelled',
           paymentStatus: 'failed',
         },
       });
+      if (count === 0) return;
 
       await tx.paymentTransaction.updateMany({
         where: {
@@ -283,7 +295,7 @@ export const orderRepository = {
       });
 
       for (const item of restoredVariantItems) {
-        await tx.productVariant.update({
+        await tx.productVariant.updateMany({
           where: { id: item.variantId },
           data: {
             stock: { increment: item.quantity },

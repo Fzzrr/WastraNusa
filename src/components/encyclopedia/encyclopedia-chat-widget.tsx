@@ -172,9 +172,11 @@ export function EncyclopediaChatWidget({
           </span>
           <div className="text-left">
             <p className="text-xs font-bold leading-tight tracking-wide text-[#f5ead3]">
-              Tanya Asisten
+              Chatbot Asisten WastraNusa
             </p>
-            <p className="text-xs font-medium text-white/80">Q&A Artikel Ini</p>
+            <p className="text-xs font-medium text-white/80">
+              Tanyakan Seputar Artikel Ini
+            </p>
           </div>
           {/* Subtle pulsating status dot */}
           <span className="absolute -top-1 -right-1 flex size-3">

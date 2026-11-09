@@ -17,7 +17,7 @@ export const checkoutSchema = z.object({
     .min(1, 'Alamat pengiriman wajib dipilih')
     .nullish(),
   shippingOptionId: z.string().min(1, 'Metode pengiriman wajib dipilih'),
-  customerNotes: z.string().nullish(),
+  customerNotes: z.string().max(500, 'Catatan maksimal 500 karakter').nullish(),
 });
 
 /**

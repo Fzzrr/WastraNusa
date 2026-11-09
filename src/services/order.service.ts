@@ -5,6 +5,7 @@ import {
   PaymentTransactionStatus,
 } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
+import { logError } from '@/lib/logger';
 import { formatIDR } from '@/lib/utils';
 import { orderRepository } from '@/repositories/order.repository';
 
@@ -252,7 +253,11 @@ async function reconcileExpiredOrders(userId?: string) {
   );
 
   for (const order of expiredOrders) {
-    await cancelOrderAndRestoreStock(order, 'expired');
+    try {
+      await cancelOrderAndRestoreStock(order, 'expired');
+    } catch (error) {
+      logError(error, { action: 'reconcileExpiredOrders', orderId: order.id });
+    }
   }
 }
 

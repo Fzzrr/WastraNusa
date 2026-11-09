@@ -246,9 +246,12 @@ export function EncyclopediaSection() {
                             </p>
                             <Badge
                               variant="secondary"
-                              className="mt-2 inline-flex rounded-md bg-white/12 px-2 py-0.5 text-xs font-medium text-[#dbe5d8]"
+                              className="mt-2 max-w-full justify-start rounded-md bg-white/12 px-2 py-0.5 text-xs font-medium text-[#dbe5d8]"
+                              title={article.category}
                             >
-                              {article.category}
+                              <span className="truncate">
+                                {article.category}
+                              </span>
                             </Badge>
                           </div>
                         </div>
@@ -266,7 +269,7 @@ export function EncyclopediaSection() {
 
             <Button
               asChild
-              className="group mt-5 inline-flex items-center gap-1 text-sm font-semibold text-[#d4e1d2] transition hover:text-white"
+              className="group mt-5 inline-flex items-center gap-1 rounded-full border border-[#e8cb8d]/40 bg-[#e8cb8d]/10 px-4 text-sm font-semibold text-[#f3dfb4] transition hover:border-[#e8cb8d]/70 hover:bg-[#e8cb8d]/20 hover:text-[#fff6e3]"
             >
               <Link href="/encyclopedia">
                 Lihat Semua Artikel

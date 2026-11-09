@@ -10,6 +10,9 @@ vi.mock('next/navigation', () => ({
     throw new Error('NEXT_NOT_FOUND');
   }),
 }));
+vi.mock('@/lib/auth/auth', () => ({
+  getSessionUser: vi.fn(async () => null),
+}));
 vi.mock('@/components/catalog/detail/catalog-detail-main', () => ({
   CatalogDetailMain: () => null,
 }));
@@ -22,6 +25,17 @@ const params = Promise.resolve({ slug: 'does-not-exist' });
 describe('slug detail pages', { tags: ['frontend'] }, () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('hides draft articles from guests', async () => {
+    vi.mocked(articleRepository.findByIdOrSlug).mockResolvedValue({
+      id: 'x',
+      status: 'draft',
+    } as never);
+
+    await expect(EncyclopediaDetailPage({ params })).rejects.toThrow(
+      'NEXT_NOT_FOUND',
+    );
   });
 
   it.each([
@@ -41,7 +55,10 @@ describe('slug detail pages', { tags: ['frontend'] }, () => {
     ['catalog', CatalogDetailPage, productRepository],
     ['encyclopedia', EncyclopediaDetailPage, articleRepository],
   ] as const)('%s renders when the slug exists', async (_, Page, repo) => {
-    vi.mocked(repo.findByIdOrSlug).mockResolvedValue({ id: 'x' } as never);
+    vi.mocked(repo.findByIdOrSlug).mockResolvedValue({
+      id: 'x',
+      status: 'published',
+    } as never);
 
     await expect(Page({ params })).resolves.toBeTruthy();
     expect(notFound).not.toHaveBeenCalled();
