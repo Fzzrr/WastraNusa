@@ -161,7 +161,23 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
 
     expect(res.status).toBe(500);
     expect(body.status).toBe('error');
-    expect(body.message).toBe('Something broke');
+    expect(body.message).toBe('Terjadi kesalahan pada server');
+  });
+
+  it('should return 409 when a foreign key blocks a delete', async () => {
+    const error = new Error(
+      'violates RESTRICT setting of foreign key constraint',
+    );
+    error.name = 'DriverAdapterError';
+    const handler = withApiPublic(async () => {
+      throw error;
+    });
+
+    const res = await handler(new Request('http://localhost/api/test'), {
+      params: Promise.resolve({}),
+    });
+
+    expect(res.status).toBe(409);
   });
 
   it('should return 500 with generic message on non-Error throw', async () => {

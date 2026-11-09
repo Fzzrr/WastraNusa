@@ -1,4 +1,4 @@
-import { withApiPublic } from '@/lib/api-handler';
+import { withApiAdmin } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
 import { productService } from '@/services/product.service';
 
@@ -7,7 +7,7 @@ import { productService } from '@/services/product.service';
  * seller-scoped dashboard (`/api/seller/dashboard`). Kept functional for
  * backward compatibility; the admin product-inventory UI has been retired.
  */
-export const GET = withApiPublic(async () => {
+export const GET = withApiAdmin(async () => {
   const dashboardOverview = await productService.getDashboardOverview();
   return jsend.success(dashboardOverview);
 });
