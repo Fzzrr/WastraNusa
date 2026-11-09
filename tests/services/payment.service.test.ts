@@ -346,6 +346,9 @@ describe('paymentService', () => {
         customerNotes:
           'checkout_cart_item_ids=[\"cart-item-1\"] | checkout_items=[{\"productId\":\"prod-1\",\"variantId\":\"var-1\",\"quantity\":2}]',
       } as never);
+      vi.mocked(orderRepository.confirmPaidOrder).mockResolvedValue({
+        count: 1,
+      });
       vi.mocked(cartRepository.removePurchasedItemsById).mockResolvedValue({
         count: 1,
       } as never);
@@ -361,9 +364,9 @@ describe('paymentService', () => {
         'order-123',
         expect.objectContaining({ status: 'success' }),
       );
-      expect(orderRepository.updateOrderPaymentStatus).toHaveBeenCalledWith(
+      expect(orderRepository.confirmPaidOrder).toHaveBeenCalledWith(
         'order-123',
-        expect.objectContaining({ paymentStatus: 'paid' }),
+        expect.objectContaining({ paymentMethod: mockPayload.payment_type }),
       );
       expect(cartRepository.removePurchasedItemsById).toHaveBeenCalledWith(
         'user-123',

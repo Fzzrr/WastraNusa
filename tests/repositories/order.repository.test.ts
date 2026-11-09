@@ -388,6 +388,85 @@ describe('orderRepository', { tags: ['db'] }, () => {
   });
 
   describe('cancelOrderAndRestoreStock', () => {
+    it('should restore stock only once when cancelled twice at the same time', async () => {
+      const id = crypto.randomUUID();
+      orderIds.push(id);
+      const variantId = crypto.randomUUID();
+      variantIds.push(variantId);
+
+      await prisma.productVariant.create({
+        data: {
+          id: variantId,
+          productId: SEED_PRODUCT_1.id,
+          name: `Race Variant ${variantId.slice(0, 8)}`,
+          type: 'size',
+          price: Number(SEED_PRODUCT_1.price),
+          stock: 10,
+          sku: `TEST-RACE-VAR-${variantId.slice(0, 8)}`,
+        },
+      });
+
+      await orderRepository.createOrder({
+        id,
+        orderNumber: `TEST-RACE-${id.slice(0, 8)}`,
+        userId,
+        productId: SEED_PRODUCT_1.id,
+        variantId,
+        productName: SEED_PRODUCT_1.name,
+        quantity: 2,
+        productPrice: Number(SEED_PRODUCT_1.price),
+        shippingAddressId: SEED_ADDRESS_USER.id,
+        courier: 'JNE',
+        courierService: 'REG',
+        subtotal: Number(SEED_PRODUCT_1.price) * 2,
+        shippingCost: 15000,
+        totalAmount: Number(SEED_PRODUCT_1.price) * 2 + 15000,
+      });
+
+      const restore = () =>
+        orderRepository.cancelOrderAndRestoreStock(
+          id,
+          [{ variantId, quantity: 2 }],
+          'expired',
+        );
+      await Promise.all([restore(), restore()]);
+
+      const variant = await prisma.productVariant.findUnique({
+        where: { id: variantId },
+      });
+      expect(variant?.stock).toBe(12);
+    });
+
+    it('should still cancel when a variant no longer exists', async () => {
+      const id = crypto.randomUUID();
+      orderIds.push(id);
+
+      await orderRepository.createOrder({
+        id,
+        orderNumber: `TEST-GONE-${id.slice(0, 8)}`,
+        userId,
+        productId: SEED_PRODUCT_1.id,
+        productName: SEED_PRODUCT_1.name,
+        quantity: 1,
+        productPrice: Number(SEED_PRODUCT_1.price),
+        shippingAddressId: SEED_ADDRESS_USER.id,
+        courier: 'JNE',
+        courierService: 'REG',
+        subtotal: Number(SEED_PRODUCT_1.price),
+        shippingCost: 15000,
+        totalAmount: Number(SEED_PRODUCT_1.price) + 15000,
+      });
+
+      await orderRepository.cancelOrderAndRestoreStock(
+        id,
+        [{ variantId: 'deleted-variant', quantity: 1 }],
+        'expired',
+      );
+
+      const order = await prisma.order.findUnique({ where: { id } });
+      expect(order?.orderStatus).toBe('cancelled');
+    });
+
     it('should cancel order, expire pending payment transaction, and restore stock', async () => {
       const id = crypto.randomUUID();
       orderIds.push(id);

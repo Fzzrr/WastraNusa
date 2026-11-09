@@ -2,6 +2,14 @@ import { cleanup } from '@testing-library/react';
 import 'dotenv/config';
 import { afterEach, vi } from 'vitest';
 
+// Repository tests write real rows, so refuse to run against a remote database.
+const databaseHost = new URL(
+  process.env.DATABASE_URL ?? 'postgresql://localhost',
+).hostname;
+if (!['localhost', '127.0.0.1', 'database'].includes(databaseHost)) {
+  throw new Error(`Tests must not run against ${databaseHost}`);
+}
+
 // vitest is not in `globals` mode, so React Testing Library's automatic
 // afterEach cleanup is not registered. Without this, rendered components
 // accumulate in document.body across tests (e.g. duplicate elements).
@@ -85,6 +93,7 @@ vi.mock('@/repositories/order.repository', () => ({
     findOrderForUserByIdentifier: vi.fn(),
     findOrderForCancellationById: vi.fn(),
     updateOrderPaymentStatus: vi.fn(),
+    confirmPaidOrder: vi.fn(),
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
     findExpiredPendingOrders: vi.fn(),
