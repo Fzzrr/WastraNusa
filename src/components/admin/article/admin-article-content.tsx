@@ -81,7 +81,9 @@ export function AdminArticleContent() {
     useState<EncyclopediaArticleDetail | null>(null);
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
 
-  const { data: articlesData, isLoading } = useArticles(page, 10);
+  const { data: articlesData, isLoading } = useArticles(page, 10, {
+    includeUnpublished: true,
+  });
   const {
     mutate: deleteArticle,
     mutateAsync: deleteArticleAsync,
@@ -98,8 +100,16 @@ export function AdminArticleContent() {
     if (articlesData?.meta.hasNextPage) {
       const nextPage = page + 1;
       queryClient.prefetchQuery({
-        queryKey: articleKeys.list(nextPage, 10),
-        queryFn: () => fetchArticles(nextPage, 10),
+        queryKey: articleKeys.list(
+          nextPage,
+          10,
+          undefined,
+          undefined,
+          undefined,
+          true,
+        ),
+        queryFn: () =>
+          fetchArticles(nextPage, 10, { includeUnpublished: true }),
       });
     }
   }, [page, articlesData, queryClient]);

@@ -31,6 +31,7 @@ export const articleKeys = {
     island?: string,
     topic?: string,
     q?: string,
+    includeUnpublished?: boolean,
   ) =>
     [
       ...articleKeys.lists(),
@@ -39,6 +40,7 @@ export const articleKeys = {
       island ?? 'all',
       topic ?? 'all',
       q ?? '',
+      includeUnpublished ?? false,
     ] as const,
   details: () => [...articleKeys.all, 'detail'] as const,
   detail: (slug: string) => [...articleKeys.details(), slug] as const,
@@ -153,6 +155,10 @@ export function fetchArticles(
     searchParams.set('q', filters.q);
   }
 
+  if (filters.includeUnpublished) {
+    searchParams.set('includeUnpublished', 'true');
+  }
+
   return fetchArticleApi<EncyclopediaArticleListResponse>(
     `/api/articles?${searchParams.toString()}`,
   );
@@ -202,6 +208,7 @@ export function useArticles(
       filters.island,
       filters.topic,
       filters.q,
+      filters.includeUnpublished,
     ),
     queryFn: () => fetchArticles(page, limit, filters),
     placeholderData: (previousData) => previousData,

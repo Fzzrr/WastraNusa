@@ -1,4 +1,5 @@
 import { ArticleStatus, Prisma } from '@/generated/prisma/client';
+import { ApiError } from '@/lib/error';
 import prisma from '@/lib/prisma';
 import { mergeUniqueSorted } from '@/lib/utils';
 
@@ -72,16 +73,18 @@ export const articleRepository = {
     limit,
     island,
     topic,
+    status,
     q,
   }: {
     offset?: number;
     limit?: number;
     island?: string;
     topic?: string;
+    status?: ArticleStatus;
     q?: string;
   } = {}) => {
     return prisma.article.findMany({
-      where: buildListWhere({ island, topic, q }),
+      where: buildListWhere({ island, topic, status, q }),
       skip: offset,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -178,6 +181,7 @@ export const articleRepository = {
 
   findMostPopular: async (limit: number = 6) => {
     return prisma.articleEngagement.findMany({
+      where: { article: { status: 'published' } },
       take: limit,
       orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
       include: {
@@ -329,7 +333,7 @@ export const articleRepository = {
       });
 
       if (!article) {
-        throw new Error('NotFound');
+        throw new ApiError('Artikel tidak ditemukan', 404);
       }
 
       const existingLike = await tx.userArticleLike.findFirst({

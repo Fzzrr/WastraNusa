@@ -45,6 +45,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
       island: undefined,
       topic: undefined,
+      includeUnpublished: false,
     });
   });
 
@@ -70,6 +71,7 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(mockService.getArticles).toHaveBeenCalledWith(3, 20, {
       island: 'Jawa',
       topic: undefined,
+      includeUnpublished: false,
     });
   });
 
@@ -95,7 +97,39 @@ describe('GET /api/articles', { tags: ['backend'] }, () => {
     expect(mockService.getArticles).toHaveBeenCalledWith(1, 10, {
       island: undefined,
       topic: 'Teknik Pembuatan',
+      includeUnpublished: false,
     });
+  });
+});
+
+describe('GET /api/articles drafts', { tags: ['backend'] }, () => {
+  const request = () =>
+    createRequest('http://localhost/api/articles?includeUnpublished=true');
+
+  it('should ignore includeUnpublished for guests', async () => {
+    mockAuth.getUser.mockResolvedValue(null as never);
+    mockService.getArticles.mockResolvedValue(MOCK_ARTICLES as never);
+
+    await GET(request(), { params: Promise.resolve({}) });
+
+    expect(mockService.getArticles).toHaveBeenCalledWith(
+      1,
+      10,
+      expect.objectContaining({ includeUnpublished: false }),
+    );
+  });
+
+  it('should honour includeUnpublished for admins', async () => {
+    mockAuth.getUser.mockResolvedValue({ id: 'a', role: 'admin' } as never);
+    mockService.getArticles.mockResolvedValue(MOCK_ARTICLES as never);
+
+    await GET(request(), { params: Promise.resolve({}) });
+
+    expect(mockService.getArticles).toHaveBeenCalledWith(
+      1,
+      10,
+      expect.objectContaining({ includeUnpublished: true }),
+    );
   });
 });
 

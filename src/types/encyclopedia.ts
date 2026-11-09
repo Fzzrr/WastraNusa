@@ -20,6 +20,8 @@ export interface EncyclopediaArticleFilters {
   topic?: string;
   /** Free-text search, matched in the database. */
   q?: string;
+  /** Admin table only; the API ignores this for everyone else. */
+  includeUnpublished?: boolean;
 }
 
 export interface EncyclopediaArticle {
