@@ -26,18 +26,18 @@ import {
  */
 
 export const inputClassName =
-  'h-11 rounded-xl border-[#e5ded5] bg-white px-4 text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
+  'h-12 rounded-xl border-border bg-card px-4 text-base text-ink placeholder:text-ink-soft transition-shadow focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15';
 export const textareaClassName =
-  'w-full resize-none rounded-xl border border-[#e5ded5] bg-white px-4 py-3 text-sm text-[#2f3a33] placeholder:text-[#b3aa9e] transition-shadow focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15';
+  'w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-base text-ink placeholder:text-ink-soft transition-shadow focus:outline-none focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15';
 export const selectTriggerClassName =
-  'h-11 w-full cursor-pointer gap-2.5 rounded-xl border-[#e5ded5] bg-white px-3.5 text-[#2f3a33] shadow-[0_1px_2px_rgba(60,41,15,0.04)] transition-all hover:border-[#caa86a]/60 focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15 disabled:cursor-not-allowed disabled:bg-[#f4efe5] data-[size=default]:h-11 data-[state=open]:border-[#3a5a4a] data-[state=open]:ring-3 data-[state=open]:ring-[#3a5a4a]/15 data-placeholder:text-[#b3aa9e] [&>svg:last-child]:text-[#8a6a3a] [&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-[state=open]:[&>svg:last-child]:rotate-180';
+  'h-12 w-full cursor-pointer gap-2.5 rounded-xl border-border bg-card px-4 text-base text-ink transition-colors hover:border-brand/40 focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15 disabled:cursor-not-allowed disabled:bg-surface data-[size=default]:h-11 data-[state=open]:border-brand data-[state=open]:ring-3 data-[state=open]:ring-brand/15 data-placeholder:text-ink-soft [&>svg:last-child]:text-ink-soft [&>svg:last-child]:transition-transform [&>svg:last-child]:duration-200 data-[state=open]:[&>svg:last-child]:rotate-180';
 
 /** Dropdown panel opened directly below its trigger, matching its width. */
 export const selectContentClassName =
-  'max-h-72 rounded-xl border-0 bg-[#fffdfa] p-1 shadow-[0_16px_36px_-12px_rgba(89,69,38,0.28)] ring-1 ring-[#ebe3d6]';
+  'max-h-72 rounded-xl border-0 bg-card p-1';
 
 export const selectItemClassName =
-  'cursor-pointer rounded-lg py-2 pr-8 pl-3 text-sm text-[#3d3a34] transition-colors focus:bg-[#f4efe5] focus:text-[#2f5543] data-[state=checked]:bg-[#e3ece5] data-[state=checked]:font-semibold data-[state=checked]:text-[#2f5543] [&_svg]:text-[#2f5543]';
+  'cursor-pointer rounded-lg py-2 pr-8 pl-3 text-[15px] text-ink transition-colors focus:bg-surface focus:text-ink data-[state=checked]:bg-surface data-[state=checked]:font-semibold data-[state=checked]:text-ink [&_svg]:text-ink';
 
 /**
  * Single-choice pill buttons (radio group). Friendlier than a dropdown for
@@ -70,10 +70,10 @@ export function ChoicePills<T extends string | null>({
             aria-checked={isActive}
             onClick={() => onChange(option.value)}
             className={cn(
-              'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl px-4 text-sm transition-all',
+              'inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-xl px-4 text-[15px] transition-all',
               isActive
-                ? 'bg-[#3a5a4a] font-medium text-white shadow-[0_6px_14px_-6px_rgba(47,75,61,0.6)]'
-                : 'bg-white text-[#6f6a62] ring-1 ring-[#e5ded5] hover:text-[#2f5543] hover:ring-[#3a5a4a]/40',
+                ? 'bg-brand font-medium text-on-field'
+                : 'bg-card text-ink-soft hover:text-ink',
             )}
           >
             {isActive ? <Check className="size-3.5" /> : null}
@@ -116,12 +116,12 @@ export function Field({
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
       <div className="flex items-center justify-between gap-2">
-        <label className="text-sm font-medium text-[#3d3a34]">
+        <label className="text-[15px] font-medium text-ink">
           {label}
           {required ? (
-            <span className="ml-0.5 text-[#c26a3d]">*</span>
+            <span className="ml-0.5 text-destructive">*</span>
           ) : (
-            <span className="ml-1.5 text-xs font-normal text-[#a39c92]">
+            <span className="ml-1.5 text-[13px] font-normal text-ink-soft">
               (Opsional)
             </span>
           )}
@@ -130,26 +130,24 @@ export function Field({
       </div>
       {children}
       {error ? (
-        <p className="flex animate-in items-center gap-1 text-xs text-red-600 fade-in">
+        <p className="flex animate-in items-center gap-1 text-[13px] text-destructive fade-in">
           <AlertCircle className="size-3.5 shrink-0" />
           {error}
         </p>
       ) : hint ? (
-        <p className="text-xs text-[#9a8f80]">{hint}</p>
+        <p className="text-[13px] text-ink-soft">{hint}</p>
       ) : null}
     </div>
   );
 }
 
 export function FormSection({
-  step,
   icon: Icon,
   title,
   description,
   aside,
   children,
 }: {
-  step: number;
   icon: LucideIcon;
   title: string;
   description: string;
@@ -157,18 +155,16 @@ export function FormSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-2xl bg-[#fffdfa] p-5 ring-1 ring-[#ebe3d6]">
+    <section className="rounded-xl bg-card p-5 md:p-6">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3">
-          <span className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#f4efe5] text-[#8a6a3a]">
-            <Icon className="size-4" />
-            <span className="absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#3a5a4a] text-xs font-semibold text-white">
-              {step}
-            </span>
-          </span>
+          <Icon
+            className="mt-0.5 size-5 shrink-0 text-ink-soft"
+            strokeWidth={1.75}
+          />
           <div>
-            <h3 className="font-semibold text-[#2f4f3f]">{title}</h3>
-            <p className="text-xs text-[#9a8f80]">{description}</p>
+            <h3 className="text-lg font-semibold text-ink">{title}</h3>
+            <p className="text-[15px] text-ink-soft">{description}</p>
           </div>
         </div>
         {aside}
@@ -192,7 +188,7 @@ export function ImagePreview({
   return (
     <div
       className={cn(
-        'flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] text-[#b3aa9e]',
+        'flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-surface text-ink-soft',
         isValid && 'border-solid',
         className,
       )}
@@ -287,18 +283,18 @@ export function CreatableCombobox({
           inputRef.current?.focus();
         }}
         className={cn(
-          'flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-xl border border-[#e5ded5] bg-white py-1.5 pr-2 pl-3 transition-shadow',
-          isOpen && 'border-[#3a5a4a] ring-3 ring-[#3a5a4a]/15',
+          'flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-xl border border-border bg-card py-1.5 pr-2 pl-3 transition-shadow',
+          isOpen && 'border-brand ring-3 ring-brand/15',
         )}
       >
         <Search
           className={cn(
             'size-4 shrink-0 transition-colors',
-            isOpen ? 'text-[#2f5543]' : 'text-[#b3aa9e]',
+            isOpen ? 'text-ink' : 'text-ink-soft',
           )}
         />
         {value ? (
-          <span className="inline-flex animate-in items-center gap-1 rounded-lg bg-[#e3ece5] px-2 py-1 text-sm font-medium text-[#2f5543] fade-in zoom-in-95">
+          <span className="inline-flex animate-in items-center gap-1 rounded-lg bg-surface px-2 py-1 text-[15px] font-medium text-ink fade-in zoom-in-95">
             {value}
             <button
               type="button"
@@ -307,7 +303,7 @@ export function CreatableCombobox({
                 event.stopPropagation();
                 onChange('');
               }}
-              className="cursor-pointer rounded-full p-0.5 text-[#5b7d66] hover:bg-[#cfe0d3] hover:text-[#2f5543]"
+              className="cursor-pointer rounded-full p-0.5 text-ink-soft hover:bg-surface hover:text-ink"
             >
               <X className="size-3" />
             </button>
@@ -323,13 +319,13 @@ export function CreatableCombobox({
           role="combobox"
           aria-expanded={isOpen}
           aria-controls={listboxId}
-          className="min-w-[8rem] flex-1 bg-transparent px-1 text-sm text-[#2f3a33] outline-none placeholder:text-[#b3aa9e]"
+          className="min-w-[8rem] flex-1 bg-transparent px-1 text-[15px] text-ink outline-none placeholder:text-ink-soft"
         />
       </div>
 
       {isOpen ? (
-        <div className="absolute z-20 mt-2 w-full origin-top animate-in overflow-hidden rounded-xl bg-[#fffdfa] shadow-[0_12px_32px_rgba(89,69,38,0.14)] ring-1 ring-[#ebe3d6] duration-150 fade-in zoom-in-95">
-          <p className="flex items-center gap-1.5 border-b border-[#efe8de] px-3 py-2 text-xs font-medium text-[#9a8f80]">
+        <div className="absolute z-20 mt-2 w-full origin-top animate-in overflow-hidden rounded-xl bg-card duration-150 fade-in zoom-in-95">
+          <p className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[13px] text-ink-soft">
             <History className="size-3.5" />
             {trimmedSearch
               ? `${filteredOptions.length} Data Tersimpan Cocok`
@@ -341,7 +337,7 @@ export function CreatableCombobox({
             className="max-h-52 overflow-y-auto p-1"
           >
             {isLoading ? (
-              <p className="px-3 py-2 text-sm text-[#9a8f80]">Memuat…</p>
+              <p className="px-3 py-2 text-base text-ink-soft">Memuat…</p>
             ) : null}
             {filteredOptions.map((option) => (
               <button
@@ -351,8 +347,8 @@ export function CreatableCombobox({
                 aria-selected={value === option}
                 onClick={() => select(option)}
                 className={cn(
-                  'flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-[#3d3a34] transition-colors hover:bg-[#f4efe5]',
-                  value === option && 'bg-[#f4efe5] font-medium text-[#2f5543]',
+                  'flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-[15px] text-ink transition-colors hover:bg-surface',
+                  value === option && 'bg-surface font-medium text-ink',
                 )}
               >
                 {option}
@@ -363,17 +359,17 @@ export function CreatableCombobox({
               <button
                 type="button"
                 onClick={() => select(trimmedSearch)}
-                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-[#f4efe5]"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-[15px] transition-colors hover:bg-surface"
               >
-                <Plus className="size-3.5 text-[#2f5543]" />
-                <span className="text-[#9a8f80]">Buat baru</span>
-                <span className="rounded-md bg-[#e3ece5] px-2 py-0.5 font-medium text-[#2f5543]">
+                <Plus className="size-3.5 text-ink" />
+                <span className="text-ink-soft">Buat baru</span>
+                <span className="rounded-md bg-surface px-2 py-0.5 font-medium text-ink">
                   {trimmedSearch}
                 </span>
               </button>
             ) : null}
             {!isLoading && filteredOptions.length === 0 && !trimmedSearch ? (
-              <p className="px-3 py-2 text-sm text-[#9a8f80]">{emptyText}</p>
+              <p className="px-3 py-2 text-base text-ink-soft">{emptyText}</p>
             ) : null}
           </div>
         </div>

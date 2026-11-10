@@ -25,7 +25,6 @@ export function SummarySection() {
   const imageURL = useWatch({ control, name: 'imageURL' });
   return (
     <FormSection
-      step={4}
       icon={BookOpen}
       title="Ringkasan & Gambar"
       description="Teks yang muncul di kartu dan halaman artikel"
@@ -39,10 +38,10 @@ export function SummarySection() {
           aside={
             <span
               className={cn(
-                'text-xs tabular-nums',
+                'text-[13px] tabular-nums',
                 excerptLength > EXCERPT_SOFT_LIMIT
-                  ? 'text-[#c26a3d]'
-                  : 'text-[#a39c92]',
+                  ? 'text-destructive'
+                  : 'text-ink-soft',
               )}
             >
               {excerptLength}/{EXCERPT_SOFT_LIMIT}

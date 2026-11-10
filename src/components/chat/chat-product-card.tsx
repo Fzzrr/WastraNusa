@@ -16,11 +16,11 @@ export function ChatProductCard({
     <Link
       href={`/catalog/${encodeURIComponent(product.slug)}`}
       className={cn(
-        'flex min-w-0 items-center gap-2.5 rounded-xl bg-white p-2 text-[#2f3a33] ring-1 ring-[#ebe3d6] transition-colors hover:ring-[#2f5f49]/40',
+        'flex min-w-0 items-center gap-2.5 rounded-xl bg-card p-2 text-ink transition-colors',
         className,
       )}
     >
-      <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-[#f1ebdf] text-[#a07a2c]">
+      <span className="relative grid size-11 shrink-0 place-items-center overflow-hidden rounded-lg bg-surface text-ink-soft">
         {product.imageURL ? (
           <Image
             src={product.imageURL}
@@ -34,15 +34,15 @@ export function ChatProductCard({
         )}
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-xs font-semibold">
+        <span className="block truncate text-[13px] font-semibold">
           {product.name}
         </span>
         {product.variantName ? (
-          <span className="block truncate text-xs text-[#7d7465]">
+          <span className="block truncate text-[13px] text-ink-soft">
             Varian: {product.variantName}
           </span>
         ) : null}
-        <span className="block text-xs font-bold text-[#2f5f49]">
+        <span className="block text-[15px] font-semibold text-ink">
           {formatIDR(product.price)}
         </span>
       </span>

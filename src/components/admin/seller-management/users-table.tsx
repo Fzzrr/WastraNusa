@@ -36,56 +36,52 @@ function UserRow({
       <tr
         onClick={hasDetail ? onToggle : undefined}
         className={cn(
-          'group border-t border-[#efe8dd] transition-colors',
-          hasDetail && 'cursor-pointer hover:bg-[#faf7f2]',
-          isExpanded && 'bg-[#faf7f2]',
+          'group border-t border-border transition-colors',
+          hasDetail && 'cursor-pointer hover:bg-surface',
+          isExpanded && 'bg-surface',
         )}
       >
         <td className="px-5 py-4">
           <div className="flex items-center gap-3">
             <span
               className={cn(
-                'relative flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-2 ring-white transition-transform group-hover:scale-105',
-                isSeller
-                  ? 'bg-[#dfe8df] text-[#2f5543]'
-                  : 'bg-[#efe3cc] text-[#9a7b4a]',
+                'relative flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold ring-2 ring-white transition-transform group-hover:scale-105',
+                isSeller ? 'bg-surface text-ink' : 'bg-surface text-ink-soft',
               )}
             >
               {getInitials(user.name)}
               {isSeller ? (
-                <BadgeCheck className="absolute -right-1 -bottom-1 size-4 rounded-full bg-white fill-[#2f5543] text-white" />
+                <BadgeCheck className="absolute -right-1 -bottom-1 size-4 rounded-full bg-card fill-brand text-white" />
               ) : null}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-[#2f3a33] transition-colors group-hover:text-[#2f5543]">
+              <p className="truncate text-base font-medium text-ink transition-colors group-hover:text-ink">
                 {user.name}
               </p>
               {showShopName ? (
-                <p className="truncate text-xs text-[#9a8f80]">
+                <p className="truncate text-[13px] text-ink-soft">
                   {application.shopName}
                 </p>
               ) : null}
             </div>
           </div>
         </td>
-        <td className="px-5 py-4 text-xs text-[#6f6a62]">
+        <td className="px-5 py-4 text-[13px] text-ink-soft">
           {user.location ?? '—'}
           {user.locationSource ? (
-            <p className="mt-0.5 text-xs text-[#a39c92]">
+            <p className="mt-0.5 text-[13px] text-ink-soft">
               {user.locationSource === 'ip'
                 ? 'Perkiraan dari login terakhir'
                 : 'Alamat pengiriman'}
             </p>
           ) : null}
         </td>
-        <td className="px-5 py-4 text-sm text-[#2f3a33]">
+        <td className="px-5 py-4 text-[15px] text-ink">
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
-                isSeller
-                  ? 'bg-[#e7efe4] text-[#2f5543]'
-                  : 'bg-[#f1ede6] text-[#6f6a62]',
+                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[13px] font-medium',
+                isSeller ? 'bg-surface text-ink' : 'bg-surface text-ink-soft',
               )}
             >
               {isSeller ? (
@@ -96,7 +92,7 @@ function UserRow({
               {isSeller ? 'Seller' : 'User'}
             </span>
             {application?.status === 'pending' ? (
-              <span className="rounded-full bg-[#f8ecd6] px-2 py-0.5 text-xs font-medium text-[#a0702a]">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-medium text-ink-soft">
                 Menunggu Review
               </span>
             ) : null}
@@ -116,8 +112,8 @@ function UserRow({
               onToggle();
             }}
             className={cn(
-              'cursor-pointer text-[#4a4843] transition-colors hover:bg-[#f4efe5] disabled:opacity-30',
-              isExpanded && 'bg-[#2f5543] text-white hover:bg-[#2f5543]',
+              'cursor-pointer text-ink transition-colors hover:bg-surface disabled:opacity-30',
+              isExpanded && 'bg-brand text-on-field hover:bg-brand-strong',
             )}
           >
             <MoreHorizontal
@@ -152,7 +148,7 @@ export function UsersTable({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-2xl ring-1',
+        'overflow-hidden rounded-xl ring-1',
         lightCardClassName,
         enterClassName,
       )}
@@ -160,7 +156,7 @@ export function UsersTable({
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
+          <thead className="bg-surface text-[13px] font-medium text-ink-soft">
             <tr>
               <th className="w-[38%] px-5 py-4">User</th>
               <th className="px-5 py-4">Lokasi</th>
@@ -171,31 +167,32 @@ export function UsersTable({
           <tbody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, index) => (
-                <tr key={index} className="border-t border-[#efe8dd]">
+                <tr key={index} className="border-t border-border">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <Skeleton className="size-9 rounded-full bg-[#eee2d0]" />
-                      <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
+                      <Skeleton className="size-9 rounded-full bg-surface" />
+                      <Skeleton className="h-4 w-32 bg-surface" />
                     </div>
                   </td>
                   <td className="px-5 py-4">
-                    <Skeleton className="h-3 w-20 bg-[#eee2d0]" />
+                    <Skeleton className="h-3 w-20 bg-surface" />
                   </td>
                   <td className="px-5 py-4">
-                    <Skeleton className="h-4 w-14 bg-[#eee2d0]" />
+                    <Skeleton className="h-4 w-14 bg-surface" />
                   </td>
                   <td className="px-5 py-4">
-                    <Skeleton className="h-4 w-6 bg-[#eee2d0]" />
+                    <Skeleton className="h-4 w-6 bg-surface" />
                   </td>
                 </tr>
               ))
             ) : users.length === 0 ? (
               <tr>
                 <td colSpan={4} className="py-12">
-                  <div className="flex flex-col items-center gap-3 text-sm text-[#8f8377]">
-                    <span className="flex size-11 items-center justify-center rounded-full bg-[#f4efe5] text-[#b08a5e]">
-                      <Search className="size-5" />
-                    </span>
+                  <div className="flex flex-col items-center gap-3 text-[15px] text-ink-soft">
+                    <Search
+                      className="shrink-0 size-5 text-ink-soft"
+                      strokeWidth={1.75}
+                    />
                     Tidak ada user yang cocok.
                   </div>
                 </td>

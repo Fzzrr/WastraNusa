@@ -31,7 +31,7 @@ export function LikedArticlesMain() {
         <span className="flex items-center gap-2">
           Artikel Disukai
           {!isPending ? (
-            <span className="rounded-full bg-[#f6e4da] px-2 py-0.5 text-xs font-semibold text-[#9c5235]">
+            <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-ink-soft">
               {totalItems}
             </span>
           ) : null}
@@ -44,13 +44,13 @@ export function LikedArticlesMain() {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="flex animate-pulse items-center gap-4 rounded-2xl bg-white p-3.5 ring-1 ring-[#efe8dd]"
+              className="flex animate-pulse items-center gap-4 rounded-xl bg-card p-3.5"
             >
-              <div className="size-20 rounded-xl bg-[#efe8db]" />
+              <div className="size-20 rounded-xl bg-surface" />
               <div className="flex flex-1 flex-col gap-2">
-                <div className="h-4 w-28 rounded-full bg-[#efe8db]" />
-                <div className="h-4 w-3/4 rounded bg-[#f2ede4]" />
-                <div className="h-3 w-full rounded bg-[#f6f2ea]" />
+                <div className="h-4 w-28 rounded-full bg-surface" />
+                <div className="h-4 w-3/4 rounded bg-surface" />
+                <div className="h-3 w-full rounded bg-surface" />
               </div>
             </div>
           ))}

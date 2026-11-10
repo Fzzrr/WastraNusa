@@ -54,3 +54,5 @@ src/generated/
 # postman
 .postman/
 postman/
+# design-taste working files (screenshots, direction sheet)
+.taste-skill/

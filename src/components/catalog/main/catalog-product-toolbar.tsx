@@ -1,26 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { ProductCatalogSortBy } from '@/types/product';
-import {
-  ArrowDown,
-  ArrowDownAZ,
-  ArrowUp,
-  ArrowUpAZ,
-  ArrowUpDown,
-  Clock,
-  History,
-  Package,
-} from 'lucide-react';
-
-const SORT_ICONS: Record<ProductCatalogSortBy, typeof Clock> = {
-  newest: Clock,
-  oldest: History,
-  price_asc: ArrowUp,
-  price_desc: ArrowDown,
-  name_asc: ArrowDownAZ,
-  name_desc: ArrowUpAZ,
-};
 
 type CatalogProductToolbarProps = {
   activeSort: ProductCatalogSortBy;
@@ -39,54 +18,36 @@ export function CatalogProductToolbar({
   onSortChange,
 }: CatalogProductToolbarProps) {
   return (
-    <Card className="rounded-2xl border-0 bg-[#fbf8f2] px-3 py-3 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_28px_rgba(89,69,38,0.06)] ring-1 ring-[#e3d9c7] sm:px-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        {/* Result count */}
-        <div className="flex items-center gap-2.5 rounded-xl border border-[#e2dac9] bg-[#efeadf] py-1.5 pr-4 pl-1.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
-            <Package className="size-4" />
-          </span>
-          <p className="text-sm text-[#5b6f63]">
-            Menampilkan{' '}
-            <span className="rounded-md bg-[#2f5f49]/10 px-1.5 py-0.5 font-bold text-[#2f5b49]">
-              {productCount}
-            </span>{' '}
-            Produk
-          </p>
-        </div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-[15px] text-ink-soft tabular-nums">
+        {productCount} produk
+      </p>
 
-        {/* Sort control */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-[#68746a]">
-            <ArrowUpDown className="size-3.5" />
-            Urutkan
-          </span>
-          <div className="flex flex-wrap items-center gap-1 rounded-xl border border-[#e2dac9] bg-[#efeadf] p-1">
-            {sortOptions.map((option) => {
-              const Icon = SORT_ICONS[option.value];
-              const isActive = activeSort === option.value;
-              return (
-                <Button
-                  key={option.value}
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  className={cn(
-                    'h-7 gap-1.5 rounded-lg px-3 text-xs font-semibold transition-all duration-200 active:scale-95',
-                    isActive
-                      ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf3eb] shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)] hover:text-[#edf3eb]'
-                      : 'text-[#5d6f62] hover:bg-[#e3dccd] hover:text-[#3f5b4c]',
-                  )}
-                  onClick={() => onSortChange(option.value)}
-                >
-                  <Icon className="size-3.5" />
-                  {option.label}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
+      <div
+        role="group"
+        aria-label="Urutkan produk"
+        className="-mx-1 flex gap-1 overflow-x-auto px-1 sm:mx-0 sm:px-0"
+      >
+        {sortOptions.map((option) => {
+          const isActive = activeSort === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={isActive}
+              className={cn(
+                'h-10 shrink-0 cursor-pointer rounded-full px-4 text-[15px] whitespace-nowrap transition-colors active:scale-95',
+                isActive
+                  ? 'bg-brand font-semibold text-on-field'
+                  : 'text-ink-soft hover:bg-surface hover:text-ink',
+              )}
+              onClick={() => onSortChange(option.value)}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
-    </Card>
+    </div>
   );
 }

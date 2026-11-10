@@ -46,12 +46,10 @@ function AddressField({
 }) {
   return (
     <div className="flex min-w-0 gap-2.5">
-      <Icon className="mt-0.5 size-4 shrink-0 text-[#b08a5e]" />
+      <Icon className="mt-0.5 size-4 shrink-0 text-ink-soft" />
       <div className="min-w-0">
-        <div className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
-          {label}
-        </div>
-        <div className="text-sm text-[#3d4f45]">{children}</div>
+        <div className="text-[13px] font-medium text-ink-soft">{label}</div>
+        <div className="text-[15px] text-ink">{children}</div>
       </div>
     </div>
   );
@@ -66,37 +64,32 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
   return (
     <div
       className={cn(
-        'group overflow-hidden rounded-2xl bg-white ring-1 transition-all duration-300 hover:shadow-[0_16px_32px_-22px_rgba(89,69,38,0.45)]',
-        address.isDefault
-          ? 'ring-2 ring-[#2f5f49]/40'
-          : 'ring-[#efe8dd] hover:ring-[#caa86a]/50',
+        'group overflow-hidden rounded-xl bg-card transition-shadow duration-300',
+        address.isDefault ? 'ring-2 ring-brand/40' : 'ring-0',
       )}
     >
       {/* Header */}
       <div
         className={cn(
-          'flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 md:px-5',
+          'flex flex-wrap items-center justify-between gap-3 px-4 pt-4 md:px-5',
           address.isDefault
-            ? 'border-[#d5e2d8] bg-gradient-to-r from-[#e3ece5] to-[#faf7f2]'
-            : 'border-[#efe8dd] bg-[#faf7f2]',
+            ? 'border-border bg-surface'
+            : 'border-border bg-surface',
         )}
       >
         <div className="flex items-center gap-3">
-          <span
+          <LabelIcon
             className={cn(
-              'grid size-9 place-items-center rounded-xl',
-              address.isDefault
-                ? 'bg-[#2f5f49] text-[#e8cb8d]'
-                : 'bg-[#f5ead3] text-[#a07a2c]',
+              'size-5 shrink-0',
+              address.isDefault ? 'text-brand' : 'text-ink-soft',
             )}
-          >
-            <LabelIcon className="size-4" />
-          </span>
-          <span className="font-semibold text-[#2f4f3f]">{address.label}</span>
+            strokeWidth={1.75}
+          />
+          <span className="font-semibold text-ink">{address.label}</span>
           {address.isDefault && (
             <Badge
               variant="secondary"
-              className="flex items-center gap-1 rounded-full border-none bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-xs font-semibold text-[#3c2e14] hover:bg-[#e8cb8d]"
+              className="flex items-center gap-1 rounded-full border-none bg-brand/10 px-2.5 py-0.5 text-[13px] font-semibold text-brand hover:bg-brand/10"
             >
               <Star className="size-3 fill-current" />
               Utama
@@ -110,7 +103,10 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
               variant="outline"
               size="sm"
               disabled={isSettingDefault}
-              className={cn(profileOutlineButtonClassName, 'h-8 px-3 text-xs')}
+              className={cn(
+                profileOutlineButtonClassName,
+                'h-8 px-3 text-[13px]',
+              )}
               onClick={() => setDefault(address.id)}
             >
               <Check className="size-3.5" />
@@ -120,7 +116,10 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
           <Button
             variant="outline"
             size="sm"
-            className={cn(profileOutlineButtonClassName, 'h-8 px-3 text-xs')}
+            className={cn(
+              profileOutlineButtonClassName,
+              'h-8 px-3 text-[13px]',
+            )}
             onClick={() => onEdit(address)}
           >
             <Pencil className="size-3.5" /> Edit
@@ -131,7 +130,7 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
               size="sm"
               disabled={isDeleting}
               aria-label={`Hapus alamat ${address.label}`}
-              className="h-8 cursor-pointer rounded-xl border-[#f0cfc7] bg-white px-3 text-xs text-[#b04a3a] hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
+              className="h-8 cursor-pointer rounded-full border-destructive/30 bg-card px-3 text-[13px] text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={() => deleteAddress(address.id)}
             >
               <Trash2 className="size-3.5" />
@@ -157,7 +156,7 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
         {address.notes && (
           <div className="md:col-span-2">
             <AddressField icon={StickyNote} label="Catatan">
-              <span className="text-[#6f6a62] italic">{address.notes}</span>
+              <span className="text-ink-soft italic">{address.notes}</span>
             </AddressField>
           </div>
         )}
@@ -168,17 +167,17 @@ function SavedAddressCard({ address, onEdit }: SavedAddressCardProps) {
 
 function SavedAddressCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe8dd]">
-      <div className="flex items-center justify-between border-b border-[#efe8dd] bg-[#faf7f2] px-5 py-3">
-        <Skeleton className="h-5 w-32 bg-[#e8e2d5]" />
-        <Skeleton className="h-7 w-20 bg-[#e8e2d5]" />
+    <div className="overflow-hidden rounded-xl bg-card">
+      <div className="flex items-center justify-between bg-surface px-5 py-3">
+        <Skeleton className="h-5 w-32 bg-surface" />
+        <Skeleton className="h-7 w-20 bg-surface" />
       </div>
       <div className="flex flex-col gap-4 p-5">
         <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-10 bg-[#e8e2d5]" />
-          <Skeleton className="h-10 bg-[#e8e2d5]" />
+          <Skeleton className="h-10 bg-surface" />
+          <Skeleton className="h-10 bg-surface" />
         </div>
-        <Skeleton className="h-12 bg-[#e8e2d5]" />
+        <Skeleton className="h-12 bg-surface" />
       </div>
     </div>
   );

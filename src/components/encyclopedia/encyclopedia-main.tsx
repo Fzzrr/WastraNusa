@@ -7,6 +7,7 @@ import {
   EncyclopediaSidebar,
   EncyclopediaStats,
 } from '@/components/encyclopedia';
+import { EncyclopediaHero } from '@/components/encyclopedia/encyclopedia-hero';
 import { Reveal } from '@/components/reveal';
 import {
   Breadcrumb,
@@ -17,7 +18,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
-import { WastraHeroPanel } from '@/components/wastra-hero';
 import { useArticles } from '@/hooks/use-article';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
@@ -25,7 +25,7 @@ import {
   searchArticles as filterArticlesByQuery,
 } from '@/lib/search-filters';
 import type { Stat } from '@/types/encyclopedia';
-import { Home, Library, X } from 'lucide-react';
+import { Home, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -39,17 +39,11 @@ interface EncyclopediaMainProps {
 
 function EncyclopediaStatsSkeleton() {
   return (
-    <div className="mt-8 grid grid-cols-2 gap-3 border-t border-white/10 pt-6 md:gap-4 lg:grid-cols-4">
+    <div className="flex flex-wrap gap-x-12 gap-y-6">
       {Array.from({ length: 4 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex items-center gap-3 rounded-2xl bg-white/[0.07] p-4 ring-1 ring-white/15"
-        >
-          <Skeleton className="size-11 shrink-0 rounded-xl bg-white/15" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-6 w-10 bg-white/15" />
-            <Skeleton className="h-3 w-24 bg-white/15" />
-          </div>
+        <div key={index} className="space-y-2">
+          <Skeleton className="h-10 w-14 rounded-none bg-surface" />
+          <Skeleton className="h-4 w-16 rounded-none bg-surface" />
         </div>
       ))}
     </div>
@@ -59,44 +53,44 @@ function EncyclopediaStatsSkeleton() {
 function EncyclopediaSidebarSkeleton() {
   return (
     <aside className="flex flex-col gap-3">
-      <div className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-        <Skeleton className="mb-3 h-5 w-28 bg-[#e6dfd1]" />
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <Skeleton className="mb-3 h-5 w-28 bg-surface" />
         <div className="flex flex-col gap-2">
           {Array.from({ length: 6 }).map((_, index) => (
-            <Skeleton key={index} className="h-9 w-full bg-[#e6dfd1]" />
+            <Skeleton key={index} className="h-9 w-full bg-surface" />
           ))}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#d4cbbc] bg-[#f7f3ea] p-4">
-        <Skeleton className="mb-3 h-5 w-20 bg-[#e6dfd1]" />
+      <div className="rounded-xl border border-border bg-surface p-4">
+        <Skeleton className="mb-3 h-5 w-20 bg-surface" />
         <div className="flex flex-wrap gap-2">
           {Array.from({ length: 5 }).map((_, index) => (
-            <Skeleton key={index} className="h-7 w-24 bg-[#e6dfd1]" />
+            <Skeleton key={index} className="h-7 w-24 bg-surface" />
           ))}
         </div>
       </div>
 
-      <Skeleton className="h-10 w-full rounded-xl bg-[#e6dfd1]" />
+      <Skeleton className="h-10 w-full rounded-xl bg-surface" />
     </aside>
   );
 }
 
 function EncyclopediaFeaturedSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#d5ccbc] bg-[#faf8f2]">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface">
       <div className="grid md:grid-cols-[320px_minmax(0,1fr)]">
-        <Skeleton className="h-[220px] w-full rounded-none bg-[#ece1d0]" />
+        <Skeleton className="h-[220px] w-full rounded-none bg-surface" />
         <div className="p-5">
           <div className="mb-3 flex gap-2">
-            <Skeleton className="h-6 w-20 bg-[#e6dfd1]" />
-            <Skeleton className="h-6 w-24 bg-[#e6dfd1]" />
+            <Skeleton className="h-6 w-20 bg-surface" />
+            <Skeleton className="h-6 w-24 bg-surface" />
           </div>
-          <Skeleton className="h-9 w-4/5 bg-[#e6dfd1]" />
-          <Skeleton className="mt-2 h-9 w-3/5 bg-[#e6dfd1]" />
-          <Skeleton className="mt-3 h-4 w-full bg-[#e6dfd1]" />
-          <Skeleton className="mt-2 h-4 w-5/6 bg-[#e6dfd1]" />
-          <Skeleton className="mt-4 h-10 w-40 rounded-xl bg-[#e6dfd1]" />
+          <Skeleton className="h-9 w-4/5 bg-surface" />
+          <Skeleton className="mt-2 h-9 w-3/5 bg-surface" />
+          <Skeleton className="mt-3 h-4 w-full bg-surface" />
+          <Skeleton className="mt-2 h-4 w-5/6 bg-surface" />
+          <Skeleton className="mt-4 h-10 w-40 rounded-xl bg-surface" />
         </div>
       </div>
     </div>
@@ -109,18 +103,18 @@ function EncyclopediaArticleGridSkeleton() {
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2]"
+          className="overflow-hidden rounded-xl border border-border bg-card"
         >
-          <Skeleton className="h-44 w-full rounded-none bg-[#ece1d0]" />
+          <Skeleton className="h-44 w-full rounded-none bg-surface" />
           <div className="p-4">
             <div className="flex gap-1">
-              <Skeleton className="h-5 w-20 bg-[#e6dfd1]" />
-              <Skeleton className="h-5 w-20 bg-[#e6dfd1]" />
+              <Skeleton className="h-5 w-20 bg-surface" />
+              <Skeleton className="h-5 w-20 bg-surface" />
             </div>
-            <Skeleton className="mt-2 h-8 w-11/12 bg-[#e6dfd1]" />
-            <Skeleton className="mt-2 h-8 w-3/4 bg-[#e6dfd1]" />
-            <Skeleton className="mt-3 h-4 w-full bg-[#e6dfd1]" />
-            <Skeleton className="mt-2 h-4 w-5/6 bg-[#e6dfd1]" />
+            <Skeleton className="mt-2 h-8 w-11/12 bg-surface" />
+            <Skeleton className="mt-2 h-8 w-3/4 bg-surface" />
+            <Skeleton className="mt-3 h-4 w-full bg-surface" />
+            <Skeleton className="mt-2 h-4 w-5/6 bg-surface" />
           </div>
         </div>
       ))}
@@ -256,11 +250,11 @@ export function EncyclopediaMain({
         <div>
           <div>
             <Breadcrumb className="mb-2">
-              <BreadcrumbList className="text-[#607167] text-sm font-medium">
+              <BreadcrumbList className="text-ink-soft text-[15px] font-medium">
                 <BreadcrumbItem>
                   <BreadcrumbLink
                     href="/"
-                    className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+                    className="flex items-center gap-1.5 hover:text-ink"
                   >
                     <Home className="size-3.5" />
                     Beranda
@@ -268,8 +262,8 @@ export function EncyclopediaMain({
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="text-[#2f5b49]">
-                    Ensiklopedia Budaya
+                  <BreadcrumbPage className="text-ink">
+                    Ensiklopedia
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -277,22 +271,21 @@ export function EncyclopediaMain({
           </div>
         </div>
 
-        <WastraHeroPanel
-          className="mt-3"
-          title="Ensiklopedia Budaya"
-          accent="Wastra"
-          description="Jelajahi kekayaan pengetahuan wastra tradisional Indonesia dari teknik tenun hingga makna filosofi setiap motif kain."
-          images={articles.map((article) => article.imageURL)}
+        {/* The lead card below already shows the featured article. */}
+        <EncyclopediaHero
+          articles={articles.filter(
+            (article) => article.slug !== featuredArticle?.slug,
+          )}
         >
           {showLoadingSkeleton ? (
             <EncyclopediaStatsSkeleton />
           ) : (
-            <EncyclopediaStats stats={stats} />
+            <EncyclopediaStats stats={stats} tone="light" />
           )}
-        </WastraHeroPanel>
+        </EncyclopediaHero>
       </section>
 
-      <section className="border-y border-[#d3cbbd] bg-[#e9e4d9] py-6">
+      <section className="pt-12 pb-4">
         <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
           {/* Toolbar: article count + view toggle. Full width so the count
               aligns left with the sidebar and the toggle aligns right with the
@@ -300,12 +293,12 @@ export function EncyclopediaMain({
               same top edge inside the grid below. */}
           {showLoadingSkeleton ? (
             <div className="mb-4 flex h-9 items-center">
-              <Skeleton className="h-5 w-44 bg-[#e6dfd1]" />
+              <Skeleton className="h-5 w-44 bg-surface" />
             </div>
           ) : (
             <div className="mb-4 flex h-9 items-center justify-between">
               {isSearching ? (
-                <p className="flex items-center gap-2 text-left text-sm font-semibold text-[#4e6659]">
+                <p className="flex items-center gap-2 text-left text-base font-semibold text-ink">
                   <span>
                     {searchResults.length} hasil untuk &ldquo;
                     {normalizedSearch}&rdquo;
@@ -313,28 +306,22 @@ export function EncyclopediaMain({
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="inline-flex items-center gap-1 rounded-full border border-[#cdbfa8] bg-[#f7f3ea] px-2 py-0.5 text-xs font-medium text-[#4c6457] transition hover:bg-[#ece5d8]"
+                    aria-label="Hapus pencarian"
+                    title="Hapus pencarian"
+                    className="grid size-9 place-items-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-ink"
                   >
-                    <X className="h-3 w-3" />
-                    Hapus
+                    <X className="size-4" />
                   </button>
                 </p>
               ) : (
-                <p className="inline-flex items-center gap-2 text-left text-sm font-semibold text-[#4e6659]">
-                  <span className="grid size-7 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
-                    <Library className="size-3.5" />
-                  </span>
-                  Menampilkan
-                  <span className="rounded-full bg-[#2f5f49] px-2 py-0.5 text-xs text-[#eef3ea] tabular-nums">
-                    {data?.meta.totalItems ?? articles.length}
-                  </span>
-                  Artikel
+                <p className="text-[15px] text-ink-soft tabular-nums">
+                  {data?.meta.totalItems ?? articles.length} artikel
                 </p>
               )}
             </div>
           )}
 
-          <div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]">
+          <div className="grid gap-10 xl:grid-cols-[240px_minmax(0,1fr)]">
             {showLoadingSkeleton ? (
               <EncyclopediaSidebarSkeleton />
             ) : (
@@ -351,15 +338,13 @@ export function EncyclopediaMain({
 
             <div>
               {isPending && !showLoadingSkeleton ? (
-                <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">
-                  Memuat artikel ensiklopedia...
-                </div>
+                <p className="mt-4 text-[15px] text-ink-soft">Memuat…</p>
               ) : null}
 
               {!isPending && error ? (
-                <div className="mt-4 rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
-                  Gagal memuat artikel. Silakan coba lagi.
-                </div>
+                <p className="mt-4 bg-destructive/10 p-5 text-[15px] text-destructive">
+                  Gagal memuat artikel. Coba muat ulang halaman.
+                </p>
               ) : null}
 
               {showLoadingSkeleton ? <EncyclopediaFeaturedSkeleton /> : null}
@@ -373,7 +358,7 @@ export function EncyclopediaMain({
 
               {showLoadingSkeleton ? <EncyclopediaArticleGridSkeleton /> : null}
 
-              <Reveal className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <Reveal className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
                 {!isPending &&
                   !error &&
                   displayedArticles.map((article) => (
@@ -388,10 +373,10 @@ export function EncyclopediaMain({
                   !error &&
                   !featuredArticle &&
                   displayedArticles.length === 0 && (
-                    <div className="rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658] sm:col-span-2 xl:col-span-3">
+                    <div className="bg-surface p-6 text-[15px] text-ink-soft sm:col-span-2 xl:col-span-3">
                       {isSearching
                         ? `Tidak ada artikel yang cocok dengan "${normalizedSearch}".`
-                        : 'Belum ada artikel ensiklopedia yang tersedia.'}
+                        : 'Belum ada artikel.'}
                     </div>
                   )}
               </Reveal>

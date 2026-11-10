@@ -80,7 +80,7 @@ export function ChatComposer({
   const showSuggestions = !!suggestions?.length && content.length === 0;
 
   return (
-    <div className="border-t border-[#efe8dd] bg-[#fffdf8] px-3 pt-3 pb-3 sm:px-4">
+    <div className="border-t border-border bg-card px-3 pt-3 pb-3 sm:px-4">
       {attachedProduct ? (
         <div className="mb-2.5 flex items-center gap-2">
           <ChatProductCard product={attachedProduct} className="flex-1" />
@@ -89,7 +89,7 @@ export function ChatComposer({
             onClick={onClearAttachment}
             aria-label="Hapus produk yang disisipkan"
             title="Hapus produk"
-            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-[#8a7f70] transition-colors hover:bg-[#f1ebdf] hover:text-[#b04a3a]"
+            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-ink-soft transition-colors hover:bg-surface hover:text-destructive"
           >
             <X className="size-4" />
           </button>
@@ -103,7 +103,7 @@ export function ChatComposer({
               key={text}
               type="button"
               onClick={() => pickSuggestion(text)}
-              className="shrink-0 cursor-pointer rounded-full border border-[#e3d9c7] bg-white px-3 py-1.5 text-xs font-medium whitespace-nowrap text-[#4d6356] transition-colors hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] hover:text-[#2f5f49]"
+              className="shrink-0 cursor-pointer rounded-full border border-border bg-card px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-ink transition-colors hover:border-brand/40 hover:bg-surface hover:text-ink"
             >
               {text}
             </button>
@@ -131,15 +131,15 @@ export function ChatComposer({
             rows={1}
             maxLength={MAX_LENGTH}
             placeholder="Tulis pesan..."
-            className="block min-h-11 w-full resize-none rounded-2xl border border-[#e5ded5] bg-white px-4 py-3 text-sm leading-5 text-[#2f3a33] transition-[border-color,box-shadow] placeholder:text-[#b3aa9e] focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15"
+            className="block min-h-11 w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-[15px] leading-5 text-ink transition-[border-color,box-shadow] placeholder:text-ink-soft focus:outline-none focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15"
           />
           {showCounter ? (
             <span
               className={cn(
-                'pointer-events-none absolute right-3 bottom-1 text-xs tabular-nums',
+                'pointer-events-none absolute right-3 bottom-1 text-[13px] tabular-nums',
                 content.length >= MAX_LENGTH
-                  ? 'text-[#b04a3a]'
-                  : 'text-[#a39784]',
+                  ? 'text-destructive'
+                  : 'text-ink-soft',
               )}
             >
               {content.length}/{MAX_LENGTH}
@@ -150,7 +150,7 @@ export function ChatComposer({
           type="submit"
           disabled={!canSend}
           aria-label="Kirim pesan"
-          className="size-11 shrink-0 cursor-pointer rounded-2xl bg-gradient-to-br from-[#2f5f49] to-[#3f7359] text-white shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] transition-all hover:-translate-y-px hover:from-[#274e3c] hover:to-[#35644d] active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none"
+          className="size-11 shrink-0 cursor-pointer rounded-full bg-brand text-on-field transition-colors hover:bg-brand-strong active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none"
         >
           {isPending ? (
             <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -161,7 +161,7 @@ export function ChatComposer({
       </form>
 
       {showHint ? (
-        <p className="mt-1.5 hidden px-1 text-xs text-[#b3aa9e] sm:block">
+        <p className="mt-1.5 hidden px-1 text-[13px] text-ink-soft sm:block">
           <kbd className="font-sans font-semibold">Enter</kbd> untuk kirim ·{' '}
           <kbd className="font-sans font-semibold">Shift + Enter</kbd> untuk
           baris baru

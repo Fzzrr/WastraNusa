@@ -22,16 +22,16 @@ export function SellerHeader({
             aria-label="Buka sidebar"
             variant="outline"
             size="icon-sm"
-            className="size-10 border-[#d7cab7] bg-white/80 text-[#5e554a] shadow-none md:hidden"
+            className="size-10 border-0 bg-surface text-ink shadow-none md:hidden"
             onClick={() => setOpen(true)}
           >
             <Menu className="size-4" />
           </Button>
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#2f5543] md:text-3xl">
+            <h1 className="text-[clamp(1.75rem,3vw,2.5rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">
               {title}
             </h1>
-            <p className="text-base text-[#7d766c]">{subtitle}</p>
+            <p className="text-base text-ink-soft">{subtitle}</p>
           </div>
         </div>
       </div>

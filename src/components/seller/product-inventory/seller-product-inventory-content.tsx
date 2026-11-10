@@ -46,97 +46,80 @@ const STATUS_STYLES: Record<
 > = {
   active: {
     label: 'Aktif',
-    className: 'bg-[#e3ece5] text-[#2f5f49]',
+    className: 'bg-surface text-ink',
     dot: 'bg-[#3f8f63]',
   },
   inactive: {
     label: 'Nonaktif',
-    className: 'bg-[#f1ede6] text-[#6f6a62]',
-    dot: 'bg-[#a39c92]',
+    className: 'bg-surface text-ink-soft',
+    dot: 'bg-surface',
   },
   out_of_stock: {
     label: 'Habis',
-    className: 'bg-[#f6e1dd] text-[#b04a3a]',
-    dot: 'bg-[#b04a3a]',
+    className: 'bg-destructive/10 text-destructive',
+    dot: 'bg-destructive',
   },
 };
 
-const cardClassName =
-  'rounded-2xl bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
+const cardClassName = 'rounded-xl bg-card ring-1 ring-border';
 
 function StatTile({
   icon: Icon,
   label,
   value,
   caption,
-  tone,
   index,
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
   caption: string;
-  tone: 'green' | 'gold' | 'terracotta' | 'blue';
   index: number;
 }) {
-  const toneClassName = {
-    green: 'bg-[#e3ece5] text-[#2f5f49]',
-    gold: 'bg-[#f5ead3] text-[#a07a2c]',
-    terracotta: 'bg-[#f6e4da] text-[#9c5235]',
-    blue: 'bg-[#e6ecf3] text-[#34507a]',
-  }[tone];
-
   return (
     <div
       className={cn(
         cardClassName,
-        'group flex animate-in items-center gap-3 p-4 transition-all duration-300 fill-mode-both fade-in slide-in-from-bottom-2 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(60,41,15,0.05),0_18px_40px_rgba(89,69,38,0.12)]',
+        'animate-in p-5 fill-mode-both fade-in slide-in-from-bottom-2',
       )}
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <span
-        className={cn(
-          'grid size-11 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-105',
-          toneClassName,
-        )}
-      >
-        <Icon className="size-5" />
-      </span>
-      <div className="min-w-0">
-        <p className="text-xs font-medium text-[#9a8f80]">{label}</p>
-        <p className="text-2xl leading-tight font-bold text-[#2f4f3f] tabular-nums">
-          {value}
-        </p>
-        <p className="truncate text-xs text-[#b3aa9e]">{caption}</p>
-      </div>
+      <p className="flex items-center gap-2 text-[15px] text-ink">
+        <Icon className="size-5 shrink-0 text-ink-soft" strokeWidth={1.75} />
+        {label}
+      </p>
+      <p className="mt-3 text-3xl leading-none font-semibold tracking-[-0.02em] text-ink tabular-nums">
+        {value}
+      </p>
+      <p className="mt-2 truncate text-[15px] text-ink-soft">{caption}</p>
     </div>
   );
 }
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-t border-[#efe8dd]">
+    <tr className="border-t border-border">
       <td className="px-4 py-3.5">
-        <Skeleton className="size-4 rounded-sm bg-[#eee2d0]" />
+        <Skeleton className="size-4 rounded-sm bg-surface" />
       </td>
       <td className="px-4 py-3.5">
         <div className="flex items-center gap-3">
-          <Skeleton className="size-12 rounded-xl bg-[#eee2d0]" />
+          <Skeleton className="size-12 rounded-xl bg-surface" />
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-40 bg-[#eee2d0]" />
-            <Skeleton className="h-3 w-28 bg-[#eee2d0]" />
+            <Skeleton className="h-4 w-40 bg-surface" />
+            <Skeleton className="h-3 w-28 bg-surface" />
           </div>
         </div>
       </td>
       {Array.from({ length: 5 }).map((_, index) => (
         <td key={index} className="px-4 py-3.5">
-          <Skeleton className="mx-auto h-4 w-16 bg-[#eee2d0]" />
+          <Skeleton className="mx-auto h-4 w-16 bg-surface" />
         </td>
       ))}
       <td className="px-4 py-3.5">
         <div className="flex items-center justify-center gap-1.5">
-          <Skeleton className="size-8 rounded-lg bg-[#eee2d0]" />
-          <Skeleton className="size-8 rounded-lg bg-[#eee2d0]" />
+          <Skeleton className="size-8 rounded-lg bg-surface" />
+          <Skeleton className="size-8 rounded-lg bg-surface" />
         </div>
       </td>
     </tr>
@@ -262,7 +245,6 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={0}
             icon={Package}
-            tone="green"
             label="Total Produk"
             value={isLoading ? '…' : totalItems.toLocaleString('id-ID')}
             caption="Semua produk terdaftar"
@@ -270,7 +252,6 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={1}
             icon={CheckCircle2}
-            tone="blue"
             label="Aktif"
             value={isLoading ? '…' : activeCount.toLocaleString('id-ID')}
             caption={pageScope}
@@ -278,7 +259,6 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={2}
             icon={AlertTriangle}
-            tone="terracotta"
             label="Stok Menipis"
             value={isLoading ? '…' : lowStockCount.toLocaleString('id-ID')}
             caption={`Stok 1–${LOW_STOCK_THRESHOLD} unit · ${pageScope.toLowerCase()}`}
@@ -286,7 +266,6 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={3}
             icon={Boxes}
-            tone="gold"
             label="Total Stok"
             value={isLoading ? '…' : totalStock.toLocaleString('id-ID')}
             caption={pageScope}
@@ -300,12 +279,13 @@ export function SellerProductInventoryContent() {
           )}
           style={{ animationDelay: '280ms' }}
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe8dd] px-4 py-3 md:px-5">
-            <span className="inline-flex items-center gap-2 text-sm text-[#6f6a62]">
-              <span className="grid size-8 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
-                <Package className="size-4" />
-              </span>
-              <span className="font-semibold text-[#2f4f3f] tabular-nums">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 md:px-5">
+            <span className="inline-flex items-center gap-2 text-[15px] text-ink-soft">
+              <Package
+                className="shrink-0 size-5 text-ink-soft"
+                strokeWidth={1.75}
+              />
+              <span className="font-semibold text-ink tabular-nums">
                 {isLoading ? '…' : totalItems}
               </span>
               Produk
@@ -316,7 +296,7 @@ export function SellerProductInventoryContent() {
                   variant="outline"
                   onClick={handleBulkDelete}
                   disabled={isDeleting}
-                  className="h-10 animate-in cursor-pointer gap-1.5 rounded-xl border-[#f0cfc7] bg-white px-4 text-[#b04a3a] fade-in zoom-in-95 hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
+                  className="h-10 animate-in cursor-pointer gap-1.5 rounded-full border-destructive/30 bg-card px-4 text-destructive fade-in zoom-in-95 hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 className="size-4" />
                   Hapus ({selectedIds.length})
@@ -352,7 +332,7 @@ export function SellerProductInventoryContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
-                <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
+                <thead className="bg-surface text-[13px] font-medium text-ink-soft">
                   <tr>
                     <th className="w-12 px-4 py-3.5">
                       <Checkbox
@@ -389,10 +369,8 @@ export function SellerProductInventoryContent() {
                             key={product.id}
                             onClick={() => handleEdit(product)}
                             className={cn(
-                              'group cursor-pointer border-t border-[#efe8dd] transition-colors',
-                              isSelected
-                                ? 'bg-[#f4efe5]'
-                                : 'hover:bg-[#faf7f2]',
+                              'group cursor-pointer border-t border-border transition-colors',
+                              isSelected ? 'bg-surface' : 'hover:bg-surface',
                             )}
                           >
                             <td
@@ -407,7 +385,7 @@ export function SellerProductInventoryContent() {
                             </td>
                             <td className="px-4 py-3.5">
                               <div className="flex items-center gap-3">
-                                <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f4efe5] text-[#b08a5e] ring-1 ring-[#ebe3d6]">
+                                <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft ring-1 ring-border">
                                   {product.imageURL ? (
                                     <Image
                                       src={product.imageURL}
@@ -421,18 +399,18 @@ export function SellerProductInventoryContent() {
                                   )}
                                 </span>
                                 <div className="flex min-w-0 flex-col gap-0.5">
-                                  <p className="line-clamp-1 font-semibold text-[#2f3a33] transition-colors group-hover:text-[#2f5543]">
+                                  <p className="line-clamp-1 font-semibold text-ink transition-colors group-hover:text-ink">
                                     {product.name}
                                   </p>
-                                  <p className="line-clamp-1 text-xs text-[#9a8f80]">
+                                  <p className="line-clamp-1 text-[13px] text-ink-soft">
                                     {product.clothingType} · {product.island}
                                   </p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3.5 text-sm text-[#6f6a62]">
+                            <td className="px-4 py-3.5 text-[15px] text-ink-soft">
                               <span className="inline-flex items-center gap-1.5">
-                                <BookOpen className="size-3.5 shrink-0 text-[#b08a5e]" />
+                                <BookOpen className="size-3.5 shrink-0 text-ink-soft" />
                                 <span className="line-clamp-1">
                                   {product.articleTitle}
                                 </span>
@@ -441,7 +419,7 @@ export function SellerProductInventoryContent() {
                             <td className="px-4 py-3.5">
                               <span
                                 className={cn(
-                                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
+                                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold',
                                   status.className,
                                 )}
                               >
@@ -454,18 +432,18 @@ export function SellerProductInventoryContent() {
                                 {status.label}
                               </span>
                             </td>
-                            <td className="px-4 py-3.5 text-right text-sm font-bold whitespace-nowrap text-[#2f5f49]">
+                            <td className="px-4 py-3.5 text-right text-[15px] font-bold whitespace-nowrap text-ink">
                               {formatIDR(product.price)}
                             </td>
                             <td className="px-4 py-3.5 text-center">
                               <span
                                 className={cn(
-                                  'inline-flex items-center gap-1.5 text-sm font-semibold tabular-nums',
+                                  'inline-flex items-center gap-1.5 text-[15px] font-semibold tabular-nums',
                                   product.stock <= 0
-                                    ? 'text-[#b04a3a]'
+                                    ? 'text-destructive'
                                     : isLowStock
-                                      ? 'text-[#a0702a]'
-                                      : 'text-[#3d3a34]',
+                                      ? 'text-ink-soft'
+                                      : 'text-ink',
                                 )}
                                 title={isLowStock ? 'Stok menipis' : undefined}
                               >
@@ -473,7 +451,7 @@ export function SellerProductInventoryContent() {
                                   className={cn(
                                     'size-1.5 rounded-full',
                                     product.stock <= 0
-                                      ? 'bg-[#b04a3a]'
+                                      ? 'bg-destructive'
                                       : isLowStock
                                         ? 'animate-pulse bg-amber-500'
                                         : 'bg-[#3f8f63]',
@@ -483,7 +461,7 @@ export function SellerProductInventoryContent() {
                               </span>
                             </td>
                             <td className="px-4 py-3.5 text-center">
-                              <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-semibold text-[#4d6356]">
+                              <span className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink">
                                 {product.variantCount}
                               </span>
                             </td>
@@ -497,7 +475,7 @@ export function SellerProductInventoryContent() {
                                   variant="ghost"
                                   aria-label="Edit produk"
                                   title="Edit produk"
-                                  className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#826428]"
+                                  className="cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink"
                                   onClick={() => handleEdit(product)}
                                 >
                                   <Pencil />
@@ -507,7 +485,7 @@ export function SellerProductInventoryContent() {
                                   variant="ghost"
                                   aria-label="Hapus produk"
                                   title="Hapus produk"
-                                  className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-red-50 hover:text-red-600"
+                                  className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive"
                                   onClick={() => handleDelete(product.id)}
                                   disabled={isDeleting}
                                 >
@@ -524,10 +502,9 @@ export function SellerProductInventoryContent() {
           )}
 
           {productData && totalPages > 1 ? (
-            <div className="flex items-center justify-between border-t border-[#efe8dd] px-5 py-3.5">
-              <p className="text-sm text-[#9a8f80]">
-                Halaman{' '}
-                <span className="font-semibold text-[#2f4f3f]">{page}</span>{' '}
+            <div className="flex items-center justify-between border-t border-border px-5 py-3.5">
+              <p className="text-base text-ink-soft">
+                Halaman <span className="font-semibold text-ink">{page}</span>{' '}
                 dari {totalPages}
               </p>
               <div className="flex items-center gap-2">
@@ -535,7 +512,7 @@ export function SellerProductInventoryContent() {
                   variant="outline"
                   size="icon"
                   aria-label="Halaman sebelumnya"
-                  className="size-8 cursor-pointer rounded-lg border-[#e5ded5] bg-[#fffdfa] text-[#6f6a62] hover:bg-[#f4efe5]"
+                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
                   onClick={() => goToPage(Math.max(1, page - 1))}
                   disabled={page === 1 || isLoading}
                 >
@@ -545,7 +522,7 @@ export function SellerProductInventoryContent() {
                   variant="outline"
                   size="icon"
                   aria-label="Halaman berikutnya"
-                  className="size-8 cursor-pointer rounded-lg border-[#e5ded5] bg-[#fffdfa] text-[#6f6a62] hover:bg-[#f4efe5]"
+                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
                   onClick={() => goToPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages || isLoading}
                 >

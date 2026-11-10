@@ -73,7 +73,7 @@ export function PriceInput({
 }: ComponentProps<typeof Input>) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-medium text-[#8a6a3a]">
+      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[15px] font-medium text-ink-soft">
         Rp
       </span>
       <Input
@@ -129,10 +129,10 @@ export function VariantCard({
   const variantErrors = errors.variants?.[index];
 
   return (
-    <div className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] transition-shadow fade-in slide-in-from-bottom-1 hover:shadow-[0_12px_24px_-18px_rgba(89,69,38,0.5)]">
+    <div className="animate-in space-y-4 rounded-xl border-l-4 border-gold bg-surface p-4 ring-1 ring-border transition-shadow fade-in slide-in-from-bottom-1">
       <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex min-w-0 items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#3a5a4a] text-xs text-white">
+        <span className="inline-flex min-w-0 items-center gap-2 text-[15px] font-semibold text-ink">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-[13px] text-on-field">
             {index + 1}
           </span>
           <span className="truncate">
@@ -147,7 +147,7 @@ export function VariantCard({
           disabled={!canRemove}
           aria-label={`Hapus varian ${index + 1}`}
           title={canRemove ? 'Hapus varian' : 'Minimal 1 varian diperlukan'}
-          className="cursor-pointer rounded-lg text-[#a39c92] hover:bg-red-50 hover:text-red-600 disabled:pointer-events-none disabled:opacity-30"
+          className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
         >
           <Trash2 className="size-4" />
         </Button>

@@ -27,7 +27,6 @@ export function ArticleSectionsSection() {
   });
   return (
     <FormSection
-      step={5}
       icon={Layers}
       title="Bagian Artikel"
       description={`${fields.length} bagian · isi utama artikel`}
@@ -39,7 +38,7 @@ export function ArticleSectionsSection() {
           onClick={() =>
             append({ title: '', content: '', order: fields.length })
           }
-          className="cursor-pointer gap-1.5 rounded-lg border-[#3a5a4a]/30 text-[#2f5543] hover:bg-[#e7efe4] hover:text-[#2f5543]"
+          className="cursor-pointer gap-1.5 rounded-lg border-brand/30 text-ink hover:bg-surface hover:text-ink"
         >
           <Plus className="size-4" />
           Tambah Bagian
@@ -48,19 +47,19 @@ export function ArticleSectionsSection() {
     >
       <div className="space-y-3">
         {fields.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-[#e0d6c6] bg-[#faf7f2] py-8 text-sm text-[#9a8f80]">
-            <Layers className="size-5 text-[#b08a5e]" />
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-surface py-8 text-[15px] text-ink-soft">
+            <Layers className="size-5 text-ink-soft" />
             Belum ada bagian.
           </div>
         ) : null}
         {fields.map((field, index) => (
           <div
             key={field.id}
-            className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] fade-in slide-in-from-bottom-1"
+            className="animate-in space-y-4 rounded-xl border-l-4 border-gold bg-surface p-4 ring-1 ring-border fade-in slide-in-from-bottom-1"
           >
             <div className="flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
-                <span className="flex size-6 items-center justify-center rounded-full bg-[#3a5a4a] text-xs text-white">
+              <span className="inline-flex items-center gap-2 text-[15px] font-semibold text-ink">
+                <span className="flex size-6 items-center justify-center rounded-full bg-brand text-[13px] text-on-field">
                   {index + 1}
                 </span>
                 {sections?.[index]?.title?.trim() || `Bagian ${index + 1}`}
@@ -71,7 +70,7 @@ export function ArticleSectionsSection() {
                 size="icon-sm"
                 aria-label={`Hapus bagian ${index + 1}`}
                 onClick={() => remove(index)}
-                className="cursor-pointer rounded-lg text-[#a39c92] hover:bg-red-50 hover:text-red-600"
+                className="cursor-pointer rounded-lg text-ink-soft hover:bg-red-50 hover:text-destructive"
               >
                 <Trash2 className="size-4" />
               </Button>

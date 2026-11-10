@@ -41,7 +41,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const className = cn(
     'flex h-12 items-center gap-3 rounded-xl px-3 text-[15px] text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    item.active && 'bg-white/10 text-[#e08a55] hover:text-[#e08a55]',
+    item.active && 'bg-white/10 text-gold hover:text-gold',
     item.disabled && 'pointer-events-none opacity-50',
   );
 
@@ -59,7 +59,7 @@ function SidebarNavigationItem({ item }: { item: DashboardNavItem }) {
       <Icon className="size-[18px]" />
       <span className="flex-1 text-left">{item.title}</span>
       {item.disabled ? (
-        <span className="rounded-full bg-[#d2a36d]/20 px-2 py-0.5 text-xs font-semibold tracking-wide text-[#e3bf8c]">
+        <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[13px] font-semibold text-gold">
           Segera Hadir
         </span>
       ) : null}
@@ -102,7 +102,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
           <p className="truncate text-base font-bold text-sidebar-foreground">
             WastraNusa
           </p>
-          <p className="text-sm text-[#d2a36d]">Panel Penjual</p>
+          <p className="text-base text-gold">Panel Penjual</p>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
           </Link>
           <Button
             variant="ghost"
-            className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="h-10 w-full justify-start gap-2 rounded-full px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />
@@ -138,18 +138,18 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
         <div className="h-px bg-white/10" />
         <Link
           href="/profile"
-          className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3 transition-colors hover:bg-white/12"
+          className="flex items-center gap-3 rounded-xl bg-white/8 px-3 py-3 transition-colors hover:bg-white/12"
         >
           <Avatar size="sm" className="size-9">
-            <AvatarFallback className="bg-[#d2a36d] font-semibold text-[#3a2f16]">
+            <AvatarFallback className="bg-gold font-semibold text-ink">
               <Store className="size-4" />
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
+            <p className="truncate text-base font-medium text-sidebar-foreground">
               {shopName || sellerName}
             </p>
-            <p className="text-xs text-sidebar-foreground/75">
+            <p className="text-[13px] text-sidebar-foreground/75">
               · Lihat profil toko
             </p>
           </div>
@@ -164,7 +164,7 @@ export function SellerSidebar({ shopName }: { shopName: string }) {
 
   return (
     <>
-      <aside className="sticky top-0 hidden h-screen w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
+      <aside className="sticky top-0 hidden h-dvh w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
         <SellerSidebarContent shopName={shopName} />
       </aside>
 

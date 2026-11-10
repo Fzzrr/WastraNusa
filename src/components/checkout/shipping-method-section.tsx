@@ -32,8 +32,8 @@ export function ShippingMethodSection({
               className={cn(
                 'group relative flex cursor-pointer flex-col gap-3 rounded-xl p-4 ring-1 transition-all duration-200',
                 isSelected
-                  ? 'bg-gradient-to-br from-[#e3ece5] to-[#fffdf8] ring-2 ring-[#2f5f49]/50 shadow-[0_10px_24px_-16px_rgba(47,95,73,0.7)]'
-                  : 'bg-white ring-[#efe8dd] hover:-translate-y-0.5 hover:ring-[#caa86a]/50',
+                  ? 'bg-surface ring-2 ring-brand/50'
+                  : 'bg-card ring-border',
               )}
             >
               <input
@@ -46,10 +46,10 @@ export function ShippingMethodSection({
               <div className="flex items-center justify-between gap-2">
                 <span
                   className={cn(
-                    'rounded-lg px-2.5 py-1 text-xs font-extrabold tracking-wide uppercase',
+                    'rounded-lg px-2.5 py-1 text-[15px] font-semibold',
                     isSelected
-                      ? 'bg-[#2f5f49] text-[#e8cb8d]'
-                      : 'bg-[#f4efe5] text-[#8a6a3a]',
+                      ? 'bg-brand text-gold'
+                      : 'bg-surface text-ink-soft',
                   )}
                 >
                   {opt.courier}
@@ -58,8 +58,8 @@ export function ShippingMethodSection({
                   className={cn(
                     'grid size-5 place-items-center rounded-full transition-all',
                     isSelected
-                      ? 'bg-[#2f5f49] text-white'
-                      : 'ring-2 ring-[#e3d9c7]',
+                      ? 'bg-brand text-on-field'
+                      : 'ring-2 ring-border',
                   )}
                 >
                   {isSelected ? <Check className="size-3" /> : null}
@@ -67,18 +67,18 @@ export function ShippingMethodSection({
               </div>
               <div className="flex items-end justify-between gap-2">
                 <div>
-                  <p className="text-sm font-bold text-[#2f4f3f]">{opt.name}</p>
-                  <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-[#9a8f80]">
+                  <p className="text-base font-bold text-ink">{opt.name}</p>
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-[13px] text-ink-soft">
                     <Clock className="size-3" />
                     {opt.desc}
                   </p>
                 </div>
-                <span className="text-sm font-extrabold whitespace-nowrap text-[#2f5f49]">
+                <span className="text-[15px] font-bold whitespace-nowrap text-ink">
                   {formatIDR(opt.price)}
                 </span>
               </div>
               {opt.tag ? (
-                <span className="absolute -top-2 right-3 rounded-full bg-gradient-to-r from-[#caa86a] to-[#e8cb8d] px-2 py-0.5 text-xs font-bold text-[#3c2e14] shadow-sm">
+                <span className="absolute -top-2 right-3 rounded-full bg-brand/10 px-2.5 py-0.5 text-[13px] font-semibold text-brand">
                   {opt.tag}
                 </span>
               ) : null}

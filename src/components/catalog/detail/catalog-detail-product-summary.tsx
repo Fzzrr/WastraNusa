@@ -1,6 +1,4 @@
-﻿import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+﻿import { Button } from '@/components/ui/button';
 import { cn, formatIDR } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
 import {
@@ -11,8 +9,6 @@ import {
   Plus,
   ShoppingCart,
   Store,
-  Tag,
-  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -56,177 +52,144 @@ export function CatalogDetailProductSummary({
     hasVariantOptions && selectedVariantStock <= 0;
   const isPurchaseDisabled = isOutOfStock || isSelectedVariantOutOfStock;
 
+  const stockNote = isPurchaseDisabled
+    ? 'Stok habis'
+    : selectedVariantStock <= 5
+      ? `Sisa ${selectedVariantStock}`
+      : null;
+
   return (
     <div>
-      <div className="flex flex-wrap gap-1.5">
-        <Badge
-          variant="outline"
-          className="gap-1 rounded-full border-[#e6d6b8] bg-[#f5ead3] px-2.5 py-1 text-[#826428]"
-        >
-          <Tag className="size-3" />
-          {product.clothingType}
-        </Badge>
-        <Badge
-          variant="outline"
-          className="gap-1 rounded-full border-[#efd5c6] bg-[#f6e4da] px-2.5 py-1 text-[#9c5235]"
-        >
-          <MapPin className="size-3" />
-          {product.province}
-        </Badge>
-      </div>
-
-      <h1 className="mt-3 text-3xl font-bold tracking-tight text-[#2f5b49] sm:text-4xl lg:text-5xl">
+      <h1 className="text-[clamp(2rem,3.6vw,3.25rem)] leading-[1.05] font-semibold tracking-[-0.03em] text-ink">
         {product.name}
       </h1>
 
-      {product.seller ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[15px] text-ink-soft">
+        <span className="inline-flex items-center gap-1.5">
+          <MapPin className="size-4" strokeWidth={1.75} />
+          {product.province}
+        </span>
+        {product.seller ? (
           <Link
             href={`/shop/${product.seller.id}`}
-            className="group inline-flex items-center gap-2 rounded-full border border-[#e3d9c7] bg-[#f5f0e7] px-3 py-1.5 text-sm font-semibold text-[#2f5f49] transition-colors hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none"
+            className="inline-flex items-center gap-1.5 font-semibold text-ink underline-offset-4 hover:underline"
           >
-            <Store className="size-4 text-[#a07a2c]" />
-            <span>{product.seller.shopName ?? product.seller.name}</span>
-            <span className="text-xs font-medium text-[#646f66] group-hover:text-[#2f5f49]">
-              · Kunjungi toko
-            </span>
+            <Store className="size-4" strokeWidth={1.75} />
+            {product.seller.shopName ?? product.seller.name}
           </Link>
-          {onAskSeller ? (
-            <button
-              type="button"
-              onClick={onAskSeller}
-              disabled={isAskSellerPending}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#2f5f49] px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[#27503e] focus-visible:ring-2 focus-visible:ring-[#2f5f49]/40 focus-visible:outline-none disabled:opacity-60"
-            >
-              <MessageCircle className="size-4" />
-              {isAskSellerPending ? 'Membuka chat...' : 'Tanya Penjual'}
-            </button>
-          ) : null}
+        ) : null}
+        {product.seller && onAskSeller ? (
+          <button
+            type="button"
+            onClick={onAskSeller}
+            disabled={isAskSellerPending}
+            className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full bg-surface px-4 font-semibold text-ink transition-colors hover:bg-brand hover:text-on-field disabled:opacity-60"
+          >
+            <MessageCircle className="size-4" strokeWidth={1.75} />
+            {isAskSellerPending ? 'Membuka chat…' : 'Tanya penjual'}
+          </button>
+        ) : null}
+      </div>
+
+      <p
+        key={selectedVariantPrice}
+        className="mt-6 animate-in text-[clamp(1.75rem,2.6vw,2.25rem)] font-bold tracking-[-0.02em] text-ink tabular-nums duration-300 fade-in"
+      >
+        {formatIDR(selectedVariantPrice)}
+      </p>
+
+      <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink">
+        {product.description || 'Belum ada deskripsi.'}
+      </p>
+
+      {variantOptions.length > 0 ? (
+        <div
+          role="group"
+          aria-label="Varian"
+          className="mt-6 flex flex-wrap items-center gap-2"
+        >
+          {variantOptions.map((variant) => {
+            const isSelected = selectedVariant === variant.name;
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                aria-pressed={isSelected}
+                aria-label={`${variant.name} (${variant.stock})`}
+                className={cn(
+                  'inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-full px-4 text-[15px] transition-colors active:scale-95',
+                  isSelected
+                    ? 'bg-brand font-semibold text-on-field'
+                    : 'bg-surface text-ink hover:bg-border',
+                  variant.stock <= 0 &&
+                    !isSelected &&
+                    'line-through opacity-50',
+                )}
+                onClick={() => onVariantChange(variant.name)}
+              >
+                {isSelected ? <Check className="size-4" /> : null}
+                {variant.name}
+              </button>
+            );
+          })}
         </div>
       ) : null}
 
-      <Card className="relative mt-4 gap-1 overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-[#e3ece5] via-[#f1ebdf] to-[#f5ead3] px-5 py-4 ring-1 ring-[#d9d0c2]">
-        <span className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-[#2f5f49] to-[#caa86a]" />
-        <span className="text-xs font-semibold tracking-wider text-[#646f66] uppercase">
-          Harga{selectedVariant ? ` · ${selectedVariant}` : ''}
-        </span>
-        <h2
-          key={selectedVariantPrice}
-          className="animate-in text-4xl font-extrabold tracking-tight text-[#2f5f49] duration-300 fade-in"
-        >
-          {formatIDR(selectedVariantPrice)}
-        </h2>
-      </Card>
-
-      <p className="mt-4 max-w-3xl text-[15px] leading-7 text-[#3e5348]">
-        {product.description ||
-          'Deskripsi produk belum tersedia. Silakan cek artikel ensiklopedia untuk konteks budaya produk ini.'}
-      </p>
-
-      <div className="mt-4 flex flex-col gap-2">
-        <span className="text-sm font-semibold text-[#4d6458]">Varian</span>
-        <div className="flex flex-wrap items-center gap-2">
-          {variantOptions.length > 0 ? (
-            variantOptions.map((variant) => {
-              const isSelected = selectedVariant === variant.name;
-              return (
-                <Button
-                  key={variant.id}
-                  type="button"
-                  variant="outline"
-                  aria-pressed={isSelected}
-                  aria-label={`${variant.name} (${variant.stock})`}
-                  className={cn(
-                    'h-10 cursor-pointer gap-1.5 rounded-xl border-[#ddd4c5] bg-[#fbf8f2] px-3.5 text-[#496356] transition-all hover:-translate-y-px hover:border-[#2f5f49]/50 hover:bg-[#fbf8f2] hover:text-[#2f5f49]',
-                    isSelected &&
-                      'border-[#2f5f49] bg-[#2f5f49] text-[#edf4ec] shadow-[0_6px_14px_-6px_rgba(47,95,73,0.6)] hover:bg-[#2f5f49] hover:text-[#edf4ec]',
-                    variant.stock <= 0 && !isSelected && 'opacity-50',
-                  )}
-                  onClick={() => onVariantChange(variant.name)}
-                >
-                  {isSelected ? <Check className="size-3.5" /> : null}
-                  {variant.name}
-                  <span
-                    className={cn(
-                      'rounded-full px-1.5 text-xs font-semibold',
-                      isSelected
-                        ? 'bg-white/20 text-white'
-                        : 'bg-[#efe8dd] text-[#6a726c]',
-                    )}
-                  >
-                    {variant.stock}
-                  </span>
-                </Button>
-              );
-            })
-          ) : (
-            <span className="text-sm text-[#6f6a5f]">Belum ada varian</span>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Card className="inline-flex flex-row items-center gap-1 rounded-xl border-0 bg-[#fbf8f2] p-1 ring-1 ring-[#ddd4c5]">
-          <Button
+      <div className="mt-6 flex items-center gap-4">
+        <div className="inline-flex items-center rounded-full bg-surface p-1">
+          <button
             type="button"
-            size="icon-sm"
-            variant="ghost"
             aria-label="Kurangi jumlah"
-            className="size-10 cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
+            className="grid size-10 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:bg-card disabled:opacity-40"
             onClick={onDecreaseQuantity}
             disabled={safeQuantity <= 1 || isPurchaseDisabled}
           >
-            <Minus />
-          </Button>
-          <span className="min-w-8 text-center text-base font-bold text-[#315642] tabular-nums">
+            <Minus className="size-4" />
+          </button>
+          <span className="min-w-8 text-center text-base font-semibold text-ink tabular-nums">
             {safeQuantity}
           </span>
-          <Button
+          <button
             type="button"
-            size="icon-sm"
-            variant="ghost"
             aria-label="Tambah jumlah"
-            className="size-10 cursor-pointer rounded-lg text-[#2f5f49] hover:bg-[#e3ece5]"
+            className="grid size-10 cursor-pointer place-items-center rounded-full text-ink transition-colors hover:bg-card disabled:opacity-40"
             onClick={onIncreaseQuantity}
             disabled={
               isPurchaseDisabled || safeQuantity >= selectedVariantStock
             }
           >
-            <Plus />
-          </Button>
-        </Card>
-        <span className="inline-flex items-center gap-2 text-sm text-[#6c6962]">
+            <Plus className="size-4" />
+          </button>
+        </div>
+        {stockNote ? (
           <span
             className={cn(
-              'size-2 rounded-full',
-              selectedVariantStock <= 0
-                ? 'bg-red-500'
-                : selectedVariantStock <= 5
-                  ? 'animate-pulse bg-amber-500'
-                  : 'bg-[#3f8f63]',
+              'text-[15px]',
+              isPurchaseDisabled ? 'text-destructive' : 'text-[#9a5b1e]',
             )}
-          />
-          <span>Stok tersedia: {selectedVariantStock} unit</span>
-        </span>
+          >
+            {stockNote}
+          </span>
+        ) : null}
       </div>
 
       {/* On phones the actions stay pinned to the bottom while the summary is in view. */}
-      <div className="sticky bottom-0 z-30 -mx-4 mt-4 grid grid-cols-2 gap-2 border-t border-[#e3d9c7] bg-[#f6f2e9]/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+      <div className="sticky bottom-0 z-30 -mx-4 mt-6 grid grid-cols-2 gap-2 bg-ground/95 px-4 py-3 sm:static sm:mx-0 sm:bg-transparent sm:p-0">
         <Button
           disabled={isPurchaseDisabled || isCartActionPending}
-          className="h-12 cursor-pointer rounded-xl bg-[#2f5f49] px-2 text-sm text-[#edf4ec] sm:px-4 sm:text-base shadow-[0_10px_20px_-10px_rgba(47,95,73,0.7)] transition-all hover:-translate-y-0.5 hover:bg-[#254a39] active:translate-y-0"
+          aria-label={isCartActionPending ? undefined : 'Tambah ke keranjang'}
+          className="h-12 cursor-pointer rounded-full bg-surface px-3 text-[15px] font-semibold text-ink transition-colors hover:bg-border active:scale-[0.98] sm:text-base"
           onClick={onAddToCart}
         >
           <ShoppingCart data-icon="inline-start" />
-          {isCartActionPending ? 'Memproses...' : 'Tambah ke Keranjang'}
+          {isCartActionPending ? 'Memproses…' : 'Keranjang'}
         </Button>
         <Button
           disabled={isPurchaseDisabled || isCartActionPending}
-          className="h-12 cursor-pointer rounded-xl bg-[#b35d2f] px-2 text-sm text-white shadow-[0_10px_20px_-10px_rgba(179,93,47,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#9c4f27] active:translate-y-0 sm:px-4 sm:text-base"
+          className="h-12 cursor-pointer rounded-full bg-brand px-3 text-[15px] font-semibold text-on-field transition-colors hover:bg-brand-strong active:scale-[0.98] sm:text-base"
           onClick={onBuyNow}
         >
-          <Zap data-icon="inline-start" />
-          {isCartActionPending ? 'Memproses...' : 'Beli Langsung'}
+          {isCartActionPending ? 'Memproses…' : 'Beli langsung'}
         </Button>
       </div>
     </div>

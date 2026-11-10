@@ -242,34 +242,32 @@ export default function AddUpdateProductModal({
         isOpen ? 'visible opacity-100' : 'invisible opacity-0',
       )}
     >
-      <div
-        className="absolute inset-0 bg-[#1f2a24]/45 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <form
         onSubmit={handleSubmit(onSubmit, onInvalid)}
         className={cn(
-          'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#f7f3ec] shadow-2xl transition-all duration-300',
+          'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-surface transition-all duration-300',
           isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95',
         )}
       >
         {/* Header */}
-        <div className="border-b border-[#ebe3d6] bg-[#fffdfa] px-6 pt-5 pb-4">
+        <div className="border-b border-border bg-card px-6 pt-5 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
-                <Package className="size-5" />
-              </span>
+              <Package
+                className="shrink-0 size-5 text-brand"
+                strokeWidth={1.75}
+              />
               <div className="min-w-0">
-                <h2 className="text-lg font-semibold text-[#2f4f3f]">
+                <h2 className="text-xl font-semibold text-ink">
                   {isEdit ? 'Edit Produk & Inventori' : 'Tambah Produk Baru'}
                 </h2>
-                <p className="truncate text-xs text-[#9a8f80]">
+                <p className="truncate text-[13px] text-ink-soft">
                   {isEdit && initialData ? (
                     initialData.name
                   ) : (
                     <>
-                      Field bertanda <span className="text-[#c26a3d]">*</span>{' '}
+                      Field bertanda <span className="text-destructive">*</span>{' '}
                       wajib diisi
                     </>
                   )}
@@ -282,26 +280,26 @@ export default function AddUpdateProductModal({
               size="icon-sm"
               aria-label="Tutup"
               onClick={onClose}
-              className="cursor-pointer rounded-full bg-[#f4efe5] text-[#6f6a62] hover:bg-[#ebe3d6] hover:text-[#2f3a33]"
+              className="cursor-pointer rounded-full bg-surface text-ink-soft hover:bg-surface hover:text-ink"
             >
               <X className="size-4" />
             </Button>
           </div>
 
           <div className="mt-4 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efe8dd]">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-500',
-                  progress === 100 ? 'bg-[#3a5a4a]' : 'bg-[#d2a36d]',
+                  progress === 100 ? 'bg-brand' : 'bg-gold',
                 )}
                 style={{ width: `${progress}%` }}
               />
             </div>
             <span
               className={cn(
-                'text-xs font-medium whitespace-nowrap tabular-nums',
-                progress === 100 ? 'text-[#2f5543]' : 'text-[#9a8f80]',
+                'text-[13px] font-medium whitespace-nowrap tabular-nums',
+                progress === 100 ? 'text-ink' : 'text-ink-soft',
               )}
             >
               {filledCount}/{requiredChecks.length} Bagian Wajib
@@ -312,7 +310,6 @@ export default function AddUpdateProductModal({
         {/* Body */}
         <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5 md:px-8">
           <FormSection
-            step={1}
             icon={Package}
             title="Informasi Dasar"
             description="Nama produk dan artikel budaya yang terkait"
@@ -326,7 +323,7 @@ export default function AddUpdateProductModal({
                   values.sku ? (
                     <span className="inline-flex items-center gap-1.5">
                       SKU otomatis:
-                      <span className="rounded-md bg-[#f4efe5] px-1.5 py-0.5 font-mono text-xs text-[#6f6a62]">
+                      <span className="rounded-md bg-surface px-1.5 py-0.5 tabular-nums text-[13px] text-ink-soft">
                         {values.sku}
                       </span>
                     </span>
@@ -387,12 +384,12 @@ export default function AddUpdateProductModal({
                           </SelectItem>
                         ))}
                         {isFetchingNextArticlePage ? (
-                          <p className="px-2 py-2 text-xs text-muted-foreground">
+                          <p className="px-2 py-2 text-[13px] text-muted-foreground">
                             Memuat artikel berikutnya...
                           </p>
                         ) : null}
                         {!hasNextArticlePage && articleOptions.length > 0 ? (
-                          <p className="px-2 py-2 text-xs text-muted-foreground">
+                          <p className="px-2 py-2 text-[13px] text-muted-foreground">
                             Semua artikel telah dimuat
                           </p>
                         ) : null}
@@ -405,7 +402,6 @@ export default function AddUpdateProductModal({
           </FormSection>
 
           <FormSection
-            step={2}
             icon={Tag}
             title="Harga & Klasifikasi"
             description="Harga dasar, berat pengiriman, dan kategori"
@@ -473,7 +469,6 @@ export default function AddUpdateProductModal({
           </FormSection>
 
           <FormSection
-            step={3}
             icon={ImageIcon}
             title="Media & Deskripsi"
             description="Foto utama dan cerita singkat produk"
@@ -508,7 +503,6 @@ export default function AddUpdateProductModal({
           </FormSection>
 
           <FormSection
-            step={4}
             icon={Layers}
             title="Varian Produk"
             description={`${fields.length} varian · total stok ${totalStock.toLocaleString('id-ID')} unit`}
@@ -518,7 +512,7 @@ export default function AddUpdateProductModal({
                 variant="outline"
                 size="sm"
                 onClick={() => append(EMPTY_VARIANT)}
-                className="cursor-pointer gap-1.5 rounded-lg border-[#3a5a4a]/30 text-[#2f5543] hover:bg-[#e7efe4] hover:text-[#2f5543]"
+                className="cursor-pointer gap-1.5 rounded-lg border-brand/30 text-ink hover:bg-surface hover:text-ink"
               >
                 <Plus className="size-4" />
                 Tambah Varian
@@ -526,7 +520,7 @@ export default function AddUpdateProductModal({
             }
           >
             {errors.variants?.message ? (
-              <p className="mb-3 text-sm text-red-600">
+              <p className="mb-3 text-base text-destructive">
                 {errors.variants.message}
               </p>
             ) : null}
@@ -548,19 +542,19 @@ export default function AddUpdateProductModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-[#ebe3d6] bg-[#fffdfa] px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-border bg-card px-6 py-4">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-11 cursor-pointer rounded-xl border-[#e5ded5] bg-white px-6 text-[#6f6a62] hover:bg-[#f4efe5]"
+            className="h-11 cursor-pointer rounded-full border-border bg-card px-6 text-ink-soft hover:bg-surface"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 min-w-44 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-6 text-white shadow-[0_6px_16px_rgba(47,75,61,0.25)] transition-all hover:-translate-y-px hover:bg-[#2f4b3d]"
+            className="h-11 min-w-44 cursor-pointer gap-2 rounded-full bg-brand px-6 text-on-field transition-all hover:bg-brand-strong"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

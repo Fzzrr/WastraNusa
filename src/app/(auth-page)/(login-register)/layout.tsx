@@ -7,7 +7,7 @@ type LayoutProps = {
 
 export default function AuthLayout({ children }: LayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#e8e0d0]">
+    <div className="flex min-h-dvh bg-ground">
       {/* Left: form panel — form sits slightly above center, left-aligned with padding */}
       <div className="flex w-full flex-col lg:w-[60%] relative">
         {/* Logo top-left - Absolute positioning to avoid impacting flex center */}
@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: LayoutProps) {
               height={60}
               priority
             />
-            <span className="text-lg font-semibold tracking-tight text-[#2d2318]">
+            <span className="text-lg font-semibold tracking-tight text-ink">
               WastraNusa
             </span>
           </Link>
@@ -28,7 +28,7 @@ export default function AuthLayout({ children }: LayoutProps) {
 
         {/* Form — centered vertically, left-padded like design */}
         <div className="flex flex-1 items-center justify-center px-10">
-          <div className="w-full max-w-[345px]">{children}</div>
+          <div className="w-full max-w-[380px]">{children}</div>
         </div>
       </div>
 
@@ -42,11 +42,6 @@ export default function AuthLayout({ children }: LayoutProps) {
           style={{ objectPosition: '70% 10%' }}
           className="object-cover"
           sizes="(max-width: 1024px) 0vw, 40vw"
-        />
-        {/* Dark green tinted overlay matching the design */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: 'rgba(42, 99, 71, 0.45)' }}
         />
       </div>
     </div>

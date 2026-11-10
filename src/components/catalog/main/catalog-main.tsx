@@ -120,14 +120,10 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
   };
 
   return (
-    <main className="border-t border-[#dbd4c7]">
-      <CatalogMainHeader
-        totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
-        totalIslands={meta?.stats?.totalIslands ?? meta?.islands?.length ?? 0}
-        images={products.map((product) => product.imageURL)}
-      />
+    <main>
+      <CatalogMainHeader />
 
-      <section className="border-y border-[#d4ccbe] bg-[#e8e3d9] py-6">
+      <section id="katalog-produk" className="scroll-mt-6 pt-10 pb-4">
         <div className="mx-auto grid w-full grid-cols-1 max-w-[1320px] gap-4 px-4 md:px-6 lg:px-8 xl:grid-cols-[280px_minmax(0,1fr)]">
           <CatalogFiltersSidebar
             totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
@@ -191,7 +187,7 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
             {showLoadingSkeleton ? <CatalogProductGridSkeleton /> : null}
 
             {!showLoadingSkeleton && !isPending && error ? (
-              <div className="mt-4 rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
+              <div className="mt-4 rounded-xl border border-destructive/30 bg-surface p-6 text-[15px] text-destructive">
                 Gagal memuat data produk. Silakan coba lagi.
               </div>
             ) : null}
@@ -201,7 +197,7 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
             ) : null}
 
             {!isPending && !error && products.length === 0 ? (
-              <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">
+              <div className="mt-4 rounded-xl border border-border bg-card p-6 text-[15px] text-ink">
                 Belum ada produk yang sesuai dengan filter saat ini.
               </div>
             ) : null}

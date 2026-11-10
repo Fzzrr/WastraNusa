@@ -43,30 +43,30 @@ import {
 
 function TableRowSkeleton() {
   return (
-    <tr className="border-t border-[#ece7de]">
+    <tr className="border-t border-border">
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-5 w-28 bg-[#eee2d0]" />
-          <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
+          <Skeleton className="h-5 w-28 bg-surface" />
+          <Skeleton className="h-4 w-36 bg-surface" />
         </div>
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
+        <Skeleton className="h-4 w-36 bg-surface" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
+        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
+        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-36 rounded-lg bg-[#eee2d0]" />
+        <Skeleton className="h-9 w-36 rounded-lg bg-surface" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-28 rounded-lg bg-[#eee2d0]" />
+        <Skeleton className="h-9 w-28 rounded-lg bg-surface" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-20 rounded-lg bg-[#eee2d0]" />
+        <Skeleton className="h-9 w-20 rounded-lg bg-surface" />
       </td>
     </tr>
   );
@@ -178,9 +178,9 @@ export function SellerOrderContent() {
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">
-        <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
+        <div className="flex flex-col gap-4 rounded-xl bg-surface p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {isLoading ? '...' : orderData?.meta.totalItems} Pesanan
             </p>
 
@@ -192,7 +192,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[190px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-border bg-card sm:w-[190px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -212,7 +212,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[180px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-border bg-card sm:w-[180px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -227,10 +227,10 @@ export function SellerOrderContent() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
+          <Card className="overflow-hidden rounded-xl border border-border bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] ">
+                <thead className="bg-surface text-[13px] font-semibold text-ink-soft">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
                     <th className="px-4 py-3">Pelanggan</th>
@@ -250,7 +250,7 @@ export function SellerOrderContent() {
                     <tr>
                       <td
                         colSpan={7}
-                        className="py-10 text-center text-[#8f8377]"
+                        className="py-10 text-center text-ink-soft"
                       >
                         Belum ada data pesanan.
                       </td>
@@ -269,50 +269,50 @@ export function SellerOrderContent() {
                       return (
                         <tr
                           key={order.orderId}
-                          className="border-t border-[#ece7de]"
+                          className="border-t border-border"
                         >
-                          <td className="px-4 py-3 text-[#2b2b2b]">
+                          <td className="px-4 py-3 text-ink">
                             <div className="flex flex-col gap-0.5">
                               <p className="text-small font-semibold">
                                 {order.orderNumber}
                               </p>
-                              <p className="text-xs text-muted-foreground/80">
+                              <p className="text-[13px] text-muted-foreground/80">
                                 {order.createdAtLabel} ·{' '}
                                 {order.totalAmountLabel}
                               </p>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-[#6d6a64]">
+                          <td className="px-4 py-3 text-[15px] text-ink-soft">
                             <div className="flex flex-col">
-                              <span className="font-semibold text-[#3d3a34]">
+                              <span className="font-semibold text-ink">
                                 {order.customer.name}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[13px] text-muted-foreground">
                                 {order.customer.email}
                               </span>
-                              <span className="mt-2 text-xs text-[#3d3a34]">
+                              <span className="mt-2 text-[13px] text-ink">
                                 Kirim ke{' '}
                                 <span className="font-semibold">
                                   {order.shipping.recipientName}
                                 </span>{' '}
                                 ({order.shipping.phone})
                               </span>
-                              <span className="max-w-64 text-xs leading-relaxed">
+                              <span className="max-w-64 text-[13px] leading-relaxed">
                                 {order.shipping.address}
                               </span>
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-[13px] text-muted-foreground">
                                 {order.shipping.courier}
                               </span>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-sm text-[#6d6a64]">
+                          <td className="px-4 py-3 text-[15px] text-ink-soft">
                             <div className="flex flex-col gap-2">
                               {order.products.map((product, index) => (
                                 <div key={index} className="flex flex-col">
-                                  <span className="font-semibold text-[#3d3a34]">
+                                  <span className="font-semibold text-ink">
                                     {product.name}
                                   </span>
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-[13px] text-muted-foreground">
                                     {product.location} · Qty {product.quantity}{' '}
                                     · {product.unitPrice}
                                   </span>
@@ -344,7 +344,7 @@ export function SellerOrderContent() {
                                 }
                                 disabled={!editable}
                               >
-                                <SelectTrigger className="h-9 w-36 rounded-lg border-[#ddd6c9] bg-white text-xs">
+                                <SelectTrigger className="h-9 w-36 rounded-lg border-border bg-card text-[13px]">
                                   <SelectValue placeholder="Pilih status" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -384,14 +384,14 @@ export function SellerOrderContent() {
                                 )
                               }
                               placeholder="Isi no. resi"
-                              className="h-9 rounded-lg border-[#ddd6c9] bg-white text-sm"
+                              className="h-9 rounded-lg border-border bg-card text-[15px]"
                               disabled={!editable}
                             />
                           </td>
                           <td className="px-4 py-3 text-right">
                             <Button
                               size="sm"
-                              className="h-9 rounded-lg"
+                              className="h-9 rounded-full"
                               onClick={() => handleSave(order)}
                               disabled={!editable || savingId === order.orderId}
                             >
@@ -409,14 +409,14 @@ export function SellerOrderContent() {
           </Card>
           {orderData && orderData.meta.totalPages > 1 ? (
             <div className="mt-4 flex items-center justify-between px-2">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Halaman {page} dari {orderData.meta.totalPages}
               </p>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="size-8 rounded-full border-border bg-background text-ink-soft hover:bg-surface"
                   onClick={() =>
                     setPage((currentPage) => Math.max(1, currentPage - 1))
                   }
@@ -451,17 +451,17 @@ export function SellerOrderContent() {
                           className="flex items-center gap-1"
                         >
                           {showEllipsis ? (
-                            <span className="px-1 text-[#8f8377]">...</span>
+                            <span className="px-1 text-ink-soft">...</span>
                           ) : null}
                           <Button
                             variant={
                               page === pageNumber ? 'default' : 'outline'
                             }
                             size="icon"
-                            className={`size-8 rounded-lg ${
+                            className={`size-8 rounded-full ${
                               page === pageNumber
-                                ? 'bg-[#3d3a34] text-white hover:bg-[#3d3a34]/90'
-                                : 'border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]'
+                                ? 'bg-field text-white hover:bg-field/90'
+                                : 'border-border bg-background text-ink-soft hover:bg-surface'
                             }`}
                             onClick={() => setPage(pageNumber)}
                             disabled={isLoading}
@@ -476,7 +476,7 @@ export function SellerOrderContent() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="size-8 rounded-lg border-[#ddd6c9] bg-background text-[#6a645a] hover:bg-[#ede8df]"
+                  className="size-8 rounded-full border-border bg-background text-ink-soft hover:bg-surface"
                   onClick={() =>
                     setPage((currentPage) =>
                       Math.min(orderData.meta.totalPages, currentPage + 1),

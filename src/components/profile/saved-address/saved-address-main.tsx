@@ -43,7 +43,7 @@ export function SavedAddressMain() {
           <span className="flex items-center gap-2">
             Alamat Tersimpan
             {!isLoading && addresses.length > 0 ? (
-              <span className="rounded-full bg-[#e3ece5] px-2 py-0.5 text-xs font-semibold text-[#2f5f49]">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-ink">
                 {addresses.length}
               </span>
             ) : null}

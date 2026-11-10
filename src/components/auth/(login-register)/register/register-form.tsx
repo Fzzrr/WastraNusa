@@ -106,8 +106,8 @@ export function RegisterForm() {
 
   return (
     <div className="w-full">
-      <h1 className="mb-5 text-2xl font-bold text-[#2d2318]">
-        Daftar ke WastraNusa
+      <h1 className="mb-8 text-[clamp(2rem,3vw,2.75rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">
+        Buat akun
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
@@ -117,7 +117,7 @@ export function RegisterForm() {
             <Field data-invalid={!!errors.firstName} className="gap-1">
               <FieldLabel
                 htmlFor="firstName"
-                className="text-xs font-sm text-[#2d2318]"
+                className="text-[15px] font-medium text-ink"
               >
                 Nama Depan
               </FieldLabel>
@@ -127,9 +127,9 @@ export function RegisterForm() {
                 autoComplete="given-name"
                 placeholder="Nama depan"
                 {...register('firstName')}
-                className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+                className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
               />
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {errors.firstName?.message}
               </FieldError>
             </Field>
@@ -138,7 +138,7 @@ export function RegisterForm() {
             <Field data-invalid={!!errors.phone} className="gap-1">
               <FieldLabel
                 htmlFor="phone"
-                className="text-xs font-sm text-[#2d2318]"
+                className="text-[15px] font-medium text-ink"
               >
                 Nomor Telepon
               </FieldLabel>
@@ -154,9 +154,9 @@ export function RegisterForm() {
                     '',
                   ))
                 }
-                className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+                className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
               />
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {errors.phone?.message}
               </FieldError>
             </Field>
@@ -165,7 +165,7 @@ export function RegisterForm() {
             <Field data-invalid={!!errors.email} className="gap-1">
               <FieldLabel
                 htmlFor="email"
-                className="text-xs font-sm text-[#2d2318]"
+                className="text-[15px] font-medium text-ink"
               >
                 Email
               </FieldLabel>
@@ -175,9 +175,9 @@ export function RegisterForm() {
                 autoComplete="email"
                 placeholder="name@example.com"
                 {...register('email')}
-                className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+                className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
               />
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {errors.email?.message}
               </FieldError>
             </Field>
@@ -186,7 +186,7 @@ export function RegisterForm() {
             <Field data-invalid={!!errors.password} className="gap-1">
               <FieldLabel
                 htmlFor="password"
-                className="text-xs font-sm text-[#2d2318]"
+                className="text-[15px] font-medium text-ink"
               >
                 Password
               </FieldLabel>
@@ -196,9 +196,9 @@ export function RegisterForm() {
                 autoComplete="new-password"
                 placeholder="••••••••"
                 {...register('password')}
-                className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+                className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
               />
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {errors.password?.message}
               </FieldError>
             </Field>
@@ -208,7 +208,7 @@ export function RegisterForm() {
               data-invalid={!!(errors.day || errors.month || errors.year)}
               className="gap-1"
             >
-              <FieldLabel className="text-xs font-sm text-[#2d2318]">
+              <FieldLabel className="text-[15px] font-medium text-ink">
                 Tanggal Lahir
               </FieldLabel>
               <div className="flex gap-2">
@@ -217,7 +217,7 @@ export function RegisterForm() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
+                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
                         <SelectValue placeholder="Tanggal" />
                       </SelectTrigger>
                       <SelectContent>
@@ -236,7 +236,7 @@ export function RegisterForm() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
+                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
                         <SelectValue placeholder="Bulan" />
                       </SelectTrigger>
                       <SelectContent>
@@ -255,7 +255,7 @@ export function RegisterForm() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-[#c8bfb0] bg-transparent text-[#2d2318] focus:ring-[#8a7a6a]">
+                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
                         <SelectValue placeholder="Tahun" />
                       </SelectTrigger>
                       <SelectContent>
@@ -269,7 +269,7 @@ export function RegisterForm() {
                   )}
                 />
               </div>
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {(errors.day || errors.month || errors.year) &&
                   'Lengkapi tanggal lahir Anda.'}
               </FieldError>
@@ -277,7 +277,7 @@ export function RegisterForm() {
 
             {/* Gender */}
             <Field data-invalid={!!errors.gender} className="gap-1">
-              <div className="flex gap-2.5 text-xs text-[#2d2318] mt-0.5">
+              <div className="flex gap-2.5 text-[13px] text-ink mt-0.5">
                 {[
                   { value: 'female', label: 'Perempuan' },
                   { value: 'male', label: 'Laki-laki' },
@@ -290,13 +290,13 @@ export function RegisterForm() {
                       type="radio"
                       value={gender.value}
                       {...register('gender')}
-                      className="accent-[#3d2e1e] w-3 h-3"
+                      className="size-4 accent-brand"
                     />
                     {gender.label}
                   </label>
                 ))}
               </div>
-              <FieldError className="text-xs font-medium leading-none">
+              <FieldError className="text-[13px] font-medium leading-none">
                 {errors.gender?.message}
               </FieldError>
             </Field>
@@ -317,7 +317,7 @@ export function RegisterForm() {
         {/* Error message */}
         <div className="min-h-[0.5rem] py-0">
           {errors.root && (
-            <FieldError className="text-xs font-medium leading-none">
+            <FieldError className="text-[13px] font-medium leading-none">
               {errors.root.message}
             </FieldError>
           )}
@@ -328,7 +328,7 @@ export function RegisterForm() {
           type={isSuccess ? 'button' : 'submit'}
           disabled={isSubmitting}
           onClick={isSuccess ? () => router.push('/login') : undefined}
-          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm"
+          className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong"
         >
           {isSuccess
             ? 'Ke Halaman Masuk'
@@ -344,11 +344,11 @@ export function RegisterForm() {
             <GoogleButton label="Lanjutkan dengan Google" />
           </div>
 
-          <p className="mt-4 text-center text-xs text-[#6a6056]">
+          <p className="mt-6 text-center text-[15px] text-ink-soft">
             Sudah punya akun?{' '}
             <Link
               href="/login"
-              className="text-[#8b5530] hover:underline font-medium"
+              className="font-semibold text-brand underline-offset-4 hover:underline"
             >
               Masuk
             </Link>

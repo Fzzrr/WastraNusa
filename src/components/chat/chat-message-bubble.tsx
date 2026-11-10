@@ -32,10 +32,8 @@ export function ChatMessageBubble({
     >
       <div
         className={cn(
-          'group/bubble flex max-w-[82%] flex-col gap-1 rounded-2xl px-3.5 py-2 text-sm leading-relaxed transition-shadow sm:max-w-[68%]',
-          isOwn
-            ? 'bg-gradient-to-br from-[#2f5f49] to-[#3f7359] text-white shadow-[0_6px_16px_-10px_rgba(47,95,73,0.9)]'
-            : 'bg-white text-[#2f3a33] shadow-[0_1px_2px_rgba(60,41,15,0.06)] ring-1 ring-[#ebe3d6]',
+          'group/bubble flex max-w-[82%] flex-col gap-1 rounded-xl px-3.5 py-2 text-[15px] leading-relaxed transition-shadow sm:max-w-[68%]',
+          isOwn ? 'bg-brand text-on-field' : 'bg-card text-ink',
           isLastInGroup && (isOwn ? 'rounded-br-md' : 'rounded-bl-md'),
         )}
       >
@@ -45,14 +43,14 @@ export function ChatMessageBubble({
         <p className="break-words whitespace-pre-wrap">{message.content}</p>
         <div
           className={cn(
-            'flex items-center gap-1 self-end text-xs tabular-nums',
-            isOwn ? 'text-white/75' : 'text-[#a39784]',
+            'flex items-center gap-1 self-end text-[13px] tabular-nums',
+            isOwn ? 'text-white/75' : 'text-ink-soft',
           )}
         >
           <span>{time}</span>
           {isOwn ? (
             isRead ? (
-              <span className="flex items-center text-[#e8cb8d]" title="Dibaca">
+              <span className="flex items-center text-gold" title="Dibaca">
                 <CheckCheck className="size-3.5" aria-hidden />
                 <span className="sr-only">Dibaca</span>
               </span>

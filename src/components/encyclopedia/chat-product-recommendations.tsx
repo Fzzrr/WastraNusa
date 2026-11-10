@@ -14,7 +14,7 @@ export function ChatProductRecommendations({
         <li key={product.slug}>
           <Link
             href={product.href}
-            className="flex gap-3 rounded-xl border border-border bg-background p-2 text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
+            className="flex gap-3 rounded-xl bg-surface p-2 text-ink transition-colors hover:bg-border focus-visible:outline-2 focus-visible:outline-ring"
           >
             {product.imageURL && (
               <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted">

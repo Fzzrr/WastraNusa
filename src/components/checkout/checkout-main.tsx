@@ -135,7 +135,7 @@ export function CheckoutMain() {
               onSelect={setSelectedShippingId}
             />
 
-            <div className="flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
+            <div className="flex flex-col-reverse items-center justify-between gap-3 rounded-xl bg-card p-4 sm:flex-row">
               <Link href="/cart">
                 <Button
                   variant="outline"
@@ -161,9 +161,9 @@ export function CheckoutMain() {
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-[#9a8f80]">
-              <ShieldCheck className="size-3.5 text-[#2f5f49]" />
-              <p className="text-xs font-medium">
+            <div className="flex items-center justify-center gap-2 text-ink-soft">
+              <ShieldCheck className="size-3.5 text-ink" />
+              <p className="text-[13px] font-medium">
                 Pembayaran Aman & Terenkripsi
               </p>
             </div>

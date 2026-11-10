@@ -38,11 +38,11 @@ export function MyOrderMain() {
       description="Lacak status dan riwayat belanja Anda"
       bodyClassName="p-0"
     >
-      <div className="border-b border-[#efe8dd] px-5 py-3 md:px-6">
+      <div className="border-b border-border px-5 py-3 md:px-6">
         <div
           role="tablist"
           aria-label="Filter status pesanan"
-          className="flex gap-1 overflow-x-auto rounded-xl bg-[#f4efe5] p-1 scrollbar-none"
+          className="flex gap-1 overflow-x-auto rounded-xl bg-surface p-1 scrollbar-none"
         >
           {tabs.map((tab) => {
             const isActive = activeTab === tab;
@@ -61,8 +61,8 @@ export function MyOrderMain() {
                 className={cn(
                   'inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all duration-200',
                   isActive
-                    ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-white shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)]'
-                    : 'text-[#6f6a62] hover:bg-white/70 hover:text-[#2f5f49]',
+                    ? 'bg-brand text-on-field'
+                    : 'text-ink-soft hover:bg-white/70 hover:text-ink',
                 )}
               >
                 <Icon className="size-3.5" />

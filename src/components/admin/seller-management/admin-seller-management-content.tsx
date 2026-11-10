@@ -32,10 +32,10 @@ export function AdminSellerManagementContent() {
       <AdminHeader
         title="Manajemen Penjual"
         subtitle={
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-[15px]">
             <AdminBrandChip />
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fffdfa] px-3 py-1 text-[#6f6a62] ring-1 ring-[#ebe3d6]">
-              <Store className="size-3.5 text-[#b08a5e]" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-ink-soft ring-1 ring-border">
+              <Store className="size-3.5 text-ink-soft" />
               Kelola seller, pengajuan toko, dan performa penjualan
             </span>
           </div>
@@ -53,15 +53,15 @@ export function AdminSellerManagementContent() {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Cari seller atau toko..."
-                className="peer h-11 w-full rounded-xl bg-[#fffdfa] pr-10 pl-10 text-sm text-[#2f3a33] shadow-[0_1px_2px_rgba(60,41,15,0.04)] ring-1 ring-[#e5ded5] transition-shadow outline-none placeholder:text-[#a39c92] focus:shadow-[0_0_0_4px_rgba(58,90,74,0.12)] focus:ring-[#3a5a4a]"
+                className="peer h-11 w-full rounded-xl bg-card pr-10 pl-10 text-[15px] text-ink ring-1 ring-border transition-shadow outline-none placeholder:text-ink-soft focus:ring-brand"
               />
-              <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[#a39c92] transition-colors peer-focus:text-[#2f5543]" />
+              <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-ink-soft transition-colors peer-focus:text-ink" />
               {searchInput ? (
                 <button
                   type="button"
                   aria-label="Hapus pencarian"
                   onClick={() => setSearchInput('')}
-                  className="absolute top-1/2 right-3 flex size-6 -translate-y-1/2 animate-in cursor-pointer items-center justify-center rounded-full text-[#a39c92] transition-colors fade-in hover:bg-[#f4efe5] hover:text-[#2f3a33]"
+                  className="absolute top-1/2 right-3 flex size-6 -translate-y-1/2 animate-in cursor-pointer items-center justify-center rounded-full text-ink-soft transition-colors fade-in hover:bg-surface hover:text-ink"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -73,7 +73,7 @@ export function AdminSellerManagementContent() {
               pendingCount={pendingApplications?.length ?? 0}
             />
             <div className="ml-auto flex items-center gap-3">
-              <span className="text-sm whitespace-nowrap text-[#9a8f80] tabular-nums">
+              <span className="text-[15px] whitespace-nowrap text-ink-soft tabular-nums">
                 {isLoading ? '…' : `${(users ?? []).length} User`}
               </span>
               <SortMenu value={sort} onChange={setSort} />

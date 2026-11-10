@@ -132,7 +132,7 @@ export default function AddUpdateAddressModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
       />
 
@@ -140,15 +140,15 @@ export default function AddUpdateAddressModal({
       <FormProvider {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className={`relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-[#fdfaf5] shadow-2xl transition-all duration-300 ${
+          className={`relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-card shadow-2xl transition-all duration-300 ${
             isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95'
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#ece7dd] px-6 py-4">
-            <div className="flex items-center gap-3 text-[#4d6356]">
-              <MapPin className="h-5 w-5 text-[#5c7365]" />
-              <h2 className="text-lg font-semibold">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <div className="flex items-center gap-3 text-ink">
+              <MapPin className="h-5 w-5 text-ink-soft" />
+              <h2 className="text-xl font-semibold text-ink">
                 {isEdit ? 'Edit Alamat' : 'Tambah Alamat Baru'}
               </h2>
             </div>
@@ -157,7 +157,7 @@ export default function AddUpdateAddressModal({
               variant="ghost"
               size="icon-sm"
               onClick={onClose}
-              className="rounded-full bg-[#f3ede8] text-[#8f9b94] transition-colors hover:bg-[#e6dcd5]"
+              className="rounded-full bg-surface text-ink-soft transition-colors hover:bg-surface"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -168,16 +168,16 @@ export default function AddUpdateAddressModal({
             <div className="flex flex-col gap-5">
               {/* Label */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+                <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
                   Label Alamat <span className="text-red-400">*</span>
                 </label>
                 <Input
                   {...register('label')}
                   placeholder="Contoh: Rumah, Kantor, Kos"
-                  className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                  className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                 />
                 {errors.label && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-[13px] text-red-500">
                     {errors.label.message}
                   </p>
                 )}
@@ -186,31 +186,31 @@ export default function AddUpdateAddressModal({
               {/* Recipient + Phone */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+                  <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
                     Nama Penerima <span className="text-red-400">*</span>
                   </label>
                   <Input
                     {...register('recipientName')}
                     placeholder="Nama lengkap penerima"
-                    className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                    className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                   />
                   {errors.recipientName && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1 text-[13px] text-red-500">
                       {errors.recipientName.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+                  <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
                     Nomor Telepon <span className="text-red-400">*</span>
                   </label>
                   <Input
                     {...register('phone')}
                     placeholder="08xxxxxxxxxx"
-                    className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
+                    className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                   />
                   {errors.phone && (
-                    <p className="mt-1 text-xs text-red-500">
+                    <p className="mt-1 text-[13px] text-red-500">
                       {errors.phone.message}
                     </p>
                   )}
@@ -221,17 +221,17 @@ export default function AddUpdateAddressModal({
 
               {/* Full Address */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+                <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
                   Alamat Lengkap <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   {...register('fullAddress')}
                   rows={3}
                   placeholder="Jl. Contoh No. 123, RT 01/RW 02..."
-                  className="w-full resize-none rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 py-3 text-sm text-[#4d6356] placeholder:text-[#b0b8b3] outline-none transition-all focus:border-[#5c7365] focus:ring-2 focus:ring-[#5c7365]/20"
+                  className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-ink placeholder:text-ink-soft outline-none transition-all focus:border-border focus:ring-2 focus:ring-border/20"
                 />
                 {errors.fullAddress && (
-                  <p className="mt-1 text-xs text-red-500">
+                  <p className="mt-1 text-[13px] text-red-500">
                     {errors.fullAddress.message}
                   </p>
                 )}
@@ -239,9 +239,9 @@ export default function AddUpdateAddressModal({
 
               {/* Notes */}
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+                <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
                   Catatan{' '}
-                  <span className="text-xs font-normal text-[#8f9b94]">
+                  <span className="text-[13px] font-normal text-ink-soft">
                     (opsional)
                   </span>
                 </label>
@@ -249,33 +249,33 @@ export default function AddUpdateAddressModal({
                   {...register('notes')}
                   rows={2}
                   placeholder="Patokan / petunjuk tambahan untuk kurir..."
-                  className="w-full resize-none rounded-xl border border-[#e5ded5] bg-[#fdfaf7] px-4 py-3 text-sm text-[#4d6356] placeholder:text-[#b0b8b3] outline-none transition-all focus:border-[#5c7365] focus:ring-2 focus:ring-[#5c7365]/20"
+                  className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-ink placeholder:text-ink-soft outline-none transition-all focus:border-border focus:ring-2 focus:ring-border/20"
                 />
               </div>
 
               {/* Set as default */}
               {isEdit && initialData?.isDefault ? (
                 /* Already the default — show a locked indicator; user cannot un-default here */
-                <div className="flex items-center gap-3 rounded-xl border border-[#d4e6d9] bg-[#eef6f1] px-4 py-3">
-                  <Check className="h-4 w-4 flex-shrink-0 text-[#3c5043]" />
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3">
+                  <Check className="h-4 w-4 flex-shrink-0 text-ink" />
                   <div>
-                    <span className="text-sm font-medium text-[#3c5043]">
+                    <span className="text-[15px] font-medium text-ink">
                       Ini adalah alamat utama Anda
                     </span>
-                    <p className="mt-0.5 text-xs text-[#5c7365]">
+                    <p className="mt-0.5 text-[13px] text-ink-soft">
                       Untuk mengganti alamat utama, atur alamat lain sebagai
                       utama.
                     </p>
                   </div>
                 </div>
               ) : (
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-[#ece7dd] bg-[#f8f5ef] px-4 py-3 transition-colors hover:bg-[#f3ede6]">
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-colors hover:bg-surface">
                   <input
                     {...register('isDefault')}
                     type="checkbox"
-                    className="h-4 w-4 cursor-pointer accent-[#5c7365]"
+                    className="h-4 w-4 cursor-pointer accent-brand"
                   />
-                  <span className="text-sm text-[#4d6356]">
+                  <span className="text-[15px] text-ink">
                     Jadikan sebagai alamat utama
                   </span>
                 </label>
@@ -284,11 +284,11 @@ export default function AddUpdateAddressModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center gap-3 rounded-b-2xl border-t border-[#ece7dd] bg-[#fdfaf5] px-6 py-4">
+          <div className="flex items-center gap-3 rounded-b-2xl border-t border-border bg-card px-6 py-4">
             <Button
               type="submit"
               disabled={isPending}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#3c5043] text-base font-medium text-white transition-colors hover:bg-[#2d3d32]"
+              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-brand text-base font-medium text-on-field transition-colors hover:bg-brand-strong"
             >
               {isPending ? (
                 <div className="size-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -305,7 +305,7 @@ export default function AddUpdateAddressModal({
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-11 rounded-xl border-[#d8cfbf] bg-white px-6 text-base font-medium text-[#5c7365] transition-colors hover:bg-[#f8f5ef]"
+              className="h-11 rounded-full border-border bg-card px-6 text-base font-medium text-ink-soft transition-colors hover:bg-surface"
             >
               Batal
             </Button>

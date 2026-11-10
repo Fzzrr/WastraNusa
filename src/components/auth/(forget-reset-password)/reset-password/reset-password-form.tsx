@@ -39,19 +39,19 @@ const ResetPasswordStatus = ({
 
   return (
     <div className="text-center space-y-4">
-      <p className="text-sm text-[#2d2318]">
+      <p className="text-base text-ink">
         {isSuccess
           ? 'Password Anda berhasil diperbarui.'
           : 'Link reset password tidak valid atau sudah kedaluwarsa.'}
       </p>
-      <p className="text-xs text-[#2d2318]/70">
+      <p className="text-[13px] text-ink/70">
         {isSuccess
           ? 'Anda akan segera diarahkan ke halaman masuk.'
           : 'Demi keamanan, link reset hanya berlaku sebentar. Silakan minta link baru.'}
       </p>
       <Button
         onClick={onAction}
-        className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm"
+        className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong"
       >
         {isSuccess ? 'Masuk Sekarang' : 'Kembali ke Halaman Masuk'}
       </Button>
@@ -84,7 +84,7 @@ const ActualResetForm = ({
             id="password"
             type="password"
             {...register('password')}
-            className="h-11 rounded-sm border-[#b8b0a0] bg-transparent focus-visible:ring-1 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+            className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
             placeholder="••••••••"
           />
           <FieldError>{errors.password?.message}</FieldError>
@@ -96,7 +96,7 @@ const ActualResetForm = ({
             id="confirmPassword"
             type="password"
             {...register('confirmPassword')}
-            className="h-11 rounded-sm border-[#b8b0a0] bg-transparent focus-visible:ring-1 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+            className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
             placeholder="••••••••"
           />
           <FieldError>{errors.confirmPassword?.message}</FieldError>
@@ -111,7 +111,7 @@ const ActualResetForm = ({
 
       <Button
         type="submit"
-        className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm mt-1"
+        className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong mt-1"
         disabled={isSubmitting}
       >
         {isSubmitting ? 'Menyimpan...' : 'Simpan Password Baru'}

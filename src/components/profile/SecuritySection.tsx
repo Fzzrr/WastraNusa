@@ -52,15 +52,13 @@ function SecurityRow({
   status?: ReactNode;
 }) {
   return (
-    <div className="group flex items-center justify-between gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50">
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-surface px-4 py-3.5">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e3ece5] text-[#2f5f49] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
-          {icon}
-        </span>
+        <span className="shrink-0 text-ink-soft">{icon}</span>
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-[#2f3a33]">{title}</div>
+          <div className="text-[15px] font-semibold text-ink">{title}</div>
           {subtitle && (
-            <div className="truncate text-xs text-[#9a8f80]">{subtitle}</div>
+            <div className="truncate text-[15px] text-ink-soft">{subtitle}</div>
           )}
         </div>
       </div>
@@ -174,26 +172,20 @@ export default function SecuritySection() {
       }
     >
       {isOAuthOnly && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <Info className="mt-0.5 size-5 shrink-0 text-amber-600" />
-          <div className="text-sm text-amber-800">
-            <p className="mb-1 font-semibold">Akun Terhubung dengan Google</p>
-            <p className="text-[13px] leading-relaxed">
-              Anda menggunakan login Google untuk akun ini. Pengaturan password
-              dinonaktifkan karena Anda tidak memiliki password lokal.
-            </p>
-          </div>
-        </div>
+        <p className="mb-4 flex items-start gap-3 rounded-xl bg-surface p-4 text-[15px] text-ink">
+          <Info className="mt-0.5 size-5 shrink-0 text-ink-soft" />
+          Akun ini masuk lewat Google, jadi tidak memakai password.
+        </p>
       )}
 
       {isChangingPassword ? (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] duration-300 fade-in slide-in-from-top-1 md:p-5"
+          className="animate-in space-y-4 rounded-xl bg-surface p-4 duration-300 fade-in slide-in-from-top-1 md:p-5"
         >
           <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
-              <KeyRound className="size-4 text-[#a07a2c]" />
+            <h3 className="flex items-center gap-2 text-[15px] font-semibold text-ink">
+              <KeyRound className="size-4 text-ink-soft" />
               Ubah Password
             </h3>
             <Button
@@ -201,7 +193,7 @@ export default function SecuritySection() {
               variant="ghost"
               size="icon"
               aria-label="Tutup"
-              className="size-8 cursor-pointer rounded-full text-[#9a8f80] hover:bg-white"
+              className="size-8 cursor-pointer rounded-full text-ink-soft hover:bg-card"
               onClick={() => setIsChangingPassword(false)}
             >
               <X className="size-4" />
@@ -235,25 +227,25 @@ export default function SecuritySection() {
         <div className="grid gap-3 md:grid-cols-2">
           {!isOAuthOnly && (
             <SecurityRow
-              icon={<Lock className="size-4" />}
+              icon={<Lock className="size-5" strokeWidth={1.75} />}
               title="Password"
               subtitle="••••••••••••"
               status={
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#e3ece5] px-2.5 py-1 text-xs font-semibold text-[#2f5f49]">
-                  <CheckCircle className="size-3" />
-                  Aktif
-                </span>
+                <CheckCircle
+                  className="size-5 shrink-0 text-brand"
+                  aria-label="Aktif"
+                />
               }
             />
           )}
           <SecurityRow
-            icon={<MonitorSmartphone className="size-4" />}
+            icon={<MonitorSmartphone className="size-5" strokeWidth={1.75} />}
             title="Login Terakhir"
             subtitle={isPending ? 'Memuat...' : loginDate}
             status={
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#e3ece5] px-2.5 py-1 text-xs font-semibold text-[#2f5f49]">
-                <span className="size-1.5 animate-pulse rounded-full bg-[#3f8f63]" />
-                Sesi Aktif
+              <span className="inline-flex shrink-0 items-center gap-1.5 text-[15px] text-ink-soft">
+                <span className="size-2 rounded-full bg-[#3f8f63]" />
+                Aktif
               </span>
             }
           />

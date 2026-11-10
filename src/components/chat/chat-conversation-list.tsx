@@ -13,10 +13,10 @@ type Filter = 'all' | 'unread';
 function ConversationRowSkeleton() {
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <Skeleton className="size-11 shrink-0 rounded-full bg-[#eee2d0]" />
+      <Skeleton className="size-11 shrink-0 rounded-full bg-surface" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
-        <Skeleton className="h-3 w-40 bg-[#f2ede4]" />
+        <Skeleton className="h-4 w-28 bg-surface" />
+        <Skeleton className="h-3 w-40 bg-surface" />
       </div>
     </div>
   );
@@ -53,9 +53,9 @@ export function ChatConversationList({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-col gap-2.5 border-b border-[#efe8dd] px-4 py-3">
+      <div className="flex flex-col gap-2.5 border-b border-border px-4 py-3">
         <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#b3aa9e]" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink-soft" />
           <label htmlFor="chat-search" className="sr-only">
             Cari percakapan
           </label>
@@ -65,14 +65,14 @@ export function ChatConversationList({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Cari nama..."
-            className="h-9 w-full rounded-xl border border-[#e5ded5] bg-white pr-8 pl-9 text-sm text-[#2f3a33] transition-[border-color,box-shadow] placeholder:text-[#b3aa9e] focus:outline-none focus-visible:border-[#3a5a4a] focus-visible:ring-3 focus-visible:ring-[#3a5a4a]/15 [&::-webkit-search-cancel-button]:hidden"
+            className="h-9 w-full rounded-xl border border-border bg-card pr-8 pl-9 text-[15px] text-ink transition-[border-color,box-shadow] placeholder:text-ink-soft focus:outline-none focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15 [&::-webkit-search-cancel-button]:hidden"
           />
           {query ? (
             <button
               type="button"
               onClick={() => setQuery('')}
               aria-label="Hapus pencarian"
-              className="absolute top-1/2 right-2 grid size-5 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-[#9a8f80] hover:bg-[#f4efe5] hover:text-[#2f4f3f]"
+              className="absolute top-1/2 right-2 grid size-5 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-ink-soft hover:bg-surface hover:text-ink"
             >
               <X className="size-3.5" />
             </button>
@@ -82,7 +82,7 @@ export function ChatConversationList({
         <div
           role="tablist"
           aria-label="Filter percakapan"
-          className="flex gap-1 rounded-xl bg-[#f4efe5] p-1"
+          className="flex gap-1 rounded-xl bg-surface p-1"
         >
           {filters.map((item) => {
             const isActive = filter === item.id;
@@ -94,20 +94,18 @@ export function ChatConversationList({
                 aria-selected={isActive}
                 onClick={() => setFilter(item.id)}
                 className={cn(
-                  'inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-200',
+                  'inline-flex h-9 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full px-3 text-[15px] transition-colors duration-200',
                   isActive
-                    ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-white shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)]'
-                    : 'text-[#6f6a62] hover:bg-white/70 hover:text-[#2f5f49]',
+                    ? 'bg-brand font-semibold text-on-field'
+                    : 'text-ink-soft hover:bg-surface hover:text-ink',
                 )}
               >
                 {item.label}
                 {item.count ? (
                   <span
                     className={cn(
-                      'min-w-4 rounded-full px-1 text-xs leading-4 tabular-nums',
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-[#b08a5e] text-white',
+                      'text-[13px] tabular-nums',
+                      isActive ? 'text-on-field-soft' : 'text-ink-soft',
                     )}
                   >
                     {item.count}
@@ -128,7 +126,7 @@ export function ChatConversationList({
           </div>
         ) : visible.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center">
-            <span className="grid size-12 place-items-center rounded-full bg-[#f5ead3] text-[#b08a5e]">
+            <span className="grid size-12 place-items-center rounded-full bg-surface text-ink-soft">
               {normalizedQuery ? (
                 <Search className="size-6" />
               ) : (
@@ -136,14 +134,14 @@ export function ChatConversationList({
               )}
             </span>
             <div>
-              <p className="text-sm font-semibold text-[#3d4f45]">
+              <p className="text-base font-semibold text-ink">
                 {normalizedQuery
                   ? 'Tidak ditemukan'
                   : filter === 'unread'
                     ? 'Semua pesan sudah dibaca'
                     : 'Belum ada percakapan'}
               </p>
-              <p className="mt-1 text-xs text-[#9a8f80]">
+              <p className="mt-1 text-[13px] text-ink-soft">
                 {normalizedQuery
                   ? `Tidak ada percakapan dengan "${query.trim()}".`
                   : filter === 'unread'
@@ -170,13 +168,11 @@ export function ChatConversationList({
                     aria-current={isSelected ? 'true' : undefined}
                     className={cn(
                       'group relative flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200',
-                      isSelected
-                        ? 'bg-[#e3ece5] shadow-[inset_0_0_0_1px_rgba(47,95,73,0.12)]'
-                        : 'hover:bg-[#f4efe5]',
+                      isSelected ? 'bg-surface' : 'hover:bg-surface',
                     )}
                   >
                     {isSelected ? (
-                      <span className="absolute top-2.5 bottom-2.5 left-0 w-1 rounded-r-full bg-gradient-to-b from-[#2f5f49] to-[#3f7359]" />
+                      <span className="absolute top-2.5 bottom-2.5 left-0 w-1 rounded-r-full bg-brand" />
                     ) : null}
 
                     <span className="relative shrink-0">
@@ -191,15 +187,15 @@ export function ChatConversationList({
                           className={cn(
                             'font-semibold transition-colors',
                             isSelected
-                              ? 'bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]'
-                              : 'bg-[#e3ece5] text-[#2f5543] group-hover:bg-[#d8e5db]',
+                              ? 'bg-brand text-gold'
+                              : 'bg-surface text-ink group-hover:bg-surface',
                           )}
                         >
                           {getInitials(otherParticipant.name)}
                         </AvatarFallback>
                       </Avatar>
                       {isUnread ? (
-                        <span className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-[#b08a5e] ring-2 ring-[#fffdf8]" />
+                        <span className="absolute -top-0.5 -right-0.5 size-3 rounded-full bg-surface ring-2 ring-border" />
                       ) : null}
                     </span>
 
@@ -207,7 +203,7 @@ export function ChatConversationList({
                       <span className="flex items-center justify-between gap-2">
                         <span
                           className={cn(
-                            'truncate text-sm text-[#2f3a33]',
+                            'truncate text-[15px] text-ink',
                             isUnread ? 'font-bold' : 'font-semibold',
                           )}
                         >
@@ -215,10 +211,10 @@ export function ChatConversationList({
                         </span>
                         <span
                           className={cn(
-                            'shrink-0 text-xs tabular-nums',
+                            'shrink-0 text-[13px] tabular-nums',
                             isUnread
-                              ? 'font-semibold text-[#b08a5e]'
-                              : 'text-[#a39784]',
+                              ? 'font-semibold text-ink-soft'
+                              : 'text-ink-soft',
                           )}
                         >
                           {formatShortTime(conversation.lastMessageAt)}
@@ -227,19 +223,17 @@ export function ChatConversationList({
                       <span className="flex items-center justify-between gap-2">
                         <span
                           className={cn(
-                            'truncate text-xs',
-                            isUnread
-                              ? 'font-medium text-[#4d4a44]'
-                              : 'text-[#9a8f80]',
+                            'truncate text-[13px]',
+                            isUnread ? 'font-medium text-ink' : 'text-ink-soft',
                           )}
                         >
                           {isOwnLast ? (
-                            <span className="text-[#607167]">Anda: </span>
+                            <span className="text-ink-soft">Anda: </span>
                           ) : null}
                           {lastMessage?.content ?? 'Belum ada pesan'}
                         </span>
                         {isUnread ? (
-                          <span className="min-w-5 shrink-0 rounded-full bg-gradient-to-r from-[#2f5f49] to-[#3f7359] px-1.5 text-center text-xs leading-5 font-bold text-white tabular-nums">
+                          <span className="min-w-5 shrink-0 rounded-full bg-brand px-1.5 text-center text-[13px] leading-5 font-bold text-on-field tabular-nums">
                             {unreadCount > 99 ? '99+' : unreadCount}
                           </span>
                         ) : null}

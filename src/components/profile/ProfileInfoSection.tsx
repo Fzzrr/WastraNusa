@@ -42,21 +42,17 @@ function InfoTile({
   return (
     <div
       className={cn(
-        'group flex items-center gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50',
+        'flex items-center gap-3 rounded-xl bg-surface px-4 py-3.5',
         className,
       )}
     >
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#f5ead3] text-[#a07a2c] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
-        <Icon className="size-4" />
-      </span>
+      <Icon className="shrink-0 size-5 text-ink-soft" strokeWidth={1.75} />
       <div className="min-w-0">
-        <p className="text-xs font-medium tracking-wider text-[#9a8f80] uppercase">
-          {label}
-        </p>
+        <p className="text-[13px] text-ink-soft">{label}</p>
         <p
           className={cn(
-            'truncate text-sm font-semibold',
-            isEmpty ? 'text-[#b3aa9e] italic' : 'text-[#2f3a33]',
+            'truncate text-base font-medium',
+            isEmpty ? 'text-ink-soft italic' : 'text-ink',
           )}
         >
           {isEmpty ? 'Belum diisi' : value}
@@ -161,10 +157,10 @@ export default function ProfileInfoSection() {
   if (isPending) {
     return (
       <div className={cn(profileCardClassName, 'animate-pulse p-6')}>
-        <div className="mb-6 h-10 w-56 rounded-xl bg-[#efe8dd]" />
+        <div className="mb-6 h-10 w-56 rounded-xl bg-surface" />
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-[68px] rounded-xl bg-[#f4efe5]" />
+            <div key={index} className="h-[68px] rounded-xl bg-surface" />
           ))}
         </div>
       </div>
@@ -278,7 +274,7 @@ export default function ProfileInfoSection() {
               readOnly
               className={cn(
                 inputClassName,
-                'pointer-events-none bg-[#f4efe5] text-[#6f6a62]',
+                'pointer-events-none bg-surface text-ink-soft',
               )}
             />
           </Field>
@@ -303,10 +299,10 @@ export default function ProfileInfoSection() {
                       })
                     }
                     className={cn(
-                      'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-sm transition-all',
+                      'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl text-[15px] transition-all',
                       isActive
-                        ? 'bg-[#2f5f49] font-medium text-white shadow-[0_6px_14px_-6px_rgba(47,95,73,0.6)]'
-                        : 'bg-white text-[#6f6a62] ring-1 ring-[#e5ded5] hover:text-[#2f5543] hover:ring-[#2f5f49]/40',
+                        ? 'bg-brand font-medium text-on-field'
+                        : 'bg-card text-ink-soft hover:text-ink',
                     )}
                   >
                     {isActive ? <Check className="size-3.5" /> : null}

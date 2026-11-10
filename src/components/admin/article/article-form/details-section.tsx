@@ -28,7 +28,6 @@ export function DetailsSection({
   } = useFormContext<CreateArticleInput>();
   return (
     <FormSection
-      step={3}
       icon={SlidersHorizontal}
       title="Detail Tambahan"
       description="Informasi pendukung untuk filter dan tampilan"
@@ -102,12 +101,12 @@ export function DetailsSection({
         </Field>
       </div>
 
-      <label className="group mt-4 flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-[#faf7f2] px-4 py-3 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f4efe5]">
+      <label className="group mt-4 flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-surface px-4 py-3 ring-1 ring-border transition-colors hover:bg-surface">
         <div>
-          <p className="text-sm font-medium text-[#3d3a34]">
+          <p className="text-base font-medium text-ink">
             Tampilkan di Featured
           </p>
-          <p className="text-xs text-[#9a8f80]">
+          <p className="text-[13px] text-ink-soft">
             Artikel akan ditonjolkan di halaman ensiklopedia
           </p>
         </div>
@@ -117,8 +116,8 @@ export function DetailsSection({
             type="checkbox"
             className="peer sr-only"
           />
-          <span className="block h-6 w-11 rounded-full bg-[#ddd4c6] transition-colors peer-checked:bg-[#3a5a4a] peer-focus-visible:ring-4 peer-focus-visible:ring-[#3a5a4a]/20" />
-          <span className="absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
+          <span className="block h-6 w-11 rounded-full bg-surface transition-colors peer-checked:bg-brand peer-focus-visible:ring-4 peer-focus-visible:ring-brand/20" />
+          <span className="absolute top-0.5 left-0.5 size-5 rounded-full bg-card transition-transform peer-checked:translate-x-5" />
         </span>
       </label>
     </FormSection>

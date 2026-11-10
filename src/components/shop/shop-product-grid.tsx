@@ -11,9 +11,6 @@ import type {
 import { PackageOpen } from 'lucide-react';
 import { useState } from 'react';
 
-const surfaceCardClassName =
-  'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
-
 const SORT_OPTIONS: Array<{
   label: string;
   value: ProductCatalogSortBy;
@@ -38,10 +35,8 @@ const COMPARE: Record<
 };
 
 export function ShopProductGrid({
-  shopName,
   products,
 }: {
-  shopName: string;
   products: ProductInventoryItem[];
 }) {
   const [activeSort, setActiveSort] = useState<ProductCatalogSortBy>('newest');
@@ -69,31 +64,14 @@ export function ShopProductGrid({
 
   return (
     <section>
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight text-[#2b4d3c] sm:text-3xl">
-          Koleksi Toko
-        </h2>
-        <p className="mt-2 text-base text-[#5f7366]">
-          Wastra pilihan dari {shopName}
-        </p>
-      </div>
+      <h2 className="text-[clamp(1.75rem,3vw,2.25rem)] leading-tight font-semibold tracking-[-0.02em] text-ink">
+        Koleksi
+      </h2>
 
       {products.length === 0 ? (
-        <div
-          className={cn(
-            surfaceCardClassName,
-            'mt-5 flex flex-col items-center gap-3 px-6 py-14 text-center',
-          )}
-        >
-          <span className="grid size-14 place-items-center rounded-full bg-[#f5ead3] text-[#b08a5e]">
-            <PackageOpen className="size-7" />
-          </span>
-          <div>
-            <p className="font-semibold text-[#3d4f45]">Belum ada produk</p>
-            <p className="mt-1 text-sm text-[#9a8f80]">
-              Toko ini belum menampilkan produk apa pun.
-            </p>
-          </div>
+        <div className="mt-6 flex flex-col items-center gap-3 bg-surface px-6 py-14 text-center">
+          <PackageOpen className="size-8 text-ink-soft" strokeWidth={1.5} />
+          <p className="text-base text-ink-soft">Belum ada produk.</p>
         </div>
       ) : (
         <>
@@ -101,7 +79,7 @@ export function ShopProductGrid({
             <div
               role="group"
               aria-label="Filter jenis wastra"
-              className="mt-5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]"
+              className="mt-6 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]"
             >
               {filters.map((filter) => {
                 const isActive = activeType === filter.value;
@@ -112,19 +90,17 @@ export function ShopProductGrid({
                     aria-pressed={isActive}
                     onClick={() => setActiveType(filter.value)}
                     className={cn(
-                      'inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-all duration-200 active:scale-95',
+                      'inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-[15px] transition-colors duration-200 active:scale-95',
                       isActive
-                        ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] text-[#edf3eb] shadow-[0_6px_14px_-8px_rgba(47,95,73,0.8)]'
-                        : 'bg-[#fbf8f2] text-[#5d6f62] ring-1 ring-[#e3d9c7] hover:-translate-y-0.5 hover:bg-[#f5ead3] hover:text-[#3f5b4c]',
+                        ? 'bg-brand text-on-field'
+                        : 'bg-surface text-ink hover:bg-brand hover:text-on-field',
                     )}
                   >
                     {filter.label}
                     <span
                       className={cn(
-                        'rounded-full px-1.5 text-xs tabular-nums',
-                        isActive
-                          ? 'bg-white/20 text-white'
-                          : 'bg-[#efeadf] text-[#826428]',
+                        'text-[13px] font-normal tabular-nums',
+                        isActive ? 'text-on-field-soft' : 'text-ink-soft',
                       )}
                     >
                       {filter.count}
@@ -147,7 +123,7 @@ export function ShopProductGrid({
           {/* Re-keyed so the cards fade back in after a filter or sort change. */}
           <Reveal
             key={`${activeType ?? 'all'}-${activeSort}`}
-            className="mt-4 grid animate-in auto-rows-fr grid-cols-1 gap-3 duration-300 fade-in sm:grid-cols-2 xl:grid-cols-3"
+            className="mt-6 grid animate-in grid-cols-2 gap-x-4 gap-y-8 duration-300 fade-in xl:grid-cols-4"
           >
             {visible.map((product) => (
               <CatalogProductCard key={product.id} product={product} />

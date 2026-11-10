@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import {
   Carousel,
   type CarouselApi,
@@ -22,26 +20,9 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
 const navButtonClassName =
-  'absolute top-1/2 z-20 grid size-10 -translate-y-1/2 place-items-center rounded-full border border-[#ddd4c6] bg-white text-[#2d5f48] shadow-sm transition hover:scale-105 hover:bg-[#2d5f48] hover:text-white active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:text-[#2d5f48]';
+  'grid size-11 place-items-center rounded-full bg-surface text-ink transition-colors hover:bg-brand hover:text-on-field active:scale-95 disabled:pointer-events-none disabled:opacity-35';
 
-function getIslandCardBackground(index: number) {
-  const hue = 28 + ((index * 23) % 36);
-  const start = `hsl(${hue} 38% 70%)`;
-  const mid = `hsl(${hue - 6} 20% 47%)`;
-  const end = `hsl(${hue - 12} 10% 27%)`;
-
-  return `radial-gradient(circle at 80% 15%, rgba(255, 235, 190, 0.35) 0%, rgba(0, 0, 0, 0) 42%), linear-gradient(165deg, ${start} 0%, ${mid} 52%, ${end} 100%)`;
-}
-
-function IslandCardImage({
-  images,
-  alt,
-  index,
-}: {
-  images: string[];
-  alt: string;
-  index: number;
-}) {
+function IslandCardImage({ images, alt }: { images: string[]; alt: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   // Article images are hotlinked; drop dead links instead of showing a broken image.
   const [failed, setFailed] = useState<string[]>([]);
@@ -58,12 +39,7 @@ function IslandCardImage({
   }, [usable.length]);
 
   if (usable.length === 0) {
-    return (
-      <div
-        className="absolute inset-0 transition duration-700 ease-out group-hover:scale-110"
-        style={{ backgroundImage: getIslandCardBackground(index) }}
-      />
-    );
+    return <div className="absolute inset-0 bg-field" />;
   }
 
   return (
@@ -75,7 +51,7 @@ function IslandCardImage({
           alt={alt}
           fill
           sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className={`object-cover transition duration-700 ease-out group-hover:scale-110 ${
+          className={`object-cover transition duration-1000 ease-out group-hover:scale-105 ${
             imageIndex === activeIndex % usable.length
               ? 'opacity-100'
               : 'opacity-0'
@@ -138,49 +114,52 @@ export function IslandCards() {
   }, [data?.items]);
 
   return (
-    <section className="mx-auto mt-16 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-[#2d5f48] sm:text-3xl">
-            Wastra dari Seluruh Nusantara
-          </h2>
-          <p className="mt-1 text-sm text-[#5f7366]">
-            Temukan ragam kain tradisional dari setiap pulau di Indonesia.
-          </p>
-        </div>
+    <section className="mx-auto mt-14 w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
+      <div className="flex items-end justify-between gap-4">
+        <h2 className="text-[clamp(1.75rem,3vw,2.25rem)] leading-tight font-semibold tracking-[-0.02em] text-ink">
+          Wastra per pulau
+        </h2>
 
-        <Link
-          href="/encyclopedia"
-          className="group/all inline-flex items-center gap-1.5 rounded-xl border border-[#2f4f3f] px-4 py-2 text-sm font-semibold text-[#2f4f3f] transition hover:-translate-y-0.5 hover:bg-[#2d5f48] hover:text-white hover:shadow-[0_10px_20px_-12px_rgba(45,95,72,0.8)]"
-        >
-          Lihat Semua
-          {!isPending && islands.length > 0 ? (
-            <span className="rounded-full bg-[#e3ece5] px-1.5 text-xs text-[#2f5f49] transition-colors group-hover/all:bg-white/20 group-hover/all:text-white">
-              {islands.length} Pulau
-            </span>
-          ) : null}
-          <ChevronRight className="size-4 transition-transform group-hover/all:translate-x-0.5" />
-        </Link>
+        {hasOverflow ? (
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              aria-label="Pulau sebelumnya"
+              className={navButtonClassName}
+              disabled={!canScrollPrev}
+              onClick={() => carouselApi?.scrollPrev()}
+            >
+              <ChevronLeft className="size-5" />
+            </button>
+            <button
+              type="button"
+              aria-label="Pulau berikutnya"
+              className={navButtonClassName}
+              disabled={!canScrollNext}
+              onClick={() => carouselApi?.scrollNext()}
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      <div className="mt-6">
+      <div className="mt-5">
         {isPending ? (
           <div className="flex gap-4 overflow-hidden">
             {Array.from({ length: 5 }).map((_, index) => (
-              <Card
+              <div
                 key={index}
-                className="min-w-[240px] overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#d8cfbf]/30"
-              >
-                <div className="min-h-[240px] animate-pulse p-4" />
-              </Card>
+                className="aspect-[3/4] min-w-[240px] animate-pulse bg-surface"
+              />
             ))}
           </div>
         ) : null}
 
         {!isPending && error ? (
-          <div className="rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
-            Gagal memuat pulau ensiklopedia.
-          </div>
+          <p className="bg-surface p-6 text-[15px] text-ink-soft">
+            Gagal memuat daftar pulau.
+          </p>
         ) : null}
 
         {!isPending && !error ? (
@@ -192,37 +171,15 @@ export function IslandCards() {
               loop: shouldLoop,
               slidesToScroll: 1,
             }}
-            className={cn('w-full', hasOverflow && 'px-12')}
+            className="w-full"
           >
-            {hasOverflow ? (
-              <>
-                <Button
-                  type="button"
-                  aria-label="Pulau sebelumnya"
-                  className={navButtonClassName + ' left-0'}
-                  disabled={!canScrollPrev}
-                  onClick={() => carouselApi?.scrollPrev()}
-                >
-                  <ChevronLeft />
-                </Button>
-                <Button
-                  type="button"
-                  aria-label="Pulau berikutnya"
-                  className={navButtonClassName + ' right-0'}
-                  disabled={!canScrollNext}
-                  onClick={() => carouselApi?.scrollNext()}
-                >
-                  <ChevronRight />
-                </Button>
-              </>
-            ) : null}
             {/* Vertical padding keeps the hover lift and shadow from being clipped. */}
-            <CarouselContent className="-ml-4 py-3">
+            <CarouselContent className="-ml-4">
               {islands.map((island, index) => (
                 <CarouselItem
                   key={island.name}
                   className={cn(
-                    'basis-full pl-4 sm:basis-1/2',
+                    'basis-[62%] pl-4 sm:basis-1/2',
                     islands.length >= 5
                       ? 'lg:basis-1/3 xl:basis-1/5'
                       : islands.length === 4
@@ -232,43 +189,34 @@ export function IslandCards() {
                 >
                   <Link
                     href={`/encyclopedia?island=${encodeURIComponent(island.name)}`}
-                    className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-[#caa86a]"
+                    className="group relative block aspect-[3/4] animate-in overflow-hidden bg-field fill-mode-both fade-in outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                    style={{ animationDelay: `${index * 70}ms` }}
                   >
-                    <Card
-                      className="group relative animate-in overflow-hidden rounded-2xl border-0 p-0 ring-1 ring-black/5 transition-all duration-500 ease-out fill-mode-both fade-in slide-in-from-bottom-2 hover:-translate-y-1.5 hover:shadow-[0_26px_44px_-24px_rgba(20,28,22,0.7)] hover:ring-2 hover:ring-[#e8cb8d]/70"
-                      style={{ animationDelay: `${index * 80}ms` }}
-                    >
-                      <IslandCardImage
-                        images={islandImages.get(island.name) ?? []}
-                        alt={island.name}
-                        index={index}
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(12,20,15,0.95)_0%,rgba(12,20,15,0.7)_38%,rgba(12,20,15,0.15)_70%,rgba(0,0,0,0)_100%)]" />
+                    <IslandCardImage
+                      images={islandImages.get(island.name) ?? []}
+                      alt={island.name}
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-                      <span className="absolute top-3 right-3 z-10 grid size-8 translate-y-1 place-items-center rounded-full border border-white/25 bg-black/30 text-[#f6f2e8] opacity-0 backdrop-blur transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                        <ArrowUpRight className="size-4" />
-                      </span>
-
-                      <div className="relative flex min-h-[240px] flex-col justify-end p-4 text-[#f6f2e8]">
-                        <span className="mb-2 h-0.5 w-8 rounded-full bg-gradient-to-r from-[#e8cb8d] to-[#caa86a] transition-all duration-500 group-hover:w-14" />
-                        <p className="text-xl leading-tight font-bold transition-colors group-hover:text-[#f3dfb4]">
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 text-white">
+                      <div>
+                        <p className="text-xl leading-tight font-semibold">
                           {island.name}
                         </p>
-                        <div className="mt-2 flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-xs text-[#e4ddcc] ring-1 ring-white/15 backdrop-blur">
-                            <BookOpenText className="size-3 text-[#e8cb8d]" />
-                            <span className="font-semibold text-white">
-                              {island.count}
-                            </span>{' '}
-                            Artikel
-                          </span>
-                          <span className="inline-flex -translate-x-1 items-center gap-1 text-xs font-semibold text-[#f3dfb4] opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                            Jelajahi
-                            <ChevronRight className="size-3.5" />
-                          </span>
-                        </div>
+                        <p className="mt-1 flex items-center gap-1.5 text-[13px] text-white/75 tabular-nums">
+                          <BookOpenText
+                            className="size-3.5"
+                            strokeWidth={1.75}
+                          />
+                          {island.count}
+                          <span className="sr-only">artikel</span>
+                        </p>
                       </div>
-                    </Card>
+                      <ArrowUpRight
+                        className="size-5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        strokeWidth={1.75}
+                      />
+                    </div>
                   </Link>
                 </CarouselItem>
               ))}

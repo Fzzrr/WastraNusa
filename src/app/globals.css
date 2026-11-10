@@ -45,53 +45,64 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --color-brand: var(--color-brand);
-  --color-brand-dark: var(--color-brand-dark);
-  --color-brand-light: var(--color-brand-light);
-  --color-brand-muted: var(--color-brand-muted);
-  --color-brand-bg: var(--color-brand-bg);
-  --color-brand-bg-alt: var(--color-brand-bg-alt);
+  /* WastraNusa roles: one ground, one ink, one accent, one dark field. */
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-field: var(--field);
+  --color-on-field: var(--on-field);
+  --color-on-field-soft: var(--on-field-soft);
+  --color-gold: var(--gold);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Stone ground (not yellow cream); deep green ink taken from the cloth. */
+  --ground: #f3f2ef;
+  --surface: #e9e7e1;
+  --ink: #1f352b;
+  --ink-soft: #4d5a52;
+  --brand: #2f5b49;
+  --brand-strong: #244739;
+  --field: #22443a;
+  --on-field: #f3f2ef;
+  --on-field-soft: #b9c7be;
+  --gold: #d9b56f;
+
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --card: #fafaf8;
+  --card-foreground: var(--ink);
+  --popover: #fafaf8;
+  --popover-foreground: var(--ink);
+  --primary: var(--brand);
+  --primary-foreground: var(--on-field);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--surface);
+  --accent-foreground: var(--ink);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --color-brand: oklch(0.467 0.065 152);
-  --color-brand-dark: oklch(0.358 0.052 152);
-  --color-brand-light: oklch(0.54 0.076 152);
-  --color-brand-muted: oklch(0.957 0.01 75);
-  --color-brand-bg: oklch(0.98 0.002 240);
-  --color-brand-bg-alt: oklch(0.935 0.015 75);
+  --border: #dad6cc;
+  --input: #d3cfc4;
+  --ring: var(--brand);
+  --chart-1: #2f5b49;
+  --chart-2: #5f8a72;
+  --chart-3: #9bb5a2;
+  --chart-4: #c9a35c;
+  --chart-5: #7c6a4f;
+  --radius: 0.5rem;
+  --sidebar: #fafaf8;
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--on-field);
+  --sidebar-accent: var(--surface);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: #dad6cc;
+  --sidebar-ring: var(--brand);
 }
 
 .dark {
@@ -133,7 +144,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground font-medium;
+    @apply bg-background text-foreground;
   }
   html {
     @apply font-sans;

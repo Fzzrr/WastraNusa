@@ -3,7 +3,6 @@ import {
   ProfileEmptyState,
   profileOutlineButtonClassName,
 } from '@/components/profile/profile-section';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCancelOrder, useOrders } from '@/hooks/use-order';
 import { cn } from '@/lib/utils';
@@ -35,19 +34,16 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
     return (
       <div className="flex flex-col gap-4">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="animate-pulse overflow-hidden rounded-2xl ring-1 ring-[#efe8dd]"
-          >
-            <div className="flex justify-between bg-[#faf7f2] px-4 py-3">
-              <div className="h-6 w-40 rounded-full bg-[#efe8dd]" />
-              <div className="h-5 w-24 rounded bg-[#efe8dd]" />
+          <div key={i} className="animate-pulse overflow-hidden rounded-xl">
+            <div className="flex justify-between bg-surface px-4 py-3">
+              <div className="h-6 w-40 rounded-full bg-surface" />
+              <div className="h-5 w-24 rounded bg-surface" />
             </div>
             <div className="flex gap-4 p-4">
-              <div className="size-16 rounded-xl bg-[#efe8dd]" />
+              <div className="size-16 rounded-xl bg-surface" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-1/2 rounded bg-[#efe8dd]" />
-                <div className="h-3 w-1/3 rounded bg-[#f4efe5]" />
+                <div className="h-4 w-1/2 rounded bg-surface" />
+                <div className="h-3 w-1/3 rounded bg-surface" />
               </div>
             </div>
           </div>
@@ -105,26 +101,26 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
       {filteredOrders.map((order, orderIndex) => (
         <article
           key={order.id}
-          className="animate-in overflow-hidden rounded-2xl bg-white ring-1 ring-[#efe8dd] transition-shadow duration-300 fill-mode-both fade-in slide-in-from-bottom-1 hover:shadow-[0_16px_32px_-22px_rgba(89,69,38,0.45)]"
+          className="animate-in overflow-hidden rounded-xl bg-card transition-shadow duration-300 fill-mode-both fade-in slide-in-from-bottom-1"
           style={{ animationDelay: `${orderIndex * 60}ms` }}
         >
-          <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[#efe8dd] bg-[#faf7f2] px-4 py-3">
+          <header className="flex flex-wrap items-center justify-between gap-2 bg-surface px-4 py-3">
             <div className="flex flex-wrap items-center gap-2.5">
               <OrderStatusBadge status={order.status} />
-              <span className="font-mono text-xs font-semibold text-[#6f6a62]">
+              <span className="tabular-nums text-[13px] font-semibold text-ink-soft">
                 {order.id}
               </span>
             </div>
-            <span className="inline-flex items-center gap-1.5 text-xs text-[#9a8f80]">
+            <span className="inline-flex items-center gap-1.5 text-[13px] text-ink-soft">
               <CalendarDays className="size-3.5" />
               {order.date}
             </span>
           </header>
 
-          <div className="flex flex-col divide-y divide-[#f4efe5]">
+          <div className="flex flex-col gap-1 py-2">
             {order.products.map((product, index) => (
               <div key={index} className="flex items-center gap-4 px-4 py-3.5">
-                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#efe8db] text-[#b0a591] ring-1 ring-[#e8e2d5]">
+                <div className="relative flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft">
                   {product.imageURL ? (
                     <Image
                       src={product.imageURL}
@@ -138,9 +134,9 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                       <Hexagon
                         size={24}
                         strokeWidth={1.5}
-                        className="text-[#c4b9a3]"
+                        className="text-ink-soft"
                       />
-                      <span className="absolute bottom-1.5 mt-1 text-[9px] font-semibold tracking-wide text-[#a39882] uppercase">
+                      <span className="absolute bottom-1.5 mt-1 text-[13px] font-semibold text-ink-soft">
                         {product.category.substring(0, 4)}
                       </span>
                     </>
@@ -148,19 +144,15 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                 </div>
 
                 <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-full border-none bg-[#f6e4da] px-2 py-0 text-xs font-medium text-[#9c5235] hover:bg-[#f6e4da]"
-                  >
-                    {product.category}
-                  </Badge>
-                  <h3 className="w-full truncate text-[15px] font-bold text-[#2f4f3f]">
+                  <h3 className="w-full truncate text-base font-semibold text-ink">
                     {product.name}
                   </h3>
-                  <p className="text-xs text-[#9a8f80]">{product.location}</p>
+                  <p className="text-[13px] text-ink-soft">
+                    {product.location}
+                  </p>
                 </div>
 
-                <span className="shrink-0 rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-semibold text-[#4d6356]">
+                <span className="shrink-0 rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink">
                   ×{product.quantity}
                 </span>
               </div>
@@ -178,10 +170,10 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
             </div>
           )}
 
-          <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#efe8dd] px-4 py-3">
-            <p className="text-xs text-[#9a8f80]">
+          <footer className="flex flex-wrap items-center justify-between gap-3 px-4 pt-1 pb-4">
+            <p className="text-[13px] text-ink-soft">
               Total Belanja
-              <span className="ml-2 text-base font-extrabold text-[#2f5f49]">
+              <span className="ml-2 text-base font-bold text-ink">
                 {order.totalPrice}
               </span>
             </p>
@@ -190,7 +182,7 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 cursor-pointer rounded-xl border-[#f0cfc7] px-4 text-xs font-semibold text-[#b04a3a] hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
+                  className="h-8 cursor-pointer rounded-full border-destructive/30 px-4 text-[13px] font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
                   disabled={cancelOrderMutation.isPending}
                   onClick={() => {
                     cancelOrderMutation.mutate(order.id, {
@@ -212,7 +204,7 @@ export function MyOrderList({ activeTab, page, setPage }: MyOrderListProps) {
                   size="sm"
                   className={cn(
                     profileOutlineButtonClassName,
-                    'h-8 px-4 text-xs font-semibold',
+                    'h-8 px-4 text-[13px] font-semibold',
                   )}
                   asChild
                 >

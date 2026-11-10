@@ -1,52 +1,58 @@
-import { Compass, Home, Library, PackageSearch } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 /** 404 body, shared by the root page and the public layout (which already renders Header/Footer). */
 export function NotFoundContent() {
   return (
-    <main className="mx-auto flex w-full max-w-[1320px] flex-1 items-center px-4 py-16 md:px-6 lg:px-8">
-      <section className="w-full rounded-3xl border border-[#d7cfbd] bg-[#f9f6ee] p-8 shadow-[0_20px_50px_-30px_rgba(45,79,63,0.45)] md:p-12">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#cdd8ce] bg-[#edf3ee] px-4 py-1.5 text-sm font-semibold text-[#2f5f49]">
-          <Compass className="h-4 w-4" />
-          Halaman Tidak Ditemukan
-        </div>
-
-        <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-[#254838] md:text-5xl">
+    <main className="mx-auto grid w-full max-w-[1320px] flex-1 items-center gap-12 px-4 py-16 md:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:px-8">
+      <section>
+        <p
+          aria-hidden
+          className="text-[clamp(6rem,18vw,14rem)] leading-none font-semibold tracking-[-0.06em] text-brand"
+        >
           404
+        </p>
+        <h1 className="mt-4 text-[clamp(2rem,3.4vw,2.75rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">
+          Halaman tidak ditemukan
         </h1>
-
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#446957] md:text-lg">
-          Maaf, halaman yang Anda cari tidak tersedia atau mungkin sudah
-          dipindahkan. Silakan lanjutkan eksplorasi budaya wastra dari halaman
-          utama.
+        <p className="mt-3 max-w-md text-lg text-ink-soft">
+          Mungkin sudah dipindahkan. Lanjutkan dari salah satu tautan ini.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-10 flex flex-wrap items-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 rounded-xl bg-[#2f5f49] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#244838]"
+            className="inline-flex h-12 items-center rounded-full bg-brand px-6 text-[15px] font-semibold text-on-field transition-colors hover:bg-brand-strong"
           >
-            <Home className="h-4 w-4" />
-            Kembali ke Beranda
+            Beranda
           </Link>
-
-          <Link
-            href="/encyclopedia"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#bfcfbe] bg-white px-5 py-3 text-sm font-semibold text-[#2d4f3f] transition hover:bg-[#f1f6f2]"
-          >
-            <Library className="h-4 w-4" />
-            Buka Ensiklopedia
-          </Link>
-
-          <Link
-            href="/catalog"
-            className="inline-flex items-center gap-2 rounded-xl border border-[#bfcfbe] bg-white px-5 py-3 text-sm font-semibold text-[#2d4f3f] transition hover:bg-[#f1f6f2]"
-          >
-            <PackageSearch className="h-4 w-4" />
-            Jelajahi Katalog Produk
-          </Link>
+          {[
+            { href: '/catalog', label: 'Katalog' },
+            { href: '/encyclopedia', label: 'Ensiklopedia' },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="group inline-flex h-12 items-center gap-1.5 rounded-full px-5 text-[15px] font-semibold text-ink transition-colors hover:bg-surface"
+            >
+              {link.label}
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          ))}
         </div>
       </section>
+
+      <div className="relative hidden aspect-[4/5] w-full max-w-[520px] justify-self-end overflow-hidden bg-surface lg:block">
+        <Image
+          src="/auth-cover.jpg"
+          alt=""
+          fill
+          sizes="(min-width: 1024px) 560px, 0px"
+          style={{ objectPosition: '70% 10%' }}
+          className="object-cover"
+        />
+      </div>
     </main>
   );
 }

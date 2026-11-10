@@ -73,7 +73,7 @@ describe('CatalogDetailProductSummary', { tags: ['frontend'] }, () => {
     const props = baseProps();
     render(<CatalogDetailProductSummary {...props} />);
 
-    expect(screen.getByText('Stok tersedia: 5 unit')).toBeTruthy();
+    expect(screen.getByText('Sisa 5')).toBeTruthy();
 
     const addBtn = screen.getByRole('button', {
       name: /tambah ke keranjang/i,
@@ -97,7 +97,7 @@ describe('CatalogDetailProductSummary', { tags: ['frontend'] }, () => {
     });
     render(<CatalogDetailProductSummary {...props} />);
 
-    expect(screen.getByText('Stok tersedia: 0 unit')).toBeTruthy();
+    expect(screen.getByText('Stok habis')).toBeTruthy();
 
     const addBtn = screen.getByRole('button', {
       name: /tambah ke keranjang/i,

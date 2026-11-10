@@ -240,17 +240,17 @@ export function CartMain() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="flex animate-pulse gap-4 rounded-2xl bg-[#fffdf8] p-5 ring-1 ring-[#e8dfd0]"
+                className="flex animate-pulse gap-4 rounded-xl bg-card p-5"
               >
-                <div className="size-20 rounded-xl bg-[#efe8dd]" />
+                <div className="size-20 rounded-xl bg-surface" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/2 rounded bg-[#efe8dd]" />
-                  <div className="h-3 w-1/3 rounded bg-[#f4efe5]" />
+                  <div className="h-4 w-1/2 rounded bg-surface" />
+                  <div className="h-3 w-1/3 rounded bg-surface" />
                 </div>
               </div>
             ))}
           </div>
-          <div className="h-80 animate-pulse rounded-2xl bg-[#fffdf8] ring-1 ring-[#e8dfd0] lg:col-span-4" />
+          <div className="h-80 animate-pulse rounded-xl bg-card lg:col-span-4" />
         </div>
       ) : error ? (
         <ProfileEmptyState

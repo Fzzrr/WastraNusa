@@ -13,7 +13,6 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { KawungPattern } from '@/components/wastra-hero';
 import {
   type SellerApplication,
   useCreateSellerApplication,
@@ -61,11 +60,11 @@ export function SellerApplicationMain() {
         <div className="flex animate-pulse flex-col gap-4">
           <div className="grid gap-3 sm:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="h-20 rounded-xl bg-[#f4efe5]" />
+              <div key={index} className="h-20 rounded-xl bg-surface" />
             ))}
           </div>
-          <div className="h-11 w-full rounded-xl bg-[#f2ede4]" />
-          <div className="h-24 w-full rounded-xl bg-[#f6f2ea]" />
+          <div className="h-11 w-full rounded-xl bg-surface" />
+          <div className="h-24 w-full rounded-xl bg-surface" />
         </div>
       ) : error ? (
         <ProfileEmptyState
@@ -115,26 +114,20 @@ function StatusPanel({
   return (
     <div
       className={cn(
-        'relative flex flex-col items-center gap-4 overflow-hidden rounded-2xl px-6 py-10 text-center',
-        tone === 'approved'
-          ? 'bg-gradient-to-br from-[#e3ece5] to-[#faf7f2]'
-          : 'bg-gradient-to-br from-[#fbf0d9] to-[#faf7f2]',
+        'relative flex flex-col items-center gap-4 overflow-hidden rounded-xl px-6 py-10 text-center',
+        'bg-surface',
       )}
     >
-      <KawungPattern className="inset-0 size-full text-[#2f5b49] opacity-[0.04]" />
-      <span
+      <Icon
         className={cn(
-          'relative grid size-16 place-items-center rounded-full ring-8',
-          tone === 'approved'
-            ? 'bg-[#2f5f49] text-[#e8cb8d] ring-[#2f5f49]/10'
-            : 'bg-[#e8cb8d] text-[#6b4f1f] ring-[#e8cb8d]/25',
+          'size-10',
+          tone === 'approved' ? 'text-brand' : 'text-ink-soft',
         )}
-      >
-        <Icon className={cn('size-8', tone === 'pending' && 'animate-pulse')} />
-      </span>
+        strokeWidth={1.5}
+      />
       <div className="relative">
-        <h3 className="text-lg font-bold text-[#2f4f3f]">{title}</h3>
-        <p className="mt-1 max-w-md text-sm text-[#6f6a62]">{children}</p>
+        <h3 className="text-xl font-semibold text-ink">{title}</h3>
+        <p className="mt-1 max-w-md text-base text-ink-soft">{children}</p>
       </div>
       {action ? <div className="relative">{action}</div> : null}
     </div>
@@ -261,26 +254,30 @@ function SellerApplicationForm({
         {BENEFITS.map(({ icon: Icon, title, text }) => (
           <div
             key={title}
-            className="group flex items-start gap-3 rounded-xl bg-[#faf7f2] p-3.5 ring-1 ring-[#efe8dd] transition-colors hover:bg-[#f5ead3]/50"
+            className="flex items-start gap-3 rounded-xl bg-surface px-4 py-3.5"
           >
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c] transition-colors group-hover:bg-[#2f5f49] group-hover:text-[#e8cb8d]">
-              <Icon className="size-4" />
-            </span>
+            <Icon
+              className="shrink-0 size-5 text-ink-soft"
+              strokeWidth={1.75}
+            />
             <div>
-              <p className="text-sm font-semibold text-[#2f4f3f]">{title}</p>
-              <p className="text-xs text-[#9a8f80]">{text}</p>
+              <p className="text-base font-semibold text-ink">{title}</p>
+              <p className="text-[13px] text-ink-soft">{text}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <p className="text-sm text-[#6f6a62]">
+      <p className="text-base text-ink-soft">
         Lengkapi data berikut untuk mengajukan pembukaan toko. Pengajuan Anda
         akan ditinjau oleh tim kami sebelum toko dapat diaktifkan.
       </p>
 
       {isRejected && application?.rejectionReason ? (
-        <Alert variant="destructive" className="border-[#e2c9bb] bg-[#fbf1eb]">
+        <Alert
+          variant="destructive"
+          className="border-destructive/30 bg-surface"
+        >
           <AlertTitle>Pengajuan Sebelumnya Ditolak</AlertTitle>
           <AlertDescription>{application.rejectionReason}</AlertDescription>
         </Alert>

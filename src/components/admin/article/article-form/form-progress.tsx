@@ -22,19 +22,19 @@ export function FormProgress() {
   const progress = Math.round((filledCount / requiredFields.length) * 100);
   return (
     <div className="mt-4 flex items-center gap-3">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efe8dd]">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500',
-            progress === 100 ? 'bg-[#3a5a4a]' : 'bg-[#d2a36d]',
+            progress === 100 ? 'bg-brand' : 'bg-gold',
           )}
           style={{ width: `${progress}%` }}
         />
       </div>
       <span
         className={cn(
-          'text-xs font-medium whitespace-nowrap tabular-nums',
-          progress === 100 ? 'text-[#2f5543]' : 'text-[#9a8f80]',
+          'text-[13px] font-medium whitespace-nowrap tabular-nums',
+          progress === 100 ? 'text-ink' : 'text-ink-soft',
         )}
       >
         {filledCount}/{requiredFields.length} Field Wajib

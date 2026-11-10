@@ -26,7 +26,6 @@ export function BasicInfoSection({
   } = useFormContext<CreateArticleInput>();
   return (
     <FormSection
-      step={1}
       icon={FileText}
       title="Informasi Dasar"
       description="Judul dan identitas utama artikel"

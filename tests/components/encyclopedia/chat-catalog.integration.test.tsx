@@ -89,9 +89,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
   }
 
   function send(text: string) {
-    const input = screen.getByPlaceholderText(
-      'Tanyakan sesuatu tentang artikel ini...',
-    );
+    const input = screen.getByPlaceholderText('Tanya tentang artikel ini');
     fireEvent.change(input, { target: { value: text } });
     fireEvent.submit(input.closest('form')!);
   }
@@ -115,7 +113,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
       expect(screen.queryByRole('link')).toBeNull();
       expect(
         screen
-          .getByPlaceholderText('Tanyakan sesuatu tentang artikel ini...')
+          .getByPlaceholderText('Tanya tentang artikel ini')
           .hasAttribute('disabled'),
       ).toBe(true);
     } finally {
@@ -223,7 +221,7 @@ describe('chat UI → API → article/catalog service → UI', () => {
     await waitFor(() =>
       expect(
         screen
-          .getByPlaceholderText('Tanyakan sesuatu tentang artikel ini...')
+          .getByPlaceholderText('Tanya tentang artikel ini')
           .hasAttribute('disabled'),
       ).toBe(false),
     );

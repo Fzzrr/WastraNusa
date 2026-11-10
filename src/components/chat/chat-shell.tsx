@@ -44,24 +44,24 @@ export function ChatShell({
   return (
     <div
       className={cn(
-        'flex h-[calc(100dvh-6rem)] min-h-0 overflow-hidden rounded-2xl bg-[#fffdf8] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#e8dfd0]',
+        'flex h-[calc(100dvh-6rem)] min-h-0 overflow-hidden rounded-xl bg-card',
         className,
       )}
     >
       {/* Left pane: conversation list */}
       <aside
         className={cn(
-          'min-h-0 w-full flex-col border-r border-[#efe8dd] md:flex md:w-80 md:shrink-0 lg:w-96',
+          'min-h-0 w-full flex-col border-r border-border md:flex md:w-80 md:shrink-0 lg:w-96',
           hasSelection ? 'hidden' : 'flex',
         )}
       >
         <div className="flex items-center justify-between gap-2 px-4 pt-4 pb-1">
-          <h2 className="flex items-center gap-2 text-base font-bold text-[#2f4f3f]">
-            <MessagesSquare className="size-5 text-[#b08a5e]" />
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-ink">
+            <MessagesSquare className="size-5 text-ink-soft" />
             Percakapan
           </h2>
           {totalUnread > 0 ? (
-            <span className="rounded-full bg-[#f5ead3] px-2 py-0.5 text-xs font-semibold text-[#8a6a3a]">
+            <span className="rounded-full bg-surface px-2 py-0.5 text-[13px] font-semibold text-ink-soft">
               {totalUnread} belum dibaca
             </span>
           ) : null}

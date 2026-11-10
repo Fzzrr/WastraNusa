@@ -49,7 +49,7 @@ export function CartList({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] px-4 py-3 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_8px_24px_rgba(89,69,38,0.06)] ring-1 ring-[#e8dfd0]">
+      <div className="flex items-center justify-between gap-3 rounded-xl bg-card px-4 py-3">
         <label className="flex cursor-pointer items-center gap-3">
           <Checkbox
             id="all"
@@ -57,21 +57,21 @@ export function CartList({
             checked={isAllSelected}
             onChange={onToggleAll}
           />
-          <span className="text-sm font-bold text-[#2f4f3f]">
+          <span className="text-[15px] font-bold text-ink">
             Pilih Semua ({items.length})
           </span>
         </label>
         {selectedCount > 0 ? (
           <div className="flex animate-in items-center gap-3 fade-in zoom-in-95">
-            <span className="hidden text-xs text-[#9a8f80] sm:inline">
+            <span className="hidden text-[13px] text-ink-soft sm:inline">
               {selectedCount} dipilih
             </span>
             <Button
               variant="outline"
-              className="h-8 cursor-pointer gap-1.5 rounded-xl border-[#f0cfc7] bg-white px-3 text-xs font-bold text-[#b04a3a] hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
+              className="h-10 cursor-pointer gap-1.5 rounded-full border-0 bg-transparent px-4 text-[15px] font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
               onClick={onDeleteSelected}
             >
-              <Trash2 className="size-3.5" /> Hapus
+              <Trash2 className="size-4" /> Hapus
             </Button>
           </div>
         ) : null}

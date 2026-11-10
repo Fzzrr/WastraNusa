@@ -18,11 +18,10 @@ import { Home, Store, XCircle } from 'lucide-react';
 import { ShopHeader } from './shop-header';
 import { ShopProductGrid } from './shop-product-grid';
 
-const surfaceCardClassName =
-  'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
+const surfaceCardClassName = 'rounded-xl border-0 bg-card ring-1 ring-border';
 
 const PageShell = ({ children }: { children: React.ReactNode }) => (
-  <main className="border-t border-[#dbd4c7]">
+  <main>
     <section className="mx-auto w-full max-w-[1320px] px-4 py-6 md:px-6 md:py-8 lg:px-8">
       {children}
     </section>
@@ -32,7 +31,7 @@ const PageShell = ({ children }: { children: React.ReactNode }) => (
 function ShopSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="h-72 animate-pulse rounded-3xl bg-gradient-to-br from-[#1d3a2d] via-[#2a5541] to-[#3a6a52] md:h-80" />
+      <div className="h-72 animate-pulse bg-field md:h-80" />
       <div
         className={cn(
           surfaceCardClassName,
@@ -42,13 +41,13 @@ function ShopSkeleton() {
         {Array.from({ length: 4 }).map((_, index) => (
           <Skeleton
             key={`shop-info-skeleton-${index}`}
-            className="h-16 rounded-2xl bg-[#f2ede4]"
+            className="h-16 rounded-xl bg-surface"
           />
         ))}
       </div>
       <div>
-        <Skeleton className="h-8 w-48 bg-[#eee2d0]" />
-        <Skeleton className="mt-2 h-5 w-64 bg-[#f2ede4]" />
+        <Skeleton className="h-8 w-48 bg-surface" />
+        <Skeleton className="mt-2 h-5 w-64 bg-surface" />
         <CatalogProductGridSkeleton count={6} />
       </div>
     </div>
@@ -112,13 +111,13 @@ export function ShopMain({ sellerId }: { sellerId: string }) {
 
   return (
     <PageShell>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-12">
         <Breadcrumb>
-          <BreadcrumbList className="text-sm font-medium text-[#607167]">
+          <BreadcrumbList className="text-[15px] font-medium text-ink-soft">
             <BreadcrumbItem>
               <BreadcrumbLink
                 href="/"
-                className="flex items-center gap-1.5 hover:text-[#2f5b49]"
+                className="flex items-center gap-1.5 hover:text-ink"
               >
                 <Home className="size-3.5" />
                 Beranda
@@ -126,23 +125,20 @@ export function ShopMain({ sellerId }: { sellerId: string }) {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/catalog" className="hover:text-[#2f5b49]">
+              <BreadcrumbLink href="/catalog" className="hover:text-ink">
                 Katalog
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="text-[#2f5b49]">
+              <BreadcrumbPage className="text-ink">
                 {data.shop.shopName}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <ShopHeader shop={data.shop} products={data.products} />
-        <ShopProductGrid
-          shopName={data.shop.shopName}
-          products={data.products}
-        />
+        <ShopProductGrid products={data.products} />
       </div>
     </PageShell>
   );

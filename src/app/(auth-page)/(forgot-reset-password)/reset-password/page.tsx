@@ -10,10 +10,10 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
   return (
     <>
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-[#2d2318]">
+        <h1 className="text-[clamp(2rem,3vw,2.75rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">
           Atur Ulang Password
         </h1>
-        <p className="mt-2 text-xs text-[#6a6056]">
+        <p className="mt-3 text-base text-ink-soft">
           Masukkan password baru untuk mengamankan akun Anda.
         </p>
       </div>

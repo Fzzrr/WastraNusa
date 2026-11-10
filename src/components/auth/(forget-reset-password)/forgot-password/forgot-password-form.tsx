@@ -50,16 +50,16 @@ export function ForgotPasswordForm() {
   if (isSuccess) {
     return (
       <div className="text-center space-y-4">
-        <p className="text-sm text-[#2d2318]">
+        <p className="text-base text-ink">
           Link reset password telah dikirim ke alamat email Anda.
         </p>
-        <p className="text-xs text-[#2d2318]/70">
+        <p className="text-[13px] text-ink/70">
           Periksa kotak masuk (dan folder spam) Anda, lalu ikuti petunjuknya
           untuk mengatur ulang password.
         </p>
         <Button
           asChild
-          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm shadow-sm"
+          className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong"
         >
           <Link href="/login">Kembali ke Halaman Masuk</Link>
         </Button>
@@ -73,7 +73,7 @@ export function ForgotPasswordForm() {
         <Field data-invalid={!!errors.email} className="gap-1">
           <FieldLabel
             htmlFor="email"
-            className="text-xs font-sm text-[#2d2318]"
+            className="text-[15px] font-medium text-ink"
           >
             Alamat Email
           </FieldLabel>
@@ -82,9 +82,9 @@ export function ForgotPasswordForm() {
             type="email"
             {...register('email')}
             placeholder="name@example.com"
-            className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
+            className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
           />
-          <FieldError className="text-xs font-medium leading-none">
+          <FieldError className="text-[13px] font-medium leading-none">
             {errors.email?.message}
           </FieldError>
         </Field>
@@ -92,7 +92,7 @@ export function ForgotPasswordForm() {
 
       {error && (
         <div className="min-h-[1rem] py-0.5">
-          <FieldError className="text-xs font-medium leading-none">
+          <FieldError className="text-[13px] font-medium leading-none">
             {error}
           </FieldError>
         </div>
@@ -102,16 +102,16 @@ export function ForgotPasswordForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm mt-0.5"
+          className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong mt-0.5"
         >
           {isSubmitting ? 'Mengirim...' : 'Kirim Link Reset'}
         </Button>
 
-        <p className="mt-4 text-center text-xs text-[#6a6056]">
+        <p className="mt-6 text-center text-[15px] text-ink-soft">
           Ingat password Anda?{' '}
           <Link
             href="/login"
-            className="text-[#8b5530] hover:underline font-medium"
+            className="font-semibold text-brand underline-offset-4 hover:underline"
           >
             Masuk
           </Link>

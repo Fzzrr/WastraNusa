@@ -20,9 +20,8 @@ import {
 } from 'lucide-react';
 import { type ReactNode, useState } from 'react';
 
-const surfaceCardClassName =
-  'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
-const sectionHeaderClassName = 'border-b border-[#efe8dd] px-6 py-5';
+const surfaceCardClassName = 'rounded-xl border-0 bg-card ring-1 ring-border';
+const sectionHeaderClassName = 'px-6 pt-6';
 
 const PERIOD_OPTIONS: { value: SellerDashboardPeriod; label: string }[] = [
   { value: 7, label: '7 Hari' },
@@ -43,17 +42,15 @@ function StatCard({
 }) {
   return (
     <Card className={cn(surfaceCardClassName, 'py-6')}>
-      <CardHeader className="items-start gap-3 px-6">
-        <div className="flex size-10 items-center justify-center rounded-xl bg-[#f4efe5] text-[#8a6a3a]">
-          {icon}
-        </div>
+      <CardHeader className="flex-row items-center gap-2.5 px-6 text-ink-soft [&_svg]:size-5 [&_svg]:shrink-0 [&_svg]:stroke-[1.75]">
+        {icon}
+        <p className="text-base text-ink">{label}</p>
       </CardHeader>
       <CardContent className="px-6">
-        <div className="text-3xl font-bold tracking-tight text-[#2f4f3f]">
+        <div className="text-4xl font-semibold tracking-[-0.02em] text-ink tabular-nums">
           {value}
         </div>
-        <p className="mt-2 text-sm font-medium text-[#5f5a52]">{label}</p>
-        <p className="text-xs text-[#9a8f80]">{footnote}</p>
+        <p className="mt-2 text-[15px] text-ink-soft">{footnote}</p>
       </CardContent>
     </Card>
   );
@@ -63,12 +60,12 @@ function StatCardSkeleton() {
   return (
     <Card className={cn(surfaceCardClassName, 'py-5')}>
       <CardHeader className="items-start gap-3 px-5">
-        <Skeleton className="size-10 rounded-2xl bg-[#eee2d0]" />
+        <Skeleton className="size-10 rounded-xl bg-surface" />
       </CardHeader>
       <CardContent className="px-6">
-        <Skeleton className="h-9 w-32 bg-[#eee2d0]" />
-        <Skeleton className="mt-2 h-5 w-28 bg-[#eee2d0]" />
-        <Skeleton className="mt-1 h-4 w-36 bg-[#eee2d0]" />
+        <Skeleton className="h-9 w-32 bg-surface" />
+        <Skeleton className="mt-2 h-5 w-28 bg-surface" />
+        <Skeleton className="mt-1 h-4 w-36 bg-surface" />
       </CardContent>
     </Card>
   );
@@ -84,7 +81,7 @@ function PeriodFilter({
   disabled?: boolean;
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-xl bg-[#fffdfa] p-1 ring-1 ring-[#ebe3d6]">
+    <div className="inline-flex items-center gap-1 rounded-xl bg-card p-1 ring-1 ring-border">
       {PERIOD_OPTIONS.map((option) => (
         <Button
           key={option.value}
@@ -94,10 +91,10 @@ function PeriodFilter({
           disabled={disabled}
           onClick={() => onChange(option.value)}
           className={cn(
-            'h-8 cursor-pointer rounded-lg px-3 text-sm',
+            'h-8 cursor-pointer rounded-lg px-3 text-[15px]',
             value === option.value
-              ? 'bg-[#3a5a4a] text-white hover:bg-[#3a5a4a] hover:text-white'
-              : 'text-[#6f6a62] hover:bg-[#f4efe5] hover:text-[#2f4f3f]',
+              ? 'bg-brand text-on-field hover:bg-brand-strong hover:text-white'
+              : 'text-ink-soft hover:bg-surface hover:text-ink',
           )}
         >
           {option.label}
@@ -115,8 +112,8 @@ function SectionTitle({
   title: string;
 }) {
   return (
-    <CardTitle className="flex items-center gap-2 text-lg font-semibold text-[#2f4f3f]">
-      <Icon className="size-5 text-[#8a6a3a]" />
+    <CardTitle className="flex items-center gap-2 text-lg font-semibold text-ink">
+      <Icon className="size-5 text-ink-soft" />
       {title}
     </CardTitle>
   );
@@ -135,7 +132,7 @@ export function SellerDashboardContent() {
 
       <div className="flex flex-1 flex-col gap-6 px-4 py-6 md:px-8">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-[#6f6a62]">
+          <p className="text-base text-ink-soft">
             Menampilkan data {period} hari terakhir
           </p>
           <PeriodFilter
@@ -148,10 +145,10 @@ export function SellerDashboardContent() {
         {isError ? (
           <Card className={cn(surfaceCardClassName, 'py-10')}>
             <CardContent className="flex flex-col items-center gap-2 text-center">
-              <p className="text-sm font-medium text-[#b45843]">
+              <p className="text-base font-medium text-destructive">
                 Gagal memuat data dashboard.
               </p>
-              <p className="text-xs text-[#9a8f80]">
+              <p className="text-[13px] text-ink-soft">
                 {error instanceof Error
                   ? error.message
                   : 'Terjadi kesalahan tak terduga.'}
@@ -171,7 +168,7 @@ export function SellerDashboardContent() {
                 <SectionTitle icon={BarChart3} title="Pendapatan per Minggu" />
               </CardHeader>
               <CardContent className="px-5 py-5">
-                <Skeleton className="h-[220px] w-full rounded-lg bg-[#eee2d0]" />
+                <Skeleton className="h-[220px] w-full rounded-lg bg-surface" />
               </CardContent>
             </Card>
           </>
@@ -207,7 +204,7 @@ export function SellerDashboardContent() {
             <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
               <CardHeader className={sectionHeaderClassName}>
                 <SectionTitle icon={BarChart3} title="Pendapatan per Minggu" />
-                <p className="text-sm text-[#9a8f80]">
+                <p className="text-base text-ink-soft">
                   Pendapatan bersih per minggu (setelah komisi)
                 </p>
               </CardHeader>
@@ -221,7 +218,7 @@ export function SellerDashboardContent() {
                     ariaLabel="Pendapatan bersih per minggu"
                   />
                 ) : (
-                  <div className="flex h-[220px] items-center justify-center text-sm text-[#8f8377]">
+                  <div className="flex h-[220px] items-center justify-center text-[15px] text-ink-soft">
                     Belum ada pendapatan pada periode ini.
                   </div>
                 )}
@@ -235,7 +232,7 @@ export function SellerDashboardContent() {
               <CardContent className="px-0 py-0">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[720px] text-left">
-                    <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
+                    <thead className="bg-surface text-[13px] font-medium text-ink-soft">
                       <tr>
                         <th className="px-5 py-3">Produk</th>
                         <th className="px-5 py-3">Kategori</th>
@@ -250,7 +247,7 @@ export function SellerDashboardContent() {
                         <tr>
                           <td
                             colSpan={6}
-                            className="py-10 text-center text-sm text-[#8f8377]"
+                            className="py-10 text-center text-[15px] text-ink-soft"
                           >
                             Belum ada penjualan produk pada periode ini.
                           </td>
@@ -259,21 +256,21 @@ export function SellerDashboardContent() {
                         data.products.map((product) => (
                           <tr
                             key={product.productId}
-                            className="border-t border-[#efe8dd]"
+                            className="border-t border-border"
                           >
-                            <td className="px-5 py-3 text-sm font-medium text-[#2f3a33]">
+                            <td className="px-5 py-3 text-[15px] font-medium text-ink">
                               {product.name}
                             </td>
-                            <td className="px-5 py-3 text-sm text-[#6f6a62]">
+                            <td className="px-5 py-3 text-[15px] text-ink-soft">
                               {product.category}
                             </td>
-                            <td className="px-5 py-3 text-center text-sm font-semibold text-[#2f4f3f]">
+                            <td className="px-5 py-3 text-center text-[15px] font-semibold text-ink">
                               {product.unitsSold.toLocaleString('id-ID')}
                             </td>
-                            <td className="px-5 py-3 text-right text-sm font-semibold text-[#2f4f3f]">
+                            <td className="px-5 py-3 text-right text-[15px] font-semibold text-ink">
                               {formatIDR(product.revenue)}
                             </td>
-                            <td className="px-5 py-3 text-right text-sm text-[#6f6a62]">
+                            <td className="px-5 py-3 text-right text-[15px] text-ink-soft">
                               {formatIDR(product.commission)}
                             </td>
                             <td className="px-5 py-3">

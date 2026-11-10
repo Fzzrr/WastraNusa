@@ -146,32 +146,30 @@ export default function AddUpdateArticleModal({
         isOpen ? 'visible opacity-100' : 'invisible opacity-0',
       )}
     >
-      <div
-        className="absolute inset-0 bg-[#1f2a24]/45 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       <FormProvider {...form}>
         <form
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className={cn(
-            'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#f7f3ec] shadow-2xl transition-all duration-300',
+            'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-surface transition-all duration-300',
             isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95',
           )}
         >
           {/* Header */}
-          <div className="border-b border-[#ebe3d6] bg-[#fffdfa] px-6 pt-5 pb-4">
+          <div className="border-b border-border bg-card px-6 pt-5 pb-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
-                  <BookOpen className="size-5" />
-                </span>
+                <BookOpen
+                  className="shrink-0 size-5 text-brand"
+                  strokeWidth={1.75}
+                />
                 <div>
-                  <h2 className="text-lg font-semibold text-[#2f4f3f]">
+                  <h2 className="text-xl font-semibold text-ink">
                     {isEdit ? 'Edit Artikel' : 'Tambah Artikel Baru'}
                   </h2>
-                  <p className="text-xs text-[#9a8f80]">
-                    Field bertanda <span className="text-[#c26a3d]">*</span>{' '}
+                  <p className="text-[13px] text-ink-soft">
+                    Field bertanda <span className="text-destructive">*</span>{' '}
                     wajib diisi
                   </p>
                 </div>
@@ -182,7 +180,7 @@ export default function AddUpdateArticleModal({
                 size="icon-sm"
                 aria-label="Tutup"
                 onClick={onClose}
-                className="cursor-pointer rounded-full bg-[#f4efe5] text-[#6f6a62] transition-colors hover:bg-[#ebe3d6] hover:text-[#2f3a33]"
+                className="cursor-pointer rounded-full bg-surface text-ink-soft transition-colors hover:bg-surface hover:text-ink"
               >
                 <X className="size-4" />
               </Button>
@@ -218,19 +216,19 @@ export default function AddUpdateArticleModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 border-t border-[#ebe3d6] bg-[#fffdfa] px-6 py-4">
+          <div className="flex items-center justify-end gap-3 border-t border-border bg-card px-6 py-4">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-11 cursor-pointer rounded-xl border-[#e5ded5] bg-white px-6 text-[#6f6a62] hover:bg-[#f4efe5]"
+              className="h-11 cursor-pointer rounded-full border-border bg-card px-6 text-ink-soft hover:bg-surface"
             >
               Batal
             </Button>
             <Button
               type="submit"
               disabled={isPending}
-              className="h-11 min-w-44 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-6 text-white shadow-[0_6px_16px_rgba(47,75,61,0.25)] transition-all hover:-translate-y-px hover:bg-[#2f4b3d]"
+              className="h-11 min-w-44 cursor-pointer gap-2 rounded-full bg-brand px-6 text-on-field transition-all hover:bg-brand-strong"
             >
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />

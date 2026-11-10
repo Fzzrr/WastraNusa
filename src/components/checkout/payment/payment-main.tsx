@@ -22,10 +22,8 @@ import {
   AlertCircle,
   ArrowRight,
   ChevronLeft,
-  CreditCard,
   Loader2,
   Lock,
-  ShieldCheck,
   ShoppingCart,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -137,13 +135,13 @@ export function PaymentMain() {
             <ReviewItems items={items} shipping={shipping} address={address} />
 
             {errorMessage && (
-              <div className="order-3 flex animate-in items-start gap-3 rounded-xl border border-[#f0cfc7] bg-[#fbf1eb] p-4 text-sm text-[#9a3b2d] fade-in">
+              <div className="order-3 flex animate-in items-start gap-3 rounded-xl border border-destructive/30 bg-surface p-4 text-[15px] text-destructive fade-in">
                 <AlertCircle className="mt-0.5 size-4 shrink-0" />
                 {errorMessage}
               </div>
             )}
 
-            <div className="order-3 flex flex-col-reverse items-center justify-between gap-3 rounded-2xl bg-[#fffdf8] p-4 ring-1 ring-[#e8dfd0] sm:flex-row">
+            <div className="order-3 flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
               <Button
                 asChild
                 variant="outline"
@@ -160,7 +158,7 @@ export function PaymentMain() {
               <Button
                 onClick={handleConfirmAndPay}
                 disabled={isProcessing}
-                className="group/pay h-12 w-full cursor-pointer gap-2 rounded-xl bg-[#b35d2f] px-8 text-base font-bold text-white shadow-[0_12px_24px_-12px_rgba(179,93,47,0.9)] transition-all hover:-translate-y-px hover:bg-[#9c4f27] active:scale-95 disabled:opacity-70 sm:w-auto"
+                className="group/pay h-12 w-full cursor-pointer gap-2 rounded-full bg-brand px-8 text-base font-semibold text-on-field transition-all hover:bg-brand-strong active:scale-95 disabled:opacity-70 sm:w-auto"
               >
                 {isProcessing ? (
                   <>
@@ -168,21 +166,16 @@ export function PaymentMain() {
                   </>
                 ) : (
                   <>
-                    <CreditCard className="size-4" /> Konfirmasi & Bayar
-                    Sekarang
+                    Bayar sekarang Sekarang
                     <ArrowRight className="size-4 transition-transform group-hover/pay:translate-x-1" />
                   </>
                 )}
               </Button>
             </div>
 
-            <div className="order-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-[#7d7468]">
+            <div className="order-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[13px] text-ink-soft">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="size-3.5 text-[#2f5f49]" />
-                Pembayaran aman & terenkripsi
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Lock className="size-3.5 text-[#2f5f49]" />
+                <Lock className="size-4" strokeWidth={1.75} />
                 Diproses oleh Midtrans
               </span>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Headset, X } from 'lucide-react';
+import { ChevronDown, CircleHelp, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 const FAQS = [
@@ -67,21 +67,12 @@ export function AdminFaqWidget() {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          aria-label="Buka bantuan WastraNusa"
+          aria-label="Bantuan"
+          title="Bantuan"
           aria-haspopup="dialog"
-          className="group flex cursor-pointer items-center gap-2.5 rounded-full bg-[#2f5b49] p-2 text-white shadow-[0_10px_25px_-5px_rgba(47,91,73,0.5)] ring-2 ring-[#caa86a]/40 transition-all duration-300 hover:-translate-y-1 hover:bg-[#254b3c] hover:ring-[#caa86a] active:scale-95 sm:pr-4"
+          className="grid size-14 cursor-pointer place-items-center rounded-full bg-brand text-on-field transition hover:bg-brand-strong active:scale-95"
         >
-          <span className="flex size-9 items-center justify-center rounded-full bg-[#f5ead3] transition-transform duration-300 group-hover:-rotate-12">
-            <Headset className="size-[18px] text-[#2f5b49]" />
-          </span>
-          <span className="hidden text-left sm:block">
-            <span className="block text-xs leading-tight font-bold tracking-wide text-[#f5ead3]">
-              Bantuan
-            </span>
-            <span className="block text-xs font-medium text-white/80">
-              Pertanyaan umum (FAQ)
-            </span>
-          </span>
+          <CircleHelp className="size-6" strokeWidth={1.75} />
         </button>
       </div>
     );
@@ -91,45 +82,33 @@ export function AdminFaqWidget() {
     <aside
       role="dialog"
       aria-label="Bantuan WastraNusa"
-      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-3xl border border-[#e4d9c7] bg-[#fbf8f2] shadow-[0_20px_45px_-10px_rgba(47,91,73,0.35)] duration-200 fade-in slide-in-from-bottom-4 sm:inset-auto sm:right-6 sm:bottom-6 sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
+      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-xl bg-card shadow-[0_24px_48px_-16px_rgba(31,53,43,0.4)] duration-200 fade-in slide-in-from-bottom-4 sm:inset-auto sm:right-6 sm:bottom-6 sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
     >
-      <header className="flex items-center justify-between gap-3 bg-[#274c3d] px-4 py-3 text-white">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#376352] ring-1 ring-[#caa86a]/60">
-            <Headset className="size-5 text-[#f5ead3]" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-sm font-bold tracking-tight text-[#fbf8f2]">
-              Bantuan WastraNusa
-            </h2>
-            <p className="truncate text-xs text-white/70">
-              Pertanyaan yang sering diajukan
-            </p>
-          </div>
-        </div>
+      <header className="flex items-center justify-between gap-3 bg-field py-2 pr-2 pl-5 text-on-field">
+        <h2 className="text-lg font-semibold">Bantuan</h2>
         <button
           ref={closeRef}
           type="button"
           onClick={() => setIsOpen(false)}
           title="Tutup"
           aria-label="Tutup bantuan"
-          className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors hover:bg-white/10 hover:text-white"
+          className="grid size-11 cursor-pointer place-items-center rounded-full text-on-field-soft transition-colors hover:bg-white/10 hover:text-on-field"
         >
-          <X className="size-4" />
+          <X className="size-5" />
         </button>
       </header>
 
-      <div className="flex-1 space-y-2 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto px-2 py-2">
         {FAQS.map((faq) => (
           <details
             key={faq.question}
-            className="group rounded-xl border border-[#e5dcce] bg-white open:border-[#caa86a]"
+            className="group rounded-xl transition-colors open:bg-surface"
           >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-2 p-3 text-sm font-semibold text-[#2f5b49] [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3 py-3.5 text-[15px] font-semibold text-ink transition-colors hover:bg-surface [&::-webkit-details-marker]:hidden">
               {faq.question}
-              <ChevronDown className="size-4 shrink-0 text-[#a07a2c] transition-transform group-open:rotate-180" />
+              <ChevronDown className="size-4 shrink-0 text-ink-soft transition-transform group-open:rotate-180" />
             </summary>
-            <p className="px-3 pb-3 text-sm leading-relaxed text-[#463f35]">
+            <p className="px-3 pb-4 text-[15px] leading-relaxed text-ink">
               {faq.answer}
             </p>
           </details>

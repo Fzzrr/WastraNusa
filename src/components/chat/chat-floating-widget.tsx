@@ -8,7 +8,7 @@ import { authClient } from '@/lib/auth/auth-client';
 import { isSeller } from '@/lib/auth/roles';
 import { cn } from '@/lib/utils';
 import type { ChatAttachedProduct, ConversationSummary } from '@/types/chat';
-import { Maximize2, MessageCircle, MessagesSquare, X } from 'lucide-react';
+import { Maximize2, MessageCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, useSyncExternalStore } from 'react';
@@ -139,27 +139,16 @@ function FloatingChat({
             ? `Buka pesan, ${totalUnread} belum dibaca`
             : 'Buka pesan'
         }
+        title="Pesan"
         aria-haspopup="dialog"
-        className="group relative flex animate-in cursor-pointer items-center gap-2.5 rounded-full bg-[#2f5b49] p-2 text-white shadow-[0_10px_25px_-5px_rgba(47,91,73,0.5)] ring-2 ring-[#caa86a]/40 transition-all duration-300 fade-in slide-in-from-bottom-4 hover:-translate-y-1 hover:bg-[#254b3c] hover:shadow-[0_14px_30px_-5px_rgba(47,91,73,0.65)] hover:ring-[#caa86a] active:scale-95 sm:pr-4"
+        className="relative grid size-14 animate-in cursor-pointer place-items-center rounded-full bg-brand text-on-field transition fade-in slide-in-from-bottom-4 hover:bg-brand-strong active:scale-95"
       >
-        <span className="flex size-9 items-center justify-center rounded-full bg-[#f5ead3] transition-transform duration-300 group-hover:-rotate-12">
-          <MessageCircle className="size-[18px] text-[#2f5b49]" />
-        </span>
-        <span className="hidden text-left sm:block">
-          <span className="block text-xs leading-tight font-bold tracking-wide text-[#f5ead3]">
-            Pesan
-          </span>
-          <span className="block text-xs font-medium text-white/80">
-            {totalUnread > 0
-              ? `${totalUnread} Notifikasi`
-              : 'Chat dengan penjual'}
-          </span>
-        </span>
+        <MessageCircle className="size-6" strokeWidth={1.75} />
 
         {totalUnread > 0 ? (
-          <span className="absolute -top-1.5 -right-1 flex">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#caa86a] opacity-60" />
-            <span className="relative min-w-5 rounded-full bg-[#caa86a] px-1.5 text-center text-xs leading-5 font-bold text-[#274c3d] tabular-nums ring-2 ring-white">
+          <span className="absolute -top-1 -right-1 flex">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-60 motion-reduce:animate-none" />
+            <span className="relative min-w-[22px] rounded-full bg-gold px-1.5 text-center text-[13px] leading-[22px] font-bold text-ink tabular-nums ring-2 ring-ground">
               {totalUnread > 99 ? '99+' : totalUnread}
             </span>
           </span>
@@ -203,31 +192,26 @@ function ChatPanel({
     <aside
       role="dialog"
       aria-label="Pesan"
-      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-3xl border border-[#e4d9c7] bg-[#fffdf8] shadow-[0_20px_45px_-10px_rgba(47,91,73,0.35)] duration-200 fade-in slide-in-from-bottom-4 zoom-in-95 sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[600px] sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
+      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-2xl bg-card shadow-[0_24px_48px_-16px_rgba(31,53,43,0.4)] duration-200 fade-in slide-in-from-bottom-4 zoom-in-95 sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[600px] sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
     >
-      <header className="flex items-center justify-between gap-3 bg-[#274c3d] px-4 py-3 text-white">
+      <header className="flex items-center justify-between gap-3 bg-field px-4 py-3 text-on-field">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#376352] ring-1 ring-[#caa86a]/60">
-            <MessagesSquare className="size-5 text-[#f5ead3]" />
-          </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-bold tracking-tight text-[#fbf8f2]">
-              Pesan WastraNusa
-            </h2>
-            <p className="truncate text-xs text-white/70">
-              {totalUnread > 0
-                ? `${totalUnread} pesan belum dibaca`
-                : 'Ngobrol langsung dengan penjual'}
-            </p>
+            <h2 className="text-base font-semibold text-on-field">Pesan</h2>
+            {totalUnread > 0 ? (
+              <p className="truncate text-[13px] text-on-field-soft">
+                {totalUnread} belum dibaca
+              </p>
+            ) : null}
           </div>
         </div>
-        <div className="flex items-center gap-1 text-white/75">
+        <div className="flex items-center text-on-field-soft">
           <Link
             href={fullPageHref}
             onClick={onClose}
             title="Buka halaman pesan"
             aria-label="Buka halaman pesan"
-            className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+            className="grid size-10 place-items-center rounded-full transition-colors hover:bg-white/10 hover:text-white"
           >
             <Maximize2 className="size-4" />
           </Link>
@@ -236,7 +220,7 @@ function ChatPanel({
             onClick={onClose}
             title="Tutup"
             aria-label="Tutup pesan"
-            className="flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+            className="grid size-10 cursor-pointer place-items-center rounded-full transition-colors hover:bg-white/10 hover:text-white"
           >
             <X className="size-4" />
           </button>
