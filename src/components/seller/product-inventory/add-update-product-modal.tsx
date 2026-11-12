@@ -7,23 +7,12 @@ import {
   GENDER_CHOICES,
   ImagePreview,
   inputClassName,
-  selectContentClassName,
-  selectItemClassName,
-  selectTriggerClassName,
   textareaClassName,
 } from '@/components/form-sections';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useModalPresence } from '@/hooks/use-modal-presence';
 import {
-  useArticleOptions,
   useClothingTypeOptions,
   useCreateSellerProduct,
   useUpdateSellerProduct,
@@ -37,31 +26,17 @@ import {
 } from '@/schemas/product.schema';
 import { type ProductInventoryItem } from '@/types/product';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ImageIcon,
-  Layers,
-  Loader2,
-  Package,
-  Plus,
-  Save,
-  Tag,
-  X,
-} from 'lucide-react';
-import { type UIEvent, useEffect } from 'react';
-import {
-  Controller,
-  type Resolver,
-  useFieldArray,
-  useForm,
-  useWatch,
-} from 'react-hook-form';
+import { ImageIcon, Loader2, Package, Save, Tag } from 'lucide-react';
+import { useEffect } from 'react';
+import { Controller, type Resolver, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 
+import { ArticleSelectField } from './article-select-field';
 import {
   ClothingTypeField,
-  EMPTY_VARIANT,
   PriceInput,
-  VariantCard,
+  ProductFormHeader,
+  VariantsSection,
   buildProductFormValues,
   slugify,
 } from './product-form-fields';
@@ -85,45 +60,9 @@ export default function AddUpdateProductModal({
     useUpdateSellerProduct();
   const { data: clothingTypeOptions = [], refetch: refetchClothingTypes } =
     useClothingTypeOptions();
-  const {
-    data: articleOptionPages,
-    isLoading: isLoadingArticles,
-    hasNextPage: hasNextArticlePage,
-    isFetchingNextPage: isFetchingNextArticlePage,
-    fetchNextPage: fetchNextArticlePage,
-  } = useArticleOptions();
-
   const isEdit = Boolean(initialData);
   const isPending = isCreating || isUpdating;
-  const fetchedArticleOptions =
-    articleOptionPages?.pages.flatMap((page) => page.items) ?? [];
-  const articleOptions =
-    initialData &&
-    !fetchedArticleOptions.some(
-      (article) => article.id === initialData.articleId,
-    )
-      ? [
-          {
-            id: initialData.articleId,
-            title: initialData.articleTitle,
-            island: initialData.island,
-            province: initialData.province,
-          },
-          ...fetchedArticleOptions,
-        ]
-      : fetchedArticleOptions;
 
-  const handleArticleSelectScroll = (event: UIEvent<HTMLDivElement>) => {
-    if (!hasNextArticlePage || isFetchingNextArticlePage) return;
-
-    const container = event.currentTarget;
-    const remainingScroll =
-      container.scrollHeight - container.scrollTop - container.clientHeight;
-
-    if (remainingScroll < 60) {
-      fetchNextArticlePage();
-    }
-  };
   const {
     register,
     control,
@@ -138,19 +77,9 @@ export default function AddUpdateProductModal({
     defaultValues: buildProductFormValues(initialData),
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'variants',
-  });
-
   const values = useWatch({ control });
   const nameValue = values.name;
   const variants = values.variants ?? [];
-  const totalStock = variants.reduce(
-    (sum, variant) =>
-      sum + (Number.isFinite(variant?.stock) ? Number(variant?.stock) : 0),
-    0,
-  );
 
   const requiredChecks = [
     Boolean(values.articleId),
@@ -165,7 +94,6 @@ export default function AddUpdateProductModal({
       ),
   ];
   const filledCount = requiredChecks.filter(Boolean).length;
-  const progress = Math.round((filledCount / requiredChecks.length) * 100);
 
   useEffect(() => {
     if (!nameValue) return;
@@ -250,62 +178,22 @@ export default function AddUpdateProductModal({
           isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95',
         )}
       >
-        {/* Header */}
-        <div className="border-b border-border bg-card px-6 pt-5 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <Package
-                className="shrink-0 size-5 text-brand"
-                strokeWidth={1.75}
-              />
-              <div className="min-w-0">
-                <h2 className="text-xl font-semibold text-ink">
-                  {isEdit ? 'Edit Produk & Inventori' : 'Tambah Produk Baru'}
-                </h2>
-                <p className="truncate text-[13px] text-ink-soft">
-                  {isEdit && initialData ? (
-                    initialData.name
-                  ) : (
-                    <>
-                      Field bertanda <span className="text-destructive">*</span>{' '}
-                      wajib diisi
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Tutup"
-              onClick={onClose}
-              className="cursor-pointer rounded-full bg-surface text-ink-soft hover:bg-surface hover:text-ink"
-            >
-              <X className="size-4" />
-            </Button>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3">
-            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
-              <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-500',
-                  progress === 100 ? 'bg-brand' : 'bg-gold',
-                )}
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <span
-              className={cn(
-                'text-[13px] font-medium whitespace-nowrap tabular-nums',
-                progress === 100 ? 'text-ink' : 'text-ink-soft',
-              )}
-            >
-              {filledCount}/{requiredChecks.length} Bagian Wajib
-            </span>
-          </div>
-        </div>
+        <ProductFormHeader
+          title={isEdit ? 'Edit Produk & Inventori' : 'Tambah Produk Baru'}
+          subtitle={
+            isEdit && initialData ? (
+              initialData.name
+            ) : (
+              <>
+                Field bertanda <span className="text-destructive">*</span> wajib
+                diisi
+              </>
+            )
+          }
+          filledCount={filledCount}
+          totalCount={requiredChecks.length}
+          onClose={onClose}
+        />
 
         {/* Body */}
         <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5 md:px-8">
@@ -338,66 +226,11 @@ export default function AddUpdateProductModal({
                   className={inputClassName}
                 />
               </Field>
-              <Field
-                label="Artikel Terkait"
-                required
+              <ArticleSelectField
+                control={control}
                 error={errors.articleId?.message}
-                hint="Menghubungkan produk dengan kisah budayanya."
-              >
-                <Controller
-                  control={control}
-                  name="articleId"
-                  render={({ field }) => (
-                    <Select
-                      value={field.value ?? ''}
-                      onValueChange={field.onChange}
-                      disabled={isLoadingArticles}
-                    >
-                      <SelectTrigger className={selectTriggerClassName}>
-                        <SelectValue
-                          placeholder={
-                            isLoadingArticles
-                              ? 'Memuat artikel…'
-                              : 'Pilih artikel'
-                          }
-                          className="block w-full truncate"
-                        />
-                      </SelectTrigger>
-                      <SelectContent
-                        position="popper"
-                        className={cn(
-                          selectContentClassName,
-                          'overflow-y-auto',
-                        )}
-                        onScroll={handleArticleSelectScroll}
-                      >
-                        {articleOptions.map((article) => (
-                          <SelectItem
-                            key={article.id}
-                            value={article.id}
-                            className={cn(
-                              selectItemClassName,
-                              'overflow-hidden text-ellipsis whitespace-nowrap',
-                            )}
-                          >
-                            {article.title}
-                          </SelectItem>
-                        ))}
-                        {isFetchingNextArticlePage ? (
-                          <p className="px-2 py-2 text-[13px] text-muted-foreground">
-                            Memuat artikel berikutnya...
-                          </p>
-                        ) : null}
-                        {!hasNextArticlePage && articleOptions.length > 0 ? (
-                          <p className="px-2 py-2 text-[13px] text-muted-foreground">
-                            Semua artikel telah dimuat
-                          </p>
-                        ) : null}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </Field>
+                initialData={initialData}
+              />
             </div>
           </FormSection>
 
@@ -502,43 +335,11 @@ export default function AddUpdateProductModal({
             </div>
           </FormSection>
 
-          <FormSection
-            icon={Layers}
-            title="Varian Produk"
-            description={`${fields.length} varian · total stok ${totalStock.toLocaleString('id-ID')} unit`}
-            aside={
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => append(EMPTY_VARIANT)}
-                className="cursor-pointer gap-1.5 rounded-lg border-brand/30 text-ink hover:bg-surface hover:text-ink"
-              >
-                <Plus className="size-4" />
-                Tambah Varian
-              </Button>
-            }
-          >
-            {errors.variants?.message ? (
-              <p className="mb-3 text-base text-destructive">
-                {errors.variants.message}
-              </p>
-            ) : null}
-
-            <div className="space-y-3">
-              {fields.map((field, index) => (
-                <VariantCard
-                  key={field.id}
-                  control={control}
-                  register={register}
-                  errors={errors}
-                  index={index}
-                  onRemove={() => remove(index)}
-                  canRemove={fields.length > 1}
-                />
-              ))}
-            </div>
-          </FormSection>
+          <VariantsSection
+            control={control}
+            register={register}
+            errors={errors}
+          />
         </div>
 
         {/* Footer */}

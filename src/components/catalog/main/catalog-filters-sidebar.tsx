@@ -3,13 +3,10 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ProductFilterOption } from '@/types/product';
-import {
-  ChevronDown,
-  ChevronUp,
-  RotateCcw,
-  SlidersHorizontal,
-} from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { ChevronDown, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { useState } from 'react';
+
+import { FilterOptionList } from './catalog-filter-option-list';
 
 const MAX_VISIBLE_CATEGORIES = 8;
 const MAX_VISIBLE_ISLANDS = 8;
@@ -47,6 +44,12 @@ function capitalizeFirstLetter(value: string): string {
 
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
+
+const sumCounts = (options: ProductFilterOption[]) =>
+  options.reduce((total, option) => total + option.count, 0);
+
+const formatGender = (name: string) =>
+  GENDER_LABELS[name.toLowerCase()] ?? capitalizeFirstLetter(name);
 
 type CatalogFiltersSidebarProps = {
   totalProducts: number;
@@ -96,40 +99,6 @@ export function CatalogFiltersSidebar({
   onResetFilters,
 }: CatalogFiltersSidebarProps) {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
-  const [isIslandsExpanded, setIsIslandsExpanded] = useState(false);
-
-  const hasMoreCategories = categories.length > MAX_VISIBLE_CATEGORIES;
-  const activeCategoryIsHidden = useMemo(() => {
-    if (!selectedCategory) {
-      return false;
-    }
-
-    return categories
-      .slice(MAX_VISIBLE_CATEGORIES)
-      .some((category) => category.name === selectedCategory);
-  }, [categories, selectedCategory]);
-  const shouldShowAllCategories =
-    isCategoriesExpanded || activeCategoryIsHidden;
-  const visibleCategories = shouldShowAllCategories
-    ? categories
-    : categories.slice(0, MAX_VISIBLE_CATEGORIES);
-
-  const hasMoreIslands = islands.length > MAX_VISIBLE_ISLANDS;
-  const activeIslandIsHidden = useMemo(() => {
-    if (!selectedIsland) {
-      return false;
-    }
-
-    return islands
-      .slice(MAX_VISIBLE_ISLANDS)
-      .some((island) => island.name === selectedIsland);
-  }, [islands, selectedIsland]);
-  const shouldShowAllIslands = isIslandsExpanded || activeIslandIsHidden;
-  const visibleIslands = shouldShowAllIslands
-    ? islands
-    : islands.slice(0, MAX_VISIBLE_ISLANDS);
 
   const hasPriceFilter =
     selectedPricePreset !== 'all' ||
@@ -187,81 +156,15 @@ export function CatalogFiltersSidebar({
       >
         <div className="overflow-hidden">
           <div className="flex flex-col gap-3 pt-3 xl:pt-0">
-            <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
-              <h3 className="px-3 text-base font-semibold text-ink">
-                Kategori Produk
-              </h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  className={cn(
-                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                    !selectedCategory
-                      ? 'bg-brand text-on-field'
-                      : 'text-ink hover:bg-surface hover:text-ink',
-                  )}
-                  onClick={() => onCategoryChange(undefined)}
-                >
-                  <span>Semua Produk</span>
-                  <span
-                    className={cn(
-                      'text-[13px] tabular-nums',
-                      !selectedCategory
-                        ? 'text-on-field-soft'
-                        : 'text-ink-soft',
-                    )}
-                  >
-                    {totalProducts}
-                  </span>
-                </button>
-
-                {visibleCategories.map((category) => (
-                  <button
-                    key={category.name}
-                    type="button"
-                    className={cn(
-                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                      selectedCategory === category.name
-                        ? 'bg-brand text-on-field'
-                        : 'text-ink hover:bg-surface hover:text-ink',
-                    )}
-                    onClick={() => onCategoryChange(category.name)}
-                  >
-                    <span>{category.name}</span>
-                    <span
-                      className={cn(
-                        'text-[13px] tabular-nums',
-                        selectedCategory === category.name
-                          ? 'text-on-field-soft'
-                          : 'text-ink-soft',
-                      )}
-                    >
-                      {category.count}
-                    </span>
-                  </button>
-                ))}
-
-                {hasMoreCategories ? (
-                  <button
-                    type="button"
-                    className="mt-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-[15px] font-semibold text-ink-soft"
-                    onClick={() => setIsCategoriesExpanded((value) => !value)}
-                    aria-expanded={shouldShowAllCategories}
-                  >
-                    <span>
-                      {shouldShowAllCategories
-                        ? 'Sembunyikan lainnya'
-                        : 'Tampilkan lainnya'}
-                    </span>
-                    {shouldShowAllCategories ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </button>
-                ) : null}
-              </div>
-            </Card>
+            <FilterOptionList
+              title="Kategori Produk"
+              allLabel="Semua Produk"
+              allCount={totalProducts}
+              options={categories}
+              selected={selectedCategory}
+              onChange={onCategoryChange}
+              maxVisible={MAX_VISIBLE_CATEGORIES}
+            />
 
             <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
               <h3 className="px-3 text-base font-semibold text-ink">
@@ -307,134 +210,25 @@ export function CatalogFiltersSidebar({
               </div>
             </Card>
 
-            <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
-              <h3 className="px-3 text-base font-semibold text-ink">
-                Asal Daerah
-              </h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  className={cn(
-                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                    !selectedIsland
-                      ? 'bg-brand text-on-field'
-                      : 'text-ink hover:bg-surface hover:text-ink',
-                  )}
-                  onClick={() => onIslandChange(undefined)}
-                >
-                  <span>Semua Pulau</span>
-                  <span
-                    className={cn(
-                      'text-[13px] tabular-nums',
-                      !selectedIsland ? 'text-on-field-soft' : 'text-ink-soft',
-                    )}
-                  >
-                    {islands.reduce((total, island) => total + island.count, 0)}
-                  </span>
-                </button>
+            <FilterOptionList
+              title="Asal Daerah"
+              allLabel="Semua Pulau"
+              allCount={sumCounts(islands)}
+              options={islands}
+              selected={selectedIsland}
+              onChange={onIslandChange}
+              maxVisible={MAX_VISIBLE_ISLANDS}
+            />
 
-                {visibleIslands.map((island) => (
-                  <button
-                    key={island.name}
-                    type="button"
-                    className={cn(
-                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                      selectedIsland === island.name
-                        ? 'bg-brand text-on-field'
-                        : 'text-ink hover:bg-surface hover:text-ink',
-                    )}
-                    onClick={() => onIslandChange(island.name)}
-                  >
-                    <span>{island.name}</span>
-                    <span
-                      className={cn(
-                        'text-[13px] tabular-nums',
-                        selectedIsland === island.name
-                          ? 'text-on-field-soft'
-                          : 'text-ink-soft',
-                      )}
-                    >
-                      {island.count}
-                    </span>
-                  </button>
-                ))}
-
-                {hasMoreIslands ? (
-                  <button
-                    type="button"
-                    className="mt-1 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-[15px] font-semibold text-ink-soft"
-                    onClick={() => setIsIslandsExpanded((value) => !value)}
-                    aria-expanded={shouldShowAllIslands}
-                  >
-                    <span>
-                      {shouldShowAllIslands
-                        ? 'Sembunyikan lainnya'
-                        : 'Tampilkan lainnya'}
-                    </span>
-                    {shouldShowAllIslands ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </button>
-                ) : null}
-              </div>
-            </Card>
-
-            <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
-              <h3 className="px-3 text-base font-semibold text-ink">Gender</h3>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  type="button"
-                  className={cn(
-                    'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                    !selectedGender
-                      ? 'bg-brand text-on-field'
-                      : 'text-ink hover:bg-surface hover:text-ink',
-                  )}
-                  onClick={() => onGenderChange(undefined)}
-                >
-                  <span>Semua Gender</span>
-                  <span
-                    className={cn(
-                      'text-[13px] tabular-nums',
-                      !selectedGender ? 'text-on-field-soft' : 'text-ink-soft',
-                    )}
-                  >
-                    {genders.reduce((total, gender) => total + gender.count, 0)}
-                  </span>
-                </button>
-
-                {genders.map((gender) => (
-                  <button
-                    key={gender.name}
-                    type="button"
-                    className={cn(
-                      'relative flex cursor-pointer items-center justify-between overflow-hidden rounded-full px-3 py-2 text-left text-[15px] transition-colors duration-200',
-                      selectedGender === gender.name
-                        ? 'bg-brand text-on-field'
-                        : 'text-ink hover:bg-surface hover:text-ink',
-                    )}
-                    onClick={() => onGenderChange(gender.name)}
-                  >
-                    <span>
-                      {GENDER_LABELS[gender.name.toLowerCase()] ??
-                        capitalizeFirstLetter(gender.name)}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[13px] tabular-nums',
-                        selectedGender === gender.name
-                          ? 'text-on-field-soft'
-                          : 'text-ink-soft',
-                      )}
-                    >
-                      {gender.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </Card>
+            <FilterOptionList
+              title="Gender"
+              allLabel="Semua Gender"
+              allCount={sumCounts(genders)}
+              options={genders}
+              selected={selectedGender}
+              onChange={onGenderChange}
+              formatLabel={formatGender}
+            />
 
             <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
               <h3 className="px-3 text-base font-semibold text-ink">

@@ -1,10 +1,8 @@
 'use client';
 
 import { SellerHeader } from '@/components/seller/seller-header';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { TablePagination } from '@/components/table-pagination';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -12,8 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { OrderStatus } from '@/generated/prisma/enums';
 import {
   type SellerOrderItem,
   fetchSellerOrders,
@@ -23,54 +19,19 @@ import {
 } from '@/hooks/use-seller-order';
 import type { AdminOrderUpdateInput } from '@/schemas/order.schema';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 import {
   FilterOrderStatus,
   FilterPaymentStatus,
-  ORDER_STATUS_EDIT_OPTIONS,
   ORDER_STATUS_FILTER_OPTIONS,
   OrderDraft,
   PAYMENT_STATUS_OPTIONS,
   getOrderDraft,
-  getOrderStatusBadgeClass,
-  getPaymentStatusBadgeClass,
   isEditableTargetStatus,
-  isOrderEditable,
 } from './order-helpers';
-
-function TableRowSkeleton() {
-  return (
-    <tr className="border-t border-border">
-      <td className="px-4 py-3">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-5 w-28 bg-surface" />
-          <Skeleton className="h-4 w-36 bg-surface" />
-        </div>
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-36 bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-9 w-36 rounded-lg bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-9 w-28 rounded-lg bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-9 w-20 rounded-lg bg-surface" />
-      </td>
-    </tr>
-  );
-}
+import { OrderRow, OrderRowSkeleton } from './order-table-row';
 
 export function SellerOrderContent() {
   const [page, setPage] = useState(1);
@@ -110,13 +71,15 @@ export function SellerOrderContent() {
   }, [page, orderData, queryClient, filters]);
 
   const handleDraftChange = (
-    orderId: string,
-    updater: (current: OrderDraft) => OrderDraft,
     order: SellerOrderItem,
+    patch: Partial<OrderDraft>,
   ) => {
     setDrafts((currentDrafts) => ({
       ...currentDrafts,
-      [orderId]: updater(getOrderDraft(order, currentDrafts[orderId])),
+      [order.orderId]: {
+        ...getOrderDraft(order, currentDrafts[order.orderId]),
+        ...patch,
+      },
     }));
   };
 
@@ -244,7 +207,7 @@ export function SellerOrderContent() {
                 <tbody>
                   {isLoading ? (
                     Array.from({ length: 5 }).map((_, index) => (
-                      <TableRowSkeleton key={index} />
+                      <OrderRowSkeleton key={index} />
                     ))
                   ) : orderData?.items.length === 0 ? (
                     <tr>
@@ -256,239 +219,30 @@ export function SellerOrderContent() {
                       </td>
                     </tr>
                   ) : (
-                    orderData?.items.map((order) => {
-                      const draft = getOrderDraft(order, drafts[order.orderId]);
-                      const editable = isOrderEditable(order);
-                      const selectedEditableStatus =
-                        ORDER_STATUS_EDIT_OPTIONS.some(
-                          (option) => option.value === draft.orderStatus,
-                        )
-                          ? draft.orderStatus
-                          : // '' (not undefined) keeps the Select controlled.
-                            '';
-                      return (
-                        <tr
-                          key={order.orderId}
-                          className="border-t border-border"
-                        >
-                          <td className="px-4 py-3 text-ink">
-                            <div className="flex flex-col gap-0.5">
-                              <p className="text-small font-semibold">
-                                {order.orderNumber}
-                              </p>
-                              <p className="text-[13px] text-muted-foreground/80">
-                                {order.createdAtLabel} ·{' '}
-                                {order.totalAmountLabel}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-[15px] text-ink-soft">
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-ink">
-                                {order.customer.name}
-                              </span>
-                              <span className="text-[13px] text-muted-foreground">
-                                {order.customer.email}
-                              </span>
-                              <span className="mt-2 text-[13px] text-ink">
-                                Kirim ke{' '}
-                                <span className="font-semibold">
-                                  {order.shipping.recipientName}
-                                </span>{' '}
-                                ({order.shipping.phone})
-                              </span>
-                              <span className="max-w-64 text-[13px] leading-relaxed">
-                                {order.shipping.address}
-                              </span>
-                              <span className="text-[13px] text-muted-foreground">
-                                {order.shipping.courier}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-[15px] text-ink-soft">
-                            <div className="flex flex-col gap-2">
-                              {order.products.map((product, index) => (
-                                <div key={index} className="flex flex-col">
-                                  <span className="font-semibold text-ink">
-                                    {product.name}
-                                  </span>
-                                  <span className="text-[13px] text-muted-foreground">
-                                    {product.location} · Qty {product.quantity}{' '}
-                                    · {product.unitPrice}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-col gap-2">
-                              <Badge
-                                variant="secondary"
-                                className={getOrderStatusBadgeClass(
-                                  order.orderStatus,
-                                )}
-                              >
-                                {order.orderStatusLabel}
-                              </Badge>
-                              <Select
-                                value={selectedEditableStatus}
-                                onValueChange={(value: OrderStatus) =>
-                                  handleDraftChange(
-                                    order.orderId,
-                                    (current) => ({
-                                      ...current,
-                                      orderStatus: value,
-                                    }),
-                                    order,
-                                  )
-                                }
-                                disabled={!editable}
-                              >
-                                <SelectTrigger className="h-9 w-36 rounded-lg border-border bg-card text-[13px]">
-                                  <SelectValue placeholder="Pilih status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {ORDER_STATUS_EDIT_OPTIONS.map((option) => (
-                                    <SelectItem
-                                      key={option.value}
-                                      value={option.value}
-                                    >
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <Badge
-                              variant="secondary"
-                              className={getPaymentStatusBadgeClass(
-                                order.paymentStatus,
-                              )}
-                            >
-                              {order.paymentStatusLabel}
-                            </Badge>
-                          </td>
-                          <td className="px-4 py-3">
-                            <Input
-                              value={draft.trackingNumber}
-                              onChange={(event) =>
-                                handleDraftChange(
-                                  order.orderId,
-                                  (current) => ({
-                                    ...current,
-                                    trackingNumber: event.target.value,
-                                  }),
-                                  order,
-                                )
-                              }
-                              placeholder="Isi no. resi"
-                              className="h-9 rounded-lg border-border bg-card text-[15px]"
-                              disabled={!editable}
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <Button
-                              size="sm"
-                              className="h-9 rounded-full"
-                              onClick={() => handleSave(order)}
-                              disabled={!editable || savingId === order.orderId}
-                            >
-                              <Save data-icon="inline-start" />
-                              Simpan
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })
+                    orderData?.items.map((order) => (
+                      <OrderRow
+                        key={order.orderId}
+                        order={order}
+                        draft={getOrderDraft(order, drafts[order.orderId])}
+                        isSaving={savingId === order.orderId}
+                        onDraftChange={(patch) =>
+                          handleDraftChange(order, patch)
+                        }
+                        onSave={() => handleSave(order)}
+                      />
+                    ))
                   )}
                 </tbody>
               </table>
             </div>
           </Card>
-          {orderData && orderData.meta.totalPages > 1 ? (
-            <div className="mt-4 flex items-center justify-between px-2">
-              <p className="text-base text-muted-foreground">
-                Halaman {page} dari {orderData.meta.totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 rounded-full border-border bg-background text-ink-soft hover:bg-surface"
-                  onClick={() =>
-                    setPage((currentPage) => Math.max(1, currentPage - 1))
-                  }
-                  disabled={page === 1 || isLoading}
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from(
-                    { length: orderData.meta.totalPages },
-                    (_, index) => index + 1,
-                  )
-                    .filter((pageNumber) => {
-                      if (orderData.meta.totalPages <= 5) return true;
-                      if (
-                        pageNumber === 1 ||
-                        pageNumber === orderData.meta.totalPages
-                      ) {
-                        return true;
-                      }
-                      if (Math.abs(pageNumber - page) <= 1) return true;
-                      return false;
-                    })
-                    .map((pageNumber, index, pages) => {
-                      const showEllipsis =
-                        index > 0 && pageNumber - pages[index - 1] > 1;
-
-                      return (
-                        <div
-                          key={pageNumber}
-                          className="flex items-center gap-1"
-                        >
-                          {showEllipsis ? (
-                            <span className="px-1 text-ink-soft">...</span>
-                          ) : null}
-                          <Button
-                            variant={
-                              page === pageNumber ? 'default' : 'outline'
-                            }
-                            size="icon"
-                            className={`size-8 rounded-full ${
-                              page === pageNumber
-                                ? 'bg-field text-white hover:bg-field/90'
-                                : 'border-border bg-background text-ink-soft hover:bg-surface'
-                            }`}
-                            onClick={() => setPage(pageNumber)}
-                            disabled={isLoading}
-                          >
-                            {pageNumber}
-                          </Button>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="size-8 rounded-full border-border bg-background text-ink-soft hover:bg-surface"
-                  onClick={() =>
-                    setPage((currentPage) =>
-                      Math.min(orderData.meta.totalPages, currentPage + 1),
-                    )
-                  }
-                  disabled={page === orderData.meta.totalPages || isLoading}
-                >
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-            </div>
-          ) : null}
+          <TablePagination
+            page={page}
+            totalPages={orderData?.meta.totalPages ?? 1}
+            onPageChange={setPage}
+            disabled={isLoading}
+            className="border-t-0 px-2 py-0"
+          />
         </div>
       </section>
     </main>

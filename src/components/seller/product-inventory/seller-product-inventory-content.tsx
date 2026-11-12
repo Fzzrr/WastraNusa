@@ -5,62 +5,38 @@ import {
   profilePrimaryButtonClassName,
 } from '@/components/profile/profile-section';
 import { SellerHeader } from '@/components/seller/seller-header';
+import { TablePagination } from '@/components/table-pagination';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   fetchSellerProducts,
   sellerProductKeys,
   useDeleteSellerProduct,
   useSellerProducts,
 } from '@/hooks/use-seller-product';
-import { cn, formatIDR } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { type ProductInventoryItem } from '@/types/product';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
-  BookOpen,
   Boxes,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  Hexagon,
   type LucideIcon,
   Package,
-  Pencil,
   Plus,
   Trash2,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import AddUpdateProductModal from './add-update-product-modal';
+import {
+  LOW_STOCK_THRESHOLD,
+  ProductRow,
+  ProductRowSkeleton,
+} from './product-table-row';
 
 const PAGE_SIZE = 10;
-const LOW_STOCK_THRESHOLD = 5;
-
-const STATUS_STYLES: Record<
-  ProductInventoryItem['status'],
-  { label: string; className: string; dot: string }
-> = {
-  active: {
-    label: 'Aktif',
-    className: 'bg-surface text-ink',
-    dot: 'bg-[#3f8f63]',
-  },
-  inactive: {
-    label: 'Nonaktif',
-    className: 'bg-surface text-ink-soft',
-    dot: 'bg-surface',
-  },
-  out_of_stock: {
-    label: 'Habis',
-    className: 'bg-destructive/10 text-destructive',
-    dot: 'bg-destructive',
-  },
-};
-
 const cardClassName = 'rounded-xl bg-card ring-1 ring-border';
 
 function StatTile({
@@ -93,36 +69,6 @@ function StatTile({
       </p>
       <p className="mt-2 truncate text-[15px] text-ink-soft">{caption}</p>
     </div>
-  );
-}
-
-function TableRowSkeleton() {
-  return (
-    <tr className="border-t border-border">
-      <td className="px-4 py-3.5">
-        <Skeleton className="size-4 rounded-sm bg-surface" />
-      </td>
-      <td className="px-4 py-3.5">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-12 rounded-xl bg-surface" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-40 bg-surface" />
-            <Skeleton className="h-3 w-28 bg-surface" />
-          </div>
-        </div>
-      </td>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <td key={index} className="px-4 py-3.5">
-          <Skeleton className="mx-auto h-4 w-16 bg-surface" />
-        </td>
-      ))}
-      <td className="px-4 py-3.5">
-        <div className="flex items-center justify-center gap-1.5">
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-        </div>
-      </td>
-    </tr>
   );
 }
 
@@ -354,183 +300,30 @@ export function SellerProductInventoryContent() {
                 <tbody>
                   {isLoading
                     ? Array.from({ length: 5 }).map((_, index) => (
-                        <TableRowSkeleton key={index} />
+                        <ProductRowSkeleton key={index} />
                       ))
-                    : items.map((product) => {
-                        const isSelected = selectedIds.includes(product.id);
-                        const status =
-                          STATUS_STYLES[product.status] ??
-                          STATUS_STYLES.inactive;
-                        const isLowStock =
-                          product.stock > 0 &&
-                          product.stock <= LOW_STOCK_THRESHOLD;
-                        return (
-                          <tr
-                            key={product.id}
-                            onClick={() => handleEdit(product)}
-                            className={cn(
-                              'group cursor-pointer border-t border-border transition-colors',
-                              isSelected ? 'bg-surface' : 'hover:bg-surface',
-                            )}
-                          >
-                            <td
-                              className="px-4 py-3.5"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <Checkbox
-                                aria-label={`Pilih ${product.name}`}
-                                checked={isSelected}
-                                onChange={() => toggleSelectOne(product.id)}
-                              />
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center gap-3">
-                                <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft ring-1 ring-border">
-                                  {product.imageURL ? (
-                                    <Image
-                                      src={product.imageURL}
-                                      alt=""
-                                      fill
-                                      sizes="48px"
-                                      className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                    />
-                                  ) : (
-                                    <Hexagon className="size-5" />
-                                  )}
-                                </span>
-                                <div className="flex min-w-0 flex-col gap-0.5">
-                                  <p className="line-clamp-1 font-semibold text-ink transition-colors group-hover:text-ink">
-                                    {product.name}
-                                  </p>
-                                  <p className="line-clamp-1 text-[13px] text-ink-soft">
-                                    {product.clothingType} · {product.island}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3.5 text-[15px] text-ink-soft">
-                              <span className="inline-flex items-center gap-1.5">
-                                <BookOpen className="size-3.5 shrink-0 text-ink-soft" />
-                                <span className="line-clamp-1">
-                                  {product.articleTitle}
-                                </span>
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <span
-                                className={cn(
-                                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-semibold',
-                                  status.className,
-                                )}
-                              >
-                                <span
-                                  className={cn(
-                                    'size-1.5 rounded-full',
-                                    status.dot,
-                                  )}
-                                />
-                                {status.label}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5 text-right text-[15px] font-bold whitespace-nowrap text-ink">
-                              {formatIDR(product.price)}
-                            </td>
-                            <td className="px-4 py-3.5 text-center">
-                              <span
-                                className={cn(
-                                  'inline-flex items-center gap-1.5 text-[15px] font-semibold tabular-nums',
-                                  product.stock <= 0
-                                    ? 'text-destructive'
-                                    : isLowStock
-                                      ? 'text-ink-soft'
-                                      : 'text-ink',
-                                )}
-                                title={isLowStock ? 'Stok menipis' : undefined}
-                              >
-                                <span
-                                  className={cn(
-                                    'size-1.5 rounded-full',
-                                    product.stock <= 0
-                                      ? 'bg-destructive'
-                                      : isLowStock
-                                        ? 'animate-pulse bg-amber-500'
-                                        : 'bg-[#3f8f63]',
-                                  )}
-                                />
-                                {product.stock}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5 text-center">
-                              <span className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink">
-                                {product.variantCount}
-                              </span>
-                            </td>
-                            <td
-                              className="px-4 py-3.5"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <div className="flex items-center justify-center gap-1.5">
-                                <Button
-                                  size="icon-sm"
-                                  variant="ghost"
-                                  aria-label="Edit produk"
-                                  title="Edit produk"
-                                  className="cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink"
-                                  onClick={() => handleEdit(product)}
-                                >
-                                  <Pencil />
-                                </Button>
-                                <Button
-                                  size="icon-sm"
-                                  variant="ghost"
-                                  aria-label="Hapus produk"
-                                  title="Hapus produk"
-                                  className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive"
-                                  onClick={() => handleDelete(product.id)}
-                                  disabled={isDeleting}
-                                >
-                                  <Trash2 />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                    : items.map((product) => (
+                        <ProductRow
+                          key={product.id}
+                          product={product}
+                          isSelected={selectedIds.includes(product.id)}
+                          isDeleting={isDeleting}
+                          onToggleSelect={() => toggleSelectOne(product.id)}
+                          onEdit={() => handleEdit(product)}
+                          onDelete={() => handleDelete(product.id)}
+                        />
+                      ))}
                 </tbody>
               </table>
             </div>
           )}
 
-          {productData && totalPages > 1 ? (
-            <div className="flex items-center justify-between border-t border-border px-5 py-3.5">
-              <p className="text-base text-ink-soft">
-                Halaman <span className="font-semibold text-ink">{page}</span>{' '}
-                dari {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Halaman sebelumnya"
-                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
-                  onClick={() => goToPage(Math.max(1, page - 1))}
-                  disabled={page === 1 || isLoading}
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Halaman berikutnya"
-                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
-                  onClick={() => goToPage(Math.min(totalPages, page + 1))}
-                  disabled={page === totalPages || isLoading}
-                >
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-            </div>
-          ) : null}
+          <TablePagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+            disabled={isLoading}
+          />
         </div>
       </section>
 

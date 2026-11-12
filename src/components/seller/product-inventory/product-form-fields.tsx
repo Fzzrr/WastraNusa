@@ -3,6 +3,7 @@
 import {
   CreatableCombobox,
   Field,
+  FormSection,
   ImagePreview,
   inputClassName,
 } from '@/components/form-sections';
@@ -12,13 +13,14 @@ import { VariantType } from '@/generated/prisma/enums';
 import { cn } from '@/lib/utils';
 import { type CreateProductInput } from '@/schemas/product.schema';
 import { type ProductInventoryItem } from '@/types/product';
-import { Trash2 } from 'lucide-react';
-import { type ComponentProps } from 'react';
+import { Layers, Package, Plus, Trash2, X } from 'lucide-react';
+import { type ComponentProps, type ReactNode } from 'react';
 import {
   type Control,
   Controller,
   type FieldErrors,
   type UseFormRegister,
+  useFieldArray,
   useWatch,
 } from 'react-hook-form';
 
@@ -216,5 +218,126 @@ export function VariantCard({
         </Field>
       </div>
     </div>
+  );
+}
+
+export function ProductFormHeader({
+  title,
+  subtitle,
+  filledCount,
+  totalCount,
+  onClose,
+}: {
+  title: string;
+  subtitle: ReactNode;
+  filledCount: number;
+  totalCount: number;
+  onClose: () => void;
+}) {
+  const progress = Math.round((filledCount / totalCount) * 100);
+
+  return (
+    <div className="border-b border-border bg-card px-6 pt-5 pb-4">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <Package className="shrink-0 size-5 text-brand" strokeWidth={1.75} />
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold text-ink">{title}</h2>
+            <p className="truncate text-[13px] text-ink-soft">{subtitle}</p>
+          </div>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Tutup"
+          onClick={onClose}
+          className="cursor-pointer rounded-full bg-surface text-ink-soft hover:bg-surface hover:text-ink"
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
+          <div
+            className={cn(
+              'h-full rounded-full transition-all duration-500',
+              progress === 100 ? 'bg-brand' : 'bg-gold',
+            )}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <span
+          className={cn(
+            'text-[13px] font-medium whitespace-nowrap tabular-nums',
+            progress === 100 ? 'text-ink' : 'text-ink-soft',
+          )}
+        >
+          {filledCount}/{totalCount} Bagian Wajib
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function VariantsSection({
+  control,
+  register,
+  errors,
+}: {
+  control: Control<CreateProductInput>;
+  register: UseFormRegister<CreateProductInput>;
+  errors: FieldErrors<CreateProductInput>;
+}) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'variants',
+  });
+  const variants = useWatch({ control, name: 'variants' }) ?? [];
+  const totalStock = variants.reduce(
+    (sum, variant) =>
+      sum + (Number.isFinite(variant?.stock) ? Number(variant?.stock) : 0),
+    0,
+  );
+
+  return (
+    <FormSection
+      icon={Layers}
+      title="Varian Produk"
+      description={`${fields.length} varian · total stok ${totalStock.toLocaleString('id-ID')} unit`}
+      aside={
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => append(EMPTY_VARIANT)}
+          className="cursor-pointer gap-1.5 rounded-lg border-brand/30 text-ink hover:bg-surface hover:text-ink"
+        >
+          <Plus className="size-4" />
+          Tambah Varian
+        </Button>
+      }
+    >
+      {errors.variants?.message ? (
+        <p className="mb-3 text-base text-destructive">
+          {errors.variants.message}
+        </p>
+      ) : null}
+
+      <div className="space-y-3">
+        {fields.map((field, index) => (
+          <VariantCard
+            key={field.id}
+            control={control}
+            register={register}
+            errors={errors}
+            index={index}
+            onRemove={() => remove(index)}
+            canRemove={fields.length > 1}
+          />
+        ))}
+      </div>
+    </FormSection>
   );
 }

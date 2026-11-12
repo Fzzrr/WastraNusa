@@ -1,9 +1,9 @@
 'use client';
 
 import { AdminBrandChip, AdminHeader } from '@/components/admin/admin-header';
+import { TablePagination } from '@/components/table-pagination';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   articleKeys,
   fetchArticleDetail,
@@ -11,68 +11,14 @@ import {
   useArticles,
   useDeleteArticle,
 } from '@/hooks/use-article';
-import { cn } from '@/lib/utils';
 import { type EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  Clock3,
-  Eye,
-  FileText,
-  MapPin,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { BookOpen, FileText, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import AddUpdateArticleModal from './add-update-article-modal';
-
-function TableRowSkeleton() {
-  return (
-    <tr className="border-t border-border">
-      <td className="px-4 py-3">
-        <Skeleton className="size-4 rounded-sm bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-12 rounded-xl bg-surface" />
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-5 w-48 bg-surface" />
-            <Skeleton className="h-4 w-32 bg-surface" />
-          </div>
-        </div>
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-6 w-16 rounded-full bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-24 bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="h-4 w-20 bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="ml-auto h-4 w-12 bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <Skeleton className="ml-auto h-4 w-12 bg-surface" />
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex items-center justify-center gap-2">
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-        </div>
-      </td>
-    </tr>
-  );
-}
+import { ArticleRow, ArticleRowSkeleton } from './article-table-row';
 
 export function AdminArticleContent() {
   const [page, setPage] = useState(1);
@@ -90,7 +36,6 @@ export function AdminArticleContent() {
     isPending: isDeleting,
   } = useDeleteArticle();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   const articles = articlesData?.items ?? [];
   const isAllSelected =
@@ -255,7 +200,7 @@ export function AdminArticleContent() {
               <tbody>
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <TableRowSkeleton key={i} />
+                    <ArticleRowSkeleton key={i} />
                   ))
                 ) : articlesData?.items.length === 0 ? (
                   <tr>
@@ -270,197 +215,28 @@ export function AdminArticleContent() {
                     </td>
                   </tr>
                 ) : (
-                  articlesData?.items.map((article) => {
-                    const isSelected = selectedSlugs.includes(article.slug);
-                    return (
-                      <tr
-                        key={article.slug}
-                        onClick={() => handleEdit(article.slug)}
-                        className={cn(
-                          'group cursor-pointer border-t border-border transition-colors',
-                          isSelected ? 'bg-surface' : 'hover:bg-surface',
-                        )}
-                      >
-                        <td
-                          className="px-4 py-3"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <Checkbox
-                            aria-label={`Pilih ${article.title}`}
-                            checked={isSelected}
-                            onChange={() => toggleSelectOne(article.slug)}
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft ring-1 ring-border">
-                              {article.imageURL ? (
-                                <Image
-                                  src={article.imageURL}
-                                  alt=""
-                                  fill
-                                  sizes="48px"
-                                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                />
-                              ) : (
-                                <BookOpen className="size-5" />
-                              )}
-                            </span>
-                            <div className="flex min-w-0 flex-col gap-0.5">
-                              <p className="line-clamp-1 font-semibold text-ink transition-colors group-hover:text-ink">
-                                {article.title}
-                              </p>
-                              <p className="line-clamp-1 text-[13px] text-ink-soft">
-                                {article.motifLabel} · {article.region}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium whitespace-nowrap text-ink">
-                            {article.topic}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-[15px] text-ink-soft">
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="size-3.5 shrink-0 text-ink-soft" />
-                            <span className="line-clamp-1">
-                              {article.region}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink tabular-nums">
-                            <Eye className="size-3.5" />
-                            {article.views}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink-soft tabular-nums">
-                            <Clock3 className="size-3.5" />
-                            {article.readMinutes}
-                          </span>
-                        </td>
-                        <td
-                          className="px-4 py-3"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Button
-                              size="icon-sm"
-                              variant="ghost"
-                              aria-label="Kunjungi artikel"
-                              title="Lihat artikel"
-                              className="cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink"
-                              onClick={() =>
-                                router.push(`/encyclopedia/${article.slug}`)
-                              }
-                            >
-                              <Eye />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="ghost"
-                              aria-label="Edit artikel"
-                              title="Edit artikel"
-                              className="cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink"
-                              onClick={() => handleEdit(article.slug)}
-                            >
-                              <Pencil />
-                            </Button>
-                            <Button
-                              size="icon-sm"
-                              variant="ghost"
-                              aria-label="Hapus artikel"
-                              title="Hapus artikel"
-                              className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive"
-                              onClick={() => handleDelete(article.slug)}
-                              disabled={isDeleting}
-                            >
-                              <Trash2 />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
+                  articles.map((article) => (
+                    <ArticleRow
+                      key={article.slug}
+                      article={article}
+                      isSelected={selectedSlugs.includes(article.slug)}
+                      isDeleting={isDeleting}
+                      onToggleSelect={() => toggleSelectOne(article.slug)}
+                      onEdit={() => handleEdit(article.slug)}
+                      onDelete={() => handleDelete(article.slug)}
+                    />
+                  ))
                 )}
               </tbody>
             </table>
           </div>
 
-          {articlesData && articlesData.meta.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-border px-5 py-4">
-              <p className="text-base text-ink-soft">
-                Halaman <span className="font-semibold text-ink">{page}</span>{' '}
-                dari {articlesData.meta.totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Halaman sebelumnya"
-                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
-                  onClick={() => goToPage(Math.max(1, page - 1))}
-                  disabled={page === 1 || isLoading}
-                >
-                  <ChevronLeft className="size-4" />
-                </Button>
-
-                <div className="flex items-center gap-1">
-                  {Array.from(
-                    { length: articlesData.meta.totalPages },
-                    (_, i) => i + 1,
-                  )
-                    .filter((p) => {
-                      // Logic to show limited pages
-                      if (articlesData.meta.totalPages <= 5) return true;
-                      if (p === 1 || p === articlesData.meta.totalPages)
-                        return true;
-                      if (Math.abs(p - page) <= 1) return true;
-                      return false;
-                    })
-                    .map((p, i, arr) => {
-                      const showEllipsis = i > 0 && p - arr[i - 1] > 1;
-                      return (
-                        <div key={p} className="flex items-center gap-1">
-                          {showEllipsis && (
-                            <span className="px-1 text-ink-soft">…</span>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className={cn(
-                              'size-8 cursor-pointer rounded-full transition-all',
-                              page === p
-                                ? 'border-brand bg-brand text-on-field hover:bg-brand-strong hover:text-white'
-                                : 'border-border bg-card text-ink-soft hover:bg-surface',
-                            )}
-                            onClick={() => goToPage(p)}
-                            disabled={isLoading}
-                          >
-                            {p}
-                          </Button>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  aria-label="Halaman berikutnya"
-                  className="size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface"
-                  onClick={() =>
-                    goToPage(Math.min(articlesData.meta.totalPages, page + 1))
-                  }
-                  disabled={page === articlesData.meta.totalPages || isLoading}
-                >
-                  <ChevronRight className="size-4" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <TablePagination
+            page={page}
+            totalPages={articlesData?.meta.totalPages ?? 1}
+            onPageChange={goToPage}
+            disabled={isLoading}
+          />
         </div>
       </section>
 
