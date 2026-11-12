@@ -52,6 +52,16 @@ export const sellerManagementRepository = {
    * application is marked rejected (so they may re-apply and it stops counting
    * as verified), and their sessions are dropped so the cached role can't linger.
    */
+  /** Orders the seller still has to fulfil, or that a buyer may still pay. */
+  countActiveOrders: async (sellerId: string) => {
+    return prisma.order.count({
+      where: {
+        sellerId,
+        orderStatus: { in: ['pending', 'confirmed', 'processing', 'shipped'] },
+      },
+    });
+  },
+
   demoteSeller: async (userId: string, reviewerId: string, reason: string) => {
     await prisma.$transaction([
       prisma.user.update({

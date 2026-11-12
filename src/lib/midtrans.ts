@@ -82,6 +82,28 @@ export async function expireMidtransTransaction(orderId: string) {
 }
 
 /**
+ * Asks Midtrans for a transaction's current status. The response has the same
+ * fields as a notification (incl. signature_key). Returns null on 404, which
+ * means the buyer never picked a payment method, so nothing can be paid.
+ * @see https://docs.midtrans.com/reference/get-transaction-status
+ */
+export async function getMidtransTransactionStatus(
+  orderId: string,
+): Promise<Record<string, unknown> | null> {
+  // @types/midtrans-client doesn't declare `transaction`.
+  const { transaction } = midtrans_snap as unknown as {
+    transaction: { status(id: string): Promise<Record<string, unknown>> };
+  };
+  try {
+    return await transaction.status(orderId);
+  } catch (error) {
+    const httpStatus = (error as { httpStatusCode?: unknown }).httpStatusCode;
+    if (Number(httpStatus) === 404) return null;
+    throw error;
+  }
+}
+
+/**
  * Verifies the Midtrans notification signature key.
  * Formula: SHA512(order_id + status_code + gross_amount + server_key)
  * @see https://docs.midtrans.com/reference/receiving-notifications

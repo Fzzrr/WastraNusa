@@ -2,7 +2,10 @@ import { ProductStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { articleRepository } from '@/repositories/article.repository';
-import { sellerProductRepository } from '@/repositories/sellerProduct.repository';
+import {
+  type VariantWrite,
+  sellerProductRepository,
+} from '@/repositories/sellerProduct.repository';
 import {
   type CreateProductInput,
   type ProductVariantInput,
@@ -100,18 +103,31 @@ const normalizeVariantsForCreate = (variants?: ProductVariantInput[]) =>
     imageURL: variant.imageURL,
   }));
 
-const normalizeVariantsForUpdate = (variants: ProductVariantInput[]) => ({
-  deleteMany: {},
-  create: variants.map((variant) => ({
-    id: variant.id ?? crypto.randomUUID(),
-    name: variant.name,
-    type: variant.type,
-    price: variant.price,
-    stock: variant.stock,
-    sku: variant.sku,
-    imageURL: variant.imageURL,
-  })),
-});
+/**
+ * Splits submitted variants into ones that already belong to this product
+ * (updated in place) and new ones. A client-sent id that isn't one of this
+ * product's variants is treated as new, so it can't touch another product.
+ */
+const splitVariantsForUpdate = (
+  variants: ProductVariantInput[],
+  existingIds: Set<string>,
+) => {
+  const kept: VariantWrite[] = [];
+  const created: VariantWrite[] = [];
+  for (const variant of variants) {
+    const isKept = Boolean(variant.id && existingIds.has(variant.id));
+    (isKept ? kept : created).push({
+      id: isKept ? variant.id! : crypto.randomUUID(),
+      name: variant.name,
+      type: variant.type,
+      price: variant.price,
+      stock: variant.stock,
+      sku: variant.sku,
+      imageURL: variant.imageURL,
+    });
+  }
+  return { kept, created };
+};
 
 /**
  * Business logic for a seller managing their OWN products. `sellerId` is the
@@ -228,23 +244,48 @@ export const sellerProductService = {
       );
     }
 
-    const product = await sellerProductRepository.update(existing.id, {
-      articleId: data.articleId,
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      price: data.price,
-      sku: data.sku,
-      weight: data.weight,
-      imageURL: data.imageURL,
-      island: nextIsland,
-      province: nextProvince,
-      clothingType: data.clothingType,
-      gender: data.gender,
-      variants: data.variants
-        ? normalizeVariantsForUpdate(data.variants)
-        : undefined,
-    });
+    const variants = data.variants
+      ? splitVariantsForUpdate(
+          data.variants,
+          new Set(existing.variants.map((variant) => variant.id)),
+        )
+      : undefined;
+
+    if (variants) {
+      const keptIds = new Set(variants.kept.map((variant) => variant.id));
+      const removedIds = existing.variants
+        .map((variant) => variant.id)
+        .filter((id) => !keptIds.has(id));
+      // Cancelling an unpaid order puts its stock back on the variant; once
+      // the variant is gone that stock would be lost.
+      const blocked =
+        await sellerProductRepository.findVariantsInUnpaidOrders(removedIds);
+      if (blocked.length > 0) {
+        throw new ApiError(
+          `Varian ${blocked.map((v) => v.name).join(', ')} masih ada di pesanan yang belum dibayar. Hapus varian setelah pesanan dibayar atau dibatalkan.`,
+          409,
+        );
+      }
+    }
+
+    const product = await sellerProductRepository.update(
+      existing.id,
+      {
+        articleId: data.articleId,
+        name: data.name,
+        slug: data.slug,
+        description: data.description,
+        price: data.price,
+        sku: data.sku,
+        weight: data.weight,
+        imageURL: data.imageURL,
+        island: nextIsland,
+        province: nextProvince,
+        clothingType: data.clothingType,
+        gender: data.gender,
+      },
+      variants,
+    );
 
     logger.info('Seller product updated successfully', {
       productId: existing.id,

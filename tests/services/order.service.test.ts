@@ -1,7 +1,11 @@
 import { ApiError } from '@/lib/error';
-import { expireMidtransTransaction } from '@/lib/midtrans';
+import {
+  expireMidtransTransaction,
+  getMidtransTransactionStatus,
+} from '@/lib/midtrans';
 import { orderRepository } from '@/repositories/order.repository';
 import { orderService } from '@/services/order.service';
+import { paymentService } from '@/services/payment.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.unmock('@/services/order.service');
@@ -340,5 +344,72 @@ describe('orderService', { tags: ['backend'] }, () => {
 
       expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('reconcileExpiredOrders', { tags: ['backend'] }, () => {
+  const expired = {
+    id: 'ord-1',
+    orderStatus: 'pending',
+    paymentStatus: 'unpaid',
+  };
+  const status = (transaction_status: string) => ({
+    transaction_id: 'tx-1',
+    order_id: 'ord-1',
+    gross_amount: '371000.00',
+    status_code: '200',
+    transaction_status,
+    signature_key: 'sig',
+    payment_type: 'bank_transfer',
+  });
+
+  beforeEach(() => {
+    mockRepo.findExpiredPendingOrders.mockResolvedValue([expired] as never);
+  });
+
+  it('confirms an order Midtrans says is paid instead of cancelling it', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(
+      status('settlement'),
+    );
+
+    await orderService.getUserOrders('user-1');
+
+    expect(paymentService.handleNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        order_id: 'ord-1',
+        transaction_status: 'settlement',
+      }),
+    );
+    expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
+  });
+
+  it('cancels and closes an order still unpaid at Midtrans', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(
+      status('pending'),
+    );
+
+    await orderService.getUserOrders('user-1');
+
+    expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalled();
+    expect(expireMidtransTransaction).toHaveBeenCalledWith('ord-1');
+  });
+
+  it('cancels when the buyer never picked a payment method', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(null);
+
+    await orderService.getUserOrders('user-1');
+
+    expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalled();
+    expect(expireMidtransTransaction).not.toHaveBeenCalled();
+  });
+
+  it('leaves the order pending when Midtrans cannot be reached', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockRejectedValue(
+      new Error('ECONNRESET'),
+    );
+
+    await orderService.getUserOrders('user-1');
+
+    expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
   });
 });

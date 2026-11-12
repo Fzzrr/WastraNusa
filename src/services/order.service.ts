@@ -6,9 +6,16 @@ import {
 } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
 import { logError, logger } from '@/lib/logger';
-import { expireMidtransTransaction } from '@/lib/midtrans';
+import {
+  expireMidtransTransaction,
+  getMidtransTransactionStatus,
+} from '@/lib/midtrans';
 import { formatIDR } from '@/lib/utils';
 import { orderRepository } from '@/repositories/order.repository';
+import { midtransNotificationSchema } from '@/schemas/payment.schema';
+// payment.service imports this module too; both only use each other inside
+// functions, so the cycle is safe.
+import { paymentService } from '@/services/payment.service';
 
 type UiOrderStatus =
   | 'Menunggu Bayar'
@@ -341,8 +348,31 @@ export async function reconcileExpiredOrders(userId?: string) {
 
   for (const order of expiredOrders) {
     try {
-      await cancelOrderAndRestoreStock(order, 'expired');
+      // The webhook may be late or lost (e.g. it can't reach localhost), so
+      // ask Midtrans before cancelling: the buyer may have paid already.
+      const status = await getMidtransTransactionStatus(order.id);
+      const txStatus = status?.transaction_status;
+
+      if (txStatus === 'settlement' || txStatus === 'capture') {
+        await paymentService.handleNotification(
+          midtransNotificationSchema.parse(status),
+        );
+        continue;
+      }
+
+      const cancelled = await cancelOrderAndRestoreStock(order, 'expired');
+      // Still open at Midtrans: close it so it can't be paid after cancelling.
+      if (cancelled && txStatus === 'pending') {
+        await expireMidtransTransaction(order.id).catch((error) => {
+          logger.warn('Could not expire Midtrans transaction', {
+            orderId: order.id,
+            error,
+          });
+        });
+      }
     } catch (error) {
+      // Payment state unknown (Midtrans unreachable): keep the order pending
+      // and retry on the next call rather than cancel a possibly paid order.
       logError(error, { action: 'reconcileExpiredOrders', orderId: order.id });
     }
   }

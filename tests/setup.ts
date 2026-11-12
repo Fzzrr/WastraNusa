@@ -188,6 +188,7 @@ vi.mock('@/services/address.service', () => ({
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
   expireMidtransTransaction: vi.fn(),
+  getMidtransTransactionStatus: vi.fn(),
   verifySignatureKey: vi.fn(),
 }));
 

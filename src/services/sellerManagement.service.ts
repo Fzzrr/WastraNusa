@@ -142,6 +142,17 @@ export const sellerManagementService = {
       throw new ApiError('User ini bukan seller', 400);
     }
 
+    // A demoted seller loses the seller pages, so paid orders would be stuck
+    // with nobody able to ship them.
+    const activeOrders =
+      await sellerManagementRepository.countActiveOrders(userId);
+    if (activeOrders > 0) {
+      throw new ApiError(
+        `Seller masih memiliki ${activeOrders} pesanan aktif. Tunggu hingga semua pesanan diterima atau dibatalkan sebelum mencabut status seller.`,
+        409,
+      );
+    }
+
     await sellerManagementRepository.demoteSeller(userId, reviewerId, reason);
     logger.info('Seller demoted to user', { userId, reviewerId });
   },
