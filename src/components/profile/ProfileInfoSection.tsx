@@ -24,7 +24,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 function InfoTile({
@@ -98,18 +98,18 @@ export default function ProfileInfoSection() {
     birthDate: '',
   });
 
-  useEffect(() => {
-    if (user && !isEditing) {
-      setFormData({
-        name: user.name || '',
-        phoneNumber: user.phoneNumber || '',
-        gender: user.gender || '',
-        birthDate: user.birthDate
-          ? new Date(user.birthDate).toISOString().split('T')[0]
-          : '', // Get YYYY-MM-DD
-      });
-    }
-  }, [user, isEditing]);
+  // The form only shows while editing, so fill it from the user right then.
+  const startEditing = () => {
+    setFormData({
+      name: user?.name || '',
+      phoneNumber: user?.phoneNumber || '',
+      gender: user?.gender || '',
+      birthDate: user?.birthDate
+        ? new Date(user.birthDate).toISOString().split('T')[0] // YYYY-MM-DD
+        : '',
+    });
+    setIsEditing(true);
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -184,7 +184,7 @@ export default function ProfileInfoSection() {
         !isEditing ? (
           <Button
             variant="outline"
-            onClick={() => setIsEditing(true)}
+            onClick={startEditing}
             className={cn(
               profileOutlineButtonClassName,
               'h-9 w-full sm:w-auto',
