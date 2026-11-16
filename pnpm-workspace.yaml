@@ -7,3 +7,10 @@ allowBuilds:
   protobufjs: true
   sharp: true
   unrs-resolver: true
+
+overrides:
+  # minimatch 7-10 has GHSA-g3hv-75wg-m249 (ReDoS); 11.x is the patched line.
+  # Only dev tooling still pins it: typescript-eslint (via eslint-config-next),
+  # ts-morph (via the shadcn CLI), and the Prettier import-sort plugin.
+  # Drop once they depend on minimatch >= 11.
+  'minimatch@>=7 <11': ^11.0.8
