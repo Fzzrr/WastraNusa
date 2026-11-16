@@ -142,8 +142,7 @@ export const conversationService = {
 
     return conversations.map((conversation) => {
       const latest = conversation.messages[0] as
-        | Pick<MessageRow, 'content' | 'createdAt' | 'senderId'>
-        | undefined;
+        Pick<MessageRow, 'content' | 'createdAt' | 'senderId'> | undefined;
       return {
         id: conversation.id,
         otherParticipant: pickOtherParticipant(conversation, userId),

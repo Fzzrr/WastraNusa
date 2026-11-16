@@ -31,25 +31,23 @@ export function useWikipediaSummaryImport(isActive: boolean) {
 
   const abortRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    return () => {
-      abortRef.current?.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isActive) {
-      abortRef.current?.abort();
+  // Opening the panel starts from a clean slate. Reset while rendering when
+  // `isActive` flips, instead of in an effect (no extra render pass).
+  const [wasActive, setWasActive] = useState(isActive);
+  if (isActive !== wasActive) {
+    setWasActive(isActive);
+    if (isActive) {
+      setUrl('');
+      setUrlHint(null);
+      setError(null);
+      setPreview(null);
       setIsLoading(false);
-      return;
     }
-    setUrl('');
-    setUrlHint(null);
-    setError(null);
-    setPreview(null);
-    abortRef.current?.abort();
-    setIsLoading(false);
-  }, [isActive]);
+  }
+
+  // Closing the panel or unmounting cancels a request in flight (its
+  // `finally` clears the loading state).
+  useEffect(() => () => abortRef.current?.abort(), [isActive]);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -87,44 +85,38 @@ export function useWikipediaSummaryImport(isActive: boolean) {
         ac.signal,
       );
       const mapped = mapWikipediaSummaryToArticleFields(summary);
-      // Attempt to fetch sections (mobile-sections) to populate form sections
+      // Sections are optional: the summary is still usable without them.
+      let sectionsError: string | null = null;
+      let sectionsFetched = false;
       try {
-        // dynamic import to avoid increasing initial bundle for clients that don't use this
-        let sectionsError: string | null = null;
-        let sectionsFetched = false;
-        try {
-          // Use server-side proxy to avoid CORS / 403 issues from client
-          const proxyUrl = `/api/wikimedia/mobile-sections?origin=${encodeURIComponent(
-            parsed.apiOrigin,
-          )}&title=${encodeURIComponent(parsed.pageTitle)}`;
-          const resp = await fetch(proxyUrl, { signal: ac.signal });
-          const sectionsResp = resp.ok ? await resp.json() : null;
-          if (sectionsResp?.sections && sectionsResp.sections.length > 0) {
-            mapped.sections = sectionsResp.sections
-              .filter((s: { line?: string; text?: string }) => s.line && s.text)
-              .map((s: { line: string; text: string; imageURL?: string }) => ({
-                title: s.line,
-                content: s.text,
-                ...(s.imageURL ? { imageURL: s.imageURL } : {}),
-              }));
-          }
-          sectionsFetched = true;
-        } catch (e: unknown) {
-          sectionsError = e instanceof Error ? e.message : String(e);
-
-          console.debug('Could not fetch mobile sections for preview', e);
+        // Server-side proxy avoids CORS / 403 issues from the browser.
+        const proxyUrl = `/api/wikimedia/mobile-sections?origin=${encodeURIComponent(
+          parsed.apiOrigin,
+        )}&title=${encodeURIComponent(parsed.pageTitle)}`;
+        const resp = await fetch(proxyUrl, { signal: ac.signal });
+        const sectionsResp = resp.ok ? await resp.json() : null;
+        if (sectionsResp?.sections && sectionsResp.sections.length > 0) {
+          mapped.sections = sectionsResp.sections
+            .filter((s: { line?: string; text?: string }) => s.line && s.text)
+            .map((s: { line: string; text: string; imageURL?: string }) => ({
+              title: s.line,
+              content: s.text,
+              ...(s.imageURL ? { imageURL: s.imageURL } : {}),
+            }));
         }
-
-        setPreview({
-          mapped,
-          pageUrl: trimmed,
-          wikiType: summary.type,
-          sectionsFetchError: sectionsError,
-          sectionsFetched,
-        });
-      } catch (err) {
-        throw err;
+        sectionsFetched = true;
+      } catch (e: unknown) {
+        if (ac.signal.aborted) throw e;
+        sectionsError = e instanceof Error ? e.message : String(e);
       }
+
+      setPreview({
+        mapped,
+        pageUrl: trimmed,
+        wikiType: summary.type,
+        sectionsFetchError: sectionsError,
+        sectionsFetched,
+      });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
       const message =

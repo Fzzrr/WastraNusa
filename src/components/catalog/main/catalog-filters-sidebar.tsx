@@ -25,12 +25,7 @@ const MAX_VISIBLE_CATEGORIES = 8;
 const MAX_VISIBLE_ISLANDS = 8;
 
 export type PricePresetKey =
-  | 'all'
-  | 'lt-200k'
-  | '200k-500k'
-  | '500k-1m'
-  | '1m-3m'
-  | 'gt-3m';
+  'all' | 'lt-200k' | '200k-500k' | '500k-1m' | '1m-3m' | 'gt-3m';
 
 const PRICE_RANGES: Array<{
   key: PricePresetKey;

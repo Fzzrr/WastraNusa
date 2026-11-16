@@ -42,12 +42,7 @@ export interface ProductInventoryItem {
 }
 
 export type ProductCatalogSortBy =
-  | 'newest'
-  | 'oldest'
-  | 'price_asc'
-  | 'price_desc'
-  | 'name_asc'
-  | 'name_desc';
+  'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'name_asc' | 'name_desc';
 
 export interface ProductCatalogFilters {
   minPrice?: number;

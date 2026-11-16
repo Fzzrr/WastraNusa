@@ -1,4 +1,4 @@
-import type { JSendResponse } from '@/lib/jsend';
+import { parseJSend } from '@/lib/api-client';
 import type { ChatAnswer, ChatProduct, ChatStreamEvent } from '@/types/chat';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -75,23 +75,7 @@ async function sendChatApi({
     }
   }
 
-  const body = (await response.json()) as JSendResponse<ChatApiResponse>;
-
-  if (body.status === 'success') {
-    return body.data as ChatApiResponse;
-  }
-
-  if (body.status === 'fail') {
-    const message =
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'message' in body.data
-        ? String((body.data as { message: unknown }).message)
-        : 'Gagal mengirim pesan';
-    throw new Error(message);
-  }
-
-  throw new Error(body.message || 'Terjadi kesalahan sistem');
+  return parseJSend<ChatApiResponse>(response, 'Gagal mengirim pesan');
 }
 
 export function useArticleChat(articleId: string) {

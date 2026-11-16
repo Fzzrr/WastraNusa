@@ -26,7 +26,7 @@ import {
 
 /** Form pieces and helpers for the seller product form. */
 
-export const EMPTY_VARIANT = {
+const EMPTY_VARIANT = {
   name: '',
   type: VariantType.size,
   price: 0,
@@ -112,7 +112,7 @@ export function ClothingTypeField({
   );
 }
 
-export function VariantCard({
+function VariantCard({
   control,
   register,
   errors,

@@ -1,4 +1,4 @@
-import { fetchApi, mutateApi, parseJSend } from '@/lib/api-client';
+import { fetchApi, mutateApi } from '@/lib/api-client';
 import {
   type CreateArticleInput,
   type UpdateArticleInput,
@@ -14,6 +14,8 @@ import type { LikedArticlesResponse } from '@/types/profile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const DEFAULT_ARTICLE_LIMIT = 50;
+/** Articles per page on /encyclopedia (also used by its server prefetch). */
+export const ENCYCLOPEDIA_PAGE_SIZE = 10;
 const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 
 /**
@@ -50,35 +52,6 @@ export const articleKeys = {
   likedList: (page: number, limit: number = DEFAULT_LIKED_ARTICLE_LIMIT) =>
     [...articleKeys.liked(), page, limit] as const,
 };
-
-export async function createArticleApi(
-  data: CreateArticleInput,
-): Promise<EncyclopediaArticleDetail> {
-  const response = await fetch('/api/articles', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  return parseJSend<EncyclopediaArticleDetail>(response);
-}
-
-export async function updateArticleApi(
-  slug: string,
-  data: UpdateArticleInput,
-): Promise<EncyclopediaArticleDetail> {
-  const response = await fetch(`/api/articles/${encodeURIComponent(slug)}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  return parseJSend<EncyclopediaArticleDetail>(response);
-}
 
 export function fetchArticles(
   page: number = 1,
@@ -338,7 +311,8 @@ export function useCreateArticle() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateArticleInput) => createArticleApi(data),
+    mutationFn: (data: CreateArticleInput) =>
+      mutateApi<EncyclopediaArticleDetail>('/api/articles', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: articleKeys.all });
     },
@@ -350,7 +324,11 @@ export function useUpdateArticle() {
 
   return useMutation({
     mutationFn: ({ slug, data }: { slug: string; data: UpdateArticleInput }) =>
-      updateArticleApi(slug, data),
+      mutateApi<EncyclopediaArticleDetail>(
+        `/api/articles/${encodeURIComponent(slug)}`,
+        'PUT',
+        data,
+      ),
     onSuccess: (_, { slug }) => {
       queryClient.invalidateQueries({ queryKey: articleKeys.all });
       queryClient.invalidateQueries({ queryKey: articleKeys.detail(slug) });

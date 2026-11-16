@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WastraHeroPanel } from '@/components/wastra-hero';
-import { useArticles } from '@/hooks/use-article';
+import { ENCYCLOPEDIA_PAGE_SIZE, useArticles } from '@/hooks/use-article';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
   SEARCH_RESULT_LIMIT,
@@ -28,8 +28,6 @@ import type { Stat } from '@/types/encyclopedia';
 import { Home, Library, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-const ARTICLES_PER_PAGE = 10;
 
 interface EncyclopediaMainProps {
   initialIsland?: string;
@@ -140,7 +138,7 @@ export function EncyclopediaMain({
   const [searchTerm, setSearchTerm] = useState(initialSearch ?? '');
   const { data, error, isPending } = useArticles(
     currentPage,
-    ARTICLES_PER_PAGE,
+    ENCYCLOPEDIA_PAGE_SIZE,
     {
       island: selectedIsland,
       topic: selectedTopic,

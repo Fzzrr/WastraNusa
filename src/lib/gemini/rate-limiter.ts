@@ -16,13 +16,8 @@ export class RateLimiter {
     this.maxRequests = maxRequests;
     this.windowMs = windowMs;
 
-    // Periodic cleanup of expired entries every 5 minutes
-    if (typeof setInterval !== 'undefined') {
-      const interval = setInterval(() => this.cleanup(), 5 * 60_000);
-      if (typeof interval === 'object' && 'unref' in interval) {
-        (interval as { unref: () => void }).unref();
-      }
-    }
+    // Drop expired entries every 5 minutes; unref so it never holds the process open.
+    setInterval(() => this.cleanup(), 5 * 60_000).unref?.();
   }
 
   /**

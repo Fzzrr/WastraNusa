@@ -3,8 +3,7 @@ import {
   cartKeys,
   useAddToCart,
   useCart,
-  useClearCart,
-  useRemoveFromCart,
+  useRemoveMultipleFromCart,
   useUpdateCartItem,
 } from '@/hooks/use-cart';
 import {
@@ -168,7 +167,7 @@ describe('use-cart hooks', { tags: ['frontend'] }, () => {
       }) as never,
     );
 
-    const { result } = renderHook(() => useRemoveFromCart(), {
+    const { result } = renderHook(() => useRemoveMultipleFromCart(), {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>
           {children}
@@ -177,40 +176,10 @@ describe('use-cart hooks', { tags: ['frontend'] }, () => {
     });
 
     act(() => {
-      result.current.mutate('item-1');
+      result.current.mutate({ cartItemIds: ['item-1'] });
     });
 
     // Should immediately remove item from cache
-    await waitFor(() => {
-      const cached = queryClient.getQueryData<Cart>(cartKeys.list());
-      expect(cached?.items.length).toBe(0);
-    });
-  });
-
-  it('should optimistically update on clear cart', async () => {
-    const queryClient = new QueryClient();
-    queryClient.setQueryData(cartKeys.list(), MOCK_CART);
-
-    vi.spyOn(global, 'fetch').mockResolvedValue(
-      createSuccessResponse({
-        ...MOCK_CART,
-        items: [],
-      }) as never,
-    );
-
-    const { result } = renderHook(() => useClearCart(), {
-      wrapper: ({ children }) => (
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
-      ),
-    });
-
-    act(() => {
-      result.current.mutate();
-    });
-
-    // Should immediately clear items in cache
     await waitFor(() => {
       const cached = queryClient.getQueryData<Cart>(cartKeys.list());
       expect(cached?.items.length).toBe(0);

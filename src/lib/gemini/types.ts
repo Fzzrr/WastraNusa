@@ -24,8 +24,3 @@ export interface LlmChatResult {
   model: string;
   cached?: boolean;
 }
-
-export interface LlmProvider {
-  readonly name: string;
-  chat(options: LlmChatOptions): Promise<LlmChatResult>;
-}

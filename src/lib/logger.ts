@@ -26,16 +26,12 @@ const consoleFormat = combine(
   winston.format.printf(({ timestamp, level, message, ...metadata }) => {
     let msg = `[${timestamp}] ${level}: ${message}`;
 
-    // Clean up metadata: remove 'service' if it's the default one to reduce noise
     const cleanMeta = Object.fromEntries(
       Object.entries(metadata).map(([key, value]) => [
         key,
         summarizeError(value),
       ]),
     );
-    if (cleanMeta.service === 'user-service') {
-      delete cleanMeta.service;
-    }
 
     // If there's any metadata left (like 'body' or 'result'), print it.
     // inspect, not JSON.stringify: error objects from HTTP clients (e.g.
@@ -50,7 +46,6 @@ const consoleFormat = combine(
 
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  defaultMeta: { service: 'user-service' },
   transports: [
     new winston.transports.Console({
       format: consoleFormat,

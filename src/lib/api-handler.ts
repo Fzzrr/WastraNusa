@@ -107,68 +107,38 @@ function handleApiError(err: unknown, req: Request) {
   return jsend.error('Terjadi kesalahan pada server', 500);
 }
 
-/**
- * Higher-order function to wrap API routes with authentication and standardized error handling.
- * @param handler The actual route logic
- * @returns A Next.js API route handler
- */
-export function withApiAuth<T = unknown>(handler: ApiHandler<T>) {
-  return async (req: Request, { params }: { params: Promise<T> }) => {
-    try {
-      const user = await AuthHelper.requireUser();
-      const resolvedParams = await params;
+type RouteContext<T> = { params: Promise<T> };
 
-      return await handler({ userId: user.id, params: resolvedParams, req });
+/** Wraps a route with an auth guard, awaited params, and shared error handling. */
+function withGuard<T, U extends { id: string }>(
+  requireUser: () => Promise<U>,
+  handler: ApiHandler<T>,
+) {
+  return async (req: Request, { params }: RouteContext<T>) => {
+    try {
+      const user = await requireUser();
+      return await handler({ userId: user.id, params: await params, req });
     } catch (err) {
       return handleApiError(err, req);
     }
   };
 }
 
-/**
- * Higher-order function to wrap API routes with admin authentication and standardized error handling.
- * @param handler The actual route logic
- * @returns A Next.js API route handler
- */
-export function withApiAdmin<T = unknown>(handler: ApiHandler<T>) {
-  return async (req: Request, { params }: { params: Promise<T> }) => {
-    try {
-      const user = await AuthHelper.requireAdmin();
-      const resolvedParams = await params;
+/** Signed-in users only; `userId` is the caller. */
+export const withApiAuth = <T = unknown>(handler: ApiHandler<T>) =>
+  withGuard(() => AuthHelper.requireUser(), handler);
 
-      return await handler({ userId: user.id, params: resolvedParams, req });
-    } catch (err) {
-      return handleApiError(err, req);
-    }
-  };
-}
+/** Admins only. */
+export const withApiAdmin = <T = unknown>(handler: ApiHandler<T>) =>
+  withGuard(() => AuthHelper.requireAdmin(), handler);
 
-/**
- * Higher-order function to wrap API routes with seller authentication and standardized error handling.
- * The seller's own user id is passed as `userId` so handlers can scope queries by `sellerId`.
- * @param handler The actual route logic
- * @returns A Next.js API route handler
- */
-export function withApiSeller<T = unknown>(handler: ApiHandler<T>) {
-  return async (req: Request, { params }: { params: Promise<T> }) => {
-    try {
-      const user = await AuthHelper.requireSeller();
-      const resolvedParams = await params;
+/** Sellers only; `userId` is the seller, so handlers can scope by `sellerId`. */
+export const withApiSeller = <T = unknown>(handler: ApiHandler<T>) =>
+  withGuard(() => AuthHelper.requireSeller(), handler);
 
-      return await handler({ userId: user.id, params: resolvedParams, req });
-    } catch (err) {
-      return handleApiError(err, req);
-    }
-  };
-}
-
-/**
- * Higher-order function to wrap public API routes with standardized error handling and async params.
- * @param handler The actual route logic
- * @returns A Next.js API route handler
- */
+/** No auth required; `userId`/`userRole` are set when the caller is signed in. */
 export function withApiPublic<T = unknown>(handler: PublicApiHandler<T>) {
-  return async (req: Request, { params }: { params: Promise<T> }) => {
+  return async (req: Request, { params }: RouteContext<T>) => {
     try {
       const resolvedParams = await params;
       const user = await AuthHelper.getUser();

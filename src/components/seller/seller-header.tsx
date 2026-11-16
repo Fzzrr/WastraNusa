@@ -1,6 +1,6 @@
 'use client';
 
-import { useSellerSidebar } from '@/components/seller/seller-sidebar-context';
+import { usePanelSidebar } from '@/components/panel-shell';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 
@@ -11,7 +11,7 @@ export function SellerHeader({
   title: string;
   subtitle: string;
 }) {
-  const { setOpen } = useSellerSidebar();
+  const { setOpen } = usePanelSidebar();
 
   return (
     <header className="flex flex-col gap-4 px-4 pt-6 md:px-8 md:pt-8">

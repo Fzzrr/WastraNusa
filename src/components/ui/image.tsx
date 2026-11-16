@@ -1,19 +1,25 @@
 import NextImage, { type ImageProps } from 'next/image';
 
-// Wikimedia rate-limits (429) the server-side optimizer, which downloads the
-// original once per requested width. Browsers may hotlink it directly.
-const WIKIMEDIA = /^https:\/\/(upload|thumb)\.wikimedia\.org\//;
-
-export function isWikimediaUrl(src: ImageProps['src']) {
-  return typeof src === 'string' && WIKIMEDIA.test(src);
+/**
+ * Remote images are URLs admins/sellers paste from any site, so they can't be
+ * allow-listed for the optimizer. They load straight from their host instead;
+ * only images from /public go through `/_next/image`. This keeps the server
+ * from being an open image proxy (and from spending CPU/memory resizing).
+ */
+export function isRemoteUrl(src: ImageProps['src']) {
+  return typeof src === 'string' && /^(https?:)?\/\//.test(src);
 }
 
-/** `next/image`, except Wikimedia images skip the optimizer. */
+/** `next/image`, except remote images skip the optimizer. */
 export default function Image(props: ImageProps) {
+  const remote = isRemoteUrl(props.src);
   return (
     <NextImage
+      // Many hosts block hotlinks by Referer; sending none also keeps our
+      // URLs private from them.
+      referrerPolicy={remote ? 'no-referrer' : undefined}
       {...props}
-      unoptimized={props.unoptimized || isWikimediaUrl(props.src)}
+      unoptimized={props.unoptimized || remote}
     />
   );
 }

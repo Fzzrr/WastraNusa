@@ -1,4 +1,4 @@
-import { parseJSend } from '@/lib/api-client';
+import { fetchApi, mutateApi } from '@/lib/api-client';
 import type {
   CreateAddressInput,
   UpdateAddressInput,
@@ -34,54 +34,7 @@ export const addressKeys = {
   detail: (id: string) => [...addressKeys.all, 'detail', id] as const,
 };
 
-async function fetchAddressesApi(): Promise<CustomerAddress[]> {
-  const response = await fetch('/api/addresses', {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return parseJSend<CustomerAddress[]>(response);
-}
-
-async function createAddressApi(
-  data: CreateAddressInput,
-): Promise<CustomerAddress> {
-  const response = await fetch('/api/addresses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return parseJSend<CustomerAddress>(response);
-}
-
-async function updateAddressApi(
-  id: string,
-  data: UpdateAddressInput,
-): Promise<CustomerAddress> {
-  const response = await fetch(`/api/addresses/${encodeURIComponent(id)}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return parseJSend<CustomerAddress>(response);
-}
-
-async function deleteAddressApi(id: string): Promise<void> {
-  const response = await fetch(`/api/addresses/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  await parseJSend<null>(response);
-}
-
-async function setDefaultAddressApi(id: string): Promise<CustomerAddress> {
-  const response = await fetch(
-    `/api/addresses/${encodeURIComponent(id)}/default`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    },
-  );
-  return parseJSend<CustomerAddress>(response);
-}
+const addressPath = (id: string) => `/api/addresses/${encodeURIComponent(id)}`;
 
 // --------------- Hooks ---------------
 
@@ -91,7 +44,7 @@ async function setDefaultAddressApi(id: string): Promise<CustomerAddress> {
 export function useAddresses() {
   return useQuery({
     queryKey: addressKeys.list(),
-    queryFn: fetchAddressesApi,
+    queryFn: () => fetchApi<CustomerAddress[]>('/api/addresses'),
     staleTime: 1000 * 60 * 5, // 5 minutes — addresses change infrequently
   });
 }
@@ -103,7 +56,8 @@ export function useCreateAddress() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateAddressInput) => createAddressApi(data),
+    mutationFn: (data: CreateAddressInput) =>
+      mutateApi<CustomerAddress>('/api/addresses', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: addressKeys.lists() });
     },
@@ -118,7 +72,7 @@ export function useUpdateAddress() {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateAddressInput }) =>
-      updateAddressApi(id, data),
+      mutateApi<CustomerAddress>(addressPath(id), 'PUT', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: addressKeys.lists() });
     },
@@ -133,7 +87,7 @@ export function useDeleteAddress() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteAddressApi(id),
+    mutationFn: (id: string) => mutateApi<null>(addressPath(id), 'DELETE'),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: addressKeys.lists() });
 
@@ -166,7 +120,8 @@ export function useSetDefaultAddress() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => setDefaultAddressApi(id),
+    mutationFn: (id: string) =>
+      mutateApi<CustomerAddress>(`${addressPath(id)}/default`, 'POST'),
     onMutate: async (id) => {
       await queryClient.cancelQueries({ queryKey: addressKeys.lists() });
 

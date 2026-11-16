@@ -16,9 +16,7 @@ interface JSendError {
 }
 
 export type JSendResponse<T = unknown> =
-  | JSendSuccess<T>
-  | JSendFail<T>
-  | JSendError;
+  JSendSuccess<T> | JSendFail<T> | JSendError;
 
 export const jsend = {
   success<T>(data: T | null = null, status = 200) {

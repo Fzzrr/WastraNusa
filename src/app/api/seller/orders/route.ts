@@ -1,12 +1,12 @@
 import { OrderStatus, PaymentStatus } from '@/generated/prisma/enums';
 import { withApiSeller } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
+import { getPagination } from '@/lib/pagination';
 import { sellerOrderService } from '@/services/sellerOrder.service';
 
 export const GET = withApiSeller(async ({ req, userId }) => {
   const url = new URL(req.url);
-  const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
-  const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
+  const { page, limit } = getPagination(req);
 
   const orderStatusParam = url.searchParams.get('orderStatus');
   const paymentStatusParam = url.searchParams.get('paymentStatus');

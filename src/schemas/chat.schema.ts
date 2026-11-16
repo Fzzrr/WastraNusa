@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const chatMessageSchema = z.object({
+const chatMessageSchema = z.object({
   role: z.enum(['user', 'model'], {
     error: 'Role harus bernilai "user" atau "model"',
   }),

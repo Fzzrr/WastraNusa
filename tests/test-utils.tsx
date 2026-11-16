@@ -9,7 +9,7 @@ import type { ReactElement, ReactNode } from 'react';
  * A QueryClient configured for tests: no retries so failures surface
  * immediately instead of being retried with backoff.
  */
-export function createTestQueryClient() {
+function createTestQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: { retry: false },

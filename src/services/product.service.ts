@@ -1,5 +1,6 @@
-import { ProductStatus } from '@/generated/prisma/enums';
+import { Gender, ProductStatus } from '@/generated/prisma/enums';
 import { ApiError } from '@/lib/error';
+import { getPagination } from '@/lib/pagination';
 import { isForSale } from '@/lib/product-availability';
 import { mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
@@ -308,3 +309,60 @@ export const productService = {
     return mergeUniqueSorted(productTypes, articleOptions.clothingTypes);
   },
 };
+
+/**
+ * Turns `/api/products` query params into `getProducts` arguments. Shared by
+ * the route and the catalog page's server prefetch, so both read a query the
+ * same way.
+ */
+export function parseCatalogQuery(searchParams: URLSearchParams) {
+  const { page, limit } = getPagination(searchParams);
+
+  const minPriceParam = searchParams.get('minPrice');
+  const rawMinPrice =
+    minPriceParam === null ? Number.NaN : Number(minPriceParam);
+  const minPrice = Number.isFinite(rawMinPrice) ? rawMinPrice : undefined;
+
+  const maxPriceParam = searchParams.get('maxPrice');
+  const rawMaxPrice =
+    maxPriceParam === null ? Number.NaN : Number(maxPriceParam);
+  const maxPrice = Number.isFinite(rawMaxPrice) ? rawMaxPrice : undefined;
+
+  const island = searchParams.get('island') || undefined;
+  const size = searchParams.get('size') || undefined;
+  const clothingType = searchParams.get('clothingType') || undefined;
+  const topic = searchParams.get('topic') || undefined;
+  const q = searchParams.get('q') || undefined;
+
+  const rawGender = searchParams.get('gender');
+  const gender =
+    rawGender && rawGender in Gender ? (rawGender as Gender) : undefined;
+
+  const rawInStock = searchParams.get('inStock');
+  const inStock =
+    rawInStock === 'true' ? true : rawInStock === 'false' ? false : undefined;
+
+  const includeOutOfStock = searchParams.get('includeOutOfStock') === 'true';
+
+  const rawSortBy = searchParams.get('sortBy');
+  const sortBy =
+    rawSortBy &&
+    PRODUCT_SORT_OPTIONS.includes(rawSortBy as ProductCatalogSortBy)
+      ? (rawSortBy as ProductCatalogSortBy)
+      : undefined;
+
+  const filters: ProductCatalogFilters = {
+    minPrice,
+    maxPrice,
+    island,
+    size,
+    clothingType,
+    topic,
+    q,
+    gender,
+    inStock,
+    excludeOutOfStock: !includeOutOfStock,
+    sortBy,
+  };
+  return { page, limit, filters };
+}
