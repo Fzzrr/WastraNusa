@@ -27,9 +27,8 @@ import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 
-const surfaceCardClassName =
-  'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
-const sectionHeaderClassName = 'border-b border-[#efe8dd] px-6 py-5';
+const surfaceCardClassName = 'rounded-xl border-0 bg-card ring-1 ring-border';
+const sectionHeaderClassName = 'px-6 pt-6';
 
 export function SellerShopProfileContent() {
   const { data, isPending, error } = useMyShopProfile();
@@ -47,11 +46,11 @@ export function SellerShopProfileContent() {
         ) : error ? (
           <Card className={cn(surfaceCardClassName, 'py-10')}>
             <CardContent className="flex flex-col items-center gap-2 text-center">
-              <XCircle className="size-8 text-[#b45843]" />
-              <p className="text-sm font-medium text-[#b45843]">
+              <XCircle className="size-8 text-destructive" />
+              <p className="text-base font-medium text-destructive">
                 Gagal memuat profil toko.
               </p>
-              <p className="text-xs text-[#9a8f80]">
+              <p className="text-[13px] text-ink-soft">
                 {error instanceof Error
                   ? error.message
                   : 'Terjadi kesalahan tak terduga.'}
@@ -61,11 +60,11 @@ export function SellerShopProfileContent() {
         ) : !data ? (
           <Card className={cn(surfaceCardClassName, 'py-10')}>
             <CardContent className="flex flex-col items-center gap-2 text-center">
-              <Store className="size-8 text-[#8a6a3a]" />
-              <p className="text-sm font-medium text-[#2f4f3f]">
+              <Store className="size-8 text-ink-soft" />
+              <p className="text-base font-medium text-ink">
                 Profil toko belum tersedia.
               </p>
-              <p className="text-xs text-[#9a8f80]">
+              <p className="text-[13px] text-ink-soft">
                 Profil toko dibuat otomatis setelah pengajuan Anda disetujui.
               </p>
             </CardContent>
@@ -82,16 +81,16 @@ function ShopProfileSkeleton() {
   return (
     <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
       <CardHeader className={sectionHeaderClassName}>
-        <Skeleton className="h-6 w-40 bg-[#eee2d0]" />
+        <Skeleton className="h-6 w-40 bg-surface" />
       </CardHeader>
       <CardContent className="flex flex-col gap-5 px-6 py-6">
         {Array.from({ length: 5 }).map((_, index) => (
           <div key={index} className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
-            <Skeleton className="h-11 w-full rounded-xl bg-[#f2ede4]" />
+            <Skeleton className="h-4 w-28 bg-surface" />
+            <Skeleton className="h-11 w-full rounded-xl bg-surface" />
           </div>
         ))}
-        <Skeleton className="h-11 w-40 self-end rounded-xl bg-[#eee2d0]" />
+        <Skeleton className="h-11 w-40 self-end rounded-xl bg-surface" />
       </CardContent>
     </Card>
   );
@@ -146,11 +145,11 @@ function ShopProfileForm({ profile }: { profile: ShopProfile }) {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
         <CardHeader className={sectionHeaderClassName}>
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-[#2f4f3f]">
-            <Store className="size-5 text-[#8a6a3a]" />
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-ink">
+            <Store className="size-5 text-ink-soft" />
             Informasi Toko
           </CardTitle>
-          <p className="text-sm text-[#9a8f80]">
+          <p className="text-base text-ink-soft">
             Informasi ini tampil kepada pembeli di WastraNusa.
           </p>
         </CardHeader>
@@ -214,8 +213,8 @@ function ShopProfileForm({ profile }: { profile: ShopProfile }) {
 
       <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
         <CardHeader className={sectionHeaderClassName}>
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-[#2f4f3f]">
-            <MapPin className="size-5 text-[#8a6a3a]" />
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-ink">
+            <MapPin className="size-5 text-ink-soft" />
             Lokasi Toko
           </CardTitle>
         </CardHeader>
@@ -254,7 +253,7 @@ function ShopProfileForm({ profile }: { profile: ShopProfile }) {
           type="submit"
           disabled={isPending || !isDirty}
           className={cn(
-            'h-11 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-6 text-white hover:bg-[#2f4b3d] disabled:cursor-not-allowed disabled:opacity-60',
+            'h-11 cursor-pointer gap-2 rounded-full bg-brand px-6 text-on-field hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60',
           )}
         >
           {isPending ? (

@@ -82,7 +82,7 @@ type SendEmailOptions =
  */
 export async function sendEmail(
   options: SendEmailOptions,
-): Promise<SentMessageInfo> {
+): Promise<SentMessageInfo | undefined> {
   const { to, subject, type, params, text } = options;
   try {
     const html = loadTemplate(type, params);

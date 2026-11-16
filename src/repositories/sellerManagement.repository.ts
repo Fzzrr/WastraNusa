@@ -27,10 +27,15 @@ export const sellerManagementRepository = {
     });
   },
 
-  /** Approval times of every approved seller application. */
+  /** Approval times of every current seller's application. */
   findApprovedApplicationDates: async () => {
     return prisma.sellerApplication.findMany({
-      where: { status: 'approved', reviewedAt: { not: null } },
+      // Only users who are still sellers (not demoted, not admins).
+      where: {
+        status: 'approved',
+        reviewedAt: { not: null },
+        user: { role: ROLES.SELLER },
+      },
       select: { reviewedAt: true },
     });
   },
@@ -47,6 +52,16 @@ export const sellerManagementRepository = {
    * application is marked rejected (so they may re-apply and it stops counting
    * as verified), and their sessions are dropped so the cached role can't linger.
    */
+  /** Orders the seller still has to fulfil, or that a buyer may still pay. */
+  countActiveOrders: async (sellerId: string) => {
+    return prisma.order.count({
+      where: {
+        sellerId,
+        orderStatus: { in: ['pending', 'confirmed', 'processing', 'shipped'] },
+      },
+    });
+  },
+
   demoteSeller: async (userId: string, reviewerId: string, reason: string) => {
     await prisma.$transaction([
       prisma.user.update({
@@ -61,6 +76,11 @@ export const sellerManagementRepository = {
           reviewedById: reviewerId,
           reviewedAt: new Date(),
         },
+      }),
+      // A demoted seller can't fulfil orders, so stop selling their products.
+      prisma.product.updateMany({
+        where: { sellerId: userId, status: 'active' },
+        data: { status: 'inactive' },
       }),
       prisma.session.deleteMany({ where: { userId } }),
     ]);

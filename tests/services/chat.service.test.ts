@@ -1,5 +1,5 @@
 import { articleContextCache, chatReplyCache } from '@/lib/gemini/cache';
-import { llmService } from '@/lib/gemini/llm.service';
+import { gemini } from '@/lib/gemini/gemini.provider';
 import { articleRepository } from '@/repositories/article.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { CHAT_PROMPT_VERSION, chatService } from '@/services/chat.service';
@@ -133,7 +133,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'Motif pucuk rebung melambangkan kesuburan dan harapan hidup.',
         model: 'gemini-2.5-flash',
       });
@@ -163,7 +163,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'Jawaban dari model AI',
         model: 'gemini-2.5-flash',
       });
@@ -191,7 +191,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      vi.spyOn(llmService, 'chat').mockResolvedValue({
+      vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'Jawaban dari model AI',
         model: 'gemini-2.5-flash',
       });
@@ -237,7 +237,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'ok',
         model: 'gemini-2.5-flash',
       });
@@ -317,7 +317,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply,
         model: 'gemini-2.5-flash',
       });
@@ -471,7 +471,7 @@ describe('chatService', () => {
       mockProductRepo.findChatProducts.mockResolvedValue([
         MOCK_CATALOG_PRODUCT,
       ] as never);
-      const spy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const spy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply:
           'Motifnya melambangkan harapan. Ini pilihan yang sesuai. [produk:1]',
         model: 'test',
@@ -523,7 +523,7 @@ describe('chatService', () => {
         MOCK_PUBLISHED_ARTICLE as never,
       );
       mockProductRepo.findChatProducts.mockResolvedValue(products as never);
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply,
         model: 'gemini-2.5-flash',
       });
@@ -598,7 +598,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'Masih tersedia.',
         model: 'gemini-2.5-flash',
       });
@@ -639,7 +639,7 @@ describe('chatService', () => {
       mockArticleRepo.findChatArticle.mockResolvedValue(
         MOCK_PUBLISHED_ARTICLE as never,
       );
-      const chatSpy = vi.spyOn(llmService, 'chat').mockResolvedValue({
+      const chatSpy = vi.spyOn(gemini, 'chat').mockResolvedValue({
         reply: 'Masih tersedia.',
         model: 'gemini-2.5-flash',
       });

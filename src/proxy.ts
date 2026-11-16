@@ -1,3 +1,4 @@
+import { loginUrlFor } from '@/lib/auth/redirect';
 import { getSessionCookie } from 'better-auth/cookies';
 import { type NextRequest, NextResponse } from 'next/server';
 
@@ -10,7 +11,7 @@ export async function proxy(request: NextRequest) {
 
   const authRoutes = ['/login', '/register'];
   // TODO: add path on protected route for user's page when we have it
-  const protectedRoutes = ['/admin', '/seller', '/profile', '/cart'];
+  const protectedRoutes = ['/admin', '/seller', '/profile', '/cart', '/chat'];
 
   const isAuthRoute = authRoutes.some((route) => pathName.startsWith(route));
 
@@ -19,7 +20,9 @@ export async function proxy(request: NextRequest) {
   );
 
   if (!sessionCookie && isProtectedRoute) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(
+      new URL(loginUrlFor(pathName + request.nextUrl.search), request.url),
+    );
   }
 
   if (sessionCookie && isAuthRoute) {
@@ -67,5 +70,6 @@ export const config = {
     '/register',
     '/profile/:path*',
     '/cart/:path*',
+    '/chat/:path*',
   ],
 };

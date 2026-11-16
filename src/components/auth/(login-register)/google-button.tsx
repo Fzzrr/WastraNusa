@@ -4,17 +4,19 @@ import { authClient } from '@/lib/auth/auth-client';
 
 type GoogleButtonProps = {
   label?: string;
+  callbackURL?: string;
 };
 
 export function GoogleButton({
   label = 'Lanjutkan dengan Google',
+  callbackURL = '/',
 }: GoogleButtonProps) {
   const handleGoogleSignIn = async () => {
     await authClient.signIn.social({
       provider: 'google',
-      callbackURL: '/encyclopedia',
+      callbackURL,
       errorCallbackURL: '/error',
-      newUserCallbackURL: '/encyclopedia',
+      newUserCallbackURL: callbackURL,
       disableRedirect: false,
     });
   };
@@ -23,7 +25,7 @@ export function GoogleButton({
     <button
       type="button"
       onClick={handleGoogleSignIn}
-      className="flex w-full items-center justify-center gap-2.5 rounded-sm border border-[#c8bfb0] bg-transparent px-4 py-2.5 text-sm font-medium text-[#2d2318] transition hover:bg-[#ddd6c8]"
+      className="flex w-full items-center justify-center gap-2.5 h-12 rounded-full border border-border bg-transparent px-4 text-base font-medium text-ink transition hover:bg-surface"
     >
       {/* Google icon */}
       <svg

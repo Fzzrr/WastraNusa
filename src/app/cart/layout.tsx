@@ -8,9 +8,9 @@ export default function CartLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f4efe6] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_45%)]">
+    <div className="flex min-h-dvh flex-col bg-ground">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8 md:py-10 max-w-[1320px]">
+      <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-8 md:px-6 md:py-10 lg:px-8">
         {children}
       </main>
       <Footer />

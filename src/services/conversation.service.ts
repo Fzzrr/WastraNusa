@@ -1,7 +1,9 @@
+import { isSeller } from '@/lib/auth/roles';
 import eventBus, { SSE_EVENTS, getUserEvent } from '@/lib/chat/event-bus';
 import { ApiError } from '@/lib/error';
 import { conversationRepository } from '@/repositories/conversation.repository';
 import { messageRepository } from '@/repositories/message.repository';
+import { productRepository } from '@/repositories/product.repository';
 import {
   type ChatParticipant,
   type ConversationDetail,
@@ -14,6 +16,19 @@ type MessageRow = {
   conversationId: string;
   senderId: string;
   content: string;
+  product: {
+    id: string;
+    slug: string;
+    name: string;
+    imageURL: string | null;
+    price: { toString(): string };
+  } | null;
+  variant: {
+    id: string;
+    name: string;
+    imageURL: string | null;
+    price: { toString(): string } | null;
+  } | null;
   readAt: Date | null;
   createdAt: Date;
 };
@@ -40,6 +55,15 @@ const mapMessage = (message: MessageRow): ConversationMessage => ({
   conversationId: message.conversationId,
   senderId: message.senderId,
   content: message.content,
+  product: message.product
+    ? {
+        ...message.product,
+        imageURL: message.variant?.imageURL ?? message.product.imageURL,
+        price: Number(message.variant?.price ?? message.product.price),
+        variantId: message.variant?.id ?? null,
+        variantName: message.variant?.name ?? null,
+      }
+    : null,
   readAt: message.readAt ? message.readAt.toISOString() : null,
   createdAt: message.createdAt.toISOString(),
 });
@@ -73,9 +97,8 @@ export const conversationService = {
       );
     }
 
-    const otherExists =
-      await conversationRepository.participantExists(otherUserId);
-    if (!otherExists) {
+    const users = await conversationRepository.findRoles([userId, otherUserId]);
+    if (!users.some((user) => user.id === otherUserId)) {
       throw new ApiError('Pengguna tidak ditemukan', 404);
     }
 
@@ -83,6 +106,10 @@ export const conversationService = {
       userId,
       otherUserId,
     );
+    // Live chat is buyer ↔ seller; it isn't a way to message any user.
+    if (!existing && !users.some((user) => isSeller(user.role))) {
+      throw new ApiError('Percakapan hanya dapat dimulai dengan penjual', 403);
+    }
     const conversation =
       existing ?? (await conversationRepository.create(userId, otherUserId));
 
@@ -114,7 +141,9 @@ export const conversationService = {
     );
 
     return conversations.map((conversation) => {
-      const latest = conversation.messages[0] as MessageRow | undefined;
+      const latest = conversation.messages[0] as
+        | Pick<MessageRow, 'content' | 'createdAt' | 'senderId'>
+        | undefined;
       return {
         id: conversation.id,
         otherParticipant: pickOtherParticipant(conversation, userId),
@@ -193,6 +222,7 @@ export const conversationService = {
     userId: string,
     conversationId: string,
     content: string,
+    attachment: { productId?: string; variantId?: string } = {},
   ): Promise<ConversationMessage> => {
     const conversation = await conversationRepository.findByIdForUser(
       conversationId,
@@ -202,10 +232,37 @@ export const conversationService = {
       throw new ApiError('Percakapan tidak ditemukan', 404);
     }
 
+    const { productId, variantId } = attachment;
+    if (variantId && !productId) {
+      throw new ApiError('Varian harus disertai produk', 400);
+    }
+    const product = productId
+      ? await productRepository.findByIdOrSlug(productId)
+      : null;
+    if (productId) {
+      // Only the other participant's listed products may be attached, so a
+      // draft (inactive) or foreign product can't leak its details into chat.
+      if (
+        !product ||
+        product.status === 'inactive' ||
+        product.sellerId !== pickOtherParticipant(conversation, userId).id
+      ) {
+        throw new ApiError('Produk tidak ditemukan', 404);
+      }
+      if (
+        variantId &&
+        !product.variants.some((variant) => variant.id === variantId)
+      ) {
+        throw new ApiError('Varian produk tidak ditemukan', 404);
+      }
+    }
+
     const created = await messageRepository.create({
       conversationId,
       senderId: userId,
       content,
+      productId: product?.id,
+      variantId,
     });
 
     await conversationRepository.touchLastMessageAt(
@@ -231,40 +288,5 @@ export const conversationService = {
     }
 
     return message;
-  },
-
-  markRead: async (
-    userId: string,
-    conversationId: string,
-  ): Promise<{ readAt: string }> => {
-    const conversation = await conversationRepository.findByIdForUser(
-      conversationId,
-      userId,
-    );
-    if (!conversation) {
-      throw new ApiError('Percakapan tidak ditemukan', 404);
-    }
-
-    const markedCount = await messageRepository.markReadForOther(
-      conversationId,
-      userId,
-    );
-    const readAt = new Date();
-
-    if (markedCount > 0) {
-      eventBus.emit(
-        getUserEvent(
-          SSE_EVENTS.MESSAGE_STATUSES_UPDATED,
-          pickOtherParticipant(conversation, userId).id,
-        ),
-        {
-          conversationId,
-          readerId: userId,
-          readAt: readAt.toISOString(),
-        },
-      );
-    }
-
-    return { readAt: readAt.toISOString() };
   },
 };

@@ -4,11 +4,24 @@ export interface ChatParticipant {
   image: string | null;
 }
 
+/** Product a buyer attached to a live-chat message. */
+export interface ChatAttachedProduct {
+  id: string;
+  slug: string;
+  name: string;
+  imageURL: string | null;
+  /** Variant price when a variant is attached, otherwise the base price. */
+  price: number;
+  variantId: string | null;
+  variantName: string | null;
+}
+
 export interface ConversationMessage {
   id: string;
   conversationId: string;
   senderId: string;
   content: string;
+  product: ChatAttachedProduct | null;
   readAt: string | null;
   createdAt: string;
 }

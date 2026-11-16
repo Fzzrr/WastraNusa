@@ -1,19 +1,27 @@
 'use client';
 
+import { CatalogProductGridSkeleton } from '@/components/catalog/main/catalog-product-grid';
 import { ProfileEmptyState } from '@/components/profile/profile-section';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePublicShop } from '@/hooks/use-public-shop';
 import { cn } from '@/lib/utils';
-import { Store, XCircle } from 'lucide-react';
+import { Home, Store, XCircle } from 'lucide-react';
 
 import { ShopHeader } from './shop-header';
 import { ShopProductGrid } from './shop-product-grid';
 
-const surfaceCardClassName =
-  'rounded-2xl border-0 bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
+const surfaceCardClassName = 'rounded-xl border-0 bg-card ring-1 ring-border';
 
 const PageShell = ({ children }: { children: React.ReactNode }) => (
-  <main className="border-t border-[#dbd4c7]">
+  <main>
     <section className="mx-auto w-full max-w-[1320px] px-4 py-6 md:px-6 md:py-8 lg:px-8">
       {children}
     </section>
@@ -23,43 +31,24 @@ const PageShell = ({ children }: { children: React.ReactNode }) => (
 function ShopSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className={cn(surfaceCardClassName, 'overflow-hidden')}>
-        <Skeleton className="h-20 w-full rounded-none bg-[#e6dfd1] sm:h-24" />
-        <div className="px-5 pb-6 md:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <Skeleton className="-mt-12 size-24 rounded-2xl bg-[#eee2d0] sm:-mt-14 sm:size-28" />
-            <div className="flex-1 space-y-2 pt-1">
-              <Skeleton className="h-8 w-64 bg-[#eee2d0]" />
-              <Skeleton className="h-4 w-40 bg-[#f2ede4]" />
-            </div>
-          </div>
-          <Skeleton className="mt-4 h-4 w-full max-w-3xl bg-[#f2ede4]" />
-          <Skeleton className="mt-2 h-4 w-2/3 bg-[#f2ede4]" />
-          <div className="mt-5 flex flex-wrap gap-4 border-t border-[#efe8dd] pt-4">
-            <Skeleton className="h-4 w-32 bg-[#f2ede4]" />
-            <Skeleton className="h-4 w-28 bg-[#f2ede4]" />
-            <Skeleton className="h-4 w-36 bg-[#f2ede4]" />
-          </div>
-        </div>
+      <div className="h-72 animate-pulse bg-field md:h-80" />
+      <div
+        className={cn(
+          surfaceCardClassName,
+          'grid gap-3 p-3 sm:grid-cols-2 lg:grid-cols-4',
+        )}
+      >
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton
+            key={`shop-info-skeleton-${index}`}
+            className="h-16 rounded-xl bg-surface"
+          />
+        ))}
       </div>
-
       <div>
-        <Skeleton className="h-6 w-40 bg-[#eee2d0]" />
-        <div className="mt-4 grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`shop-skeleton-${index}`}
-              className="h-full overflow-hidden rounded-2xl border border-[#ddd4c6] bg-[#f9f5ed]"
-            >
-              <Skeleton className="h-56 w-full rounded-none bg-[#ece2d4]" />
-              <div className="space-y-3 p-3.5">
-                <Skeleton className="h-3 w-24 bg-[#e6dfd1]" />
-                <Skeleton className="h-5 w-11/12 bg-[#e6dfd1]" />
-                <Skeleton className="h-5 w-16 bg-[#e6dfd1]" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <Skeleton className="h-8 w-48 bg-surface" />
+        <Skeleton className="mt-2 h-5 w-64 bg-surface" />
+        <CatalogProductGridSkeleton count={6} />
       </div>
     </div>
   );
@@ -122,12 +111,34 @@ export function ShopMain({ sellerId }: { sellerId: string }) {
 
   return (
     <PageShell>
-      <div className="flex flex-col gap-6">
-        <ShopHeader shop={data.shop} />
-        <ShopProductGrid
-          products={data.products}
-          productCount={data.productCount}
-        />
+      <div className="flex flex-col gap-12">
+        <Breadcrumb>
+          <BreadcrumbList className="text-[15px] font-medium text-ink-soft">
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                href="/"
+                className="flex items-center gap-1.5 hover:text-ink"
+              >
+                <Home className="size-3.5" />
+                Beranda
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/catalog" className="hover:text-ink">
+                Katalog
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage className="text-ink">
+                {data.shop.shopName}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <ShopHeader shop={data.shop} products={data.products} />
+        <ShopProductGrid products={data.products} />
       </div>
     </PageShell>
   );

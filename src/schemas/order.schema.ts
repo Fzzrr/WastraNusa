@@ -10,15 +10,12 @@ const editableOrderStatusSchema = z.union([
 export const adminOrderUpdateSchema = z
   .object({
     orderStatus: editableOrderStatusSchema.optional(),
-    trackingNumber: z.string().nullish(),
-    customerNotes: z.string().nullish(),
+    trackingNumber: z.string().max(100).nullish(),
   })
   .strict()
   .refine(
     (value) =>
-      value.orderStatus !== undefined ||
-      value.trackingNumber !== undefined ||
-      value.customerNotes !== undefined,
+      value.orderStatus !== undefined || value.trackingNumber !== undefined,
     {
       message: 'Setidaknya satu field harus diubah',
       path: ['orderStatus'],

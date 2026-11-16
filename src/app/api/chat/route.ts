@@ -1,6 +1,9 @@
 import { withApiPublic } from '@/lib/api-handler';
 import { ApiError } from '@/lib/error';
-import { chatRateLimiter } from '@/lib/gemini/rate-limiter';
+import {
+  anonymousChatRateLimiter,
+  chatRateLimiter,
+} from '@/lib/gemini/rate-limiter';
 import { jsend } from '@/lib/jsend';
 import { logger } from '@/lib/logger';
 import { chatRequestSchema } from '@/schemas/chat.schema';
@@ -9,9 +12,11 @@ import type { ChatStreamEvent } from '@/types/chat';
 
 function getClientIdentifier(req: Request, userId?: string): string {
   if (userId) return `user_${userId}`;
+  // The client controls every X-Forwarded-For hop except the last one, which
+  // our reverse proxy appended; taking the first let anyone rotate a fake IP.
   const forwarded = req.headers.get('x-forwarded-for');
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(',').at(-1)!.trim();
   }
   return req.headers.get('x-real-ip') || '127.0.0.1';
 }
@@ -19,7 +24,12 @@ function getClientIdentifier(req: Request, userId?: string): string {
 export const POST = withApiPublic(async ({ req, userId }) => {
   // 1. Rate Limiting Check
   const clientId = getClientIdentifier(req, userId);
-  const rateLimit = chatRateLimiter.check(clientId);
+  let rateLimit = chatRateLimiter.check(clientId);
+  // Anonymous callers also share one budget, so spoofed IPs can't drain the
+  // Gemini quota.
+  if (rateLimit.success && !userId) {
+    rateLimit = anonymousChatRateLimiter.check('anonymous');
+  }
 
   if (!rateLimit.success) {
     return jsend.fail(

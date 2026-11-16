@@ -1,12 +1,13 @@
 import eventBus, { SSE_EVENTS, getUserEvent } from '@/lib/chat/event-bus';
 import { conversationRepository } from '@/repositories/conversation.repository';
 import { messageRepository } from '@/repositories/message.repository';
+import { productRepository } from '@/repositories/product.repository';
 import { conversationService } from '@/services/conversation.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/repositories/conversation.repository', () => ({
   conversationRepository: {
-    participantExists: vi.fn(),
+    findRoles: vi.fn(),
     findBetween: vi.fn(),
     create: vi.fn(),
     findByIdForUser: vi.fn(),
@@ -24,6 +25,10 @@ vi.mock('@/repositories/message.repository', () => ({
   },
 }));
 
+vi.mock('@/repositories/product.repository', () => ({
+  productRepository: { findByIdOrSlug: vi.fn() },
+}));
+
 vi.mock('@/lib/chat/event-bus', () => ({
   default: { emit: vi.fn() },
   SSE_EVENTS: {
@@ -36,6 +41,7 @@ vi.mock('@/lib/chat/event-bus', () => ({
 
 const mockConversationRepo = vi.mocked(conversationRepository);
 const mockMessageRepo = vi.mocked(messageRepository);
+const mockProductRepo = vi.mocked(productRepository);
 const mockEmit = vi.mocked(eventBus.emit);
 
 const USER_A = 'user-a';
@@ -67,7 +73,9 @@ describe('conversationService', { tags: ['backend'] }, () => {
     });
 
     it('404s when the other user does not exist', async () => {
-      mockConversationRepo.participantExists.mockResolvedValue(false);
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+      ]);
 
       await expect(
         conversationService.startConversation(USER_A, 'ghost'),
@@ -76,7 +84,10 @@ describe('conversationService', { tags: ['backend'] }, () => {
     });
 
     it('returns the existing conversation instead of creating a new one', async () => {
-      mockConversationRepo.participantExists.mockResolvedValue(true);
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+        { id: USER_B, role: 'seller' },
+      ]);
       mockConversationRepo.findBetween.mockResolvedValue(
         conversationRow as never,
       );
@@ -90,6 +101,37 @@ describe('conversationService', { tags: ['backend'] }, () => {
       expect(summary.id).toBe(CONVERSATION_ID);
       expect(summary.otherParticipant.id).toBe(USER_B);
       expect(summary.unreadCount).toBe(0);
+    });
+  });
+
+  describe('startConversation between two non-sellers', () => {
+    beforeEach(() => {
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+        { id: USER_B, role: 'admin' },
+      ]);
+    });
+
+    it('refuses to open a new conversation (403)', async () => {
+      mockConversationRepo.findBetween.mockResolvedValue(null as never);
+
+      await expect(
+        conversationService.startConversation(USER_A, USER_B),
+      ).rejects.toMatchObject({ status: 403 });
+      expect(mockConversationRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('still reopens one that already exists', async () => {
+      mockConversationRepo.findBetween.mockResolvedValue(
+        conversationRow as never,
+      );
+
+      const summary = await conversationService.startConversation(
+        USER_A,
+        USER_B,
+      );
+
+      expect(summary.id).toBe(CONVERSATION_ID);
     });
   });
 
@@ -150,6 +192,107 @@ describe('conversationService', { tags: ['backend'] }, () => {
         getUserEvent(SSE_EVENTS.CONVERSATION_UPDATED, USER_B),
         { conversationId: CONVERSATION_ID },
       );
+    });
+
+    describe('with an attached product', () => {
+      // USER_A (buyer) asks USER_B (seller) about USER_B's product.
+      const sellerProduct = {
+        id: 'prod-1',
+        sellerId: USER_B,
+        status: 'active',
+        variants: [{ id: 'var-1' }],
+      };
+
+      beforeEach(() => {
+        mockConversationRepo.findByIdForUser.mockResolvedValue(
+          conversationRow as never,
+        );
+        mockConversationRepo.touchLastMessageAt.mockResolvedValue({} as never);
+      });
+
+      it('stores product + variant and maps the variant price and name', async () => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(
+          sellerProduct as never,
+        );
+        mockMessageRepo.create.mockResolvedValue({
+          id: 'msg-2',
+          conversationId: CONVERSATION_ID,
+          senderId: USER_A,
+          content: 'Ready stock?',
+          product: {
+            id: 'prod-1',
+            slug: 'batik-parang',
+            name: 'Batik Parang',
+            imageURL: 'base.jpg',
+            price: { toString: () => '150000' },
+          },
+          variant: {
+            id: 'var-1',
+            name: 'Merah',
+            imageURL: null,
+            price: { toString: () => '175000' },
+          },
+          readAt: null,
+          createdAt: new Date('2026-01-02T00:00:00.000Z'),
+        } as never);
+
+        const message = await conversationService.sendMessage(
+          USER_A,
+          CONVERSATION_ID,
+          'Ready stock?',
+          { productId: 'batik-parang', variantId: 'var-1' },
+        );
+
+        expect(mockMessageRepo.create).toHaveBeenCalledWith(
+          expect.objectContaining({ productId: 'prod-1', variantId: 'var-1' }),
+        );
+        expect(message.product).toEqual({
+          id: 'prod-1',
+          slug: 'batik-parang',
+          name: 'Batik Parang',
+          imageURL: 'base.jpg',
+          price: 175000,
+          variantId: 'var-1',
+          variantName: 'Merah',
+        });
+      });
+
+      it.each([
+        ['does not exist', null],
+        ['is inactive (draft)', { ...sellerProduct, status: 'inactive' }],
+        ['belongs to another seller', { ...sellerProduct, sellerId: 'x' }],
+      ])('404s when the product %s', async (_, product) => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(product as never);
+
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            productId: 'prod-1',
+          }),
+        ).rejects.toMatchObject({ status: 404 });
+        expect(mockMessageRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('404s when the variant is not part of the product', async () => {
+        mockProductRepo.findByIdOrSlug.mockResolvedValue(
+          sellerProduct as never,
+        );
+
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            productId: 'prod-1',
+            variantId: 'var-other',
+          }),
+        ).rejects.toMatchObject({ status: 404 });
+        expect(mockMessageRepo.create).not.toHaveBeenCalled();
+      });
+
+      it('400s for a variant without a product', async () => {
+        await expect(
+          conversationService.sendMessage(USER_A, CONVERSATION_ID, 'hi', {
+            variantId: 'var-1',
+          }),
+        ).rejects.toMatchObject({ status: 400 });
+      });
     });
   });
 

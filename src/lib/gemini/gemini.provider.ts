@@ -2,11 +2,7 @@ import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { GoogleGenAI } from '@google/genai';
 
-import {
-  type LlmChatOptions,
-  type LlmChatResult,
-  type LlmProvider,
-} from './types';
+import { type LlmChatOptions, type LlmChatResult } from './types';
 
 const FALLBACK_MODELS = [
   'gemini-flash-latest',
@@ -17,8 +13,7 @@ const FALLBACK_MODELS = [
 
 const FIRST_RESPONSE_TIMEOUT_MS = 15_000;
 
-export class GeminiProvider implements LlmProvider {
-  public readonly name = 'gemini';
+export class GeminiProvider {
   private client: GoogleGenAI | null = null;
   private readonly defaultModel: string;
 
@@ -329,3 +324,5 @@ export class GeminiProvider implements LlmProvider {
     );
   }
 }
+
+export const gemini = new GeminiProvider();

@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { NavbarSearch } from '@/components/navbar-search';
+import Image from '@/components/ui/image';
 import {
   Sheet,
   SheetClose,
@@ -9,7 +10,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { useCart } from '@/hooks/use-cart';
 import { authClient } from '@/lib/auth/auth-client';
+import { cn } from '@/lib/utils';
 import {
   BookOpenText,
   Grid2X2,
@@ -19,11 +22,12 @@ import {
   Store,
   UserRound,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useState } from 'react';
 
+// `iconOnly` items are universal symbols (cart, account): on desktop they show
+// as the icon alone, with the label kept for screen readers and the tooltip.
 const menuItems = [
   {
     label: 'Admin',
@@ -31,18 +35,30 @@ const menuItems = [
     href: '/admin/dashboard',
     adminOnly: true,
   },
-  // Sellers go straight to their panel; admins land on "Buka Toko", which
-  // shows the panel button once their shop exists (or the form otherwise).
-  { label: 'Toko', icon: Store, href: '/seller/dashboard', sellerOnly: true },
-  { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
+  // Sellers go to their public shop page (which links to the seller panel).
+  { label: 'Toko', icon: Store, href: '/shop', sellerOnly: true },
   { label: 'Katalog', icon: Grid2X2, href: '/catalog' },
-  { label: 'Keranjang', icon: ShoppingCart, href: '/cart' },
-  { label: 'Profil', icon: UserRound, href: '/profile' },
+  { label: 'Ensiklopedia', icon: BookOpenText, href: '/encyclopedia' },
+  { label: 'Keranjang', icon: ShoppingCart, href: '/cart', iconOnly: true },
+  { label: 'Profil', icon: UserRound, href: '/profile', iconOnly: true },
 ];
 
 type HeaderProps = {
   homeHref?: string;
 };
+
+// Re-keyed on every change so the badge pops when an item is added.
+function CartBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      key={count}
+      className="absolute -top-2 -right-2.5 grid h-[18px] min-w-[18px] animate-in place-items-center rounded-full bg-brand px-1 text-[13px] leading-none font-semibold text-on-field tabular-nums zoom-in-50 duration-300 motion-reduce:animate-none"
+    >
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+}
 
 export function Header({ homeHref = '/' }: HeaderProps) {
   const { data: session } = authClient.useSession();
@@ -55,30 +71,32 @@ export function Header({ homeHref = '/' }: HeaderProps) {
     pathname.startsWith('/encyclopedia') ||
     pathname.startsWith('/search');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: cart } = useCart({ enabled: Boolean(session) });
+  const cartCount = session ? (cart?.items.length ?? 0) : 0;
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
 
   const visibleMenuItems = menuItems
     .filter((item) => !item.adminOnly || isAdmin)
-    .filter((item) => !item.sellerOnly || isSeller || isAdmin)
+    .filter((item) => !item.sellerOnly || isSeller)
     .map((item) =>
-      item.sellerOnly && !isSeller
-        ? { ...item, href: '/profile/seller-application' }
-        : item,
+      item.sellerOnly ? { ...item, href: `/shop/${session?.user?.id}` } : item,
     );
 
   return (
-    <header className="border-b-4 border-[#2F4F3F] bg-[#f9f7f2]">
+    <header className="bg-ground">
       <div className="mx-auto w-full max-w-[1320px] px-4 md:px-6 lg:px-8">
-        <div className="flex h-20 items-center gap-4">
+        <div className="flex h-[72px] items-center gap-4">
           <Link href={homeHref} className="flex shrink-0 items-center gap-3">
             <Image
               src="/logo.png"
               alt="WastraNusa"
-              width={60}
-              height={70}
+              width={44}
+              height={44}
               priority
               className="object-contain"
             />
-            <span className="text-2xl font-extrabold tracking-tight text-[#2f5f49]">
+            <span className="text-xl font-bold tracking-tight text-ink">
               WastraNusa
             </span>
           </Link>
@@ -91,50 +109,72 @@ export function Header({ homeHref = '/' }: HeaderProps) {
             </div>
           ) : null}
 
-          <nav className="ml-auto hidden items-center gap-5 md:flex lg:gap-6">
-            {visibleMenuItems.map(({ label, icon: Icon, href }) => {
-              const content = (
-                <>
-                  <div className="relative">
-                    <Icon className="h-4 w-4" />
-                  </div>
-                  <span className="text-xs font-medium">{label}</span>
-                </>
-              );
-
-              const classes =
-                'group relative flex flex-col items-center gap-1 text-[#2f4f3f] transition hover:text-[#224233]';
-
-              // Logika ini akan otomatis menangani navigasi ke /cart
-              if (href) {
-                return (
-                  <Link key={label} href={href} className={classes}>
-                    {content}
-                  </Link>
-                );
-              }
-
-              return (
-                <button key={label} className={classes} type="button">
-                  {content}
-                </button>
+          <nav className="ml-auto hidden items-center gap-1 md:flex">
+            {visibleMenuItems.map(({ label, icon: Icon, href, iconOnly }) => {
+              const active = isActive(href);
+              return iconOnly ? (
+                <Link
+                  key={label}
+                  href={href}
+                  title={label}
+                  aria-label={
+                    href === '/cart' && cartCount > 0
+                      ? `${label}, ${cartCount} produk`
+                      : label
+                  }
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'grid size-11 place-items-center rounded-full text-ink transition-colors hover:bg-surface active:scale-95',
+                    active && 'bg-surface',
+                  )}
+                >
+                  <span className="relative">
+                    <Icon className="size-5" strokeWidth={1.75} />
+                    {href === '/cart' ? <CartBadge count={cartCount} /> : null}
+                  </span>
+                </Link>
+              ) : (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'rounded-full px-4 py-2.5 text-[15px] text-ink-soft transition-colors hover:text-ink',
+                    active && 'font-semibold text-ink',
+                  )}
+                >
+                  {label}
+                </Link>
               );
             })}
           </nav>
 
+          <Link
+            href="/cart"
+            aria-label={
+              cartCount > 0 ? `Keranjang, ${cartCount} produk` : 'Keranjang'
+            }
+            className="ml-auto grid size-11 place-items-center rounded-full text-ink transition active:scale-95 active:bg-surface md:hidden"
+          >
+            <span className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              <CartBadge count={cartCount} />
+            </span>
+          </Link>
+
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <button
-                className="ml-auto grid h-10 w-10 place-items-center rounded-xl border border-[#d8cfbf] text-[#355846] md:hidden"
+                className="grid size-11 place-items-center rounded-full text-ink transition active:bg-surface md:hidden"
                 type="button"
                 aria-label="Buka menu"
               >
                 <Menu className="h-5 w-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72 bg-[#f9f7f2]">
-              <SheetHeader className="border-b border-[#e4dccd]">
-                <SheetTitle className="text-[#2f5f49]">Menu</SheetTitle>
+            <SheetContent side="right" className="w-72 bg-ground">
+              <SheetHeader>
+                <SheetTitle className="text-ink">Menu</SheetTitle>
               </SheetHeader>
               <div className="px-3">
                 <Suspense fallback={null}>
@@ -149,10 +189,14 @@ export function Header({ homeHref = '/' }: HeaderProps) {
                   <SheetClose key={label} asChild>
                     <Link
                       href={href}
-                      className="flex items-center gap-3 rounded-xl px-3 py-3 text-[#2f4f3f] transition hover:bg-[#2f4f3f]/[8%] active:scale-[0.98]"
+                      aria-current={isActive(href) ? 'page' : undefined}
+                      className={cn(
+                        'flex items-center gap-3 rounded-full px-4 py-3 text-ink transition hover:bg-surface active:scale-[0.98]',
+                        isActive(href) && 'bg-surface font-semibold',
+                      )}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-sm font-medium">{label}</span>
+                      <Icon className="size-5" strokeWidth={1.75} />
+                      <span className="text-base">{label}</span>
                     </Link>
                   </SheetClose>
                 ))}

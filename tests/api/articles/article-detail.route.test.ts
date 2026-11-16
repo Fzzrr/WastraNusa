@@ -42,6 +42,7 @@ describe('GET /api/articles/[id]', { tags: ['backend'] }, () => {
     expect(mockService.getArticleDetail).toHaveBeenCalledWith(
       'article-1',
       'user-1',
+      false,
     );
   });
 });

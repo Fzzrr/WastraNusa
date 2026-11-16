@@ -5,7 +5,10 @@ import { createMidtransTransaction, verifySignatureKey } from '@/lib/midtrans';
 import { SERVICE_FEE, findShippingOption } from '@/lib/shipping';
 import { addressRepository } from '@/repositories/address.repository';
 import { cartRepository } from '@/repositories/cart.repository';
-import { orderRepository } from '@/repositories/order.repository';
+import {
+  type OrderItemCreate,
+  orderRepository,
+} from '@/repositories/order.repository';
 import { paymentTransactionRepository } from '@/repositories/paymentTransaction.repository';
 import { productRepository } from '@/repositories/product.repository';
 import { productVariantRepository } from '@/repositories/productVariant.repository';
@@ -16,20 +19,20 @@ import type {
 import {
   getOrderPaymentExpiryDate,
   orderService,
+  reconcileExpiredOrders,
 } from '@/services/order.service';
 
-interface CheckoutResolvedItem {
-  cartItemIds: string[];
-  productId: string;
-  variantId: string | null;
-  quantity: number;
-  productName: string;
-  variantName: string | null;
-  unitPrice: number;
-  province: string;
-  clothingType: string;
-  imageURL: string | null;
-}
+const MAX_PENDING_ORDERS = 3;
+
+const HANDLED_TRANSACTION_STATUSES = [
+  'capture',
+  'settlement',
+  'pending',
+  'deny',
+  'cancel',
+  'expire',
+  'failure',
+];
 
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString(36).toUpperCase();
@@ -53,6 +56,8 @@ function mapTransactionStatus(
       return 'failed';
     case 'expire':
       return 'expired';
+    case 'failure':
+      return 'failed';
     default:
       return 'pending';
   }
@@ -71,26 +76,17 @@ function mapPaymentStatus(
     case 'deny':
     case 'cancel':
     case 'expire':
+    case 'failure':
       return 'failed';
     default:
       return 'unpaid';
   }
 }
 
-function aggregateCheckoutItems(input: CheckoutInput): Array<{
-  cartItemIds: string[];
-  productId: string;
-  variantId: string | null;
-  quantity: number;
-}> {
+function aggregateCheckoutItems(input: CheckoutInput) {
   const map = new Map<
     string,
-    {
-      cartItemIds: string[];
-      productId: string;
-      variantId: string | null;
-      quantity: number;
-    }
+    { productId: string; variantId: string | null; quantity: number }
   >();
 
   for (const item of input.items) {
@@ -100,14 +96,10 @@ function aggregateCheckoutItems(input: CheckoutInput): Array<{
 
     if (existing) {
       existing.quantity += item.quantity;
-      if (item.cartItemId && !existing.cartItemIds.includes(item.cartItemId)) {
-        existing.cartItemIds.push(item.cartItemId);
-      }
       continue;
     }
 
     map.set(key, {
-      cartItemIds: item.cartItemId ? [item.cartItemId] : [],
       productId: item.productId,
       variantId,
       quantity: item.quantity,
@@ -117,86 +109,25 @@ function aggregateCheckoutItems(input: CheckoutInput): Array<{
   return Array.from(map.values());
 }
 
-function parseJsonTag(customerNotes: string | null | undefined, tag: string) {
-  if (!customerNotes) return null;
-
-  const marker = `${tag}=`;
-  const start = customerNotes.indexOf(marker);
-  if (start < 0) return null;
-
-  const jsonStart = start + marker.length;
-  const jsonEnd = customerNotes.indexOf(' | ', jsonStart);
-  const jsonRaw =
-    jsonEnd >= 0
-      ? customerNotes.slice(jsonStart, jsonEnd)
-      : customerNotes.slice(jsonStart);
-
-  try {
-    return JSON.parse(jsonRaw);
-  } catch {
-    return null;
-  }
-}
-
-function extractPurchasedItemsFromOrder(order: {
-  productId: string;
-  variantId: string | null;
-  customerNotes: string | null;
-}) {
-  const checkoutItems = parseJsonTag(
-    order.customerNotes,
-    'checkout_items',
-  ) as Array<{ productId?: string; variantId?: string | null }> | null;
-
-  if (checkoutItems && checkoutItems.length > 0) {
-    return checkoutItems
-      .filter((item) => typeof item.productId === 'string' && item.productId)
-      .map((item) => ({
-        productId: item.productId as string,
-        variantId: item.variantId ?? null,
-      }));
-  }
-
-  return [{ productId: order.productId, variantId: order.variantId }];
-}
-
-function extractPurchasedCartItemIds(order: { customerNotes: string | null }) {
-  const explicitIds = parseJsonTag(
-    order.customerNotes,
-    'checkout_cart_item_ids',
-  ) as string[] | null;
-
-  if (Array.isArray(explicitIds) && explicitIds.length > 0) {
-    return explicitIds.filter((id) => typeof id === 'string' && id.length > 0);
-  }
-
-  const checkoutItems = parseJsonTag(
-    order.customerNotes,
-    'checkout_items',
-  ) as Array<{ cartItemIds?: string[] }> | null;
-
-  if (!checkoutItems || checkoutItems.length === 0) {
-    return [];
-  }
-
-  const uniqueIds = new Set<string>();
-  for (const item of checkoutItems) {
-    if (!Array.isArray(item.cartItemIds)) continue;
-    for (const id of item.cartItemIds) {
-      if (typeof id === 'string' && id.length > 0) {
-        uniqueIds.add(id);
-      }
-    }
-  }
-
-  return Array.from(uniqueIds);
-}
-
 export const paymentService = {
   checkout: async (input: CheckoutInput, userId: string) => {
     const shippingOption = findShippingOption(input.shippingOptionId);
     if (!shippingOption) {
       throw new ApiError('Metode pengiriman tidak valid', 400);
+    }
+
+    // Every unpaid order holds stock for the whole payment window, so cap how
+    // many one buyer can keep open.
+    await reconcileExpiredOrders({ userId });
+    const pendingOrders = await orderRepository.countOrdersByUserId(userId, {
+      orderStatus: 'pending',
+      paymentStatus: 'unpaid',
+    });
+    if (pendingOrders >= MAX_PENDING_ORDERS) {
+      throw new ApiError(
+        `Anda masih memiliki ${pendingOrders} pesanan yang belum dibayar. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.`,
+        429,
+      );
     }
 
     let shippingAddressId: string;
@@ -223,7 +154,7 @@ export const paymentService = {
     }
 
     const mergedItems = aggregateCheckoutItems(input);
-    const resolvedItems: CheckoutResolvedItem[] = [];
+    const resolvedItems: OrderItemCreate[] = [];
     // ponytail: one shop per checkout because Order holds a single sellerId;
     // a multi-shop cart needs an OrderItem table or one order per seller.
     let orderSellerId: string | null | undefined;
@@ -233,8 +164,15 @@ export const paymentService = {
       if (!product) {
         throw new ApiError(`Produk tidak ditemukan: ${item.productId}`, 404);
       }
-      if (product.status !== 'active') {
+      // Without a seller nobody could fulfil the order.
+      if (product.status !== 'active' || !product.sellerId) {
         throw new ApiError(`Produk tidak tersedia: ${product.name}`, 400);
+      }
+      if (product.sellerId === userId) {
+        throw new ApiError(
+          'Anda tidak dapat membeli produk dari toko sendiri',
+          400,
+        );
       }
 
       if (orderSellerId === undefined) {
@@ -265,16 +203,18 @@ export const paymentService = {
       }
 
       resolvedItems.push({
-        cartItemIds: item.cartItemIds,
         productId: product.id,
         variantId: variant.id,
         quantity: item.quantity,
         productName: product.name,
         variantName: variant.name,
-        unitPrice:
+        // Rounded so prices saved before the whole-rupiah rule still give
+        // Midtrans an integer gross_amount.
+        unitPrice: Math.round(
           variant.price !== null
             ? Number(variant.price)
             : Number(product.price),
+        ),
         province: product.province,
         clothingType: product.clothingType,
         imageURL: product.imageURL,
@@ -282,7 +222,7 @@ export const paymentService = {
     }
 
     const subtotal = resolvedItems.reduce(
-      (acc, item) => acc + item.unitPrice * item.quantity,
+      (acc, item) => acc + Number(item.unitPrice) * item.quantity,
       0,
     );
     const totalAmount = subtotal + shippingOption.price + SERVICE_FEE;
@@ -299,40 +239,8 @@ export const paymentService = {
 
     const orderId = crypto.randomUUID();
     const orderNumber = generateOrderNumber();
-    const paymentTransactionId = crypto.randomUUID();
-    const paymentExpiredAt = getOrderPaymentExpiryDate(new Date());
-
-    const itemSnapshot = resolvedItems.map((item) => ({
-      cartItemIds: item.cartItemIds,
-      productId: item.productId,
-      variantId: item.variantId,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      productName: item.productName,
-      province: item.province,
-      clothingType: item.clothingType,
-      imageURL: item.imageURL,
-    }));
-    const checkoutCartItemIds = Array.from(
-      new Set(itemSnapshot.flatMap((item) => item.cartItemIds)),
-    );
-
-    const customerNotes = [
-      input.customerNotes,
-      resolvedItems.length > 0
-        ? `checkout_items=${JSON.stringify(itemSnapshot)}`
-        : null,
-      checkoutCartItemIds.length > 0
-        ? `checkout_cart_item_ids=${JSON.stringify(checkoutCartItemIds)}`
-        : null,
-    ]
-      .filter(Boolean)
-      .join(' | ');
-
-    const reservations = resolvedItems.map((item) => ({
-      variantId: item.variantId!,
-      quantity: item.quantity,
-    }));
+    const paymentStartedAt = new Date();
+    const paymentExpiredAt = getOrderPaymentExpiryDate(paymentStartedAt);
 
     await orderRepository.createOrderAndReserveStock(
       {
@@ -358,14 +266,27 @@ export const paymentService = {
         shippingCost: shippingOption.price,
         serviceFee: SERVICE_FEE,
         totalAmount,
-        customerNotes: customerNotes || null,
+        customerNotes: input.customerNotes?.trim() || null,
       },
-      reservations,
+      resolvedItems,
+      {
+        id: crypto.randomUUID(),
+        externalId: orderId,
+        amount: totalAmount,
+        status: 'pending',
+        expiredAt: paymentExpiredAt,
+        createdAt: paymentStartedAt,
+      },
     );
 
     let midtransResponse;
     try {
-      midtransResponse = await createMidtransTransaction(orderId, totalAmount);
+      midtransResponse = await createMidtransTransaction(
+        orderId,
+        totalAmount,
+        paymentStartedAt,
+        paymentExpiredAt,
+      );
     } catch (error) {
       logger.error('Failed to create Midtrans transaction', {
         orderId,
@@ -382,16 +303,12 @@ export const paymentService = {
       throw new ApiError('Gagal membuat transaksi pembayaran', 502);
     }
 
-    await paymentTransactionRepository.createPaymentTransaction({
-      id: paymentTransactionId,
-      orderId,
-      externalId: orderId,
-      amount: totalAmount,
-      status: 'pending',
-      paymentUrl: midtransResponse.redirect_url,
-      expiredAt: paymentExpiredAt,
-      createdAt: new Date(),
-    });
+    // The buyer can still pay with the returned token if this fails.
+    await paymentTransactionRepository
+      .setPaymentUrl(orderId, midtransResponse.redirect_url)
+      .catch((error) => {
+        logger.error('Failed to save Midtrans payment URL', { orderId, error });
+      });
 
     logger.info('Checkout completed successfully', {
       orderId,
@@ -446,6 +363,13 @@ export const paymentService = {
       return;
     }
 
+    // `challenge` is under manual review at Midtrans; a later notification
+    // settles or denies it, so keep the order pending until then.
+    if (transaction_status === 'capture' && fraud_status === 'challenge') {
+      logger.warn('Transaction under fraud review', { order_id });
+      return;
+    }
+
     if (
       transaction_status === 'capture' &&
       fraud_status &&
@@ -462,12 +386,38 @@ export const paymentService = {
       return;
     }
 
+    // The money did arrive, so the transaction stays `success`; only the order
+    // changes.
+    if (['refund', 'chargeback'].includes(transaction_status)) {
+      await orderRepository.updateOrderPaymentStatus(order_id, {
+        paymentStatus: 'refunded',
+      });
+      logger.warn('Order refunded', { order_id, transaction_status });
+      return;
+    }
+
+    // e.g. partial_refund or authorize: no matching state yet, so change nothing.
+    if (!HANDLED_TRANSACTION_STATUSES.includes(transaction_status)) {
+      logger.warn('Ignored Midtrans notification', {
+        order_id,
+        transaction_status,
+      });
+      return;
+    }
+
     const paymentTxStatus = mapTransactionStatus(transaction_status);
+    // Notifications can arrive late; never move a successful payment backwards.
+    if (paymentTxStatus === 'pending' && transaction.status === 'success') {
+      return;
+    }
+
     const paymentStatus = mapPaymentStatus(transaction_status);
     const isPaid =
       transaction_status === 'settlement' || transaction_status === 'capture';
-    const isFailed = ['deny', 'cancel', 'expire'].includes(transaction_status);
-    const paidAt = isPaid ? new Date() : null;
+    const isFailed = ['deny', 'cancel', 'expire', 'failure'].includes(
+      transaction_status,
+    );
+    const paidAt = isPaid ? (transaction.paidAt ?? new Date()) : null;
 
     await paymentTransactionRepository.updatePaymentStatus(order_id, {
       status: paymentTxStatus,
@@ -476,22 +426,28 @@ export const paymentService = {
 
     if (isPaid) {
       if (order.orderStatus === 'cancelled') {
-        logger.warn(
-          'Payment received for an order that was already cancelled',
-          {
-            order_id,
-            transaction_status,
-          },
-        );
+        // Money arrived after the order was cancelled: keep the order
+        // cancelled but record the payment so an admin can refund it.
+        if (order.paymentStatus !== 'paid') {
+          await orderRepository.updateOrderPaymentStatus(order_id, {
+            paymentStatus: 'paid',
+            paymentMethod: payment_type,
+            paidAt,
+          });
+        }
+        logger.error('Payment received for a cancelled order, needs refund', {
+          order_id,
+          transaction_status,
+        });
         return;
       }
 
-      await orderRepository.updateOrderPaymentStatus(order_id, {
-        paymentStatus,
+      // capture is followed by settlement, and Midtrans retries notifications.
+      const { count } = await orderRepository.confirmPaidOrder(order_id, {
         paymentMethod: payment_type,
         paidAt,
-        orderStatus: 'confirmed' as const,
       });
+      if (count === 0) return;
     } else if (isFailed) {
       await orderService.cancelOrderBySystemId(
         order_id,
@@ -506,32 +462,16 @@ export const paymentService = {
     }
 
     if (isPaid) {
-      const order = await orderRepository.findOrderById(order_id);
-
-      if (!order) {
-        logger.warn('Paid order not found for cart cleanup', { order_id });
-      } else {
-        const cartItemIds = extractPurchasedCartItemIds(order);
-        const purchasedItems = extractPurchasedItemsFromOrder(order);
-
-        const byIdResult = await cartRepository.removePurchasedItemsById(
+      const { count } =
+        await cartRepository.removePurchasedItemsByProductVariant(
           order.userId,
-          cartItemIds,
+          order.items,
         );
-        const byProductVariantResult =
-          await cartRepository.removePurchasedItemsByProductVariant(
-            order.userId,
-            purchasedItems,
-          );
-
-        logger.info('Removed purchased items from cart', {
-          order_id,
-          userId: order.userId,
-          removedByIdCount: byIdResult.count,
-          removedByProductVariantCount: byProductVariantResult.count,
-          purchasedItemCount: purchasedItems.length,
-        });
-      }
+      logger.info('Removed purchased items from cart', {
+        order_id,
+        userId: order.userId,
+        removedCount: count,
+      });
     }
 
     logger.info('Midtrans notification processed', {

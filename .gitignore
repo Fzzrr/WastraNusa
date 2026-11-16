@@ -17,6 +17,7 @@
 /test-results
 /playwright-report
 /playwright/.cache
+/.playwright-mcp
 
 # next.js
 /.next/
@@ -53,3 +54,5 @@ src/generated/
 # postman
 .postman/
 postman/
+# design-taste working files (screenshots, direction sheet)
+.taste-skill/

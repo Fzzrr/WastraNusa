@@ -1,16 +1,31 @@
 import { z } from 'zod';
 
+import { PHONE_REGEX } from './shop-profile.schema';
+
 /**
- * Payload a user submits to apply for a seller account.
+ * Payload a user submits to apply for a seller account. Approval copies these
+ * fields into `ShopProfile`, so the bounds match its VarChar columns.
  */
 export const createSellerApplicationSchema = z.object({
-  shopName: z.string().min(1, 'Nama toko wajib diisi'),
-  description: z.string().nullish(),
-  phoneNumber: z.string().nullish(),
+  shopName: z
+    .string()
+    .trim()
+    .min(1, 'Nama toko wajib diisi')
+    .max(60, 'Nama toko maksimal 60 karakter'),
+  description: z
+    .string()
+    .trim()
+    .max(500, 'Deskripsi toko maksimal 500 karakter')
+    .nullish(),
+  phoneNumber: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value === '' || PHONE_REGEX.test(value),
+      'Format nomor telepon tidak valid',
+    )
+    .nullish(),
 });
-
-export const updateSellerApplicationSchema =
-  createSellerApplicationSchema.partial();
 
 /**
  * Admin decision on a pending application. A rejection must carry a reason.
@@ -33,9 +48,6 @@ export const reviewSellerApplicationSchema = z
 
 export type CreateSellerApplicationInput = z.infer<
   typeof createSellerApplicationSchema
->;
-export type UpdateSellerApplicationInput = z.infer<
-  typeof updateSellerApplicationSchema
 >;
 export type ReviewSellerApplicationInput = z.infer<
   typeof reviewSellerApplicationSchema

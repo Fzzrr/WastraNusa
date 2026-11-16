@@ -70,19 +70,34 @@ describe('paymentService', () => {
           serviceFee: 5000,
           totalAmount: 263000,
         }),
-        [{ variantId: 'var-1', quantity: 2 }],
+        [expect.objectContaining({ variantId: 'var-1', quantity: 2 })],
+        expect.any(Object),
       );
+      const [orderId, , startTime, expiredAt] = vi.mocked(
+        createMidtransTransaction,
+      ).mock.calls[0];
       expect(createMidtransTransaction).toHaveBeenCalledWith(
         expect.any(String),
         263000,
+        expect.any(Date),
+        expect.any(Date),
       );
-      expect(
-        paymentTransactionRepository.createPaymentTransaction,
-      ).toHaveBeenCalledWith(
+      // Midtrans gets the same window the app stores and enforces, and the
+      // pending payment transaction is created together with the order.
+      const payment = vi.mocked(orderRepository.createOrderAndReserveStock).mock
+        .calls[0][2];
+      expect(payment).toEqual(
         expect.objectContaining({
+          externalId: orderId,
           status: 'pending',
-          expiredAt: expect.any(Date),
+          amount: 263000,
+          expiredAt,
         }),
+      );
+      expect(expiredAt.getTime() - startTime.getTime()).toBe(30 * 60 * 1000);
+      expect(paymentTransactionRepository.setPaymentUrl).toHaveBeenCalledWith(
+        orderId,
+        'https://checkout.midtrans.com/snap-token',
       );
     });
 
@@ -93,6 +108,27 @@ describe('paymentService', () => {
           mockUserId,
         ),
       ).rejects.toThrow(new ApiError('Metode pengiriman tidak valid', 400));
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
+    });
+
+    it('should not let a seller buy from their own shop', async () => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+        userId: mockUserId,
+      } as never);
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        sellerId: mockUserId,
+      } as never);
+
+      await expect(
+        paymentService.checkout(mockInput, mockUserId),
+      ).rejects.toThrow(
+        new ApiError('Anda tidak dapat membeli produk dari toko sendiri', 400),
+      );
       expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
     });
 
@@ -166,6 +202,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -191,6 +228,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -220,6 +258,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         name: 'Product 1',
         price: 100000,
         variants: [{ stock: 10 }],
@@ -247,6 +286,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         price: 100000,
         name: 'Product 1',
         variants: [{ stock: 10 }],
@@ -270,6 +310,7 @@ describe('paymentService', () => {
       vi.mocked(productRepository.findProductById).mockResolvedValue({
         id: 'prod-1',
         status: 'active',
+        sellerId: 'seller-1',
         price: 100000,
         name: 'Product 1',
         variants: [{ stock: 10 }],
@@ -306,7 +347,67 @@ describe('paymentService', () => {
           shippingAddressId: 'addr-default',
         }),
         expect.any(Array),
+        expect.any(Object),
       );
+    });
+  });
+
+  describe('checkout guards', () => {
+    const input = {
+      items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 1 }],
+      shippingAddressId: 'addr-1',
+      shippingOptionId: 'jne-reg',
+    };
+
+    beforeEach(() => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+      } as never);
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        sellerId: 'seller-1',
+      } as never);
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-1',
+        productId: 'prod-1',
+        name: 'M',
+        price: 15000.5,
+        stock: 5,
+      } as never);
+      vi.mocked(createMidtransTransaction).mockResolvedValue({
+        token: 'snap-token',
+        redirect_url: 'https://checkout.midtrans.com/snap-token',
+      });
+      vi.mocked(orderRepository.countOrdersByUserId).mockResolvedValue(0);
+    });
+
+    it('sends Midtrans a whole-rupiah amount for a legacy decimal price', async () => {
+      await paymentService.checkout(input, 'user-1');
+
+      const gross = vi.mocked(createMidtransTransaction).mock.calls[0][1];
+      expect(Number.isInteger(gross)).toBe(true);
+    });
+
+    it('refuses a new order while the buyer has 3 unpaid ones', async () => {
+      vi.mocked(orderRepository.countOrdersByUserId).mockResolvedValue(3);
+
+      await expect(
+        paymentService.checkout(input, 'user-1'),
+      ).rejects.toMatchObject({ status: 429 });
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
+    });
+
+    it('still returns the Snap token when saving the payment URL fails', async () => {
+      vi.mocked(
+        paymentTransactionRepository.setPaymentUrl,
+      ).mockRejectedValueOnce(new Error('db down'));
+
+      const result = await paymentService.checkout(input, 'user-1');
+
+      expect(result.token).toBe('snap-token');
     });
   });
 
@@ -329,14 +430,11 @@ describe('paymentService', () => {
       vi.mocked(orderRepository.findOrderById).mockResolvedValue({
         id: 'order-123',
         userId: 'user-123',
-        productId: 'prod-1',
-        variantId: 'var-1',
-        customerNotes:
-          'checkout_cart_item_ids=[\"cart-item-1\"] | checkout_items=[{\"productId\":\"prod-1\",\"variantId\":\"var-1\",\"quantity\":2}]',
+        items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 2 }],
       } as never);
-      vi.mocked(cartRepository.removePurchasedItemsById).mockResolvedValue({
+      vi.mocked(orderRepository.confirmPaidOrder).mockResolvedValue({
         count: 1,
-      } as never);
+      });
       vi.mocked(
         cartRepository.removePurchasedItemsByProductVariant,
       ).mockResolvedValue({ count: 0 } as never);
@@ -349,18 +447,14 @@ describe('paymentService', () => {
         'order-123',
         expect.objectContaining({ status: 'success' }),
       );
-      expect(orderRepository.updateOrderPaymentStatus).toHaveBeenCalledWith(
+      expect(orderRepository.confirmPaidOrder).toHaveBeenCalledWith(
         'order-123',
-        expect.objectContaining({ paymentStatus: 'paid' }),
-      );
-      expect(cartRepository.removePurchasedItemsById).toHaveBeenCalledWith(
-        'user-123',
-        ['cart-item-1'],
+        expect.objectContaining({ paymentMethod: mockPayload.payment_type }),
       );
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).toHaveBeenCalledWith('user-123', [
-        { productId: 'prod-1', variantId: 'var-1' },
+        expect.objectContaining({ productId: 'prod-1', variantId: 'var-1' }),
       ]);
     });
 
@@ -372,12 +466,34 @@ describe('paymentService', () => {
       ).rejects.toThrow(new ApiError('Signature key tidak valid', 403));
     });
 
+    it('keeps the order pending while Midtrans reviews a challenged payment', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'capture',
+        fraud_status: 'challenge',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).not.toHaveBeenCalled();
+      expect(orderService.cancelOrderBySystemId).not.toHaveBeenCalled();
+      expect(orderRepository.confirmPaidOrder).not.toHaveBeenCalled();
+    });
+
     it('should handle fraud detection', async () => {
       vi.mocked(verifySignatureKey).mockResolvedValue(true);
       const fraudPayload = {
         ...mockPayload,
         transaction_status: 'capture',
-        fraud_status: 'challenge',
+        fraud_status: 'deny',
       };
 
       vi.mocked(
@@ -399,7 +515,6 @@ describe('paymentService', () => {
         'order-123',
         'failed',
       );
-      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();
@@ -462,12 +577,17 @@ describe('paymentService', () => {
       vi.mocked(orderRepository.findOrderById).mockResolvedValue({
         id: 'order-123',
         orderStatus: 'cancelled',
+        paymentStatus: 'failed',
       } as never);
 
       await paymentService.handleNotification(mockPayload);
 
-      expect(orderRepository.updateOrderPaymentStatus).not.toHaveBeenCalled();
-      expect(cartRepository.removePurchasedItemsById).not.toHaveBeenCalled();
+      expect(orderRepository.confirmPaidOrder).not.toHaveBeenCalled();
+      // Recorded as paid (still cancelled) so an admin can refund it.
+      expect(orderRepository.updateOrderPaymentStatus).toHaveBeenCalledWith(
+        'order-123',
+        expect.objectContaining({ paymentStatus: 'paid' }),
+      );
       expect(
         cartRepository.removePurchasedItemsByProductVariant,
       ).not.toHaveBeenCalled();

@@ -94,7 +94,27 @@ describe('articleService', { tags: ['backend'] }, () => {
         limit: 50,
         island: undefined,
         topic: undefined,
+        status: 'published',
       });
+    });
+
+    it('should search in the database with the trimmed query', async () => {
+      mockRepo.findAll.mockResolvedValue([]);
+      mockRepo.countAll.mockResolvedValue(0);
+      mockRepo.countByIsland.mockResolvedValue([]);
+      mockRepo.countByTopic.mockResolvedValue([]);
+      mockRepo.countDistinctMotifLabel.mockResolvedValue(0);
+      mockRepo.countDistinctProvince.mockResolvedValue(0);
+
+      await articleService.getArticles(1, 10, { q: '  batik ' });
+
+      expect(mockRepo.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({ q: 'batik' }),
+      );
+      // totalItems must count the same filtered set the page came from
+      expect(mockRepo.countAll).toHaveBeenCalledWith(
+        expect.objectContaining({ q: 'batik' }),
+      );
     });
 
     it('should default to page 1 and limit 10', async () => {
@@ -115,6 +135,7 @@ describe('articleService', { tags: ['backend'] }, () => {
         limit: 10,
         island: undefined,
         topic: undefined,
+        status: 'published',
       });
     });
 
@@ -150,10 +171,12 @@ describe('articleService', { tags: ['backend'] }, () => {
         limit: 5,
         island: 'Jawa',
         topic: undefined,
+        status: 'published',
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         island: 'Jawa',
         topic: undefined,
+        status: 'published',
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         status: 'published',
@@ -207,10 +230,12 @@ describe('articleService', { tags: ['backend'] }, () => {
         limit: 5,
         island: undefined,
         topic: 'Teknik Pembuatan',
+        status: 'published',
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         island: undefined,
         topic: 'Teknik Pembuatan',
+        status: 'published',
       });
       expect(mockRepo.countAll).toHaveBeenCalledWith({
         status: 'published',
@@ -307,6 +332,18 @@ describe('articleService', { tags: ['backend'] }, () => {
   });
 
   describe('getArticleDetail', () => {
+    it('should hide a draft from the public', async () => {
+      mockRepo.findByIdOrSlug.mockResolvedValue({
+        ...MOCK_ARTICLE,
+        status: 'draft',
+      } as never);
+
+      await expect(articleService.getArticleDetail('slug')).rejects.toThrow(
+        'Artikel tidak ditemukan',
+      );
+      expect(mockRepo.incrementViewCount).not.toHaveBeenCalled();
+    });
+
     it('should return article and increment view count', async () => {
       mockRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE);
       mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);

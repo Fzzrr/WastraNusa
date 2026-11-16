@@ -27,6 +27,26 @@ describe('seller-application schemas', { tags: ['backend'] }, () => {
       expect(result.success).toBe(false);
     });
 
+    it('rejects values longer than the ShopProfile columns', () => {
+      for (const payload of [
+        { shopName: 'x'.repeat(61) },
+        { shopName: 'Toko', description: 'y'.repeat(501) },
+        { shopName: 'Toko', phoneNumber: 'not-a-phone' },
+      ]) {
+        expect(createSellerApplicationSchema.safeParse(payload).success).toBe(
+          false,
+        );
+      }
+    });
+
+    it('accepts an empty phone number from the form', () => {
+      const result = createSellerApplicationSchema.safeParse({
+        shopName: 'Toko',
+        phoneNumber: '',
+      });
+      expect(result.success).toBe(true);
+    });
+
     it('rejects a missing shopName', () => {
       const result = createSellerApplicationSchema.safeParse({
         description: 'no name',

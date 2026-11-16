@@ -8,6 +8,7 @@ vi.mock('@/repositories/sellerManagement.repository', () => ({
     findApprovedApplicationDates: vi.fn(),
     findUsers: vi.fn(),
     findUserRole: vi.fn(),
+    countActiveOrders: vi.fn(),
     demoteSeller: vi.fn(),
   },
 }));
@@ -58,6 +59,7 @@ describe('sellerManagementService.getStats', { tags: ['backend'] }, () => {
 describe('sellerManagementService.demoteSeller', { tags: ['backend'] }, () => {
   it('demotes a seller', async () => {
     mockRepo.findUserRole.mockResolvedValue({ id: 'u1', role: 'seller' });
+    mockRepo.countActiveOrders.mockResolvedValue(0);
 
     await sellerManagementService.demoteSeller('u1', 'admin-1', 'Melanggar');
 
@@ -80,6 +82,17 @@ describe('sellerManagementService.demoteSeller', { tags: ['backend'] }, () => {
       sellerManagementService.demoteSeller('u3', 'admin-1', 'x'),
     ).rejects.toThrow('User tidak ditemukan');
 
+    expect(mockRepo.demoteSeller).not.toHaveBeenCalled();
+  });
+
+  it('refuses to demote a seller with orders still to fulfil', async () => {
+    mockRepo.demoteSeller.mockClear();
+    mockRepo.findUserRole.mockResolvedValue({ id: 'u1', role: 'seller' });
+    mockRepo.countActiveOrders.mockResolvedValue(2);
+
+    await expect(
+      sellerManagementService.demoteSeller('u1', 'admin-1', 'x'),
+    ).rejects.toMatchObject({ status: 409 });
     expect(mockRepo.demoteSeller).not.toHaveBeenCalled();
   });
 });

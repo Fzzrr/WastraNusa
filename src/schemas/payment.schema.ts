@@ -4,20 +4,25 @@ const checkoutItemSchema = z.object({
   cartItemId: z.string().min(1).optional(),
   productId: z.string().min(1, 'ID produk wajib diisi'),
   variantId: z.string().nullish(),
-  quantity: z.number().int().min(1, 'Jumlah minimal 1'),
+  quantity: z
+    .number()
+    .int()
+    .min(1, 'Jumlah minimal 1')
+    .max(999, 'Jumlah maksimal 999'),
   frontendPrice: z.number().min(0).optional(),
 });
 
 export const checkoutSchema = z.object({
   items: z
     .array(checkoutItemSchema)
-    .min(1, 'Minimal satu produk wajib dipilih'),
+    .min(1, 'Minimal satu produk wajib dipilih')
+    .max(50, 'Maksimal 50 produk per checkout'),
   shippingAddressId: z
     .string()
     .min(1, 'Alamat pengiriman wajib dipilih')
     .nullish(),
   shippingOptionId: z.string().min(1, 'Metode pengiriman wajib dipilih'),
-  customerNotes: z.string().nullish(),
+  customerNotes: z.string().max(500, 'Catatan maksimal 500 karakter').nullish(),
 });
 
 /**

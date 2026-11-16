@@ -56,11 +56,12 @@ export interface ProductCatalogFilters {
   size?: string;
   clothingType?: string;
   gender?: Gender;
-  status?: ProductStatus;
   inStock?: boolean;
   excludeOutOfStock?: boolean;
   sortBy?: ProductCatalogSortBy;
   topic?: string;
+  /** Free-text search, matched in the database. */
+  q?: string;
 }
 
 export interface ProductFilterOption {
@@ -79,7 +80,6 @@ export interface ProductInventoryListMeta {
   islands?: ProductFilterOption[];
   sizes?: ProductFilterOption[];
   genders?: ProductFilterOption[];
-  statuses?: ProductFilterOption[];
   priceRange?: {
     min: number;
     max: number;

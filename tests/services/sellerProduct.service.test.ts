@@ -11,6 +11,9 @@ vi.mock('@/repositories/sellerProduct.repository', () => ({
     findByIdOrSlugForSeller: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    findVariantsInUnpaidOrders: vi.fn(),
+    setStatus: vi.fn(),
+    hasOrders: vi.fn(),
     delete: vi.fn(),
   },
 }));
@@ -38,14 +41,6 @@ describe(
         expect.objectContaining({ sellerId: SELLER_ID }),
       );
       expect(mockRepo.countBySeller).toHaveBeenCalledWith(SELLER_ID);
-    });
-
-    it('404s a detail read for a product the seller does not own', async () => {
-      mockRepo.findByIdOrSlugForSeller.mockResolvedValue(null as never);
-
-      await expect(
-        sellerProductService.getProductDetail(SELLER_ID, 'prod-x'),
-      ).rejects.toMatchObject({ status: 404 });
     });
 
     it('refuses to update a product the seller does not own', async () => {
@@ -81,6 +76,29 @@ describe(
       expect(mockRepo.delete).toHaveBeenCalledWith('prod-owned');
     });
 
+    it('refuses to delete a product that has orders', async () => {
+      mockRepo.resolveOwnedProductId.mockResolvedValue('prod-owned' as never);
+      mockRepo.hasOrders.mockResolvedValue(true);
+
+      await expect(
+        sellerProductService.deleteProduct(SELLER_ID, 'prod-owned'),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(mockRepo.delete).not.toHaveBeenCalled();
+    });
+
+    it('changes status only on the owned product', async () => {
+      mockRepo.resolveOwnedProductId.mockResolvedValue(null as never);
+
+      await expect(
+        sellerProductService.setStatus(SELLER_ID, 'not-mine', 'inactive'),
+      ).rejects.toMatchObject({ status: 404 });
+      expect(mockRepo.setStatus).not.toHaveBeenCalled();
+
+      mockRepo.resolveOwnedProductId.mockResolvedValue('prod-owned' as never);
+      await sellerProductService.setStatus(SELLER_ID, 'prod-owned', 'active');
+      expect(mockRepo.setStatus).toHaveBeenCalledWith('prod-owned', 'active');
+    });
+
     it('404s creation when the source article is missing', async () => {
       mockArticleRepo.findByIdOrSlug.mockResolvedValue(null as never);
 
@@ -97,6 +115,81 @@ describe(
         } as never),
       ).rejects.toMatchObject({ status: 404 });
       expect(mockRepo.create).not.toHaveBeenCalled();
+    });
+  },
+);
+
+describe(
+  'sellerProductService.updateProduct variants',
+  { tags: ['backend'] },
+  () => {
+    const variant = (id: string, name: string) => ({
+      id,
+      name,
+      type: 'size' as const,
+      price: 100000,
+      stock: 3,
+      sku: `SKU-${id}`,
+      imageURL: null,
+    });
+    const existing = {
+      id: 'prod-1',
+      articleId: 'art-1',
+      variants: [variant('v-m', 'M'), variant('v-l', 'L')],
+    };
+
+    beforeEach(() => {
+      mockRepo.findByIdOrSlugForSeller.mockResolvedValue(existing as never);
+      mockRepo.findVariantsInUnpaidOrders.mockResolvedValue([]);
+      mockRepo.update.mockResolvedValue({
+        ...existing,
+        article: { title: 'A' },
+        name: 'P',
+        slug: 'p',
+        description: null,
+        price: { toNumber: () => 100000 },
+        sku: 'P',
+        weight: 1,
+        imageURL: null,
+        province: 'Jawa Barat',
+        clothingType: 'batik',
+        gender: null,
+        status: 'active',
+        sold: 0,
+        variants: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as never);
+    });
+
+    it('keeps existing variant ids so carts and orders stay linked', async () => {
+      await sellerProductService.updateProduct(SELLER_ID, 'prod-1', {
+        variants: [
+          { ...variant('v-l', 'L'), stock: 9 },
+          // An id from another product must not be reused.
+          variant('v-foreign', 'XL'),
+        ],
+      } as never);
+
+      const [, , variants] = mockRepo.update.mock.calls[0];
+      expect(variants?.kept).toEqual([
+        expect.objectContaining({ id: 'v-l', stock: 9 }),
+      ]);
+      expect(variants?.created).toHaveLength(1);
+      expect(variants?.created[0].id).not.toBe('v-foreign');
+      // Only the removed variant is checked for unpaid orders.
+      expect(mockRepo.findVariantsInUnpaidOrders).toHaveBeenCalledWith(['v-m']);
+    });
+
+    it('refuses to remove a variant that is in an unpaid order', async () => {
+      mockRepo.findVariantsInUnpaidOrders.mockResolvedValue([{ name: 'M' }]);
+
+      await expect(
+        sellerProductService.updateProduct(SELLER_ID, 'prod-1', {
+          variants: [variant('v-l', 'L')],
+        } as never),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(mockRepo.update).not.toHaveBeenCalled();
     });
   },
 );

@@ -48,7 +48,7 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     expect(mockedSignIn).not.toHaveBeenCalled();
   });
 
-  it('signs in and redirects a regular user to /encyclopedia', async () => {
+  it('signs in and redirects a regular user to the landing page', async () => {
     mockedSignIn.mockImplementation(async (_data, opts) => {
       await opts?.onSuccess?.({} as never);
       return { error: null } as never;
@@ -67,12 +67,41 @@ describe('LoginForm', { tags: ['frontend'] }, () => {
     });
     fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
 
-    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/encyclopedia'));
+    await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/'));
     expect(mockedSignIn).toHaveBeenCalledWith(
       { email: 'user@test.com', password: 'User@12345' },
       expect.any(Object),
     );
   });
+
+  it.each([
+    ['seller', undefined, '/'],
+    ['admin', undefined, '/'],
+    ['user', '/catalog/kebaya', '/catalog/kebaya'],
+  ])(
+    'sends a %s with redirect=%s to %s',
+    async (role, redirectTo, expected) => {
+      mockedSignIn.mockImplementation(async (_data, opts) => {
+        await opts?.onSuccess?.({} as never);
+        return { error: null } as never;
+      });
+      mockedGetSession.mockResolvedValue({
+        data: { user: { role } },
+      } as never);
+
+      render(<LoginForm redirectTo={redirectTo} />);
+
+      fireEvent.change(screen.getByLabelText('Email'), {
+        target: { value: 'user@test.com' },
+      });
+      fireEvent.change(screen.getByLabelText('Password'), {
+        target: { value: 'User@12345' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /^masuk$/i }));
+
+      await waitFor(() => expect(pushMock).toHaveBeenCalledWith(expected));
+    },
+  );
 
   it('shows an error message on wrong credentials', async () => {
     mockedSignIn.mockResolvedValue({

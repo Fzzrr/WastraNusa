@@ -7,8 +7,8 @@ import { type PublicShopResponse } from '@/types/shop';
 export const publicShopService = {
   /**
    * The public shop-profile view for a seller: the profile fields plus the
-   * seller's catalog-visible products. No role gate — the page stays reachable
-   * regardless of the owner's current role.
+   * seller's catalog-visible products. 404s once the owner is no longer a
+   * seller (see `findPublicByUserId`).
    */
   getPublicShop: async (sellerId: string): Promise<PublicShopResponse> => {
     const profile = await shopProfileRepository.findPublicByUserId(sellerId);

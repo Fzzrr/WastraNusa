@@ -1,4 +1,5 @@
 import { ArticleStatus, Prisma } from '@/generated/prisma/client';
+import { ApiError } from '@/lib/error';
 import prisma from '@/lib/prisma';
 import { mergeUniqueSorted } from '@/lib/utils';
 
@@ -8,6 +9,38 @@ const getUniqueWhere = (idOrSlug: string) => {
       idOrSlug,
     );
   return isUuid ? { id: idOrSlug } : { slug: idOrSlug };
+};
+
+/** Same fields the client-side search used to scan, matched in Postgres. */
+const buildListWhere = ({
+  island,
+  topic,
+  status,
+  q,
+}: {
+  island?: string;
+  topic?: string;
+  status?: ArticleStatus;
+  q?: string;
+}): Prisma.ArticleWhereInput => {
+  const contains = q ? { contains: q, mode: 'insensitive' as const } : null;
+  return {
+    ...(island ? { island } : {}),
+    ...(topic ? { topic } : {}),
+    ...(status ? { status } : {}),
+    ...(contains
+      ? {
+          OR: [
+            { title: contains },
+            { motifLabel: contains },
+            { topic: contains },
+            { region: contains },
+            { island: contains },
+            { province: contains },
+          ],
+        }
+      : {}),
+  };
 };
 
 export const articleRepository = {
@@ -40,19 +73,18 @@ export const articleRepository = {
     limit,
     island,
     topic,
+    status,
+    q,
   }: {
     offset?: number;
     limit?: number;
     island?: string;
     topic?: string;
+    status?: ArticleStatus;
+    q?: string;
   } = {}) => {
-    const where: Prisma.ArticleWhereInput = {
-      ...(island ? { island } : {}),
-      ...(topic ? { topic } : {}),
-    };
-
     return prisma.article.findMany({
-      where,
+      where: buildListWhere({ island, topic, status, q }),
       skip: offset,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -69,14 +101,16 @@ export const articleRepository = {
     island,
     topic,
     status,
-  }: { island?: string; topic?: string; status?: ArticleStatus } = {}) => {
-    const where: Prisma.ArticleWhereInput = {
-      ...(island ? { island } : {}),
-      ...(topic ? { topic } : {}),
-      ...(status ? { status } : {}),
-    };
-
-    return prisma.article.count({ where });
+    q,
+  }: {
+    island?: string;
+    topic?: string;
+    status?: ArticleStatus;
+    q?: string;
+  } = {}) => {
+    return prisma.article.count({
+      where: buildListWhere({ island, topic, status, q }),
+    });
   },
 
   countByIsland: async ({ topic }: { topic?: string } = {}) => {
@@ -147,6 +181,7 @@ export const articleRepository = {
 
   findMostPopular: async (limit: number = 6) => {
     return prisma.articleEngagement.findMany({
+      where: { article: { status: 'published' } },
       take: limit,
       orderBy: [{ viewCount: 'desc' }, { updatedAt: 'desc' }],
       include: {
@@ -294,39 +329,34 @@ export const articleRepository = {
     return prisma.$transaction(async (tx) => {
       const article = await tx.article.findUnique({
         where: getUniqueWhere(idOrSlug),
-        select: { id: true },
+        select: { id: true, status: true },
       });
 
-      if (!article) {
-        throw new Error('NotFound');
+      // Drafts are hidden from the public, so they can't be liked either.
+      if (!article || article.status !== 'published') {
+        throw new ApiError('Artikel tidak ditemukan', 404);
       }
 
-      const existingLike = await tx.userArticleLike.findFirst({
+      // Counts come from the rows actually removed/added, so two racing
+      // clicks can't double-count; the (articleId, userId) unique backs it up.
+      const removed = await tx.userArticleLike.deleteMany({
         where: { articleId: article.id, userId },
       });
 
-      if (existingLike) {
-        // Unlike
-        await tx.userArticleLike.delete({
-          where: { id: existingLike.id },
-        });
+      if (removed.count > 0) {
         const engagement = await tx.articleEngagement.update({
           where: { articleId: article.id },
-          data: { likeCount: { decrement: 1 } },
+          data: { likeCount: { decrement: removed.count } },
         });
         return { isLiked: false, engagement };
       } else {
-        // Like
-        await tx.userArticleLike.create({
-          data: {
-            id: crypto.randomUUID(),
-            articleId: article.id,
-            userId,
-          },
+        const added = await tx.userArticleLike.createMany({
+          data: [{ id: crypto.randomUUID(), articleId: article.id, userId }],
+          skipDuplicates: true,
         });
         const engagement = await tx.articleEngagement.update({
           where: { articleId: article.id },
-          data: { likeCount: { increment: 1 } },
+          data: { likeCount: { increment: added.count } },
         });
         return { isLiked: true, engagement };
       }

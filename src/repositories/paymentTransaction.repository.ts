@@ -1,14 +1,12 @@
-import type {
-  PaymentTransactionStatus,
-  Prisma,
-} from '@/generated/prisma/client';
+import type { PaymentTransactionStatus } from '@/generated/prisma/client';
 import prisma from '@/lib/prisma';
 
 export const paymentTransactionRepository = {
-  createPaymentTransaction: async (
-    data: Prisma.PaymentTransactionUncheckedCreateInput,
-  ) => {
-    return prisma.paymentTransaction.create({ data });
+  setPaymentUrl: async (externalId: string, paymentUrl: string) => {
+    return prisma.paymentTransaction.update({
+      where: { externalId },
+      data: { paymentUrl },
+    });
   },
 
   updatePaymentStatus: async (

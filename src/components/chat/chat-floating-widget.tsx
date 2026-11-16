@@ -7,51 +7,55 @@ import { useConversations } from '@/hooks/use-conversations';
 import { authClient } from '@/lib/auth/auth-client';
 import { isSeller } from '@/lib/auth/roles';
 import { cn } from '@/lib/utils';
-import type { ConversationSummary } from '@/types/chat';
-import { Maximize2, MessageCircle, MessagesSquare, X } from 'lucide-react';
+import type { ChatAttachedProduct, ConversationSummary } from '@/types/chat';
+import { Maximize2, MessageCircle, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-/** Pages with their own chat UI, panels, or no signed-in user. */
-const HIDDEN_PATH_PREFIXES = [
-  '/chat',
-  '/admin',
-  '/seller',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-];
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /** Unread badge refresh while the panel is closed (only when tab visible). */
 const UNREAD_POLL_MS = 30_000;
 
-function isHiddenPath(pathname: string) {
-  return HIDDEN_PATH_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
+const OPEN_EVENT = 'wastra:open-seller-chat';
+
+type OpenSellerChatDetail = {
+  conversationId: string;
+  product?: ChatAttachedProduct;
+};
+
+/** Open the floating panel on a conversation, optionally with a product attached. */
+export function openSellerChat(detail: OpenSellerChatDetail) {
+  window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail }));
 }
 
 /**
- * Floating live-chat launcher shown on public pages for signed-in users:
- * a bubble with an unread badge that opens a compact chat panel.
+ * Floating seller live-chat launcher, shown on catalog pages for signed-in
+ * users: a bubble with an unread badge that opens a compact chat panel.
  */
+const subscribeNoop = () => () => {};
+
 export function ChatFloatingWidget() {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
   const user = session?.user;
+  // The server render never has the session, so render only once hydrated;
+  // otherwise server and client markup differ.
+  const isClient = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
 
-  if (!user || isHiddenPath(pathname)) return null;
+  if (!isClient || !user || !/^\/catalog(\/|$)/.test(pathname)) return null;
 
-  // Article pages already have the AI assistant bubble in this corner.
-  const raised = /^\/encyclopedia\/[^/]+/.test(pathname);
+  // Product pages pin the buy buttons to the bottom on phones.
+  const raisedOnMobile = /^\/catalog\/[^/]+/.test(pathname);
 
   return (
     <FloatingChat
       currentUserId={user.id}
       variant={isSeller(user.role) ? 'seller' : 'buyer'}
-      raised={raised}
+      raisedOnMobile={raisedOnMobile}
     />
   );
 }
@@ -59,17 +63,32 @@ export function ChatFloatingWidget() {
 function FloatingChat({
   currentUserId,
   variant,
-  raised,
+  raisedOnMobile,
 }: {
   currentUserId: string;
   variant: 'seller' | 'buyer';
-  raised: boolean;
+  raisedOnMobile: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [attachedProduct, setAttachedProduct] =
+    useState<ChatAttachedProduct | null>(null);
   const { data: conversations, isLoading } = useConversations({
     refetchInterval: isOpen ? false : UNREAD_POLL_MS,
   });
+
+  useEffect(() => {
+    const handleOpen = (event: Event) => {
+      const { conversationId, product } = (
+        event as CustomEvent<OpenSellerChatDetail>
+      ).detail;
+      setSelectedId(conversationId);
+      setAttachedProduct(product ?? null);
+      setIsOpen(true);
+    };
+    window.addEventListener(OPEN_EVENT, handleOpen);
+    return () => window.removeEventListener(OPEN_EVENT, handleOpen);
+  }, []);
 
   const totalUnread = (conversations ?? []).reduce(
     (sum, c) => sum + c.unreadCount,
@@ -94,7 +113,12 @@ function FloatingChat({
         variant={variant}
         totalUnread={totalUnread}
         selectedId={selectedId}
-        onSelect={setSelectedId}
+        onSelect={(id) => {
+          setSelectedId(id);
+          setAttachedProduct(null);
+        }}
+        attachedProduct={attachedProduct}
+        onClearAttachment={() => setAttachedProduct(null)}
         onClose={() => setIsOpen(false)}
       />
     );
@@ -103,8 +127,8 @@ function FloatingChat({
   return (
     <div
       className={cn(
-        'fixed right-4 z-40 transition-[bottom] duration-300 sm:right-6',
-        raised ? 'bottom-24' : 'bottom-4 sm:bottom-6',
+        'fixed right-4 z-40 sm:right-6 sm:bottom-6',
+        raisedOnMobile ? 'bottom-24' : 'bottom-4',
       )}
     >
       <button
@@ -115,27 +139,16 @@ function FloatingChat({
             ? `Buka pesan, ${totalUnread} belum dibaca`
             : 'Buka pesan'
         }
+        title="Pesan"
         aria-haspopup="dialog"
-        className="group relative flex animate-in cursor-pointer items-center gap-2.5 rounded-full bg-[#2f5b49] p-2 text-white shadow-[0_10px_25px_-5px_rgba(47,91,73,0.5)] ring-2 ring-[#caa86a]/40 transition-all duration-300 fade-in slide-in-from-bottom-4 hover:-translate-y-1 hover:bg-[#254b3c] hover:shadow-[0_14px_30px_-5px_rgba(47,91,73,0.65)] hover:ring-[#caa86a] active:scale-95 sm:pr-4"
+        className="relative grid size-14 animate-in cursor-pointer place-items-center rounded-full bg-brand text-on-field transition fade-in slide-in-from-bottom-4 hover:bg-brand-strong active:scale-95"
       >
-        <span className="flex size-9 items-center justify-center rounded-full bg-[#f5ead3] transition-transform duration-300 group-hover:-rotate-12">
-          <MessageCircle className="size-[18px] text-[#2f5b49]" />
-        </span>
-        <span className="hidden text-left sm:block">
-          <span className="block text-xs leading-tight font-bold tracking-wide text-[#f5ead3]">
-            Pesan
-          </span>
-          <span className="block text-[10px] font-medium text-white/80">
-            {totalUnread > 0
-              ? `${totalUnread} belum dibaca`
-              : 'Chat dengan penjual'}
-          </span>
-        </span>
+        <MessageCircle className="size-6" strokeWidth={1.75} />
 
         {totalUnread > 0 ? (
-          <span className="absolute -top-1.5 -right-1 flex">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#caa86a] opacity-60" />
-            <span className="relative min-w-5 rounded-full bg-[#caa86a] px-1.5 text-center text-[10px] leading-5 font-bold text-[#274c3d] tabular-nums ring-2 ring-white">
+          <span className="absolute -top-1 -right-1 flex">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-gold opacity-60 motion-reduce:animate-none" />
+            <span className="relative min-w-[22px] rounded-full bg-gold px-1.5 text-center text-[13px] leading-[22px] font-bold text-ink tabular-nums ring-2 ring-ground">
               {totalUnread > 99 ? '99+' : totalUnread}
             </span>
           </span>
@@ -153,6 +166,8 @@ function ChatPanel({
   totalUnread,
   selectedId,
   onSelect,
+  attachedProduct,
+  onClearAttachment,
   onClose,
 }: {
   conversations: ConversationSummary[];
@@ -162,6 +177,8 @@ function ChatPanel({
   totalUnread: number;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  attachedProduct: ChatAttachedProduct | null;
+  onClearAttachment: () => void;
   onClose: () => void;
 }) {
   // Live updates only while the panel is open, not on every page view.
@@ -175,31 +192,26 @@ function ChatPanel({
     <aside
       role="dialog"
       aria-label="Pesan"
-      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-3xl border border-[#e4d9c7] bg-[#fffdf8] shadow-[0_20px_45px_-10px_rgba(47,91,73,0.35)] duration-200 fade-in slide-in-from-bottom-4 zoom-in-95 sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[600px] sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
+      className="fixed inset-x-3 top-20 bottom-3 z-50 flex animate-in flex-col overflow-hidden rounded-2xl bg-card shadow-[0_24px_48px_-16px_rgba(31,53,43,0.4)] duration-200 fade-in slide-in-from-bottom-4 zoom-in-95 sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[600px] sm:max-h-[calc(100dvh-3rem)] sm:w-[400px]"
     >
-      <header className="flex items-center justify-between gap-3 bg-[#274c3d] px-4 py-3 text-white">
+      <header className="flex items-center justify-between gap-3 bg-field px-4 py-3 text-on-field">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#376352] ring-1 ring-[#caa86a]/60">
-            <MessagesSquare className="size-5 text-[#f5ead3]" />
-          </span>
           <div className="min-w-0">
-            <h2 className="text-sm font-bold tracking-tight text-[#fbf8f2]">
-              Pesan WastraNusa
-            </h2>
-            <p className="truncate text-[11px] text-white/70">
-              {totalUnread > 0
-                ? `${totalUnread} pesan belum dibaca`
-                : 'Ngobrol langsung dengan penjual'}
-            </p>
+            <h2 className="text-base font-semibold text-on-field">Pesan</h2>
+            {totalUnread > 0 ? (
+              <p className="truncate text-[13px] text-on-field-soft">
+                {totalUnread} belum dibaca
+              </p>
+            ) : null}
           </div>
         </div>
-        <div className="flex items-center gap-1 text-white/75">
+        <div className="flex items-center text-on-field-soft">
           <Link
             href={fullPageHref}
             onClick={onClose}
             title="Buka halaman pesan"
             aria-label="Buka halaman pesan"
-            className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+            className="grid size-10 place-items-center rounded-full transition-colors hover:bg-white/10 hover:text-white"
           >
             <Maximize2 className="size-4" />
           </Link>
@@ -208,7 +220,7 @@ function ChatPanel({
             onClick={onClose}
             title="Tutup"
             aria-label="Tutup pesan"
-            className="flex size-8 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-white/10 hover:text-white"
+            className="grid size-10 cursor-pointer place-items-center rounded-full transition-colors hover:bg-white/10 hover:text-white"
           >
             <X className="size-4" />
           </button>
@@ -224,6 +236,8 @@ function ChatPanel({
             variant={variant}
             compact
             onBack={() => onSelect(null)}
+            attachedProduct={attachedProduct}
+            onClearAttachment={onClearAttachment}
           />
         ) : (
           <ChatConversationList

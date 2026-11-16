@@ -64,6 +64,8 @@ export const auth = betterAuth({
       });
     },
     resetPasswordTokenExpiresIn: 15 * 60, // 15 minutes
+    // A reset usually means the account may be compromised: log out everywhere.
+    revokeSessionsOnPasswordReset: true,
   },
   socialProviders: {
     google: {
@@ -93,7 +95,11 @@ export const auth = betterAuth({
     sendOnSignIn: true,
     expiresIn: 15 * 60, // 15 minutes
   },
-  plugins: [admin(), openAPI()],
+  // The OpenAPI reference documents every auth endpoint; keep it out of prod.
+  plugins: [
+    admin(),
+    ...(process.env.NODE_ENV === 'production' ? [] : [openAPI()]),
+  ],
 });
 
 export async function getSessionUser() {

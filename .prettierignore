@@ -31,3 +31,5 @@ pnpm-lock.yaml
 
 # Prisma generated
 generated/
+# Playwright MCP browser artifacts
+.playwright-mcp

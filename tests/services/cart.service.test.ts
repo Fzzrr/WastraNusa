@@ -1,11 +1,14 @@
 import { ApiError } from '@/lib/error';
 import { cartRepository } from '@/repositories/cart.repository';
+import { productRepository } from '@/repositories/product.repository';
+import { productVariantRepository } from '@/repositories/productVariant.repository';
 import { cartService } from '@/services/cart.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.unmock('@/services/cart.service');
 
 const mockRepo = vi.mocked(cartRepository);
+const mockVariantRepo = vi.mocked(productVariantRepository);
 
 const MOCK_CART = {
   id: 'cart-1',
@@ -15,14 +18,21 @@ const MOCK_CART = {
       id: 'item-1',
       cartId: 'cart-1',
       productId: 'prod-1',
-      variantId: null,
+      variantId: 'var-1',
       quantity: 2,
     },
   ],
 };
 
+const MOCK_VARIANT = { id: 'var-1', productId: 'prod-1', stock: 5 };
+
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(productRepository.findProductById).mockResolvedValue({
+    id: 'prod-1',
+    status: 'active',
+    sellerId: 'seller-1',
+  } as never);
 });
 
 describe('cartService', { tags: ['backend'] }, () => {
@@ -38,6 +48,21 @@ describe('cartService', { tags: ['backend'] }, () => {
   });
 
   describe('addToCart', () => {
+    it.each([
+      [{ status: 'inactive', sellerId: 'seller-1' }, 'Produk tidak tersedia'],
+      [{ status: 'active', sellerId: 'user-1' }, 'toko sendiri'],
+    ])('rejects a product the buyer cannot buy (%o)', async (product, msg) => {
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        ...product,
+      } as never);
+
+      await expect(
+        cartService.addToCart('user-1', 'prod-1', 'var-1', 1),
+      ).rejects.toThrow(msg);
+      expect(mockRepo.addItem).not.toHaveBeenCalled();
+    });
+
     it('should throw error if quantity is 0 or less', async () => {
       await expect(
         cartService.addToCart('user-1', 'prod-1', null, 0),
@@ -47,18 +72,52 @@ describe('cartService', { tags: ['backend'] }, () => {
     it('should add item and return updated cart', async () => {
       mockRepo.findOrCreateByUser.mockResolvedValue(MOCK_CART as never);
       mockRepo.findByUserId.mockResolvedValue(MOCK_CART as never);
+      mockVariantRepo.findVariantById.mockResolvedValue(MOCK_VARIANT as never);
 
-      const cart = await cartService.addToCart('user-1', 'prod-1', null, 1);
+      const cart = await cartService.addToCart('user-1', 'prod-1', 'var-1', 1);
 
       expect(mockRepo.addItem).toHaveBeenCalledWith(
         MOCK_CART.id,
         'prod-1',
-        null,
+        'var-1',
         1,
         'user-1',
       );
       expect(mockRepo.findByUserId).toHaveBeenCalledWith('user-1');
       expect(cart).toEqual(MOCK_CART);
+    });
+
+    it('should reject an item without a variant', async () => {
+      mockRepo.findOrCreateByUser.mockResolvedValue(MOCK_CART as never);
+
+      await expect(
+        cartService.addToCart('user-1', 'prod-1', null, 1),
+      ).rejects.toThrow('Pilih varian');
+      expect(mockRepo.addItem).not.toHaveBeenCalled();
+    });
+
+    it('should reject a variant from another product', async () => {
+      mockRepo.findOrCreateByUser.mockResolvedValue(MOCK_CART as never);
+      mockVariantRepo.findVariantById.mockResolvedValue({
+        ...MOCK_VARIANT,
+        productId: 'prod-2',
+      } as never);
+
+      await expect(
+        cartService.addToCart('user-1', 'prod-1', 'var-1', 1),
+      ).rejects.toThrow(ApiError);
+      expect(mockRepo.addItem).not.toHaveBeenCalled();
+    });
+
+    it('should count the quantity already in the cart against stock', async () => {
+      // 2 already in cart + 4 requested > stock of 5
+      mockRepo.findOrCreateByUser.mockResolvedValue(MOCK_CART as never);
+      mockVariantRepo.findVariantById.mockResolvedValue(MOCK_VARIANT as never);
+
+      await expect(
+        cartService.addToCart('user-1', 'prod-1', 'var-1', 4),
+      ).rejects.toThrow('Stok tidak mencukupi');
+      expect(mockRepo.addItem).not.toHaveBeenCalled();
     });
   });
 
@@ -77,8 +136,19 @@ describe('cartService', { tags: ['backend'] }, () => {
       ).rejects.toThrow(ApiError);
     });
 
+    it('should reject a quantity above variant stock', async () => {
+      mockRepo.findByUserId.mockResolvedValue(MOCK_CART as never);
+      mockVariantRepo.findVariantById.mockResolvedValue(MOCK_VARIANT as never);
+
+      await expect(
+        cartService.updateCartItemQuantity('user-1', 'item-1', 6),
+      ).rejects.toThrow('Stok tidak mencukupi');
+      expect(mockRepo.updateItemQuantity).not.toHaveBeenCalled();
+    });
+
     it('should update quantity and return cart', async () => {
       mockRepo.findByUserId.mockResolvedValue(MOCK_CART as never);
+      mockVariantRepo.findVariantById.mockResolvedValue(MOCK_VARIANT as never);
 
       await cartService.updateCartItemQuantity('user-1', 'item-1', 5);
 

@@ -8,11 +8,14 @@ export default async function SellerLiveChatPage() {
   return (
     <main className="flex flex-1 flex-col">
       <SellerHeader
-        title="Live Chat"
+        title="Chat Pembeli"
         subtitle="Percakapan langsung dengan pelanggan"
       />
-      <section className="flex min-h-[560px] flex-1 flex-col">
-        <ChatShell variant="seller" />
+      <section className="flex flex-1 flex-col px-4 py-5 md:px-8">
+        <ChatShell
+          variant="seller"
+          className="h-[calc(100dvh-11rem)] min-h-[520px] ring-1 ring-border"
+        />
       </section>
     </main>
   );

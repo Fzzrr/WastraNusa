@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
-  ChevronRight,
   LogOut,
   type LucideIcon,
   MapPin,
@@ -15,19 +14,44 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 
-const NAV_ITEMS: { icon: LucideIcon; label: string; href: string }[] = [
+const NAV_ITEMS: {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+  // Admins can shop like any user but can't run a shop.
+  hideForAdmin?: boolean;
+}[] = [
   { icon: User, label: 'Profil Saya', href: '/profile' },
   { icon: ShoppingBag, label: 'Pesanan Saya', href: '/profile/my-order' },
   { icon: MapPin, label: 'Alamat Tersimpan', href: '/profile/saved-address' },
   { icon: BookOpen, label: 'Artikel Disukai', href: '/profile/liked-article' },
-  { icon: Store, label: 'Buka Toko', href: '/profile/seller-application' },
+  {
+    icon: Store,
+    label: 'Buka Toko',
+    href: '/profile/seller-application',
+    hideForAdmin: true,
+  },
 ];
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const navRef = useRef<HTMLElement>(null);
+  const { data: session } = authClient.useSession();
+  const isAdmin = session?.user?.role === 'admin';
+
+  // On phones the menu is a horizontal scroll row: centre the current page's
+  // pill. scrollLeft only moves the row, never the page.
+  useEffect(() => {
+    const nav = navRef.current;
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !current || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollLeft =
+      current.offsetLeft - (nav.clientWidth - current.clientWidth) / 2;
+  }, [pathname]);
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -46,60 +70,48 @@ export default function Sidebar() {
 
   return (
     <nav
+      ref={navRef}
       aria-label="Menu profil"
-      className="flex w-full flex-row flex-wrap gap-1 rounded-2xl bg-[#fffdf8] p-2 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#e8dfd0] md:sticky md:top-6 md:w-[220px] md:flex-col md:self-start lg:w-[240px]"
+      // Phones: one scrollable row of labelled pills. md+: the vertical list.
+      className="relative flex w-full flex-row gap-1 overflow-x-auto [scrollbar-width:none] md:sticky md:top-6 md:w-[220px] md:flex-col md:self-start md:overflow-visible lg:w-[240px]"
     >
-      <p className="hidden px-3 pt-2 pb-1 text-[10px] font-semibold tracking-wider text-[#9a8f80] uppercase md:block">
-        Akun Saya
-      </p>
-      {NAV_ITEMS.map(({ icon: Icon, label, href }) => {
-        const active = isActive(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'group relative flex flex-auto items-center justify-center gap-2.5 overflow-hidden rounded-xl px-3 py-2.5 text-sm whitespace-nowrap transition-all duration-200 md:flex-none md:justify-start',
-              active
-                ? 'bg-gradient-to-r from-[#2f5f49] to-[#3f7359] font-semibold text-white shadow-[0_8px_18px_-10px_rgba(47,95,73,0.8)] before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-[#e8cb8d]'
-                : 'text-[#4d6356] hover:bg-[#e3ece5] hover:text-[#2f5f49]',
-            )}
-          >
-            <span
+      {NAV_ITEMS.filter((item) => !(isAdmin && item.hideForAdmin)).map(
+        ({ icon: Icon, label, href }) => {
+          const active = isActive(href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'grid size-7 shrink-0 place-items-center rounded-lg transition-colors',
+                'group relative flex h-11 flex-none items-center gap-3 rounded-full px-4 text-[15px] whitespace-nowrap transition-colors duration-200 active:scale-[0.98] md:justify-start',
                 active
-                  ? 'bg-white/15 text-[#e8cb8d]'
-                  : 'bg-[#f5ead3] text-[#a07a2c] group-hover:bg-white',
+                  ? 'bg-brand font-semibold text-on-field'
+                  : 'text-ink hover:bg-surface',
               )}
             >
-              <Icon className="size-4" />
-            </span>
-            <span className="hidden flex-1 sm:inline">{label}</span>
-            <ChevronRight
-              className={cn(
-                'hidden size-4 transition-all md:block',
-                active
-                  ? 'text-[#e8cb8d]'
-                  : '-translate-x-1 text-[#b3aa9e] opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
-              )}
-            />
-          </Link>
-        );
-      })}
+              <Icon
+                className={cn(
+                  'size-5 shrink-0',
+                  active ? 'text-on-field' : 'text-ink-soft',
+                )}
+                strokeWidth={1.75}
+              />
+              <span className="flex-1">{label}</span>
+            </Link>
+          );
+        },
+      )}
 
-      <div className="mx-2 my-1 hidden h-px bg-[#efe8dd] md:block" />
+      <div className="hidden md:block md:h-4" />
 
       <button
         type="button"
         onClick={handleSignOut}
-        className="group flex flex-auto cursor-pointer items-center justify-center gap-2.5 rounded-xl px-3 py-2.5 text-sm whitespace-nowrap text-[#b04a3a] transition-colors hover:bg-[#f6e1dd] md:flex-none md:justify-start"
+        className="group flex h-11 flex-none cursor-pointer items-center gap-3 rounded-full px-4 text-[15px] whitespace-nowrap text-destructive transition-colors hover:bg-destructive/10 md:justify-start"
       >
-        <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#f6e1dd] transition-colors group-hover:bg-white">
-          <LogOut className="size-4" />
-        </span>
-        <span className="hidden sm:inline">Keluar</span>
+        <LogOut className="size-5 shrink-0" strokeWidth={1.75} />
+        <span>Keluar</span>
       </button>
     </nav>
   );

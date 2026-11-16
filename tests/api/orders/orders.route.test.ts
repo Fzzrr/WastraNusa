@@ -28,6 +28,8 @@ describe('Orders API GET', { tags: ['backend'] }, () => {
           canCancel: true,
           products: [
             {
+              id: 'prod-1',
+              variant: null,
               category: 'Batik',
               name: 'Batik Kawung',
               location: 'Solo',

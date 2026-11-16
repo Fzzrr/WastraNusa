@@ -2,6 +2,14 @@ import { cleanup } from '@testing-library/react';
 import 'dotenv/config';
 import { afterEach, vi } from 'vitest';
 
+// Repository tests write real rows, so refuse to run against a remote database.
+const databaseHost = new URL(
+  process.env.DATABASE_URL ?? 'postgresql://localhost',
+).hostname;
+if (!['localhost', '127.0.0.1', 'database'].includes(databaseHost)) {
+  throw new Error(`Tests must not run against ${databaseHost}`);
+}
+
 // vitest is not in `globals` mode, so React Testing Library's automatic
 // afterEach cleanup is not registered. Without this, rendered components
 // accumulate in document.body across tests (e.g. duplicate elements).
@@ -19,6 +27,7 @@ vi.mock('@/lib/auth/auth-api-helper', () => ({
     getUser: vi.fn(),
     requireUser: vi.fn(),
     requireAdmin: vi.fn(),
+    requireSeller: vi.fn(),
   },
 }));
 
@@ -77,24 +86,20 @@ vi.mock('@/services/article.service', () => ({
 }));
 
 vi.mock('@/repositories/order.repository', () => ({
+  orderItemSelect: {},
+  managedOrderSelect: {},
   orderRepository: {
-    createOrder: vi.fn(),
     createOrderAndReserveStock: vi.fn(),
     findOrderById: vi.fn(),
     findOrderDetailByIdentifier: vi.fn(),
     findOrderForUserByIdentifier: vi.fn(),
     findOrderForCancellationById: vi.fn(),
     updateOrderPaymentStatus: vi.fn(),
+    confirmPaidOrder: vi.fn(),
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
-    findExpiredPendingOrders: vi.fn(),
-    cancelOrder: vi.fn(),
+    findExpiredPendingOrders: vi.fn(async () => []),
     cancelOrderAndRestoreStock: vi.fn(),
-    findOrdersForAdmin: vi.fn(),
-    countOrdersForAdmin: vi.fn(),
-    findOrderForAdminByIdentifier: vi.fn(),
-    updateOrderForAdmin: vi.fn(),
-    findProductDetailsForOrder: vi.fn(),
   },
 }));
 
@@ -102,19 +107,18 @@ vi.mock('@/services/order.service', () => ({
   getOrderPaymentExpiryDate: vi.fn(
     (createdAt: Date) => new Date(createdAt.getTime() + 30 * 60 * 1000),
   ),
+  reconcileExpiredOrders: vi.fn(async () => {}),
   orderService: {
     getUserOrders: vi.fn(),
     getUserOrderDetail: vi.fn(),
     cancelUserOrder: vi.fn(),
     cancelOrderBySystemId: vi.fn(),
-    getAdminOrders: vi.fn(),
-    updateOrderForAdmin: vi.fn(),
   },
 }));
 
 vi.mock('@/repositories/paymentTransaction.repository', () => ({
   paymentTransactionRepository: {
-    createPaymentTransaction: vi.fn(),
+    setPaymentUrl: vi.fn(async () => ({})),
     updatePaymentStatus: vi.fn(),
     findTransactionByExternalId: vi.fn(),
   },
@@ -130,16 +134,8 @@ vi.mock('@/repositories/product.repository', () => ({
     countByIsland: vi.fn(),
     countBySize: vi.fn(),
     countByGender: vi.fn(),
-    countByStatus: vi.fn(),
-    countLowStock: vi.fn(),
-    countCreatedSince: vi.fn(),
-    countOutOfStock: vi.fn(),
-    findLowStock: vi.fn(),
     getPriceRange: vi.fn(),
     findByIdOrSlug: vi.fn(),
-    create: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn(),
   },
 }));
 
@@ -154,10 +150,6 @@ vi.mock('@/services/product.service', () => ({
   productService: {
     getProducts: vi.fn(),
     getProductDetail: vi.fn(),
-    getDashboardOverview: vi.fn(),
-    createProduct: vi.fn(),
-    updateProduct: vi.fn(),
-    deleteProduct: vi.fn(),
   },
 }));
 
@@ -179,6 +171,9 @@ vi.mock('@/repositories/address.repository', () => ({
     clearDefaultsByUser: vi.fn(),
     setDefault: vi.fn(),
     countByUser: vi.fn(),
+    isUsedByOrder: vi.fn(),
+    archive: vi.fn(),
+    replace: vi.fn(),
   },
 }));
 
@@ -194,6 +189,8 @@ vi.mock('@/services/address.service', () => ({
 
 vi.mock('@/lib/midtrans', () => ({
   createMidtransTransaction: vi.fn(),
+  expireMidtransTransaction: vi.fn(),
+  getMidtransTransactionStatus: vi.fn(),
   verifySignatureKey: vi.fn(),
 }));
 
@@ -206,7 +203,6 @@ vi.mock('@/repositories/cart.repository', () => ({
     removeItem: vi.fn(),
     clearCart: vi.fn(),
     removeItems: vi.fn(),
-    removePurchasedItemsById: vi.fn(),
     removePurchasedItemsByProductVariant: vi.fn(),
     getCartItemCount: vi.fn(),
   },

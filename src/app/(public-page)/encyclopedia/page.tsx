@@ -1,4 +1,5 @@
-﻿import { EncyclopediaMain } from '@/components/encyclopedia/encyclopedia-main';
+import { EncyclopediaMain } from '@/components/encyclopedia/encyclopedia-main';
+import type { Metadata } from 'next';
 
 type EncyclopediaPageProps = {
   searchParams: Promise<{
@@ -6,6 +7,11 @@ type EncyclopediaPageProps = {
     topic?: string;
     search?: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: 'Ensiklopedia Budaya',
+  description: 'Kenali sejarah, motif, dan makna wastra Nusantara.',
 };
 
 export default async function EncyclopediaPage({

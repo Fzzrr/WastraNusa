@@ -1,11 +1,28 @@
 import { ApiError } from '@/lib/error';
+import {
+  expireMidtransTransaction,
+  getMidtransTransactionStatus,
+} from '@/lib/midtrans';
 import { orderRepository } from '@/repositories/order.repository';
 import { orderService } from '@/services/order.service';
+import { paymentService } from '@/services/payment.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.unmock('@/services/order.service');
 
 const mockRepo = vi.mocked(orderRepository, true);
+
+const ITEM = {
+  productId: 'prod-1',
+  variantId: null,
+  productName: 'Batik',
+  variantName: null,
+  quantity: 1,
+  unitPrice: 120000,
+  imageURL: null,
+  province: 'Solo',
+  clothingType: 'batik',
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -15,12 +32,8 @@ beforeEach(() => {
   mockRepo.countOrdersByUserId.mockResolvedValue(0);
   mockRepo.findOrderDetailByIdentifier.mockResolvedValue(null as never);
   mockRepo.findOrderForCancellationById.mockResolvedValue(null as never);
-  mockRepo.cancelOrderAndRestoreStock.mockResolvedValue(undefined as never);
-  mockRepo.findOrdersForAdmin.mockResolvedValue([] as never);
-  mockRepo.countOrdersForAdmin.mockResolvedValue(0);
-  mockRepo.findProductDetailsForOrder.mockResolvedValue(null as never);
-  mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(null as never);
-  mockRepo.updateOrderForAdmin.mockResolvedValue(null as never);
+  mockRepo.cancelOrderAndRestoreStock.mockResolvedValue(true);
+  vi.mocked(expireMidtransTransaction).mockResolvedValue(undefined);
 });
 
 describe('orderService', { tags: ['backend'] }, () => {
@@ -34,18 +47,9 @@ describe('orderService', { tags: ['backend'] }, () => {
           orderStatus: 'pending',
           paymentStatus: 'unpaid',
           paymentTransactions: [],
-          customerNotes: null,
-          productId: 'prod-1',
-          variantId: 'var-1',
           createdAt: new Date('2025-03-14T00:00:00.000Z'),
-          totalAmount: 100000, // BigInt representation
-          quantity: 1,
-          product: {
-            name: 'Batik',
-            province: 'Solo',
-            clothingType: 'batik',
-            imageURL: null,
-          },
+          totalAmount: 100000,
+          items: [ITEM],
         },
       ] as never);
       mockRepo.countOrdersByUserId.mockResolvedValue(1);
@@ -102,7 +106,8 @@ describe('orderService', { tags: ['backend'] }, () => {
 
       expect(mockRepo.findExpiredPendingOrders).toHaveBeenCalledWith(
         expect.any(Date),
-        'user-1',
+        { userId: 'user-1' },
+        expect.any(Number),
       );
     });
   });
@@ -128,13 +133,7 @@ describe('orderService', { tags: ['backend'] }, () => {
         estimatedDelivery: null,
         customerNotes: null,
         createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-          imageURL: null,
-        },
+        items: [ITEM],
         shippingAddress: {
           recipientName: 'User',
           phone: '0812',
@@ -261,12 +260,7 @@ describe('orderService', { tags: ['backend'] }, () => {
             createdAt: new Date('2025-03-14T00:00:00.000Z'),
           },
         ],
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-        },
+        items: [ITEM],
         shippingAddress: {
           recipientName: 'User',
           phone: '0812',
@@ -283,6 +277,8 @@ describe('orderService', { tags: ['backend'] }, () => {
 
       expect(result.orderStatus).toBe('Dibatalkan');
       expect(result.paymentStatus).toBe('failed');
+      // The Midtrans transaction is closed so it can't be paid afterwards.
+      expect(expireMidtransTransaction).toHaveBeenCalledWith('order-id-1');
     });
 
     it('should reject cancelling non-cancellable order', async () => {
@@ -307,6 +303,56 @@ describe('orderService', { tags: ['backend'] }, () => {
       ).rejects.toThrow(
         'Pesanan ini tidak dapat dibatalkan karena pembayaran sudah diproses atau masa bayar telah habis',
       );
+    });
+  });
+
+  describe('cancelUserOrder checks Midtrans first', () => {
+    const pendingOrder = {
+      id: 'order-id-1',
+      orderStatus: 'pending',
+      paymentStatus: 'unpaid',
+      paymentTransactions: [
+        { status: 'pending', expiredAt: new Date('2099-01-01T00:00:00Z') },
+      ],
+    };
+
+    beforeEach(() => {
+      mockRepo.findOrderForUserByIdentifier.mockResolvedValue(
+        pendingOrder as never,
+      );
+    });
+
+    it('refuses to cancel an order Midtrans says is already paid', async () => {
+      const status = {
+        transaction_id: 'tx',
+        order_id: 'order-id-1',
+        gross_amount: '150000.00',
+        status_code: '200',
+        transaction_status: 'settlement',
+        signature_key: 'sig',
+        payment_type: 'qris',
+      };
+      vi.mocked(getMidtransTransactionStatus).mockResolvedValue(status);
+      const notify = vi
+        .spyOn(paymentService, 'handleNotification')
+        .mockResolvedValue();
+
+      await expect(
+        orderService.cancelUserOrder('user-1', 'ORD-1'),
+      ).rejects.toMatchObject({ status: 400 });
+      expect(notify).toHaveBeenCalledWith(status);
+      expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
+    });
+
+    it('refuses to cancel while Midtrans cannot be reached', async () => {
+      vi.mocked(getMidtransTransactionStatus).mockRejectedValue(
+        new Error('timeout'),
+      );
+
+      await expect(
+        orderService.cancelUserOrder('user-1', 'ORD-1'),
+      ).rejects.toMatchObject({ status: 503 });
+      expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
     });
   });
 
@@ -335,7 +381,6 @@ describe('orderService', { tags: ['backend'] }, () => {
       );
       expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalledWith(
         'order-id-1',
-        [{ variantId: 'var-1', quantity: 2 }],
         'expired',
         expect.any(Date),
       );
@@ -351,233 +396,71 @@ describe('orderService', { tags: ['backend'] }, () => {
       expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
     });
   });
+});
 
-  describe('getAdminOrders', () => {
-    it('should return paginated admin order list', async () => {
-      const orderData = {
-        id: 'order-id-1',
-        orderNumber: 'ORD-1',
-        orderStatus: 'processing' as const,
-        paymentStatus: 'paid' as const,
-        trackingNumber: null as string | null,
-        quantity: 1,
-        totalAmount: 150000,
-        createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        customerNotes: null,
-        productId: 'prod-1',
-        variantId: null as string | null,
-        productName: 'Batik',
-        variantName: null as string | null,
-        productPrice: 120000,
-        user: {
-          id: 'user-1',
-          name: 'User',
-          email: 'user@example.com',
-        },
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-          imageURL: null,
-        },
-      };
-
-      mockRepo.findOrdersForAdmin.mockResolvedValue([orderData] as never);
-      mockRepo.countOrdersForAdmin.mockResolvedValue(1);
-      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
-
-      const result = await orderService.getAdminOrders(1, 10, {
-        orderStatus: 'processing',
-      });
-
-      expect(mockRepo.findOrdersForAdmin).toHaveBeenCalledWith(
-        { orderStatus: 'processing' },
-        0,
-        10,
-      );
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].orderNumber).toBe('ORD-1');
-      expect(result.items[0].products).toHaveLength(1);
-      expect(result.items[0].products[0].name).toBe('Batik');
-      expect(result.meta.totalItems).toBe(1);
-    });
+describe('reconcileExpiredOrders', { tags: ['backend'] }, () => {
+  const expired = {
+    id: 'ord-1',
+    orderStatus: 'pending',
+    paymentStatus: 'unpaid',
+  };
+  const status = (transaction_status: string) => ({
+    transaction_id: 'tx-1',
+    order_id: 'ord-1',
+    gross_amount: '371000.00',
+    status_code: '200',
+    transaction_status,
+    signature_key: 'sig',
+    payment_type: 'bank_transfer',
   });
 
-  describe('updateOrderForAdmin', () => {
-    it('should update order and return mapped result', async () => {
-      const order = {
-        id: 'order-id-1',
-        orderNumber: 'ORD-1',
-        orderStatus: 'processing',
-        paymentStatus: 'paid',
-        trackingNumber: null,
-        quantity: 1,
-        totalAmount: 150000,
-        createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        customerNotes: null,
-        productId: 'prod-1',
-        variantId: null,
-        user: {
-          id: 'user-1',
-          name: 'User',
-          email: 'user@example.com',
-        },
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-        },
-      };
+  beforeEach(() => {
+    mockRepo.findExpiredPendingOrders.mockResolvedValue([expired] as never);
+  });
 
-      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(order as never);
-      mockRepo.updateOrderForAdmin.mockResolvedValue({
-        ...order,
-        orderStatus: 'shipped',
-        paymentStatus: 'paid',
-        trackingNumber: 'RESI-123',
-      } as never);
-      mockRepo.findProductDetailsForOrder.mockResolvedValue(null);
+  it('confirms an order Midtrans says is paid instead of cancelling it', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(
+      status('settlement'),
+    );
 
-      const result = await orderService.updateOrderForAdmin('ORD-1', {
-        orderStatus: 'shipped',
-        trackingNumber: 'RESI-123',
-      });
+    await orderService.getUserOrders('user-1');
 
-      expect(mockRepo.updateOrderForAdmin).toHaveBeenCalledWith(
-        'ORD-1',
-        expect.objectContaining({
-          orderStatus: 'shipped',
-          trackingNumber: 'RESI-123',
-        }),
-      );
-      expect(result.orderStatus).toBe('shipped');
-      expect(result.paymentStatus).toBe('paid');
-      expect(result.trackingNumber).toBe('RESI-123');
-      expect(result.products).toHaveLength(1);
-      expect(result.products[0].name).toBe('Batik');
-    });
+    expect(paymentService.handleNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        order_id: 'ord-1',
+        transaction_status: 'settlement',
+      }),
+    );
+    expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
+  });
 
-    it('should throw when payment is not successful', async () => {
-      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
-        id: 'order-id-1',
-        orderNumber: 'ORD-1',
-        orderStatus: 'confirmed',
-        paymentStatus: 'unpaid',
-        trackingNumber: null,
-        quantity: 1,
-        totalAmount: 150000,
-        createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        customerNotes: null,
-        productId: 'prod-1',
-        variantId: null,
-        user: {
-          id: 'user-1',
-          name: 'User',
-          email: 'user@example.com',
-        },
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-        },
-      } as never);
+  it('cancels and closes an order still unpaid at Midtrans', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(
+      status('pending'),
+    );
 
-      await expect(
-        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'shipped' }),
-      ).rejects.toThrow(
-        'Pesanan hanya dapat diubah jika pembayaran sudah berhasil',
-      );
-    });
+    await orderService.getUserOrders('user-1');
 
-    it('should throw when order is cancelled or payment failed', async () => {
-      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
-        id: 'order-id-1',
-        orderNumber: 'ORD-1',
-        orderStatus: 'cancelled',
-        paymentStatus: 'failed',
-        trackingNumber: null,
-        quantity: 1,
-        totalAmount: 150000,
-        createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        user: {
-          id: 'user-1',
-          name: 'User',
-          email: 'user@example.com',
-        },
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-        },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
-        },
-      } as never);
+    expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalled();
+    expect(expireMidtransTransaction).toHaveBeenCalledWith('ord-1');
+  });
 
-      await expect(
-        orderService.updateOrderForAdmin('ORD-1', {
-          orderStatus: 'processing',
-        }),
-      ).rejects.toThrow('Pesanan dibatalkan dan tidak dapat diubah');
-    });
+  it('cancels when the buyer never picked a payment method', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockResolvedValue(null);
 
-    it('should throw when target status is outside editable statuses', async () => {
-      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue({
-        id: 'order-id-1',
-        orderNumber: 'ORD-1',
-        orderStatus: 'confirmed',
-        paymentStatus: 'paid',
-        trackingNumber: null,
-        quantity: 1,
-        totalAmount: 150000,
-        createdAt: new Date('2025-03-14T00:00:00.000Z'),
-        user: {
-          id: 'user-1',
-          name: 'User',
-          email: 'user@example.com',
-        },
-        product: {
-          id: 'prod-1',
-          name: 'Batik',
-          province: 'Solo',
-          clothingType: 'batik',
-        },
-        shippingAddress: {
-          recipientName: 'User',
-          phone: '0812',
-          province: 'Jawa Tengah',
-          city: 'Solo',
-          district: 'Laweyan',
-          subdistrict: null,
-          postalCode: '57147',
-          fullAddress: 'Jl. Mawar No. 1',
-        },
-      } as never);
+    await orderService.getUserOrders('user-1');
 
-      await expect(
-        orderService.updateOrderForAdmin('ORD-1', { orderStatus: 'confirmed' }),
-      ).rejects.toThrow(
-        'Status pesanan hanya dapat diubah ke Pengemasan, Dikirim, atau Diterima',
-      );
-    });
+    expect(mockRepo.cancelOrderAndRestoreStock).toHaveBeenCalled();
+    expect(expireMidtransTransaction).not.toHaveBeenCalled();
+  });
 
-    it('should throw ApiError when order not found', async () => {
-      mockRepo.findOrderForAdminByIdentifier.mockResolvedValue(null);
+  it('leaves the order pending when Midtrans cannot be reached', async () => {
+    vi.mocked(getMidtransTransactionStatus).mockRejectedValue(
+      new Error('ECONNRESET'),
+    );
 
-      await expect(
-        orderService.updateOrderForAdmin('ORD-404', { orderStatus: 'shipped' }),
-      ).rejects.toThrow(ApiError);
-    });
+    await orderService.getUserOrders('user-1');
+
+    expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
   });
 });

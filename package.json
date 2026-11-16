@@ -10,9 +10,7 @@
     "prepare": "husky",
     "format:write": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,mjs,json,yml,yaml,css,scss}\"",
-    "test": "vitest",
-    "prisma-seed:dev": "tsx prisma/dev-seeds/seed.ts",
-    "prisma-seed:prod": "tsx prisma/prod-seeds/seed.ts"
+    "test": "vitest"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs}": [
@@ -26,10 +24,10 @@
   "dependencies": {
     "@google/genai": "^2.24.0",
     "@hookform/resolvers": "^5.2.2",
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^7.4.2",
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
     "@tanstack/react-query": "^5.91.2",
-    "better-auth": "^1.4.19",
+    "better-auth": "^1.7.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "daftar-wilayah-indonesia": "^4.0.3",
@@ -37,9 +35,9 @@
     "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.577.0",
     "midtrans-client": "^1.4.3",
-    "next": "16.1.6",
+    "next": "16.4.5",
     "next-themes": "^0.4.6",
-    "nodemailer": "^8.0.4",
+    "nodemailer": "^10.3.1",
     "pg": "^8.20.0",
     "radix-ui": "^1.4.3",
     "react": "19.2.3",
@@ -49,7 +47,7 @@
     "tailwind-merge": "^3.5.0",
     "tw-animate-css": "^1.4.0",
     "winston": "^3.19.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -71,10 +69,9 @@
     "jsdom": "^28.1.0",
     "lint-staged": "^15.5.2",
     "prettier": "^3.8.1",
-    "prisma": "^7.5.0",
+    "prisma": "^7.10.1",
     "shadcn": "^4.0.8",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.2"

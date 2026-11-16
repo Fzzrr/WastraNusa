@@ -1,6 +1,6 @@
 import { ApiError } from '@/lib/error';
 import { articleContextCache, chatReplyCache } from '@/lib/gemini/cache';
-import { llmService } from '@/lib/gemini/llm.service';
+import { gemini } from '@/lib/gemini/gemini.provider';
 import { logger } from '@/lib/logger';
 import { formatIDR } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';
@@ -330,7 +330,7 @@ export const chatService = {
     let previousText = '';
 
     // 6. Query LLM provider
-    const result = await llmService.chat({
+    const result = await gemini.chat({
       systemInstruction: SYSTEM_INSTRUCTION,
       articleContext,
       catalogContext: chatService.buildCatalogContext(

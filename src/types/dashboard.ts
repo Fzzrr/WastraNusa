@@ -1,29 +1,8 @@
-export type DashboardStatTone = 'positive' | 'warning';
-export type StockAlertSeverity = 'low' | 'out';
-export type DashboardStatIcon = 'package' | 'book-open' | 'triangle-alert';
-
 export type DashboardNavItem = {
   title: string;
   href?: string;
   active?: boolean;
   disabled?: boolean;
-};
-
-export type DashboardStat = {
-  title: string;
-  value: number;
-  changeLabel: string;
-  tone: DashboardStatTone;
-  description: string;
-  footnote: string;
-  icon: DashboardStatIcon;
-};
-
-export type StockAlertItem = {
-  name: string;
-  category: string;
-  stockLabel: string;
-  severity: StockAlertSeverity;
 };
 
 export type PopularArticle = {
@@ -36,29 +15,9 @@ export type PopularArticle = {
   readTimeMinutes: number;
 };
 
-export type DashboardData = {
-  summary: DashboardStat[];
-  stockAlerts: StockAlertItem[];
-  popularArticles: PopularArticle[];
-};
-
 export type ArticleDashboardData = {
   totalArticles: number;
   popularArticles: PopularArticle[];
   weeklyDelta?: number;
   monthlyDelta?: number;
-};
-
-export type ProductDashboardData = {
-  totalProducts: number;
-  lowStockItems: Array<{
-    name: string;
-    category: string;
-    stock: number;
-    severity: StockAlertSeverity;
-  }>;
-  weeklyDelta?: number;
-  monthlyDelta?: number;
-  lowStockCount?: number;
-  outOfStockCount?: number;
 };

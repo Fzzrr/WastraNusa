@@ -1,0 +1,196 @@
+'use client';
+
+import { inputClassName } from '@/components/form-sections';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
+import { Input } from '@/components/ui/input';
+import { useWikipediaSummaryImport } from '@/hooks/use-wikipedia-summary';
+import { cn } from '@/lib/utils';
+import { type CreateArticleInput } from '@/schemas/article.schema';
+import { Download, Info, Loader2, Sparkles, X } from 'lucide-react';
+import { useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { toast } from 'sonner';
+
+export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
+  const { setValue } = useFormContext<CreateArticleInput>();
+  const [showWikiReminder, setShowWikiReminder] = useState(false);
+  const wiki = useWikipediaSummaryImport(isOpen);
+
+  const handleApplyWikimediaPreview = () => {
+    if (!wiki.preview) return;
+    const { mapped } = wiki.preview;
+    setValue('title', mapped.title, { shouldDirty: true });
+    setValue('excerpt', mapped.excerpt, { shouldDirty: true });
+    setValue('summary', mapped.summary, { shouldDirty: true });
+    setValue('description', mapped.description, { shouldDirty: true });
+    if (mapped.imageURL) {
+      setValue('imageURL', mapped.imageURL, { shouldDirty: true });
+    }
+    // If Wikipedia returned section headings, map them to form sections
+    if (mapped.sections && mapped.sections.length > 0) {
+      const mappedSections = mapped.sections.map((s, i) => ({
+        title: s.title || '',
+        content: s.content || '',
+        imageURL: s.imageURL ?? '',
+        order: i,
+      }));
+      setValue('sections', mappedSections, { shouldDirty: true });
+      toast.success(
+        'Data Wikipedia beserta bagian artikel diterapkan ke form.',
+      );
+    } else {
+      toast.success('Data Wikipedia diterapkan ke form.');
+    }
+    wiki.discardPreview();
+    setShowWikiReminder(true);
+  };
+  return (
+    <>
+      <div className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-border">
+        <div className="flex items-start gap-3">
+          <Sparkles className="shrink-0 size-5 text-brand" strokeWidth={1.75} />
+          <div>
+            <p className="font-semibold text-ink">Isi Cepat dari Wikipedia</p>
+            <p className="mt-0.5 text-[13px] text-ink-soft">
+              Tempel URL artikel (mis.{' '}
+              <span className="tabular-nums text-[13px]">
+                https://id.wikipedia.org/wiki/Batik
+              </span>
+              ), lalu tarik ringkasan REST API tanpa menyalin manual.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            placeholder="https://id.wikipedia.org/wiki/..."
+            value={wiki.url}
+            onChange={(e) => wiki.setUrl(e.target.value)}
+            disabled={wiki.isLoading}
+            className={cn(inputClassName, 'flex-1')}
+          />
+          <Button
+            type="button"
+            disabled={wiki.isLoading || !wiki.urlLooksValid || !!wiki.urlHint}
+            onClick={() => void wiki.fetchSummary()}
+            className="h-11 shrink-0 cursor-pointer gap-2 rounded-xl bg-brand px-4 text-on-field hover:bg-brand-strong"
+          >
+            {wiki.isLoading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                Memuat…
+              </>
+            ) : (
+              <>
+                <Download className="size-4" aria-hidden />
+                Tarik Data
+              </>
+            )}
+          </Button>
+        </div>
+
+        {wiki.url.trim().length > 0 && wiki.urlHint && (
+          <p className="text-[13px] text-warning">{wiki.urlHint}</p>
+        )}
+
+        {wiki.error && (
+          <Alert
+            variant="destructive"
+            className="border-destructive/30 bg-destructive/10"
+          >
+            <AlertTitle>Gagal Mengambil Data</AlertTitle>
+            <AlertDescription>{wiki.error}</AlertDescription>
+          </Alert>
+        )}
+
+        {wiki.preview && (
+          <div className="animate-in space-y-3 rounded-xl bg-card p-3 ring-1 ring-border fade-in slide-in-from-top-1">
+            <p className="text-[13px] font-semibold text-ink">
+              Pratinjau — Terapkan ke Form
+            </p>
+            {wiki.preview.wikiType === 'disambiguation' && (
+              <p className="rounded-lg border border-gold/50 bg-gold/15 px-2 py-1.5 text-[13px] text-warning">
+                Halaman ini berupa disambiguasi Wikipedia; ringkasan mungkin
+                pendek — selalu sesuaikan untuk konteks WastraNusa.
+              </p>
+            )}
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {wiki.preview.mapped.imageURL ? (
+                <Image
+                  src={wiki.preview.mapped.imageURL}
+                  alt=""
+                  width={112}
+                  height={112}
+                  unoptimized
+                  className="h-28 w-full rounded-lg border border-border bg-surface object-cover sm:w-28"
+                />
+              ) : (
+                <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-border bg-card px-2 text-center text-[13px] text-muted-foreground sm:w-28">
+                  Tidak ada gambar thumbnail
+                </div>
+              )}
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="leading-snug font-medium text-foreground">
+                  {wiki.preview.mapped.title}
+                </p>
+                <p className="line-clamp-4 text-base text-muted-foreground">
+                  {wiki.preview.mapped.summary}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button
+                type="button"
+                size="sm"
+                className="cursor-pointer rounded-full bg-brand text-on-field hover:bg-brand-strong"
+                onClick={handleApplyWikimediaPreview}
+              >
+                Terapkan ke Form
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="cursor-pointer rounded-full"
+                onClick={wiki.discardPreview}
+              >
+                Buang Pratinjau
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {showWikiReminder && (
+        <div className="flex animate-in items-start gap-3 rounded-xl border border-gold/50 bg-gold/15 px-4 py-3 text-[15px] text-warning fade-in">
+          <Info className="mt-0.5 size-4 shrink-0 text-warning" />
+          <div className="flex-1">
+            <p className="font-semibold">
+              Lengkapi Field Berikut secara Manual
+            </p>
+            <p className="mt-0.5 text-warning">
+              Wikipedia tidak dapat mengisi:{' '}
+              <span className="font-medium">
+                Label Motif, Topik, Pulau, Provinsi, Daerah
+              </span>
+              . Field-field ini wajib diisi sebelum menyimpan artikel.
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-label="Tutup peringatan"
+            onClick={() => setShowWikiReminder(false)}
+            className="ml-1 cursor-pointer rounded-lg p-0.5 text-warning transition-colors hover:bg-gold/30"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      )}
+    </>
+  );
+}

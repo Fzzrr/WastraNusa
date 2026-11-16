@@ -33,7 +33,13 @@ export const GET = withApiAuth(async ({ req, userId }) => {
 
       const write = (chunk: string) => {
         if (closed) return;
-        controller.enqueue(encoder.encode(chunk));
+        try {
+          controller.enqueue(encoder.encode(chunk));
+        } catch {
+          // Stream closed before `abort` fired: detach now instead of keeping
+          // listeners and the heartbeat alive for a dead client.
+          cleanup();
+        }
       };
 
       // Map each subscribed event to its bound handler so we can detach them.

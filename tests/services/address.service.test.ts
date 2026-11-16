@@ -143,6 +143,37 @@ describe('addressService', { tags: ['backend'] }, () => {
       expect(mockRepo.findById).toHaveBeenCalledWith('addr-1', 'user-1');
       expect(mockRepo.delete).toHaveBeenCalledWith('addr-1', 'user-1');
     });
+
+    it('archives instead of deleting an address an order points at', async () => {
+      mockRepo.findById.mockResolvedValue({
+        ...MOCK_ADDRESS,
+        isDefault: false,
+      } as never);
+      mockRepo.isUsedByOrder.mockResolvedValueOnce(true);
+      mockRepo.archive.mockResolvedValue(MOCK_ADDRESS as never);
+
+      await addressService.deleteAddress('addr-1', 'user-1');
+
+      expect(mockRepo.archive).toHaveBeenCalledWith('addr-1');
+      expect(mockRepo.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('updateAddress on an address used by an order', () => {
+    it('replaces the row so the order keeps its old address', async () => {
+      mockRepo.findById.mockResolvedValue(MOCK_ADDRESS as never);
+      mockRepo.isUsedByOrder.mockResolvedValueOnce(true);
+      mockRepo.replace.mockResolvedValue(MOCK_ADDRESS as never);
+
+      await addressService.updateAddress('addr-1', 'user-1', {
+        city: 'Bandung',
+      });
+
+      expect(mockRepo.replace).toHaveBeenCalledWith(MOCK_ADDRESS, {
+        city: 'Bandung',
+      });
+      expect(mockRepo.update).not.toHaveBeenCalled();
+    });
   });
 
   describe('setDefaultAddress', () => {

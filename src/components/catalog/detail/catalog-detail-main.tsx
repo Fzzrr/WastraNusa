@@ -1,10 +1,13 @@
 'use client';
 
+import { openSellerChat } from '@/components/chat/chat-floating-widget';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail } from '@/hooks/use-article';
 import { useAddToCart, useCart, useUpdateCartItem } from '@/hooks/use-cart';
+import { useStartConversation } from '@/hooks/use-conversations';
 import { useProductCatalogDetail } from '@/hooks/use-product-catalog';
 import { authClient } from '@/lib/auth/auth-client';
+import { loginUrlFor } from '@/lib/auth/redirect';
 import { setCheckoutSession } from '@/lib/checkout-session';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -19,77 +22,77 @@ import { CatalogDetailProductSummary } from './catalog-detail-product-summary';
 
 function CatalogDetailSkeleton() {
   return (
-    <main className="border-t border-[#ddd4c5]">
+    <main>
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-6 md:px-6 lg:px-8">
-        <Skeleton className="h-5 w-80 bg-[#e6dfd1]" />
+        <Skeleton className="h-5 w-80 bg-surface" />
 
         <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
           <div className="space-y-3">
-            <Skeleton className="h-[360px] w-full rounded-2xl bg-[#ece2d4]" />
+            <Skeleton className="h-[360px] w-full rounded-xl bg-surface" />
             <div className="grid grid-cols-4 gap-2">
-              <Skeleton className="h-20 rounded-lg bg-[#e6dfd1]" />
-              <Skeleton className="h-20 rounded-lg bg-[#e6dfd1]" />
-              <Skeleton className="h-20 rounded-lg bg-[#e6dfd1]" />
-              <Skeleton className="h-20 rounded-lg bg-[#e6dfd1]" />
+              <Skeleton className="h-20 rounded-lg bg-surface" />
+              <Skeleton className="h-20 rounded-lg bg-surface" />
+              <Skeleton className="h-20 rounded-lg bg-surface" />
+              <Skeleton className="h-20 rounded-lg bg-surface" />
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="flex gap-2">
-              <Skeleton className="h-6 w-24 rounded-md bg-[#e6dfd1]" />
-              <Skeleton className="h-6 w-24 rounded-md bg-[#e6dfd1]" />
+              <Skeleton className="h-6 w-24 rounded-md bg-surface" />
+              <Skeleton className="h-6 w-24 rounded-md bg-surface" />
             </div>
-            <Skeleton className="h-12 w-3/4 bg-[#e6dfd1]" />
-            <Skeleton className="h-4 w-2/3 bg-[#e6dfd1]" />
-            <Skeleton className="h-4 w-32 bg-[#e6dfd1]" />
-            <Skeleton className="h-24 w-full rounded-2xl bg-[#e6dfd1]" />
-            <Skeleton className="h-16 w-full bg-[#e6dfd1]" />
+            <Skeleton className="h-12 w-3/4 bg-surface" />
+            <Skeleton className="h-4 w-2/3 bg-surface" />
+            <Skeleton className="h-4 w-32 bg-surface" />
+            <Skeleton className="h-24 w-full rounded-xl bg-surface" />
+            <Skeleton className="h-16 w-full bg-surface" />
             <div className="flex gap-2">
-              <Skeleton className="h-9 w-24 rounded-full bg-[#e6dfd1]" />
-              <Skeleton className="h-9 w-24 rounded-full bg-[#e6dfd1]" />
-              <Skeleton className="h-9 w-24 rounded-full bg-[#e6dfd1]" />
+              <Skeleton className="h-9 w-24 rounded-full bg-surface" />
+              <Skeleton className="h-9 w-24 rounded-full bg-surface" />
+              <Skeleton className="h-9 w-24 rounded-full bg-surface" />
             </div>
             <div className="flex gap-2">
-              <Skeleton className="h-10 w-14 rounded-lg bg-[#e6dfd1]" />
-              <Skeleton className="h-10 w-14 rounded-lg bg-[#e6dfd1]" />
-              <Skeleton className="h-10 w-14 rounded-lg bg-[#e6dfd1]" />
+              <Skeleton className="h-10 w-14 rounded-lg bg-surface" />
+              <Skeleton className="h-10 w-14 rounded-lg bg-surface" />
+              <Skeleton className="h-10 w-14 rounded-lg bg-surface" />
             </div>
             <div className="flex items-center gap-3">
-              <Skeleton className="h-11 w-36 rounded-xl bg-[#e6dfd1]" />
-              <Skeleton className="h-4 w-24 bg-[#e6dfd1]" />
+              <Skeleton className="h-11 w-36 rounded-xl bg-surface" />
+              <Skeleton className="h-4 w-24 bg-surface" />
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
-              <Skeleton className="h-11 rounded-xl bg-[#e6dfd1]" />
-              <Skeleton className="h-11 rounded-xl bg-[#e6dfd1]" />
+              <Skeleton className="h-11 rounded-xl bg-surface" />
+              <Skeleton className="h-11 rounded-xl bg-surface" />
             </div>
           </div>
         </div>
       </section>
 
       <section className="mx-auto grid w-full max-w-[1320px] gap-4 px-4 pb-10 md:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-3 rounded-2xl border border-[#d9d0c2] bg-[#f7f3ea] p-5">
+        <div className="space-y-3 rounded-xl border border-border bg-surface p-5">
           <div className="flex gap-3">
-            <Skeleton className="h-8 w-24 bg-[#e6dfd1]" />
-            <Skeleton className="h-8 w-24 bg-[#e6dfd1]" />
+            <Skeleton className="h-8 w-24 bg-surface" />
+            <Skeleton className="h-8 w-24 bg-surface" />
           </div>
-          <Skeleton className="h-9 w-52 bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-11/12 bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-10/12 bg-[#e6dfd1]" />
+          <Skeleton className="h-9 w-52 bg-surface" />
+          <Skeleton className="h-4 w-full bg-surface" />
+          <Skeleton className="h-4 w-11/12 bg-surface" />
+          <Skeleton className="h-4 w-10/12 bg-surface" />
           <div className="grid gap-3 md:grid-cols-2">
-            <Skeleton className="h-16 rounded-xl bg-[#e6dfd1]" />
-            <Skeleton className="h-16 rounded-xl bg-[#e6dfd1]" />
+            <Skeleton className="h-16 rounded-xl bg-surface" />
+            <Skeleton className="h-16 rounded-xl bg-surface" />
           </div>
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-[#ddd3c3] bg-[#f6f2e9] p-3">
-          <Skeleton className="h-8 w-48 bg-[#e6dfd1]" />
-          <Skeleton className="h-40 w-full rounded-xl bg-[#e6dfd1]" />
-          <Skeleton className="h-7 w-3/4 bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-full bg-[#e6dfd1]" />
-          <Skeleton className="h-4 w-11/12 bg-[#e6dfd1]" />
-          <Skeleton className="h-24 w-full rounded-xl bg-[#e6dfd1]" />
-          <Skeleton className="h-10 w-full rounded-xl bg-[#e6dfd1]" />
+        <div className="space-y-3 rounded-xl border border-border bg-surface p-3">
+          <Skeleton className="h-8 w-48 bg-surface" />
+          <Skeleton className="h-40 w-full rounded-xl bg-surface" />
+          <Skeleton className="h-7 w-3/4 bg-surface" />
+          <Skeleton className="h-4 w-full bg-surface" />
+          <Skeleton className="h-4 w-11/12 bg-surface" />
+          <Skeleton className="h-24 w-full rounded-xl bg-surface" />
+          <Skeleton className="h-10 w-full rounded-xl bg-surface" />
         </div>
       </section>
     </main>
@@ -103,6 +106,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   const { data: cart } = useCart({ enabled: Boolean(session) });
   const addToCartMutation = useAddToCart();
   const updateCartItemMutation = useUpdateCartItem();
+  const startConversation = useStartConversation();
   const router = useRouter();
   const [selectedVariantName, setSelectedVariantName] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -151,7 +155,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   if (!isPending && error) {
     return (
       <main className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-6 md:px-6 lg:px-8">
-        <p className="text-sm text-[#8b5e4a]">
+        <p className="text-base text-destructive">
           Gagal memuat detail produk. Silakan coba lagi.
         </p>
       </main>
@@ -161,7 +165,7 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
   if (!product) {
     return (
       <main className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-6 md:px-6 lg:px-8">
-        <p className="text-sm text-[#8b5e4a]">Produk tidak ditemukan.</p>
+        <p className="text-base text-destructive">Produk tidak ditemukan.</p>
       </main>
     );
   }
@@ -176,19 +180,11 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
       : 0;
   const isCartActionPending =
     addToCartMutation.isPending || updateCartItemMutation.isPending;
-  const encyclopediaFacts: readonly [string, string][] = [
-    ['Pulau Asal', product.island],
-    ['Provinsi', product.province],
-    [
-      'Tanggal Diunggah',
-      new Date(product.updatedAt).toLocaleDateString('id-ID'),
-    ],
-  ];
 
   const ensureAuthenticated = () => {
     if (!session && !isSessionPending) {
       toast.error('Silakan login terlebih dahulu untuk melanjutkan.');
-      router.push('/login');
+      router.push(loginUrlFor(`/catalog/${slug}`));
       return false;
     }
 
@@ -290,15 +286,40 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
     }
   };
 
+  const seller = product.seller;
+  const handleAskSeller = async () => {
+    if (!seller || !ensureAuthenticated()) {
+      return;
+    }
+
+    try {
+      const conversation = await startConversation.mutateAsync(seller.id);
+      openSellerChat({
+        conversationId: conversation.id,
+        product: {
+          id: product.id,
+          slug: product.slug,
+          name: product.name,
+          imageURL: activeImageURL ?? null,
+          price: selectedVariantPrice,
+          variantId: selectedVariant?.id ?? null,
+          variantName: selectedVariant?.name ?? null,
+        },
+      });
+    } catch {
+      toast.error('Gagal memulai percakapan. Silakan coba lagi.');
+    }
+  };
+
   return (
-    <main className="border-t border-[#ddd4c5]">
+    <main>
       <section className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-6 md:px-6 lg:px-8">
         <CatalogDetailBreadcrumb
           category={product.clothingType}
           name={product.name}
         />
 
-        <div className="mt-4 grid gap-5 xl:grid-cols-[minmax(0,430px)_minmax(0,1fr)]">
+        <div className="mt-6 grid gap-8 xl:grid-cols-[minmax(0,480px)_minmax(0,1fr)] xl:gap-14">
           <CatalogDetailGallery
             category={product.clothingType}
             imageURL={activeImageURL}
@@ -322,11 +343,17 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
             isCartActionPending={isCartActionPending}
+            onAskSeller={
+              seller && seller.id !== session?.user.id
+                ? handleAskSeller
+                : undefined
+            }
+            isAskSellerPending={startConversation.isPending}
           />
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-[1320px] gap-4 px-4 pb-10 md:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <section className="mx-auto mt-10 grid w-full max-w-[1320px] gap-10 px-4 pb-10 md:px-6 lg:px-8 xl:grid-cols-[minmax(0,1fr)_340px]">
         <CatalogDetailContent
           activeTab={activeTab}
           product={product}
@@ -334,7 +361,6 @@ export function CatalogDetailMain({ slug }: { slug: string }) {
           onTabChange={setActiveTab}
         />
         <CatalogDetailEncyclopedia
-          encyclopediaFacts={encyclopediaFacts}
           category={product.clothingType}
           linkedArticle={linkedArticle}
           isLinkedArticlePending={isLinkedArticlePending}

@@ -24,14 +24,15 @@ export const sellerDashboardRepository = {
       select: {
         id: true,
         totalAmount: true,
-        quantity: true,
+        shippingCost: true,
         paidAt: true,
-        productId: true,
-        productName: true,
-        product: {
+        items: {
           select: {
-            name: true,
+            productId: true,
+            productName: true,
             clothingType: true,
+            quantity: true,
+            unitPrice: true,
           },
         },
       },

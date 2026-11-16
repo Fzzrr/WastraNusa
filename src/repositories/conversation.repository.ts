@@ -25,13 +25,12 @@ const normalizePair = (a: string, b: string): [string, string] =>
  * lives here; the service layer never touches Prisma directly.
  */
 export const conversationRepository = {
-  /** Whether a user exists (used to validate the counterpart before starting). */
-  participantExists: async (userId: string): Promise<boolean> => {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
+  /** The given users' roles; missing ids are simply absent. */
+  findRoles: async (userIds: string[]) => {
+    return prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, role: true },
     });
-    return Boolean(user);
   },
 
   /** Find the single normalized conversation between two users, if any. */

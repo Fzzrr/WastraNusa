@@ -1,6 +1,6 @@
 'use client';
 
-import type { JSendResponse } from '@/lib/jsend';
+import { parseJSend } from '@/lib/api-client';
 import type {
   AddToCartInput,
   RemoveFromCartInput,
@@ -57,28 +57,6 @@ export const cartKeys = {
   list: () => [...cartKeys.lists()] as const,
   count: () => [...cartKeys.all, 'count'] as const,
 };
-
-// --------------- Fetch Helpers ---------------
-
-async function parseJSend<T>(response: Response): Promise<T> {
-  const body = (await response.json()) as JSendResponse<T>;
-
-  if (body.status === 'success') {
-    return body.data as T;
-  }
-
-  if (body.status === 'fail') {
-    const message =
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'message' in body.data
-        ? String((body.data as { message: unknown }).message)
-        : 'Request failed';
-    throw new Error(message);
-  }
-
-  throw new Error(body.message);
-}
 
 async function fetchCartApi(): Promise<Cart> {
   const response = await fetch('/api/cart', {

@@ -88,5 +88,9 @@ export class RateLimiter {
   }
 }
 
-// Global singleton rate limiter: 10 requests per minute per IP
+// ponytail: in-memory, so limits are per server process; move to Redis or the
+// DB when running more than one instance.
+// 10 requests per minute per IP / user.
 export const chatRateLimiter = new RateLimiter(10, 60_000);
+// Shared budget for all anonymous callers together.
+export const anonymousChatRateLimiter = new RateLimiter(30, 60_000);

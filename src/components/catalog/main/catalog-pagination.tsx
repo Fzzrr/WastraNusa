@@ -25,12 +25,12 @@ export function CatalogPagination({
   );
 
   return (
-    <div className="mt-7 border-t border-[#d7cebf] pt-4">
+    <div className="mt-10">
       <div className="flex flex-wrap items-center justify-center gap-1.5">
         <Button
           variant="outline"
           size="sm"
-          className="rounded-md border-[#dad2c4] bg-[#f8f4eb] text-xs"
+          className="h-10 rounded-full border-0 bg-transparent px-4 text-[15px] text-ink hover:bg-surface"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
@@ -43,12 +43,12 @@ export function CatalogPagination({
             <Button
               variant={currentPage === 1 ? 'default' : 'outline'}
               size="icon-sm"
-              className="rounded-md border-[#dad2c4] bg-[#f8f4eb] text-[#4e6558]"
+              className="size-10 rounded-full border-0 bg-transparent text-[15px] text-ink tabular-nums hover:bg-surface"
               onClick={() => onPageChange(1)}
             >
               1
             </Button>
-            <span className="px-1 text-[#7b776d]">...</span>
+            <span className="px-1 text-ink-soft">...</span>
           </>
         ) : null}
 
@@ -58,10 +58,10 @@ export function CatalogPagination({
             variant={page === currentPage ? 'default' : 'outline'}
             size="icon-sm"
             className={cn(
-              'rounded-md',
+              'size-10 rounded-full border-0 text-[15px] tabular-nums',
               page === currentPage
-                ? 'bg-[#2f5f49] text-[#edf4ec] hover:bg-[#244938]'
-                : 'border-[#dad2c4] bg-[#f8f4eb] text-[#4e6558]',
+                ? 'bg-brand font-semibold text-on-field hover:bg-brand-strong'
+                : 'bg-transparent text-ink hover:bg-surface',
             )}
             onClick={() => onPageChange(page)}
           >
@@ -71,11 +71,11 @@ export function CatalogPagination({
 
         {endPage < totalPages ? (
           <>
-            <span className="px-1 text-[#7b776d]">...</span>
+            <span className="px-1 text-ink-soft">...</span>
             <Button
               variant={totalPages === currentPage ? 'default' : 'outline'}
               size="icon-sm"
-              className="rounded-md border-[#dad2c4] bg-[#f8f4eb] text-[#4e6558]"
+              className="size-10 rounded-full border-0 bg-transparent text-[15px] text-ink tabular-nums hover:bg-surface"
               onClick={() => onPageChange(totalPages)}
             >
               {totalPages}
@@ -86,7 +86,7 @@ export function CatalogPagination({
         <Button
           variant="outline"
           size="sm"
-          className="rounded-md border-[#dad2c4] bg-[#f8f4eb] text-xs"
+          className="h-10 rounded-full border-0 bg-transparent px-4 text-[15px] text-ink hover:bg-surface"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage >= totalPages}
         >

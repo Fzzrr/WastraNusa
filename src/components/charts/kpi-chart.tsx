@@ -46,8 +46,14 @@ export function KpiChart({
   const [active, setActive] = useState<number | null>(null);
   // Last hovered index stays rendered while fading out (smooth hover).
   const [shown, setShown] = useState<number | null>(null);
-  const { lo, hi } = axisRange(values, type);
-  const ticks = [lo, (lo + hi) / 2, hi];
+  const range = axisRange(values, type);
+  // Counts (e.g. orders) get whole-number ticks only: a 0.5 tick would be
+  // rounded to a label that repeats its neighbour.
+  const integer = values.every(Number.isInteger);
+  const lo = integer ? Math.floor(range.lo) : range.lo;
+  const hi = range.hi;
+  const mid = (lo + hi) / 2;
+  const ticks = integer && !Number.isInteger(mid) ? [lo, hi] : [lo, mid, hi];
   const fraction = (value: number) => (value - lo) / (hi - lo);
   const xFraction = (i: number) =>
     values.length <= 1 ? 0.5 : i / (values.length - 1);
@@ -78,8 +84,8 @@ export function KpiChart({
           <span
             key={tick}
             className={cn(
-              'absolute right-0 -translate-y-1/2 text-[10px] tabular-nums',
-              isDark ? 'text-white/60' : 'text-[#9a948a]',
+              'absolute right-0 -translate-y-1/2 text-xs tabular-nums',
+              isDark ? 'text-white/60' : 'text-ink-soft',
             )}
             style={{ top: `${(1 - fraction(tick)) * 100}%` }}
           >
@@ -100,7 +106,7 @@ export function KpiChart({
               key={tick}
               className={cn(
                 'absolute inset-x-0 h-px',
-                isDark ? 'bg-white/10' : 'bg-[#efe9df]',
+                isDark ? 'bg-white/10' : 'bg-border',
               )}
               style={{ top: `${(1 - fraction(tick)) * 100}%` }}
             />
@@ -176,9 +182,7 @@ export function KpiChart({
             <div
               className={cn(
                 'pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap shadow-lg transition-[left,top,opacity] duration-300 ease-out',
-                isDark
-                  ? 'bg-[#fffdfa] text-[#2f3a33]'
-                  : 'bg-[#2f3a33] text-white',
+                isDark ? 'bg-card text-ink' : 'bg-ink text-white',
               )}
               style={{
                 left: `${Math.min(85, Math.max(15, centerFraction(shown) * 100))}%`,
@@ -188,8 +192,8 @@ export function KpiChart({
             >
               <p
                 className={cn(
-                  'text-[10px]',
-                  isDark ? 'text-[#9a8f80]' : 'text-white/60',
+                  'text-xs',
+                  isDark ? 'text-ink-soft' : 'text-white/60',
                 )}
               >
                 {labels[shown]}
@@ -207,14 +211,14 @@ export function KpiChart({
               <span
                 key={label}
                 className={cn(
-                  'flex-1 text-center text-[10px] transition-colors',
+                  'flex-1 text-center text-xs transition-colors',
                   active === i
                     ? isDark
                       ? 'font-semibold text-white'
-                      : 'font-semibold text-[#2f4f3f]'
+                      : 'font-semibold text-brand-strong'
                     : isDark
                       ? 'text-white/60'
-                      : 'text-[#9a948a]',
+                      : 'text-ink-soft',
                 )}
               >
                 {label}
@@ -223,10 +227,10 @@ export function KpiChart({
               <span
                 key={label}
                 className={cn(
-                  'absolute -translate-x-1/2 text-[10px] transition-colors',
+                  'absolute -translate-x-1/2 text-xs transition-colors',
                   active === i
-                    ? 'font-semibold text-[#2f4f3f]'
-                    : 'text-[#9a948a]',
+                    ? 'font-semibold text-brand-strong'
+                    : 'text-ink-soft',
                 )}
                 style={{ left: `${xFraction(i) * 100}%` }}
               >

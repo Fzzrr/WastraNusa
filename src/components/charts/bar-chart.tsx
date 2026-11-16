@@ -50,7 +50,7 @@ export function BarChart({
               className="group flex h-full flex-1 flex-col items-center justify-end gap-1"
               title={`${d.label}: ${valueFormatter(d.value)}`}
             >
-              <span className="text-muted-foreground text-[10px] font-medium opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="text-muted-foreground text-xs font-medium opacity-0 transition-opacity group-hover:opacity-100">
                 {valueFormatter(d.value)}
               </span>
               <div
@@ -69,7 +69,7 @@ export function BarChart({
         {data.map((d) => (
           <span
             key={d.label}
-            className="text-muted-foreground flex-1 text-center text-[11px]"
+            className="text-muted-foreground flex-1 text-center text-xs"
           >
             {d.label}
           </span>

@@ -3,40 +3,32 @@
 import { useAdminSidebar } from '@/components/admin/admin-sidebar-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
-import { type DashboardData, type DashboardNavItem } from '@/types/dashboard';
+import { type DashboardNavItem } from '@/types/dashboard';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   BookOpen,
   LayoutDashboard,
   LogOut,
   Package,
-  Package2,
-  ShoppingBag,
-  Store,
   UserRound,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 const navigationIcons = {
   Dashboard: LayoutDashboard,
   Artikel: BookOpen,
-  'Seller Management': Package,
-  'Produk & Inventori': Package2,
-  Pesanan: ShoppingBag,
+  'Manajemen Penjual': Package,
 } as const;
 
 const ADMIN_NAVIGATION = [
   { title: 'Dashboard', href: '/admin/dashboard' },
   { title: 'Artikel', href: '/admin/article' },
-  { title: 'Seller Management', href: '/admin/seller-management' },
-  // deprecated: superseded by seller panel
-  // { title: 'Produk & Inventori', href: '/admin/product-inventory' },
-  // { title: 'Pesanan', href: '/admin/pesanan' },
+  { title: 'Manajemen Penjual', href: '/admin/seller-management' },
 ];
 
 function SidebarNavigationItem({
@@ -49,7 +41,7 @@ function SidebarNavigationItem({
   const Icon = navigationIcons[item.title as keyof typeof navigationIcons];
   const className = cn(
     'flex h-12 items-center gap-3 rounded-xl px-3 text-[15px] text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground',
-    item.active && 'bg-white/10 text-[#e08a55] hover:text-[#e08a55]',
+    item.active && 'bg-white/10 text-gold hover:text-gold',
     item.disabled && 'pointer-events-none opacity-50',
   );
   const content = (
@@ -59,9 +51,9 @@ function SidebarNavigationItem({
       {count ? (
         <span
           className={cn(
-            'rounded-full px-2 py-0.5 text-xs font-medium',
+            'rounded-full px-2 py-0.5 text-[13px] font-medium',
             item.active
-              ? 'bg-[#e08a55]/20 text-[#e08a55]'
+              ? 'bg-gold/20 text-gold'
               : 'bg-white/15 text-sidebar-foreground/80',
           )}
         >
@@ -88,19 +80,14 @@ function SidebarNavigationItem({
 
 type NavCounts = Partial<Record<string, number>>;
 
-function AdminSidebarContent({
-  navCounts,
-}: {
-  data: Partial<DashboardData>;
-  navCounts?: NavCounts;
-}) {
+function AdminSidebarContent({ navCounts }: { navCounts?: NavCounts }) {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
 
   const adminName = session?.user?.name ?? 'Admin WastraNusa';
-  const adminRole = session?.user?.role === 'admin' ? 'Super User' : 'Staff';
+  const adminRole = session?.user?.role === 'admin' ? 'Administrator' : 'Staf';
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -116,7 +103,7 @@ function AdminSidebarContent({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
-        <div className="relative size-12 shrink-0 overflow-hidden">
+        <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-ground">
           <Image
             src="/logo.png"
             alt="WastraNusa"
@@ -129,7 +116,7 @@ function AdminSidebarContent({
           <p className="truncate text-base font-bold text-sidebar-foreground">
             WastraNusa
           </p>
-          <p className="text-sm text-[#d2a36d]">Panel Admin</p>
+          <p className="text-base text-gold">Panel Admin</p>
         </div>
       </div>
 
@@ -148,13 +135,6 @@ function AdminSidebarContent({
       <div className="space-y-3 px-3 pb-4">
         <nav className="space-y-2">
           <Link
-            href="/profile/seller-application"
-            className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          >
-            <Store className="size-4" />
-            <span>Toko Saya</span>
-          </Link>
-          <Link
             href="/"
             className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
           >
@@ -163,7 +143,7 @@ function AdminSidebarContent({
           </Link>
           <Button
             variant="ghost"
-            className="h-10 w-full justify-start gap-2 rounded-xl px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            className="h-10 w-full justify-start gap-2 rounded-full px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             onClick={handleSignOut}
           >
             <LogOut className="size-4" />
@@ -171,17 +151,19 @@ function AdminSidebarContent({
           </Button>
         </nav>
         <div className="h-px bg-white/10" />
-        <div className="flex items-center gap-3 rounded-2xl bg-white/8 px-3 py-3">
+        <div className="flex items-center gap-3 rounded-xl bg-white/8 px-3 py-3">
           <Avatar size="sm" className="size-9">
-            <AvatarFallback className="bg-[#d2a36d] font-semibold text-sidebar-foreground">
+            <AvatarFallback className="bg-gold font-semibold text-sidebar-foreground">
               {adminName.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-sidebar-foreground">
+            <p className="truncate text-base font-medium text-sidebar-foreground">
               {adminName}
             </p>
-            <p className="text-xs text-sidebar-foreground/75">{adminRole}</p>
+            <p className="text-[13px] text-sidebar-foreground/75">
+              {adminRole}
+            </p>
           </div>
         </div>
       </div>
@@ -189,19 +171,13 @@ function AdminSidebarContent({
   );
 }
 
-export function AdminSidebar({
-  data,
-  navCounts,
-}: {
-  data: Partial<DashboardData>;
-  navCounts?: NavCounts;
-}) {
+export function AdminSidebar({ navCounts }: { navCounts?: NavCounts }) {
   const { open, setOpen } = useAdminSidebar();
 
   return (
     <>
-      <aside className="sticky top-0 hidden h-screen w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
-        <AdminSidebarContent data={data} navCounts={navCounts} />
+      <aside className="sticky top-0 hidden h-dvh w-[var(--sidebar-width)] shrink-0 bg-sidebar md:block">
+        <AdminSidebarContent navCounts={navCounts} />
       </aside>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -210,7 +186,7 @@ export function AdminSidebar({
           showCloseButton={false}
           className="w-[var(--sidebar-width)] max-w-[85%] border-0 bg-sidebar p-0 text-sidebar-foreground"
         >
-          <AdminSidebarContent data={data} navCounts={navCounts} />
+          <AdminSidebarContent navCounts={navCounts} />
         </SheetContent>
       </Sheet>
     </>

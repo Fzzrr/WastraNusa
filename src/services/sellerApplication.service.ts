@@ -3,7 +3,6 @@ import { isAdmin } from '@/lib/auth/roles';
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { sellerApplicationRepository } from '@/repositories/sellerApplication.repository';
-import { shopProfileRepository } from '@/repositories/shopProfile.repository';
 import {
   type CreateSellerApplicationInput,
   type ReviewSellerApplicationInput,
@@ -19,30 +18,23 @@ export const sellerApplicationService = {
 
   /**
    * Submit a seller application. A user may only have one; a previously
-   * rejected application can be re-submitted (reset to pending).
-   *
-   * Admins open their shop instantly: the application is self-approved and
-   * their role stays `admin` (they then have user + seller + admin access).
+   * rejected application can be re-submitted (reset to pending). Admins
+   * moderate sellers, so they can't open a shop themselves.
    */
   createApplication: async (
     userId: string,
     data: CreateSellerApplicationInput,
   ) => {
+    if (isAdmin(await sellerApplicationRepository.findUserRole(userId))) {
+      throw new ApiError('Admin tidak dapat membuka toko', 403);
+    }
+
     const existing = await sellerApplicationRepository.findByUser(userId);
-    const isAdminApplicant = isAdmin(
-      await sellerApplicationRepository.findUserRole(userId),
-    );
-    const reviewState = isAdminApplicant
-      ? {
-          status: SellerApplicationStatus.approved,
-          reviewedById: userId,
-          reviewedAt: new Date(),
-        }
-      : {
-          status: SellerApplicationStatus.pending,
-          reviewedById: null,
-          reviewedAt: null,
-        };
+    const reviewState = {
+      status: SellerApplicationStatus.pending,
+      reviewedById: null,
+      reviewedAt: null,
+    };
 
     if (existing) {
       if (existing.status === SellerApplicationStatus.pending) {
@@ -58,9 +50,6 @@ export const sellerApplicationService = {
         ...reviewState,
         rejectionReason: null,
       });
-      if (reviewState.status === SellerApplicationStatus.approved) {
-        await shopProfileRepository.createFromApplication(userId, data);
-      }
       logger.info('Seller application re-submitted', {
         applicationId: existing.id,
         userId,
@@ -75,9 +64,6 @@ export const sellerApplicationService = {
       id,
       userId,
     });
-    if (reviewState.status === SellerApplicationStatus.approved) {
-      await shopProfileRepository.createFromApplication(userId, data);
-    }
     logger.info('Seller application created', { applicationId: id, userId });
     return application;
   },

@@ -7,7 +7,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#f5f3ec] text-[#2d4f3f]">
+    <div className="min-h-dvh bg-ground text-ink">
       <Header homeHref="/" />
       {children}
       <Footer />

@@ -1,6 +1,30 @@
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { cartRepository } from '@/repositories/cart.repository';
+import { productRepository } from '@/repositories/product.repository';
+import { productVariantRepository } from '@/repositories/productVariant.repository';
+
+/**
+ * Same rules checkout enforces, applied early so the cart never holds an item
+ * that can't be bought: stock lives on variants, so every item needs one.
+ */
+async function assertVariantStock(
+  productId: string,
+  variantId: string | null,
+  quantity: number,
+) {
+  if (!variantId) {
+    throw new ApiError('Pilih varian produk terlebih dahulu', 400);
+  }
+
+  const variant = await productVariantRepository.findVariantById(variantId);
+  if (!variant || variant.productId !== productId) {
+    throw new ApiError('Varian tidak sesuai dengan produk ini', 400);
+  }
+  if (variant.stock < quantity) {
+    throw new ApiError(`Stok tidak mencukupi (tersisa ${variant.stock})`, 400);
+  }
+}
 
 export const cartService = {
   /**
@@ -24,7 +48,26 @@ export const cartService = {
       throw new ApiError('Jumlah harus lebih dari 0', 400);
     }
 
+    // Same product rules as checkout, so the cart never holds an item that
+    // can't be bought.
+    const product = await productRepository.findProductById(productId);
+    if (!product || product.status !== 'active' || !product.sellerId) {
+      throw new ApiError('Produk tidak tersedia', 400);
+    }
+    if (product.sellerId === userId) {
+      throw new ApiError(
+        'Anda tidak dapat membeli produk dari toko sendiri',
+        400,
+      );
+    }
+
     const cart = await cartRepository.findOrCreateByUser(userId);
+    const existingQuantity =
+      cart.items.find(
+        (item) => item.productId === productId && item.variantId === variantId,
+      )?.quantity ?? 0;
+    await assertVariantStock(productId, variantId, existingQuantity + quantity);
+
     await cartRepository.addItem(
       cart.id,
       productId,
@@ -62,10 +105,11 @@ export const cartService = {
       throw new ApiError('Keranjang tidak ditemukan', 404);
     }
 
-    const itemExists = cart.items.some((item) => item.id === cartItemId);
-    if (!itemExists) {
+    const item = cart.items.find((item) => item.id === cartItemId);
+    if (!item) {
       throw new ApiError('Item tidak ditemukan di keranjang', 404);
     }
+    await assertVariantStock(item.productId, item.variantId, quantity);
 
     await cartRepository.updateItemQuantity(cartItemId, quantity, userId);
 

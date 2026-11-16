@@ -1,3 +1,5 @@
+import { withApiAdmin } from '@/lib/api-handler';
+import { logError } from '@/lib/logger';
 import { HTMLStateMachineParser } from '@/lib/wikimedia/html-parser';
 import { NextResponse } from 'next/server';
 
@@ -17,7 +19,7 @@ const BOILERPLATE_SECTION_TITLES = new Set([
   'external references',
 ]);
 
-export async function GET(req: Request) {
+export const GET = withApiAdmin(async ({ req }) => {
   try {
     const { searchParams } = new URL(req.url);
     const origin = searchParams.get('origin');
@@ -177,10 +179,10 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ sections: outSections });
   } catch (err) {
-    // generic server error
+    logError(err, { action: 'GET /api/wikimedia/mobile-sections' });
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : String(err) },
+      { error: 'Gagal mengambil data' },
       { status: 500 },
     );
   }
-}
+});

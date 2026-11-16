@@ -2,7 +2,7 @@
 
 import { CatalogFiltersSidebar } from '@/components/catalog/main/catalog-filters-sidebar';
 import type { PricePresetKey } from '@/components/catalog/main/catalog-filters-sidebar';
-import { Gender, ProductStatus } from '@/generated/prisma/enums';
+import { Gender } from '@/generated/prisma/enums';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
@@ -51,15 +51,14 @@ function parsePriceInput(value: string): number | undefined {
   return Number.isFinite(numericValue) ? numericValue : undefined;
 }
 
-export function CatalogMain() {
+export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
   const [activeSort, setActiveSort] = useState<ProductCatalogSortBy>(
     Catalog_SORT_OPTIONS[0].value,
   );
-  const [selectedCategory, setSelectedCategory] = useState<string>();
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedIsland, setSelectedIsland] = useState<string>();
   const [selectedSize, setSelectedSize] = useState<string>();
   const [selectedGender, setSelectedGender] = useState<Gender>();
-  const [selectedStatus, setSelectedStatus] = useState<ProductStatus>();
   const [inStockOnly, setInStockOnly] = useState(false);
   const [selectedPricePreset, setSelectedPricePreset] =
     useState<PricePresetKey>('all');
@@ -75,7 +74,6 @@ export function CatalogMain() {
       clothingType: selectedCategory,
       size: selectedSize,
       gender: selectedGender,
-      status: selectedStatus,
       inStock: inStockOnly ? true : undefined,
       sortBy: activeSort,
     }),
@@ -88,7 +86,6 @@ export function CatalogMain() {
       selectedGender,
       selectedIsland,
       selectedSize,
-      selectedStatus,
     ],
   );
 
@@ -116,7 +113,6 @@ export function CatalogMain() {
     setSelectedIsland(undefined);
     setSelectedSize(undefined);
     setSelectedGender(undefined);
-    setSelectedStatus(undefined);
     setInStockOnly(false);
     setSelectedPricePreset('all');
     setMinPriceInput('');
@@ -124,27 +120,21 @@ export function CatalogMain() {
   };
 
   return (
-    <main className="border-t border-[#dbd4c7]">
-      <CatalogMainHeader
-        totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
-        totalIslands={meta?.stats?.totalIslands ?? meta?.islands?.length ?? 0}
-        images={products.map((product) => product.imageURL)}
-      />
+    <main>
+      <CatalogMainHeader />
 
-      <section className="border-y border-[#d4ccbe] bg-[#e8e3d9] py-6">
-        <div className="mx-auto grid w-full max-w-[1320px] gap-4 px-4 md:px-6 lg:px-8 xl:grid-cols-[280px_minmax(0,1fr)]">
+      <section id="katalog-produk" className="scroll-mt-6 pt-10 pb-4">
+        <div className="mx-auto grid w-full grid-cols-1 max-w-[1320px] gap-4 px-4 md:px-6 lg:px-8 xl:grid-cols-[280px_minmax(0,1fr)]">
           <CatalogFiltersSidebar
             totalProducts={meta?.stats?.totalProducts ?? meta?.totalItems ?? 0}
             categories={meta?.categories ?? []}
             islands={meta?.islands ?? []}
             sizes={meta?.sizes ?? []}
             genders={meta?.genders ?? []}
-            statuses={meta?.statuses ?? []}
             selectedCategory={selectedCategory}
             selectedIsland={selectedIsland}
             selectedSize={selectedSize}
             selectedGender={selectedGender}
-            selectedStatus={selectedStatus}
             inStockOnly={inStockOnly}
             minPriceInput={minPriceInput}
             maxPriceInput={maxPriceInput}
@@ -164,10 +154,6 @@ export function CatalogMain() {
             onGenderChange={(value: string | undefined) => {
               setCurrentPage(1);
               setSelectedGender(value as Gender | undefined);
-            }}
-            onStatusChange={(value: string | undefined) => {
-              setCurrentPage(1);
-              setSelectedStatus(value as ProductStatus | undefined);
             }}
             onInStockOnlyChange={(value: boolean) => {
               setCurrentPage(1);
@@ -201,7 +187,7 @@ export function CatalogMain() {
             {showLoadingSkeleton ? <CatalogProductGridSkeleton /> : null}
 
             {!showLoadingSkeleton && !isPending && error ? (
-              <div className="mt-4 rounded-2xl border border-[#e2c9bb] bg-[#fbf1eb] p-6 text-sm text-[#8b5e4a]">
+              <div className="mt-4 rounded-xl border border-destructive/30 bg-surface p-6 text-[15px] text-destructive">
                 Gagal memuat data produk. Silakan coba lagi.
               </div>
             ) : null}
@@ -211,7 +197,7 @@ export function CatalogMain() {
             ) : null}
 
             {!isPending && !error && products.length === 0 ? (
-              <div className="mt-4 rounded-2xl border border-[#d8cfbf] bg-[#fbf8f2] p-6 text-sm text-[#4f6658]">
+              <div className="mt-4 rounded-xl border border-border bg-card p-6 text-[15px] text-ink">
                 Belum ada produk yang sesuai dengan filter saat ini.
               </div>
             ) : null}

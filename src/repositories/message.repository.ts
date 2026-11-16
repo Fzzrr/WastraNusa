@@ -1,5 +1,12 @@
 import prisma from '@/lib/prisma';
 
+const attachmentInclude = {
+  product: {
+    select: { id: true, slug: true, name: true, imageURL: true, price: true },
+  },
+  variant: { select: { id: true, name: true, imageURL: true, price: true } },
+} as const;
+
 /**
  * Data access for chat messages. All DB access for the message entity lives
  * here; the service layer never touches Prisma directly.
@@ -9,10 +16,14 @@ export const messageRepository = {
     conversationId,
     senderId,
     content,
+    productId,
+    variantId,
   }: {
     conversationId: string;
     senderId: string;
     content: string;
+    productId?: string;
+    variantId?: string;
   }) => {
     return prisma.message.create({
       data: {
@@ -20,17 +31,23 @@ export const messageRepository = {
         conversationId,
         senderId,
         content,
+        productId,
+        variantId,
       },
+      include: attachmentInclude,
     });
   },
 
   /** Oldest-first message history for a conversation (capped). */
+  /** The latest 100 messages, oldest first. */
   listByConversation: async (conversationId: string) => {
-    return prisma.message.findMany({
+    const latest = await prisma.message.findMany({
       where: { conversationId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       take: 100,
+      include: attachmentInclude,
     });
+    return latest.reverse();
   },
 
   /**

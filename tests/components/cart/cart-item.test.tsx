@@ -27,19 +27,20 @@ beforeEach(() => {
 });
 
 describe('CartItem', { tags: ['frontend'] }, () => {
-  it('renders the product name, formatted price, size and stock', () => {
+  it('renders the product name, formatted price, variant and stock', () => {
     render(
       <CartItem
         item={baseItem}
         isSelected={false}
         onToggle={vi.fn()}
         onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
       />,
     );
 
     expect(screen.getByText('Kemeja Batik Kawung')).toBeTruthy();
     expect(screen.getByText('Rp 150.000')).toBeTruthy();
-    expect(screen.getByText('Size M')).toBeTruthy();
+    expect(screen.getByText('M')).toBeTruthy();
     expect(screen.getByText('Stok: 8')).toBeTruthy();
   });
 
@@ -51,6 +52,7 @@ describe('CartItem', { tags: ['frontend'] }, () => {
         isSelected={false}
         onToggle={onToggle}
         onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
       />,
     );
 
@@ -67,13 +69,12 @@ describe('CartItem', { tags: ['frontend'] }, () => {
         isSelected
         onToggle={vi.fn()}
         onUpdateQty={onUpdateQty}
+        onRemove={vi.fn()}
       />,
     );
 
-    const buttons = screen.getAllByRole('button');
-    // First stepper button is minus, second is plus.
-    fireEvent.click(buttons[0]);
-    fireEvent.click(buttons[1]);
+    fireEvent.click(screen.getByLabelText('Kurangi jumlah'));
+    fireEvent.click(screen.getByLabelText('Tambah jumlah'));
 
     expect(onUpdateQty).toHaveBeenNthCalledWith(1, -1);
     expect(onUpdateQty).toHaveBeenNthCalledWith(2, 1);
@@ -86,10 +87,46 @@ describe('CartItem', { tags: ['frontend'] }, () => {
         isSelected={false}
         onToggle={vi.fn()}
         onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
       />,
     );
 
     const img = screen.getByAltText('Kemeja Batik Kawung') as HTMLImageElement;
     expect(img.src).toBe('https://cdn.test/x.png');
+  });
+
+  it('hides the placeholder Default variant', () => {
+    render(
+      <CartItem
+        item={{ ...baseItem, size: 'Default' }}
+        isSelected={false}
+        onToggle={vi.fn()}
+        onUpdateQty={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText(/Default/)).toBeNull();
+  });
+
+  it('fires onRemove from the per-item delete button', () => {
+    const onRemove = vi.fn();
+    render(
+      <CartItem
+        item={baseItem}
+        isSelected={false}
+        onToggle={vi.fn()}
+        onUpdateQty={vi.fn()}
+        onRemove={onRemove}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Hapus Kemeja Batik Kawung dari keranjang',
+      }),
+    );
+
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });

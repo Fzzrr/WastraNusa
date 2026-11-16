@@ -4,6 +4,11 @@ import {
   type CheckoutSessionData,
 } from '@/types/checkout';
 
+// 'Default' is the placeholder for items without a chosen variant; never show it.
+export function displayVariant(variant?: string | null) {
+  return variant && variant !== 'Default' ? variant : null;
+}
+
 let cachedRaw: string | null = null;
 let cachedData: CheckoutSessionData | null = null;
 

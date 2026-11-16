@@ -1,12 +1,19 @@
 import { withApiAdmin, withApiPublic } from '@/lib/api-handler';
+import { isAdmin } from '@/lib/auth/roles';
 import { jsend } from '@/lib/jsend';
 import { updateArticleSchema } from '@/schemas/article.schema';
 import { articleService } from '@/services/article.service';
 
-export const GET = withApiPublic<{ id: string }>(async ({ params, userId }) => {
-  const article = await articleService.getArticleDetail(params.id, userId);
-  return jsend.success(article);
-});
+export const GET = withApiPublic<{ id: string }>(
+  async ({ params, userId, userRole }) => {
+    const article = await articleService.getArticleDetail(
+      params.id,
+      userId,
+      isAdmin(userRole),
+    );
+    return jsend.success(article);
+  },
+);
 
 export const PUT = withApiAdmin<{ id: string }>(async ({ req, params }) => {
   const body = await req.json();

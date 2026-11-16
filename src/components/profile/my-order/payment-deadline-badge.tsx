@@ -80,15 +80,15 @@ export function PaymentDeadlineBadge({
 
   if (remainingMs === 0) {
     return (
-      <div className="rounded-lg border border-[#ead7cf] bg-[#fdf6f2] px-3 py-2 text-xs text-[#a06651]">
+      <div className="rounded-lg bg-destructive/10 px-3 py-2 text-[15px] text-destructive">
         Masa pembayaran telah habis. Pesanan akan dibatalkan otomatis.
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-[#e7dbc9] bg-[#fff8ed] px-3 py-2 text-xs text-[#8a6a3f] flex items-center gap-2">
-      <Clock className="size-3.5 shrink-0 text-[#8a6a3f]" />
+    <div className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-[15px] text-ink">
+      <Clock className="size-3.5 shrink-0 text-ink-soft" />
       <span>
         Sisa waktu bayar:{' '}
         <span className="font-semibold">

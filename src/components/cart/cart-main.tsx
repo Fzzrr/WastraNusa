@@ -21,7 +21,8 @@ import { CartList } from './cart-list';
 import { CartSummary } from './cart-summary';
 
 export function CartMain() {
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // Items start selected; track the ones the buyer unticks instead.
+  const [excludedIds, setExcludedIds] = useState<string[]>([]);
   const [localQuantities, setLocalQuantities] = useState<
     Record<string, number>
   >({});
@@ -127,7 +128,8 @@ export function CartMain() {
         productId: cartItem.productId,
         variantId: cartItem.variantId,
         name: cartItem.product.name,
-        price: Number(cartItem.product.price),
+        // Same rule as checkout: the variant price wins when it is set.
+        price: Number(cartItem.variant?.price ?? cartItem.product.price),
         size: cartItem.variant?.name || 'Default',
         stock: availableStock,
         quantity: localQuantities[cartItem.id] ?? cartItem.quantity,
@@ -139,8 +141,17 @@ export function CartMain() {
     });
   }, [cart, localQuantities]);
 
+  const selectableIds = useMemo(
+    () => items.filter((item) => item.stock > 0).map((item) => item.id),
+    [items],
+  );
+  const selectedIds = useMemo(
+    () => selectableIds.filter((id) => !excludedIds.includes(id)),
+    [selectableIds, excludedIds],
+  );
+
   const toggleItem = (id: string) => {
-    setSelectedIds((prev) =>
+    setExcludedIds((prev) =>
       prev.includes(id)
         ? prev.filter((itemId) => itemId !== id)
         : [...prev, id],
@@ -166,17 +177,18 @@ export function CartMain() {
   };
 
   const toggleAll = () => {
-    if (selectedIds.length === items.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(items.map((item) => item.id));
-    }
+    setExcludedIds(
+      selectedIds.length === selectableIds.length ? selectableIds : [],
+    );
   };
 
   const handleDeleteSelected = () => {
     if (selectedIds.length === 0) return;
     removeMultiple({ cartItemIds: selectedIds });
-    setSelectedIds([]);
+  };
+
+  const handleRemoveItem = (id: string) => {
+    removeMultiple({ cartItemIds: [id] });
   };
 
   // Calculate totals based on selected items
@@ -217,7 +229,7 @@ export function CartMain() {
         title="Keranjang Belanja"
         description={
           items.length > 0
-            ? `${items.length} Produk di keranjang Anda`
+            ? `${items.length} produk di keranjang Anda`
             : 'Pilih produk yang ingin Anda beli'
         }
       />
@@ -228,17 +240,17 @@ export function CartMain() {
             {Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="flex animate-pulse gap-4 rounded-2xl bg-[#fffdf8] p-5 ring-1 ring-[#e8dfd0]"
+                className="flex animate-pulse gap-4 rounded-xl bg-card p-5"
               >
-                <div className="size-20 rounded-xl bg-[#efe8dd]" />
+                <div className="size-20 rounded-xl bg-surface" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 w-1/2 rounded bg-[#efe8dd]" />
-                  <div className="h-3 w-1/3 rounded bg-[#f4efe5]" />
+                  <div className="h-4 w-1/2 rounded bg-surface" />
+                  <div className="h-3 w-1/3 rounded bg-surface" />
                 </div>
               </div>
             ))}
           </div>
-          <div className="h-80 animate-pulse rounded-2xl bg-[#fffdf8] ring-1 ring-[#e8dfd0] lg:col-span-4" />
+          <div className="h-80 animate-pulse rounded-xl bg-card lg:col-span-4" />
         </div>
       ) : error ? (
         <ProfileEmptyState
@@ -274,6 +286,7 @@ export function CartMain() {
               onToggleAll={toggleAll}
               onUpdateQty={handleUpdateQuantity}
               onDeleteSelected={handleDeleteSelected}
+              onRemoveItem={handleRemoveItem}
             />
           </div>
           <div className="mt-6 lg:sticky lg:top-6 lg:col-span-4 lg:mt-0">
