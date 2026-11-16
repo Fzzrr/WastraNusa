@@ -7,7 +7,7 @@ export function getVariantResolvedPrice(
   return variant?.price ?? fallbackPrice;
 }
 
-export function getVariantPriceRange(
+function getVariantPriceRange(
   variants: Array<{ price: number | null }>,
   fallbackPrice: number,
 ) {

@@ -230,84 +230,11 @@ export async function fetchWikipediaPageSummary(
   return data;
 }
 
-const MOBILE_SECTIONS_PATH = '/api/rest_v1/page/mobile-sections';
-
-type MobileSection = {
-  id?: string;
-  line?: string; // heading text
-  anchor?: string;
-  level?: number;
-  text?: string; // HTML content
-};
-
-type MobileSectionsResponse = {
-  lead?: unknown;
-  remaining?: unknown;
-  sections?: MobileSection[];
-};
-
-/** Shape returned by fetchWikipediaPageMobileSections after stripping/normalizing */
-export type NormalizedMobileSectionsResponse = Omit<
-  MobileSectionsResponse,
-  'sections'
-> & {
-  sections: Array<{ title: string; content: string }>;
-};
-
-/**
- * Extract plain text from an HTML string without using regex to match tags.
- * A character-by-character state machine is used so that CodeQL rules
- * js/bad-tag-filter and js/incomplete-multi-character-sanitization are not
- * triggered. Script and style block *content* is suppressed as well as the
- * tags themselves.
- */
+/** Plain text of an HTML snippet, via the DOM parser (no regex tag stripping). */
 function stripHtml(html?: string): string {
   if (!html) return '';
 
-  // Parse as HTML and extract text content to avoid fragile regex-based filtering.
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const text = doc.body?.textContent ?? '';
   return text.replace(/\s+/g, ' ').trim();
-}
-
-export async function fetchWikipediaPageMobileSections(
-  apiOrigin: string,
-  pageTitle: string,
-  signal?: AbortSignal,
-): Promise<NormalizedMobileSectionsResponse> {
-  const enc = encodeURIComponent(pageTitle);
-  const res = await fetch(`${apiOrigin}${MOBILE_SECTIONS_PATH}/${enc}`, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    signal,
-  });
-
-  const text = await res.text();
-  let json: unknown;
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {
-    throw new WikipediaSummaryFetchError(
-      'Respons Wikipedia (mobile sections) tidak dapat dibaca (bukan JSON).',
-      res.status,
-    );
-  }
-
-  if (!res.ok) {
-    const errBody = json as WikipediaSummaryErrorBody;
-    const detail =
-      errBody.detail?.trim() || res.statusText || 'Permintaan gagal';
-    throw new WikipediaSummaryFetchError(detail, res.status, errBody);
-  }
-
-  const data = json as MobileSectionsResponse;
-  // Normalize sections: map headings + text
-  const sections: Array<{ title: string; content: string }> = (
-    data.sections ?? []
-  ).map((s) => ({
-    title: stripHtml(s.line),
-    content: stripHtml(s.text),
-  }));
-
-  return { ...data, sections };
 }
