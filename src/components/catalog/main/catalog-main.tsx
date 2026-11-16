@@ -3,7 +3,11 @@
 import { CatalogFiltersSidebar } from '@/components/catalog/main/catalog-filters-sidebar';
 import type { PricePresetKey } from '@/components/catalog/main/catalog-filters-sidebar';
 import { Gender } from '@/generated/prisma/enums';
-import { useProductCatalog } from '@/hooks/use-product-catalog';
+import {
+  CATALOG_PAGE_SIZE,
+  DEFAULT_CATALOG_SORT,
+  useProductCatalog,
+} from '@/hooks/use-product-catalog';
 import type { ProductCatalogSortBy } from '@/types/product';
 import { useMemo, useState } from 'react';
 
@@ -14,8 +18,6 @@ import {
   CatalogProductGridSkeleton,
 } from './catalog-product-grid';
 import { CatalogProductToolbar } from './catalog-product-toolbar';
-
-const Catalog_PAGE_SIZE = 9;
 
 const Catalog_SORT_OPTIONS: Array<{
   label: string;
@@ -52,9 +54,8 @@ function parsePriceInput(value: string): number | undefined {
 }
 
 export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
-  const [activeSort, setActiveSort] = useState<ProductCatalogSortBy>(
-    Catalog_SORT_OPTIONS[0].value,
-  );
+  const [activeSort, setActiveSort] =
+    useState<ProductCatalogSortBy>(DEFAULT_CATALOG_SORT);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedIsland, setSelectedIsland] = useState<string>();
   const [selectedSize, setSelectedSize] = useState<string>();
@@ -91,7 +92,7 @@ export function CatalogMain({ initialCategory }: { initialCategory?: string }) {
 
   const { data, error, isPending } = useProductCatalog(
     currentPage,
-    Catalog_PAGE_SIZE,
+    CATALOG_PAGE_SIZE,
     filters,
   );
   const showLoadingSkeleton = isPending && !data;

@@ -111,8 +111,14 @@ function handleApiError(err: unknown, req: Request) {
 }
 
 /** Reads `?page=&limit=`; junk or out-of-range values fall back to safe ones. */
-export function getPagination(req: Request, defaultLimit = 10) {
-  const { searchParams } = new URL(req.url);
+export function getPagination(
+  source: Request | URLSearchParams,
+  defaultLimit = 10,
+) {
+  const searchParams =
+    source instanceof URLSearchParams
+      ? source
+      : new URL(source.url).searchParams;
   const page = Math.max(1, Math.trunc(Number(searchParams.get('page'))) || 1);
   const limit = Math.min(
     MAX_PAGE_LIMIT,

@@ -1,12 +1,14 @@
 import { fetchApi } from '@/lib/api-client';
 import type {
   ProductCatalogFilters,
+  ProductCatalogSortBy,
   ProductInventoryItem,
   ProductInventoryListResponse,
 } from '@/types/product';
 import { useQuery } from '@tanstack/react-query';
 
-const DEFAULT_CATALOG_LIMIT = 9;
+export const CATALOG_PAGE_SIZE = 9;
+export const DEFAULT_CATALOG_SORT: ProductCatalogSortBy = 'newest';
 
 export const productCatalogKeys = {
   all: ['product-catalog'] as const,
@@ -18,9 +20,10 @@ export const productCatalogKeys = {
     [...productCatalogKeys.details(), idOrSlug] as const,
 };
 
-export function fetchProductCatalog(
-  page: number = 1,
-  limit: number = DEFAULT_CATALOG_LIMIT,
+/** `/api/products` query for a catalog page (also used by the server prefetch). */
+export function productCatalogSearchParams(
+  page: number,
+  limit: number,
   filters: ProductCatalogFilters = {},
 ) {
   const searchParams = new URLSearchParams({
@@ -64,8 +67,16 @@ export function fetchProductCatalog(
     searchParams.set('sortBy', filters.sortBy);
   }
 
+  return searchParams;
+}
+
+export function fetchProductCatalog(
+  page: number = 1,
+  limit: number = CATALOG_PAGE_SIZE,
+  filters: ProductCatalogFilters = {},
+) {
   return fetchApi<ProductInventoryListResponse>(
-    `/api/products?${searchParams.toString()}`,
+    `/api/products?${productCatalogSearchParams(page, limit, filters)}`,
   );
 }
 
@@ -77,7 +88,7 @@ export function fetchProductCatalogDetail(idOrSlug: string) {
 
 export function useProductCatalog(
   page: number = 1,
-  limit: number = DEFAULT_CATALOG_LIMIT,
+  limit: number = CATALOG_PAGE_SIZE,
   filters: ProductCatalogFilters = {},
   { enabled = true }: { enabled?: boolean } = {},
 ) {

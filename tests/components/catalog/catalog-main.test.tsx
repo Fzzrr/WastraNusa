@@ -4,7 +4,8 @@ import { useProductCatalog } from '@/hooks/use-product-catalog';
 import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/hooks/use-product-catalog', () => ({
+vi.mock('@/hooks/use-product-catalog', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/hooks/use-product-catalog')>()),
   useProductCatalog: vi.fn(() => ({
     data: undefined,
     error: null,
@@ -24,7 +25,8 @@ describe('catalog ?type= filter', { tags: ['frontend'] }, () => {
       searchParams: Promise.resolve({ type: 'Batik' }),
     });
 
-    expect(element.props.initialCategory).toBe('Batik');
+    // The page wraps CatalogMain in a HydrationBoundary (server prefetch).
+    expect(element.props.children.props.initialCategory).toBe('Batik');
   });
 
   it('ignores a repeated ?type= param', async () => {
@@ -32,7 +34,7 @@ describe('catalog ?type= filter', { tags: ['frontend'] }, () => {
       searchParams: Promise.resolve({ type: ['Batik', 'Kebaya'] }),
     });
 
-    expect(element.props.initialCategory).toBeUndefined();
+    expect(element.props.children.props.initialCategory).toBeUndefined();
   });
 
   it('queries the catalog with the initial clothing type', () => {

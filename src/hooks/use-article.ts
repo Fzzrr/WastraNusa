@@ -14,6 +14,8 @@ import type { LikedArticlesResponse } from '@/types/profile';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const DEFAULT_ARTICLE_LIMIT = 50;
+/** Articles per page on /encyclopedia (also used by its server prefetch). */
+export const ENCYCLOPEDIA_PAGE_SIZE = 10;
 const DEFAULT_LIKED_ARTICLE_LIMIT = 5;
 
 /**

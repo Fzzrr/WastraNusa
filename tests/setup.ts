@@ -146,7 +146,11 @@ vi.mock('@/repositories/productVariant.repository', () => ({
   },
 }));
 
-vi.mock('@/services/product.service', () => ({
+vi.mock('@/services/product.service', async (importOriginal) => ({
+  // Pure query parsing stays real; only the data access is mocked.
+  parseCatalogQuery: (
+    await importOriginal<typeof import('@/services/product.service')>()
+  ).parseCatalogQuery,
   productService: {
     getProducts: vi.fn(),
     getProductDetail: vi.fn(),
