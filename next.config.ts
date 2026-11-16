@@ -16,14 +16,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
+  // No remotePatterns: remote images bypass the optimizer (see
+  // components/ui/image.tsx), so `/_next/image` serves /public files only.
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

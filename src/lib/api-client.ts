@@ -1,3 +1,4 @@
+import { ApiError } from '@/lib/error';
 import type { JSendResponse } from '@/lib/jsend';
 
 /**
@@ -5,7 +6,10 @@ import type { JSendResponse } from '@/lib/jsend';
  * through these, so error handling stays the same everywhere.
  */
 
-/** Unwraps a JSend body, throwing its message on `fail` or `error`. */
+/**
+ * Unwraps a JSend body. On `fail`/`error` it throws an `ApiError` carrying the
+ * HTTP status, so callers (and the retry policy) can tell 4xx from 5xx.
+ */
 export async function parseJSend<T>(
   response: Response,
   fallbackMessage = 'Permintaan gagal',
@@ -15,7 +19,7 @@ export async function parseJSend<T>(
     body = (await response.json()) as JSendResponse<T>;
   } catch {
     // Not JSON at all (e.g. a proxy error page).
-    throw new Error(fallbackMessage);
+    throw new ApiError(fallbackMessage, response.status);
   }
 
   if (body.status === 'success') {
@@ -24,14 +28,15 @@ export async function parseJSend<T>(
 
   if (body.status === 'fail') {
     const data = body.data as { message?: unknown } | null;
-    throw new Error(
+    throw new ApiError(
       data && typeof data === 'object' && 'message' in data
         ? String(data.message)
         : fallbackMessage,
+      response.status,
     );
   }
 
-  throw new Error(body.message);
+  throw new ApiError(body.message, response.status);
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };

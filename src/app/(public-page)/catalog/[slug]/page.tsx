@@ -1,6 +1,14 @@
 import { CatalogDetailMain } from '@/components/catalog/detail/catalog-detail-main';
+import { productCatalogKeys } from '@/hooks/use-product-catalog';
 import { isForSale } from '@/lib/product-availability';
+import { toJson } from '@/lib/utils';
 import { productRepository } from '@/repositories/product.repository';
+import { mapProduct } from '@/services/product.service';
+import {
+  HydrationBoundary,
+  QueryClient,
+  dehydrate,
+} from '@tanstack/react-query';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
@@ -37,10 +45,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CatalogDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  // Detail is fetched client-side; check existence here so a bad slug is a real 404.
-  if (!(await getProduct(slug))) {
+  // A bad slug is a real 404, not a client-side "not found" state.
+  const product = await getProduct(slug);
+  if (!product) {
     notFound();
   }
 
-  return <CatalogDetailMain slug={slug} />;
+  // Hand the product to React Query so the page renders with it instead of
+  // fetching it again from the browser. A failed prefetch just falls back to
+  // the client fetch.
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery({
+    queryKey: productCatalogKeys.detail(slug),
+    queryFn: () => toJson(mapProduct(product)),
+  });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <CatalogDetailMain slug={slug} />
+    </HydrationBoundary>
+  );
 }

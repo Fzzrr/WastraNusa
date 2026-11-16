@@ -252,6 +252,9 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
               src={article.imageURL}
               alt={article.title}
               fill
+              // Hero is the largest thing above the fold (LCP): load it first.
+              preload
+              loading="eager"
               onError={() => setHeroImageFailed(true)}
               className="object-cover transition-transform duration-[1500ms] ease-out group-hover/hero:scale-105"
             />
@@ -394,8 +397,7 @@ export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
                             alt={visualCaption}
                             fill
                             className="object-cover transition-transform duration-700 ease-out group-hover/visual:scale-105"
-                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 280px, 280px"
-                            priority={false}
+                            sizes="(max-width: 1024px) 100vw, 280px"
                           />
                         ) : (
                           <div className="absolute inset-0 grid place-items-center">
