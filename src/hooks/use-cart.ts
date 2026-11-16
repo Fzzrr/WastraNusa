@@ -106,7 +106,7 @@ function useCartMutation<TInput>(
     onSuccess: (newCart) => {
       queryClient.setQueryData(cartKeys.list(), newCart);
     },
-    retry: 1,
+    // No retry: re-sending a POST whose response was lost adds the item twice.
   });
 }
 

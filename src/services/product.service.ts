@@ -1,6 +1,6 @@
 import { Gender, ProductStatus } from '@/generated/prisma/enums';
-import { getPagination } from '@/lib/api-handler';
 import { ApiError } from '@/lib/error';
+import { getPagination } from '@/lib/pagination';
 import { isForSale } from '@/lib/product-availability';
 import { mergeUniqueSorted } from '@/lib/utils';
 import { articleRepository } from '@/repositories/article.repository';

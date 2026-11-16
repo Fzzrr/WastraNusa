@@ -1,6 +1,7 @@
-import { getPagination, withApiAdmin, withApiPublic } from '@/lib/api-handler';
+import { withApiAdmin, withApiPublic } from '@/lib/api-handler';
 import { isAdmin } from '@/lib/auth/roles';
 import { jsend } from '@/lib/jsend';
+import { getPagination } from '@/lib/pagination';
 import { createArticleSchema } from '@/schemas/article.schema';
 import { articleService } from '@/services/article.service';
 

@@ -12,10 +12,14 @@ export function isRemoteUrl(src: ImageProps['src']) {
 
 /** `next/image`, except remote images skip the optimizer. */
 export default function Image(props: ImageProps) {
+  const remote = isRemoteUrl(props.src);
   return (
     <NextImage
+      // Many hosts block hotlinks by Referer; sending none also keeps our
+      // URLs private from them.
+      referrerPolicy={remote ? 'no-referrer' : undefined}
       {...props}
-      unoptimized={props.unoptimized || isRemoteUrl(props.src)}
+      unoptimized={props.unoptimized || remote}
     />
   );
 }

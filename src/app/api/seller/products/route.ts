@@ -1,5 +1,6 @@
-import { getPagination, withApiSeller } from '@/lib/api-handler';
+import { withApiSeller } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
+import { getPagination } from '@/lib/pagination';
 import { createProductSchema } from '@/schemas/product.schema';
 import { sellerProductService } from '@/services/sellerProduct.service';
 

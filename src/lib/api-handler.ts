@@ -27,9 +27,6 @@ type PublicApiHandler<T = unknown> = (
   context: PublicApiHandlerContext<T>,
 ) => Promise<Response>;
 
-// Largest page any list endpoint returns; stops `?limit=1000000` scans.
-const MAX_PAGE_LIMIT = 50;
-
 function isForeignKeyError(err: unknown) {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     return err.code === 'P2003';
@@ -108,23 +105,6 @@ function handleApiError(err: unknown, req: Request) {
 
   // The real error is already in the logs; never send it to the client.
   return jsend.error('Terjadi kesalahan pada server', 500);
-}
-
-/** Reads `?page=&limit=`; junk or out-of-range values fall back to safe ones. */
-export function getPagination(
-  source: Request | URLSearchParams,
-  defaultLimit = 10,
-) {
-  const searchParams =
-    source instanceof URLSearchParams
-      ? source
-      : new URL(source.url).searchParams;
-  const page = Math.max(1, Math.trunc(Number(searchParams.get('page'))) || 1);
-  const limit = Math.min(
-    MAX_PAGE_LIMIT,
-    Math.max(1, Math.trunc(Number(searchParams.get('limit'))) || defaultLimit),
-  );
-  return { page, limit };
 }
 
 type RouteContext<T> = { params: Promise<T> };

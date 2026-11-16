@@ -1,5 +1,6 @@
-import { getPagination, withApiAuth } from '@/lib/api-handler';
+import { withApiAuth } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
+import { getPagination } from '@/lib/pagination';
 import { articleService } from '@/services/article.service';
 
 export const GET = withApiAuth(async ({ req, userId }) => {

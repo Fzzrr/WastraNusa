@@ -36,7 +36,7 @@ export async function parseJSend<T>(
     );
   }
 
-  throw new ApiError(body.message, response.status);
+  throw new ApiError(body.message || fallbackMessage, response.status);
 }
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };

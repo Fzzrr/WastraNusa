@@ -1,6 +1,7 @@
 import { OrderStatus, PaymentStatus } from '@/generated/prisma/enums';
-import { getPagination, withApiSeller } from '@/lib/api-handler';
+import { withApiSeller } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
+import { getPagination } from '@/lib/pagination';
 import { sellerOrderService } from '@/services/sellerOrder.service';
 
 export const GET = withApiSeller(async ({ req, userId }) => {

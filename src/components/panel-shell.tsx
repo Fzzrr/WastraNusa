@@ -49,7 +49,12 @@ export function PanelShell({
   sidebar: ReactNode;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  // Remember which page the drawer was opened on: navigating away closes it
+  // without an effect.
+  const pathname = usePathname();
+  const [openOn, setOpenOn] = useState<string | null>(null);
+  const open = openOn === pathname;
+  const setOpen = (next: boolean) => setOpenOn(next ? pathname : null);
 
   return (
     <PanelSidebarContext.Provider value={{ open, setOpen }}>
