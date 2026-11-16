@@ -173,7 +173,6 @@ Untuk lokal: `http://localhost:3000` dan `http://localhost:3000/api/auth/callbac
 ## Catatan Diketahui
 
 - **Live chat** memakai Server-Sent Events dengan event bus di memori proses. Di Vercel (serverless) pesan baru tidak diteruskan antar instance, sehingga tidak realtime. Di `pnpm dev` berjalan normal. Solusi yang dipertimbangkan: polling atau layanan pub/sub.
-- `docker/prod/docker-compose.yml` merupakan sisa konfigurasi Supabase lama; production saat ini di-deploy lewat integrasi Git Vercel dan Neon.
 
 ## Contributing
 

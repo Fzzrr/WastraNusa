@@ -75,7 +75,7 @@ export function PriceInput({
 }: ComponentProps<typeof Input>) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[15px] font-medium text-ink-soft">
+      <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-medium text-[#8a6a3a]">
         Rp
       </span>
       <Input
@@ -131,10 +131,10 @@ export function VariantCard({
   const variantErrors = errors.variants?.[index];
 
   return (
-    <div className="animate-in space-y-4 rounded-xl border-l-4 border-gold bg-surface p-4 ring-1 ring-border transition-shadow fade-in slide-in-from-bottom-1">
+    <div className="animate-in space-y-4 rounded-xl border-l-4 border-[#d2a36d] bg-[#faf7f2] p-4 ring-1 ring-[#efe8dd] transition-shadow fade-in slide-in-from-bottom-1 hover:shadow-[0_12px_24px_-18px_rgba(89,69,38,0.5)]">
       <div className="flex items-center justify-between gap-3">
-        <span className="inline-flex min-w-0 items-center gap-2 text-[15px] font-semibold text-ink">
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand text-[13px] text-on-field">
+        <span className="inline-flex min-w-0 items-center gap-2 text-sm font-semibold text-[#2f4f3f]">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#3a5a4a] text-xs text-white">
             {index + 1}
           </span>
           <span className="truncate">
@@ -149,7 +149,7 @@ export function VariantCard({
           disabled={!canRemove}
           aria-label={`Hapus varian ${index + 1}`}
           title={canRemove ? 'Hapus varian' : 'Minimal 1 varian diperlukan'}
-          className="cursor-pointer rounded-full text-ink-soft hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
+          className="cursor-pointer rounded-lg text-[#a39c92] hover:bg-red-50 hover:text-red-600 disabled:pointer-events-none disabled:opacity-30"
         >
           <Trash2 className="size-4" />
         </Button>
@@ -237,13 +237,15 @@ export function ProductFormHeader({
   const progress = Math.round((filledCount / totalCount) * 100);
 
   return (
-    <div className="border-b border-border bg-card px-6 pt-5 pb-4">
+    <div className="border-b border-[#ebe3d6] bg-[#fffdfa] px-6 pt-5 pb-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Package className="shrink-0 size-5 text-brand" strokeWidth={1.75} />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-[#e8cb8d]">
+            <Package className="size-5" />
+          </span>
           <div className="min-w-0">
-            <h2 className="text-xl font-semibold text-ink">{title}</h2>
-            <p className="truncate text-[13px] text-ink-soft">{subtitle}</p>
+            <h2 className="text-lg font-semibold text-[#2f4f3f]">{title}</h2>
+            <p className="truncate text-xs text-[#9a8f80]">{subtitle}</p>
           </div>
         </div>
         <Button
@@ -252,26 +254,26 @@ export function ProductFormHeader({
           size="icon-sm"
           aria-label="Tutup"
           onClick={onClose}
-          className="cursor-pointer rounded-full bg-surface text-ink-soft hover:bg-surface hover:text-ink"
+          className="cursor-pointer rounded-full bg-[#f4efe5] text-[#6f6a62] hover:bg-[#ebe3d6] hover:text-[#2f3a33]"
         >
           <X className="size-4" />
         </Button>
       </div>
 
       <div className="mt-4 flex items-center gap-3">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#efe8dd]">
           <div
             className={cn(
               'h-full rounded-full transition-all duration-500',
-              progress === 100 ? 'bg-brand' : 'bg-gold',
+              progress === 100 ? 'bg-[#3a5a4a]' : 'bg-[#d2a36d]',
             )}
             style={{ width: `${progress}%` }}
           />
         </div>
         <span
           className={cn(
-            'text-[13px] font-medium whitespace-nowrap tabular-nums',
-            progress === 100 ? 'text-ink' : 'text-ink-soft',
+            'text-xs font-medium whitespace-nowrap tabular-nums',
+            progress === 100 ? 'text-[#2f5543]' : 'text-[#9a8f80]',
           )}
         >
           {filledCount}/{totalCount} Bagian Wajib
@@ -303,6 +305,7 @@ export function VariantsSection({
 
   return (
     <FormSection
+      step={4}
       icon={Layers}
       title="Varian Produk"
       description={`${fields.length} varian · total stok ${totalStock.toLocaleString('id-ID')} unit`}
@@ -312,7 +315,7 @@ export function VariantsSection({
           variant="outline"
           size="sm"
           onClick={() => append(EMPTY_VARIANT)}
-          className="cursor-pointer gap-1.5 rounded-lg border-brand/30 text-ink hover:bg-surface hover:text-ink"
+          className="cursor-pointer gap-1.5 rounded-lg border-[#3a5a4a]/30 text-[#2f5543] hover:bg-[#e7efe4] hover:text-[#2f5543]"
         >
           <Plus className="size-4" />
           Tambah Varian
@@ -320,9 +323,7 @@ export function VariantsSection({
       }
     >
       {errors.variants?.message ? (
-        <p className="mb-3 text-base text-destructive">
-          {errors.variants.message}
-        </p>
+        <p className="mb-3 text-sm text-red-600">{errors.variants.message}</p>
       ) : null}
 
       <div className="space-y-3">

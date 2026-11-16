@@ -141,9 +141,9 @@ export function SellerOrderContent() {
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 rounded-2xl bg-[#ebe6db] p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-base text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {isLoading ? '...' : orderData?.meta.totalItems} Pesanan
             </p>
 
@@ -155,7 +155,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-lg border-border bg-card sm:w-[220px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[190px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -175,7 +175,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-lg border-border bg-card sm:w-[200px]">
+                <SelectTrigger className="h-9 w-full rounded-m border-[#ddd6c9] bg-white sm:w-[180px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,10 +190,10 @@ export function SellerOrderContent() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-xl bg-card py-0 ring-1 ring-border">
+          <Card className="overflow-hidden rounded-2xl border border-[#ddd6c9] bg-background py-0 ring-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-surface text-[13px] font-semibold text-ink-soft">
+                <thead className="bg-[#ede8df] text-xs font-semibold tracking-wide text-[#6a645a] ">
                   <tr>
                     <th className="px-4 py-3">Pesanan</th>
                     <th className="px-4 py-3">Pelanggan</th>
@@ -213,7 +213,7 @@ export function SellerOrderContent() {
                     <tr>
                       <td
                         colSpan={7}
-                        className="py-10 text-center text-ink-soft"
+                        className="py-10 text-center text-[#8f8377]"
                       >
                         Belum ada data pesanan.
                       </td>

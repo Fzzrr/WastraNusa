@@ -3,10 +3,23 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import type { ProductFilterOption } from '@/types/product';
-import { ChevronDown, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import {
+  ChevronDown,
+  MapPin,
+  PackageCheck,
+  RotateCcw,
+  SlidersHorizontal,
+  Tags,
+  Users,
+  Wallet,
+} from 'lucide-react';
 import { useState } from 'react';
 
-import { FilterOptionList } from './catalog-filter-option-list';
+import {
+  FilterCardTitle,
+  FilterOptionList,
+  filterCardClassName,
+} from './catalog-filter-option-list';
 
 const MAX_VISIBLE_CATEGORIES = 8;
 const MAX_VISIBLE_ISLANDS = 8;
@@ -120,22 +133,29 @@ export function CatalogFiltersSidebar({
           Hidden from xl up where the sidebar sits alongside the grid. */}
       <Button
         variant="outline"
-        className="flex h-12 w-full items-center gap-3 rounded-full border-0 bg-surface px-5 text-left text-ink transition-colors hover:bg-border active:scale-[0.99] xl:hidden"
+        className="group flex h-auto w-full items-center gap-3 rounded-2xl border-[#dad1c3] bg-[#f6f2e9] p-2.5 pr-3 text-left shadow-sm transition-all duration-200 hover:border-[#bfae8e] hover:bg-[#f1ebdf] hover:shadow active:scale-[0.99] xl:hidden"
         onClick={() => setIsFilterPanelOpen((value) => !value)}
         aria-expanded={isFilterPanelOpen}
       >
-        <SlidersHorizontal className="size-5 shrink-0" strokeWidth={1.75} />
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#357456] to-[#234b38] text-[#edf4ec] shadow-sm ring-1 ring-[#234b38]/20 transition-transform duration-200 group-hover:scale-105">
+          <SlidersHorizontal className="size-[18px]" />
+        </span>
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="flex items-center gap-2 text-[15px] font-semibold">
-            Filter
+          <span className="flex items-center gap-2 text-sm font-bold text-[#3f5b4c]">
+            Filter Produk
             {activeFilterCount > 0 ? (
-              <span className="text-[15px] font-normal text-ink-soft tabular-nums">
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[#caa86a] px-1.5 text-xs font-semibold text-[#3c2e14]">
                 {activeFilterCount}
               </span>
             ) : null}
           </span>
+          <span className="text-xs font-medium text-[#667060]">
+            {activeFilterCount > 0
+              ? `${activeFilterCount} filter aktif`
+              : 'Kategori, harga, ukuran, dll'}
+          </span>
         </span>
-        <span className="text-ink-soft">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#ece5d8] text-[#5d6f62] transition-colors duration-200 group-hover:bg-[#e2dac9]">
           <ChevronDown
             className={cn(
               'size-4 transition-transform duration-300',
@@ -157,6 +177,7 @@ export function CatalogFiltersSidebar({
         <div className="overflow-hidden">
           <div className="flex flex-col gap-3 pt-3 xl:pt-0">
             <FilterOptionList
+              icon={Tags}
               title="Kategori Produk"
               allLabel="Semua Produk"
               allCount={totalProducts}
@@ -166,20 +187,18 @@ export function CatalogFiltersSidebar({
               maxVisible={MAX_VISIBLE_CATEGORIES}
             />
 
-            <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
-              <h3 className="px-3 text-base font-semibold text-ink">
-                Rentang Harga
-              </h3>
+            <Card className={filterCardClassName}>
+              <FilterCardTitle icon={Wallet}>Rentang Harga</FilterCardTitle>
               <div className="flex flex-col gap-1.5">
-                <div className="flex flex-col gap-2 text-[15px] text-ink-soft">
+                <div className="flex flex-col gap-2 text-sm text-[#52685b]">
                   {PRICE_RANGES.map((item) => (
                     <label
                       key={item.key}
                       className={cn(
                         'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-1.5 transition-colors',
                         selectedPricePreset === item.key
-                          ? 'bg-surface font-semibold text-ink'
-                          : 'hover:bg-surface',
+                          ? 'bg-[#e3ece5] font-semibold text-[#2f5f49]'
+                          : 'hover:bg-[#f4efe5]',
                       )}
                     >
                       <input
@@ -187,7 +206,7 @@ export function CatalogFiltersSidebar({
                         name="price-range"
                         checked={selectedPricePreset === item.key}
                         onChange={() => onPricePresetChange(item.key)}
-                        className="size-4 accent-brand"
+                        className="size-4 accent-[#2f5f49]"
                       />
                       {item.label}
                     </label>
@@ -198,19 +217,20 @@ export function CatalogFiltersSidebar({
                     value={minPriceInput}
                     onChange={(event) => onMinPriceChange(event.target.value)}
                     placeholder="Min"
-                    className="h-9 rounded-xl border-border bg-card text-[15px] transition-shadow focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15"
+                    className="h-9 rounded-xl border-[#e5ded5] bg-white text-xs transition-shadow focus-visible:border-[#2f5f49] focus-visible:ring-3 focus-visible:ring-[#2f5f49]/15"
                   />
                   <Input
                     value={maxPriceInput}
                     onChange={(event) => onMaxPriceChange(event.target.value)}
                     placeholder="Max"
-                    className="h-9 rounded-xl border-border bg-card text-[15px] transition-shadow focus-visible:border-brand focus-visible:ring-3 focus-visible:ring-brand/15"
+                    className="h-9 rounded-xl border-[#e5ded5] bg-white text-xs transition-shadow focus-visible:border-[#2f5f49] focus-visible:ring-3 focus-visible:ring-[#2f5f49]/15"
                   />
                 </div>
               </div>
             </Card>
 
             <FilterOptionList
+              icon={MapPin}
               title="Asal Daerah"
               allLabel="Semua Pulau"
               allCount={sumCounts(islands)}
@@ -221,6 +241,7 @@ export function CatalogFiltersSidebar({
             />
 
             <FilterOptionList
+              icon={Users}
               title="Gender"
               allLabel="Semua Gender"
               allCount={sumCounts(genders)}
@@ -230,21 +251,21 @@ export function CatalogFiltersSidebar({
               formatLabel={formatGender}
             />
 
-            <Card className="gap-2 rounded-none border-0 bg-transparent p-0 py-2 text-ink">
-              <h3 className="px-3 text-base font-semibold text-ink">
+            <Card className={filterCardClassName}>
+              <FilterCardTitle icon={PackageCheck}>
                 Ketersediaan
-              </h3>
+              </FilterCardTitle>
               <label
                 className={cn(
-                  'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-[15px] transition-colors',
+                  'inline-flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors',
                   inStockOnly
-                    ? 'bg-surface font-semibold text-ink'
-                    : 'text-ink-soft hover:bg-surface',
+                    ? 'bg-[#e3ece5] font-semibold text-[#2f5f49]'
+                    : 'text-[#52685b] hover:bg-[#f4efe5]',
                 )}
               >
                 <input
                   type="checkbox"
-                  className="size-4 accent-brand"
+                  className="size-4 accent-[#2f5f49]"
                   checked={inStockOnly}
                   onChange={(event) =>
                     onInStockOnlyChange(event.target.checked)
@@ -256,11 +277,11 @@ export function CatalogFiltersSidebar({
 
             <Button
               variant="outline"
-              className="group/reset h-10 cursor-pointer gap-2 rounded-full border-0 bg-transparent text-[15px] font-semibold text-ink-soft transition-colors hover:bg-surface hover:text-ink"
+              className="group/reset h-9 cursor-pointer gap-2 rounded-xl border-[#e3d9c7] bg-[#fbf8f2] text-xs font-bold text-[#4f6558] transition-all hover:border-[#2f5f49]/40 hover:bg-[#e3ece5] hover:text-[#2f5f49]"
               onClick={onResetFilters}
             >
               <RotateCcw className="size-3.5 transition-transform duration-500 group-hover/reset:-rotate-180" />
-              Reset filter
+              Reset Semua Filter
             </Button>
           </div>
         </div>

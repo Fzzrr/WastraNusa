@@ -23,30 +23,30 @@ import {
 
 export function OrderRowSkeleton() {
   return (
-    <tr className="border-t border-border">
+    <tr className="border-t border-[#ece7de]">
       <td className="px-4 py-3">
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-5 w-28 bg-surface" />
-          <Skeleton className="h-4 w-36 bg-surface" />
+          <Skeleton className="h-5 w-28 bg-[#eee2d0]" />
+          <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
         </div>
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-36 bg-surface" />
+        <Skeleton className="h-4 w-36 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
+        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-24 rounded-md bg-surface" />
+        <Skeleton className="h-6 w-24 rounded-md bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-36 rounded-lg bg-surface" />
+        <Skeleton className="h-9 w-36 rounded-lg bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-28 rounded-lg bg-surface" />
+        <Skeleton className="h-9 w-28 rounded-lg bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-9 w-20 rounded-lg bg-surface" />
+        <Skeleton className="h-9 w-20 rounded-lg bg-[#eee2d0]" />
       </td>
     </tr>
   );
@@ -74,42 +74,46 @@ export function OrderRow({
       '';
 
   return (
-    <tr className="border-t border-border">
-      <td className="px-4 py-3 text-ink">
+    <tr className="border-t border-[#ece7de]">
+      <td className="px-4 py-3 text-[#2b2b2b]">
         <div className="flex flex-col gap-0.5">
           <p className="text-small font-semibold">{order.orderNumber}</p>
-          <p className="text-[13px] text-muted-foreground/80">
+          <p className="text-xs text-muted-foreground/80">
             {order.createdAtLabel} · {order.totalAmountLabel}
           </p>
         </div>
       </td>
-      <td className="px-4 py-3 text-[15px] text-ink-soft">
+      <td className="px-4 py-3 text-sm text-[#6d6a64]">
         <div className="flex flex-col">
-          <span className="font-semibold text-ink">{order.customer.name}</span>
-          <span className="text-[13px] text-muted-foreground">
+          <span className="font-semibold text-[#3d3a34]">
+            {order.customer.name}
+          </span>
+          <span className="text-xs text-muted-foreground">
             {order.customer.email}
           </span>
-          <span className="mt-2 text-[13px] text-ink">
+          <span className="mt-2 text-xs text-[#3d3a34]">
             Kirim ke{' '}
             <span className="font-semibold">
               {order.shipping.recipientName}
             </span>{' '}
             ({order.shipping.phone})
           </span>
-          <span className="max-w-64 text-[13px] leading-relaxed">
+          <span className="max-w-64 text-xs leading-relaxed">
             {order.shipping.address}
           </span>
-          <span className="text-[13px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {order.shipping.courier}
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 text-[15px] text-ink-soft">
+      <td className="px-4 py-3 text-sm text-[#6d6a64]">
         <div className="flex flex-col gap-2">
           {order.products.map((product, index) => (
             <div key={index} className="flex flex-col">
-              <span className="font-semibold text-ink">{product.name}</span>
-              <span className="text-[13px] text-muted-foreground">
+              <span className="font-semibold text-[#3d3a34]">
+                {product.name}
+              </span>
+              <span className="text-xs text-muted-foreground">
                 {product.location} · Qty {product.quantity} ·{' '}
                 {product.unitPrice}
               </span>
@@ -132,7 +136,7 @@ export function OrderRow({
             }
             disabled={!editable}
           >
-            <SelectTrigger className="h-9 w-36 rounded-lg border-border bg-card text-[13px]">
+            <SelectTrigger className="h-9 w-36 rounded-lg border-[#ddd6c9] bg-white text-xs">
               <SelectValue placeholder="Pilih status" />
             </SelectTrigger>
             <SelectContent>
@@ -160,14 +164,14 @@ export function OrderRow({
             onDraftChange({ trackingNumber: event.target.value })
           }
           placeholder="Isi no. resi"
-          className="h-9 rounded-lg border-border bg-card text-[15px]"
+          className="h-9 rounded-lg border-[#ddd6c9] bg-white text-sm"
           disabled={!editable}
         />
       </td>
       <td className="px-4 py-3 text-right">
         <Button
           size="sm"
-          className="h-9 rounded-full"
+          className="h-9 rounded-lg"
           onClick={onSave}
           disabled={!editable || isSaving}
         >

@@ -82,8 +82,8 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
 
   return (
     <div className="w-full">
-      <h1 className="mb-8 text-[clamp(2rem,3vw,2.75rem)] leading-tight font-semibold tracking-[-0.03em] text-ink">
-        Masuk
+      <h1 className="mb-5 text-2xl font-bold text-[#2d2318]">
+        Masuk ke WastraNusa
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
@@ -91,7 +91,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         <Field data-invalid={!!errors.email} className="gap-1">
           <FieldLabel
             htmlFor="email"
-            className="text-[15px] font-medium text-ink"
+            className="text-xs font-sm text-[#2d2318] text-bold"
           >
             Email
           </FieldLabel>
@@ -101,9 +101,9 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
             autoComplete="email"
             placeholder="name@example.com"
             {...register('email')}
-            className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
+            className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError className="text-[13px] font-medium leading-none">
+          <FieldError className="text-xs font-medium leading-none">
             {errors.email?.message}
           </FieldError>
         </Field>
@@ -112,7 +112,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         <Field data-invalid={!!errors.password} className="gap-1">
           <FieldLabel
             htmlFor="password"
-            className="text-[15px] font-medium text-ink"
+            className="text-xs font-sm text-[#2d2318]"
           >
             Password
           </FieldLabel>
@@ -122,15 +122,15 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
             autoComplete="current-password"
             placeholder="••••••••"
             {...register('password')}
-            className="h-12 rounded-xl border-border bg-card px-4 text-base text-ink focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
+            className="h-10 rounded-sm border-[#c8bfb0] bg-transparent focus-visible:ring-0.5 focus-visible:ring-[#8a7a6a] text-[#2d2318]"
           />
-          <FieldError className="text-[13px] font-medium leading-none">
+          <FieldError className="text-xs font-medium leading-none">
             {errors.password?.message}
           </FieldError>
         </Field>
 
         {/* Error + Forgot (same row, above Sign In button) */}
-        <div className="flex items-center justify-between text-[13px] min-h-[0.75rem]">
+        <div className="flex items-center justify-between text-xs min-h-[0.75rem]">
           <div className="flex-1">
             {errors.root && (
               <FieldError className="font-medium leading-none">
@@ -140,7 +140,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           </div>
           <Link
             href="/forgot-password"
-            className="font-semibold text-brand underline-offset-4 hover:underline"
+            className="text-[#8b5530] hover:underline font-medium"
           >
             Lupa password?
           </Link>
@@ -150,7 +150,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full h-12 rounded-full bg-brand text-base font-semibold text-on-field hover:bg-brand-strong mt-1"
+          className="w-full h-11 bg-[#3d2e1e] hover:bg-[#2d2015] text-[#f0ebe3] font-semibold rounded-sm mt-1"
         >
           {isSubmitting ? 'Sedang masuk...' : 'Masuk'}
         </Button>
@@ -165,11 +165,11 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       </div>
 
       {/* Register link */}
-      <p className="mt-8 text-center text-[15px] text-ink-soft">
+      <p className="mt-5 text-center text-xs text-[#6a6056]">
         Belum punya akun?{' '}
         <Link
           href="/register"
-          className="font-semibold text-brand underline-offset-4 hover:underline"
+          className="text-[#8b5530] hover:underline font-medium"
         >
           Daftar
         </Link>

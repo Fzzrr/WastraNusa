@@ -87,8 +87,8 @@ export function AddressRegionFields() {
       {/* Province + City */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Provinsi <span className="text-destructive">*</span>
+          <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+            Provinsi <span className="text-red-400">*</span>
           </label>
           <Controller
             control={control}
@@ -118,8 +118,8 @@ export function AddressRegionFields() {
               >
                 <SelectTrigger
                   className={cn(
-                    'h-11 w-full rounded-lg border border-border bg-card px-4 text-[15px] text-ink focus-visible:border-border focus-visible:ring-3 focus-visible:ring-border/30',
-                    !field.value && 'text-ink-soft',
+                    'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30',
+                    !field.value && 'text-[#b0b8b3]',
                   )}
                   aria-invalid={
                     !watchedProvince &&
@@ -129,13 +129,13 @@ export function AddressRegionFields() {
                 >
                   <SelectValue placeholder="Pilih Provinsi" />
                 </SelectTrigger>
-                <SelectContent className="max-h-60 rounded-xl border border-border bg-card text-ink">
+                <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
                   <SelectGroup>
                     {ALL_PROVINCES.map((p) => (
                       <SelectItem
                         key={p.kode}
                         value={p.nama}
-                        className="cursor-pointer rounded-lg text-[15px] text-ink hover:bg-surface focus:bg-surface focus:text-ink"
+                        className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
                       >
                         {p.nama}
                       </SelectItem>
@@ -148,14 +148,14 @@ export function AddressRegionFields() {
           {!watchedProvince &&
             (touchedFields.province || submitCount > 0) &&
             errors.province && (
-              <p className="mt-1 text-[13px] text-destructive">
+              <p className="mt-1 text-xs text-red-500">
                 {errors.province.message}
               </p>
             )}
         </div>
         <div>
-          <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kota / Kabupaten <span className="text-destructive">*</span>
+          <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+            Kota / Kabupaten <span className="text-red-400">*</span>
           </label>
           <Controller
             control={control}
@@ -182,8 +182,8 @@ export function AddressRegionFields() {
               >
                 <SelectTrigger
                   className={cn(
-                    'h-11 w-full rounded-lg border border-border bg-card px-4 text-[15px] text-ink focus-visible:border-border focus-visible:ring-3 focus-visible:ring-border/30 disabled:cursor-not-allowed disabled:opacity-60',
-                    !field.value && 'text-ink-soft',
+                    'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                    !field.value && 'text-[#b0b8b3]',
                   )}
                   aria-invalid={
                     !watchedCity &&
@@ -199,13 +199,13 @@ export function AddressRegionFields() {
                     }
                   />
                 </SelectTrigger>
-                <SelectContent className="max-h-60 rounded-xl border border-border bg-card text-ink">
+                <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
                   <SelectGroup>
                     {cityOptions.map((c) => (
                       <SelectItem
                         key={c.kode}
                         value={c.nama}
-                        className="cursor-pointer rounded-lg text-[15px] text-ink hover:bg-surface focus:bg-surface focus:text-ink"
+                        className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
                       >
                         {c.nama}
                       </SelectItem>
@@ -218,9 +218,7 @@ export function AddressRegionFields() {
           {!watchedCity &&
             (touchedFields.city || submitCount > 0) &&
             errors.city && (
-              <p className="mt-1 text-[13px] text-destructive">
-                {errors.city.message}
-              </p>
+              <p className="mt-1 text-xs text-red-500">{errors.city.message}</p>
             )}
         </div>
       </div>
@@ -228,8 +226,8 @@ export function AddressRegionFields() {
       {/* District + Subdistrict + Postal Code */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kecamatan <span className="text-destructive">*</span>
+          <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+            Kecamatan <span className="text-red-400">*</span>
           </label>
           <Controller
             control={control}
@@ -255,8 +253,8 @@ export function AddressRegionFields() {
               >
                 <SelectTrigger
                   className={cn(
-                    'h-11 w-full rounded-lg border border-border bg-card px-4 text-[15px] text-ink focus-visible:border-border focus-visible:ring-3 focus-visible:ring-border/30 disabled:cursor-not-allowed disabled:opacity-60',
-                    !field.value && 'text-ink-soft',
+                    'h-11 w-full rounded-lg border border-[#e5ded5] bg-[#fdfaf7] px-4 text-sm text-[#4d6356] focus-visible:border-[#5c7365] focus-visible:ring-3 focus-visible:ring-[#5c7365]/30 disabled:cursor-not-allowed disabled:opacity-60',
+                    !field.value && 'text-[#b0b8b3]',
                   )}
                   aria-invalid={
                     !watchedDistrict &&
@@ -270,13 +268,13 @@ export function AddressRegionFields() {
                     }
                   />
                 </SelectTrigger>
-                <SelectContent className="max-h-60 rounded-xl border border-border bg-card text-ink">
+                <SelectContent className="max-h-60 rounded-xl border border-[#e5ded5] bg-[#fdfaf7] text-[#4d6356] shadow-lg">
                   <SelectGroup>
                     {districtOptions.map((d) => (
                       <SelectItem
                         key={d.kode}
                         value={d.nama}
-                        className="cursor-pointer rounded-lg text-[15px] text-ink hover:bg-surface focus:bg-surface focus:text-ink"
+                        className="cursor-pointer rounded-lg text-sm text-[#4d6356] hover:bg-[#f3ede8] focus:bg-[#f3ede8] focus:text-[#3c5043]"
                       >
                         {d.nama}
                       </SelectItem>
@@ -289,32 +287,32 @@ export function AddressRegionFields() {
           {!watchedDistrict &&
             (touchedFields.district || submitCount > 0) &&
             errors.district && (
-              <p className="mt-1 text-[13px] text-destructive">
+              <p className="mt-1 text-xs text-red-500">
                 {errors.district.message}
               </p>
             )}
         </div>
         <div>
-          <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
+          <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
             Kelurahan
           </label>
           <Input
             {...register('subdistrict')}
             placeholder="Dago (opsional)"
-            className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
+            className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kode Pos <span className="text-destructive">*</span>
+          <label className="mb-1.5 block text-sm font-medium text-[#5c7365]">
+            Kode Pos <span className="text-red-400">*</span>
           </label>
           <Input
             {...register('postalCode')}
             placeholder="40132"
-            className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
+            className="h-11 border-[#e5ded5] bg-[#fdfaf7] px-4 text-[#4d6356] placeholder:text-[#b0b8b3] focus-visible:border-[#5c7365] focus-visible:ring-[#5c7365]/30"
           />
           {errors.postalCode && (
-            <p className="mt-1 text-[13px] text-destructive">
+            <p className="mt-1 text-xs text-red-500">
               {errors.postalCode.message}
             </p>
           )}

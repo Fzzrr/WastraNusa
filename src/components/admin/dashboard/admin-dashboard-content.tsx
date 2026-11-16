@@ -26,8 +26,9 @@ import Link from 'next/link';
 import { type ReactNode, useSyncExternalStore } from 'react';
 
 const cardClassName =
-  'rounded-xl bg-card p-6 ring-1 ring-border animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both';
-const hoverLiftClassName = 'transition-[translate,box-shadow] duration-300';
+  'rounded-2xl bg-[#fffdfa] p-6 shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6] animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both';
+const hoverLiftClassName =
+  'transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(60,41,15,0.05),0_18px_40px_rgba(89,69,38,0.12)]';
 
 const compactNumber = new Intl.NumberFormat('id-ID', {
   notation: 'compact',
@@ -37,10 +38,10 @@ const compactNumber = new Intl.NumberFormat('id-ID', {
 type BadgeTone = 'green' | 'blue' | 'peach' | 'red';
 
 const badgeToneClassName: Record<BadgeTone, string> = {
-  green: 'bg-surface text-ink',
-  blue: 'bg-brand/10 text-brand',
-  peach: 'bg-surface text-destructive',
-  red: 'bg-destructive/10 text-destructive',
+  green: 'bg-[#e7efe4] text-[#3f6b4a]',
+  blue: 'bg-[#e6ecf3] text-[#34507a]',
+  peach: 'bg-[#f6e7de] text-[#a15d3b]',
+  red: 'bg-[#f6e1dd] text-[#b04a3a]',
 };
 
 function TrendBadge({
@@ -56,7 +57,7 @@ function TrendBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-medium',
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium',
         badgeToneClassName[tone],
       )}
     >
@@ -79,7 +80,7 @@ function StatCard({
   value,
   footnote,
   badge,
-  footnoteClassName = 'text-ink-soft',
+  footnoteClassName = 'text-[#9a8f80]',
   delay = 0,
 }: {
   icon: LucideIcon;
@@ -97,15 +98,17 @@ function StatCard({
     >
       <div className="flex min-h-7 items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Icon className="shrink-0 size-5 text-ink-soft" strokeWidth={1.75} />
-          <p className="text-base text-ink">{label}</p>
+          <span className="flex size-8 items-center justify-center rounded-lg bg-[#f4efe5] text-[#8a6a3a] transition-colors group-hover:bg-[#2f5543] group-hover:text-[#f4efe2]">
+            <Icon className="size-4" />
+          </span>
+          <p className="text-sm text-[#5f5a52]">{label}</p>
         </div>
         {badge}
       </div>
-      <p className="mt-5 text-4xl font-semibold tracking-[-0.02em] text-ink tabular-nums">
+      <p className="mt-5 text-4xl font-bold tracking-tight text-[#2f4f3f] tabular-nums">
         {value}
       </p>
-      <p className={cn('mt-3 text-[15px]', footnoteClassName)}>{footnote}</p>
+      <p className={cn('mt-3 text-xs', footnoteClassName)}>{footnote}</p>
     </div>
   );
 }
@@ -122,9 +125,12 @@ function SectionHeader({
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
-        <h2 className="text-lg font-semibold text-ink">{title}</h2>
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-[#2f4f3f]">
+          <span className="h-4 w-1 rounded-full bg-[#d2a36d]" />
+          {title}
+        </h2>
         {subtitle ? (
-          <p className="mt-1 text-[15px] text-ink-soft">{subtitle}</p>
+          <p className="mt-1 pl-3 text-sm text-[#9a8f80]">{subtitle}</p>
         ) : null}
       </div>
       {aside}
@@ -140,8 +146,10 @@ function EmptyState({
   children: ReactNode;
 }) {
   return (
-    <div className="flex h-[200px] flex-col items-center justify-center gap-3 rounded-xl bg-surface text-[15px] text-ink-soft">
-      <Icon className="shrink-0 size-5 text-ink-soft" strokeWidth={1.75} />
+    <div className="flex h-[200px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#e6dccb] bg-[#faf7f2] text-sm text-[#8f8377]">
+      <span className="flex size-10 items-center justify-center rounded-full bg-[#f4efe5] text-[#b08a5e]">
+        <Icon className="size-5" />
+      </span>
       {children}
     </div>
   );
@@ -186,7 +194,7 @@ function StatCards({ data }: { data: AdminDashboardData }) {
         label="Kunjungan Artikel"
         value={compactNumber.format(data.articleViews.total)}
         footnote="Total kunjungan seluruh artikel"
-        footnoteClassName="text-ink-soft"
+        footnoteClassName="text-[#b08a5e]"
       />
     </section>
   );
@@ -218,7 +226,7 @@ function TrafficCard({
         title="Trafik Artikel"
         subtitle="Total interaksi"
         aside={
-          <span className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium text-ink-soft">
+          <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
             7 Hari
           </span>
         }
@@ -230,7 +238,7 @@ function TrafficCard({
               ...point,
               tooltipLabel: WEEKDAY_FULL_ID[point.label],
             }))}
-            color="#2f5b49"
+            color="#2f5543"
             height={190}
             ariaLabel="Trafik artikel 7 hari terakhir"
             valueFormatter={(value) =>
@@ -261,7 +269,7 @@ function TopSellerCard({
         title="Penjual Teratas"
         subtitle="Penjualan (juta rupiah)"
         aside={
-          <span className="rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium text-ink-soft">
+          <span className="rounded-full bg-[#f4efe5] px-2.5 py-1 text-xs font-medium text-[#6f6a62]">
             Bulan Ini
           </span>
         }
@@ -297,7 +305,7 @@ function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
         aside={
           <Link
             href="/admin/article"
-            className="group/link inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[15px] text-ink-soft transition-colors hover:bg-surface"
+            className="group/link inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm text-[#a07a3a] transition-colors hover:bg-[#f4efe5]"
           >
             Lihat Semua
             <ArrowRight className="size-3.5 transition-transform group-hover/link:translate-x-0.5" />
@@ -312,34 +320,34 @@ function PopularArticlesCard({ articles }: { articles: PopularArticle[] }) {
             <Link
               key={article.rank}
               href={`/encyclopedia/${article.slug}`}
-              className="group grid grid-cols-[1.75rem_1fr_auto] items-center gap-3 rounded-xl border-b border-border px-3 py-3 transition-colors last:border-b-0 hover:bg-surface"
+              className="group grid grid-cols-[1.75rem_1fr_auto] items-center gap-3 rounded-xl border-b border-[#efe8dd] px-3 py-3 transition-colors last:border-b-0 hover:bg-[#f7f2ea]"
             >
               <span
                 className={cn(
-                  'flex size-7 items-center justify-center rounded-full text-[15px] font-semibold',
+                  'flex size-7 items-center justify-center rounded-full text-sm font-semibold',
                   article.rank <= 3
-                    ? 'bg-surface text-ink-soft'
-                    : 'bg-surface text-ink-soft',
+                    ? 'bg-[#f5ead3] text-[#b8923f]'
+                    : 'bg-[#f1ede6] text-[#6b665e]',
                 )}
               >
                 {article.rank}
               </span>
               <div className="min-w-0">
-                <p className="truncate font-medium text-ink transition-colors group-hover:text-ink">
+                <p className="truncate font-medium text-[#2f3a33] transition-colors group-hover:text-[#2f5543]">
                   {article.title}
                 </p>
-                <p className="text-[13px] text-ink-soft">{article.category}</p>
+                <p className="text-xs text-[#9a8f80]">{article.category}</p>
               </div>
-              <div className="flex items-center gap-2 text-[13px] whitespace-nowrap text-ink-soft">
-                <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-1">
+              <div className="flex items-center gap-2 text-xs whitespace-nowrap text-[#6b665e]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4efe5] px-2 py-1">
                   <Eye className="size-3.5" />
                   {article.views.toLocaleString('id-ID')}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2 py-1">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#f4efe5] px-2 py-1">
                   <Clock3 className="size-3.5" />
                   {article.readTimeMinutes} Mnt
                 </span>
-                <ArrowRight className="size-3.5 -translate-x-1 text-ink-soft opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                <ArrowRight className="size-3.5 -translate-x-1 text-[#a07a3a] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
               </div>
             </Link>
           ))
@@ -355,21 +363,21 @@ function DashboardSkeleton() {
       <section className="grid gap-6 md:grid-cols-3">
         {Array.from({ length: 3 }).map((_, index) => (
           <div key={index} className={cardClassName}>
-            <Skeleton className="h-4 w-28 bg-surface" />
-            <Skeleton className="mt-5 h-10 w-36 bg-surface" />
-            <Skeleton className="mt-3 h-3 w-40 bg-surface" />
+            <Skeleton className="h-4 w-28 bg-[#eee2d0]" />
+            <Skeleton className="mt-5 h-10 w-36 bg-[#eee2d0]" />
+            <Skeleton className="mt-3 h-3 w-40 bg-[#eee2d0]" />
           </div>
         ))}
       </section>
       <div className={cardClassName}>
-        <Skeleton className="h-5 w-32 bg-surface" />
-        <Skeleton className="mt-6 h-[190px] w-full bg-surface" />
+        <Skeleton className="h-5 w-32 bg-[#eee2d0]" />
+        <Skeleton className="mt-6 h-[190px] w-full bg-[#eee2d0]" />
       </div>
       <section className="grid gap-6 xl:grid-cols-2">
         {Array.from({ length: 2 }).map((_, index) => (
           <div key={index} className={cardClassName}>
-            <Skeleton className="h-5 w-32 bg-surface" />
-            <Skeleton className="mt-6 h-[220px] w-full bg-surface" />
+            <Skeleton className="h-5 w-32 bg-[#eee2d0]" />
+            <Skeleton className="mt-6 h-[220px] w-full bg-[#eee2d0]" />
           </div>
         ))}
       </section>
@@ -392,11 +400,11 @@ export function AdminDashboardContent() {
   const { data, isLoading } = useAdminDashboard();
   const hydrated = useHydrated();
   const headerSubtitle = (
-    <div className="mt-1 flex flex-wrap items-center gap-2 text-[15px]">
+    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
       <AdminBrandChip />
       {hydrated ? (
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-ink-soft ring-1 ring-border">
-          <CalendarDays className="size-3.5 text-ink-soft" />
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fffdfa] px-3 py-1 text-[#6f6a62] ring-1 ring-[#ebe3d6]">
+          <CalendarDays className="size-3.5 text-[#b08a5e]" />
           {new Date().toLocaleDateString('id-ID', {
             weekday: 'long',
             day: 'numeric',

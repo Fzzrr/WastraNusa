@@ -18,25 +18,25 @@ export function CatalogDetailBreadcrumb({
 }: CatalogDetailBreadcrumbProps) {
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-ink-soft text-[13px] font-medium">
+      <BreadcrumbList className="text-[#607167] text-xs font-medium">
         <BreadcrumbItem>
-          <BreadcrumbLink href="/" className="hover:text-ink">
+          <BreadcrumbLink href="/" className="hover:text-[#2f5b49]">
             Beranda
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbLink href="/catalog" className="hover:text-ink">
+          <BreadcrumbLink href="/catalog" className="hover:text-[#2f5b49]">
             Katalog
           </BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbPage className="text-ink">{category}</BreadcrumbPage>
+          <BreadcrumbPage className="text-[#2f5b49]">{category}</BreadcrumbPage>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbPage className="max-w-[280px] truncate text-ink">
+          <BreadcrumbPage className="max-w-[280px] truncate text-[#2f5b49]">
             {name}
           </BreadcrumbPage>
         </BreadcrumbItem>

@@ -38,37 +38,54 @@ import {
 } from './product-table-row';
 
 const PAGE_SIZE = 10;
-const cardClassName = 'rounded-xl bg-card ring-1 ring-border';
+const cardClassName =
+  'rounded-2xl bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6]';
 
 function StatTile({
   icon: Icon,
   label,
   value,
   caption,
+  tone,
   index,
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
   caption: string;
+  tone: 'green' | 'gold' | 'terracotta' | 'blue';
   index: number;
 }) {
+  const toneClassName = {
+    green: 'bg-[#e3ece5] text-[#2f5f49]',
+    gold: 'bg-[#f5ead3] text-[#a07a2c]',
+    terracotta: 'bg-[#f6e4da] text-[#9c5235]',
+    blue: 'bg-[#e6ecf3] text-[#34507a]',
+  }[tone];
+
   return (
     <div
       className={cn(
         cardClassName,
-        'animate-in p-5 fill-mode-both fade-in slide-in-from-bottom-2',
+        'group flex animate-in items-center gap-3 p-4 transition-all duration-300 fill-mode-both fade-in slide-in-from-bottom-2 hover:-translate-y-0.5 hover:shadow-[0_2px_4px_rgba(60,41,15,0.05),0_18px_40px_rgba(89,69,38,0.12)]',
       )}
       style={{ animationDelay: `${index * 70}ms` }}
     >
-      <p className="flex items-center gap-2 text-[15px] text-ink">
-        <Icon className="size-5 shrink-0 text-ink-soft" strokeWidth={1.75} />
-        {label}
-      </p>
-      <p className="mt-3 text-3xl leading-none font-semibold tracking-[-0.02em] text-ink tabular-nums">
-        {value}
-      </p>
-      <p className="mt-2 truncate text-[15px] text-ink-soft">{caption}</p>
+      <span
+        className={cn(
+          'grid size-11 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-105',
+          toneClassName,
+        )}
+      >
+        <Icon className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-[#9a8f80]">{label}</p>
+        <p className="text-2xl leading-tight font-bold text-[#2f4f3f] tabular-nums">
+          {value}
+        </p>
+        <p className="truncate text-xs text-[#b3aa9e]">{caption}</p>
+      </div>
     </div>
   );
 }
@@ -217,6 +234,7 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={0}
             icon={Package}
+            tone="green"
             label="Total Produk"
             value={isLoading ? '…' : totalItems.toLocaleString('id-ID')}
             caption="Semua produk terdaftar"
@@ -224,6 +242,7 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={1}
             icon={CheckCircle2}
+            tone="blue"
             label="Aktif"
             value={isLoading ? '…' : activeCount.toLocaleString('id-ID')}
             caption={pageScope}
@@ -231,13 +250,15 @@ export function SellerProductInventoryContent() {
           <StatTile
             index={2}
             icon={AlertTriangle}
+            tone="terracotta"
             label="Stok Menipis"
             value={isLoading ? '…' : lowStockCount.toLocaleString('id-ID')}
-            caption={`Stok 1–${LOW_STOCK_THRESHOLD} unit`}
+            caption={`Stok 1–${LOW_STOCK_THRESHOLD} unit · ${pageScope.toLowerCase()}`}
           />
           <StatTile
             index={3}
             icon={Boxes}
+            tone="gold"
             label="Total Stok"
             value={isLoading ? '…' : totalStock.toLocaleString('id-ID')}
             caption={pageScope}
@@ -251,13 +272,12 @@ export function SellerProductInventoryContent() {
           )}
           style={{ animationDelay: '280ms' }}
         >
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 md:px-5">
-            <span className="inline-flex items-center gap-2 text-[15px] text-ink-soft">
-              <Package
-                className="shrink-0 size-5 text-ink-soft"
-                strokeWidth={1.75}
-              />
-              <span className="font-semibold text-ink tabular-nums">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#efe8dd] px-4 py-3 md:px-5">
+            <span className="inline-flex items-center gap-2 text-sm text-[#6f6a62]">
+              <span className="grid size-8 place-items-center rounded-lg bg-[#f5ead3] text-[#a07a2c]">
+                <Package className="size-4" />
+              </span>
+              <span className="font-semibold text-[#2f4f3f] tabular-nums">
                 {isLoading ? '…' : totalItems}
               </span>
               Produk
@@ -268,7 +288,7 @@ export function SellerProductInventoryContent() {
                   variant="outline"
                   onClick={handleBulkDelete}
                   disabled={isDeleting}
-                  className="h-10 animate-in cursor-pointer gap-1.5 rounded-full border-destructive/30 bg-card px-4 text-destructive fade-in zoom-in-95 hover:bg-destructive/10 hover:text-destructive"
+                  className="h-10 animate-in cursor-pointer gap-1.5 rounded-xl border-[#f0cfc7] bg-white px-4 text-[#b04a3a] fade-in zoom-in-95 hover:bg-[#f6e1dd] hover:text-[#9a3b2d]"
                 >
                   <Trash2 className="size-4" />
                   Hapus ({selectedIds.length})
@@ -304,7 +324,7 @@ export function SellerProductInventoryContent() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[960px] text-left">
-                <thead className="bg-surface text-[13px] font-medium text-ink-soft">
+                <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
                   <tr>
                     <th className="w-12 px-4 py-3.5">
                       <Checkbox

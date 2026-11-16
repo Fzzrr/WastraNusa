@@ -48,14 +48,18 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
   };
   return (
     <>
-      <div className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-border">
+      <div className="space-y-3 rounded-2xl bg-gradient-to-br from-[#eef3ee] to-[#f7f3ec] p-4 ring-1 ring-[#d5e2d8]">
         <div className="flex items-start gap-3">
-          <Sparkles className="shrink-0 size-5 text-brand" strokeWidth={1.75} />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#3a5a4a] text-[#e8cb8d]">
+            <Sparkles className="size-4" />
+          </span>
           <div>
-            <p className="font-semibold text-ink">Isi Cepat dari Wikipedia</p>
-            <p className="mt-0.5 text-[13px] text-ink-soft">
+            <p className="font-semibold text-[#2f4f3f]">
+              Isi Cepat dari Wikipedia
+            </p>
+            <p className="mt-0.5 text-xs text-[#6f6a62]">
               Tempel URL artikel (mis.{' '}
-              <span className="tabular-nums text-[13px]">
+              <span className="font-mono text-xs">
                 https://id.wikipedia.org/wiki/Batik
               </span>
               ), lalu tarik ringkasan REST API tanpa menyalin manual.
@@ -78,7 +82,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
             type="button"
             disabled={wiki.isLoading || !wiki.urlLooksValid || !!wiki.urlHint}
             onClick={() => void wiki.fetchSummary()}
-            className="h-11 shrink-0 cursor-pointer gap-2 rounded-xl bg-brand px-4 text-on-field hover:bg-brand-strong"
+            className="h-11 shrink-0 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-4 text-white hover:bg-[#2f4b3d]"
           >
             {wiki.isLoading ? (
               <>
@@ -95,26 +99,23 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
         </div>
 
         {wiki.url.trim().length > 0 && wiki.urlHint && (
-          <p className="text-[13px] text-warning">{wiki.urlHint}</p>
+          <p className="text-xs text-amber-700">{wiki.urlHint}</p>
         )}
 
         {wiki.error && (
-          <Alert
-            variant="destructive"
-            className="border-destructive/30 bg-destructive/10"
-          >
+          <Alert variant="destructive" className="border-red-200 bg-red-50/90">
             <AlertTitle>Gagal Mengambil Data</AlertTitle>
             <AlertDescription>{wiki.error}</AlertDescription>
           </Alert>
         )}
 
         {wiki.preview && (
-          <div className="animate-in space-y-3 rounded-xl bg-card p-3 ring-1 ring-border fade-in slide-in-from-top-1">
-            <p className="text-[13px] font-semibold text-ink">
+          <div className="animate-in space-y-3 rounded-xl bg-white p-3 ring-1 ring-[#cde3d8] fade-in slide-in-from-top-1">
+            <p className="text-xs font-semibold tracking-wide text-[#305645] uppercase">
               Pratinjau — Terapkan ke Form
             </p>
             {wiki.preview.wikiType === 'disambiguation' && (
-              <p className="rounded-lg border border-gold/50 bg-gold/15 px-2 py-1.5 text-[13px] text-warning">
+              <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
                 Halaman ini berupa disambiguasi Wikipedia; ringkasan mungkin
                 pendek — selalu sesuaikan untuk konteks WastraNusa.
               </p>
@@ -127,10 +128,10 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
                   width={112}
                   height={112}
                   unoptimized
-                  className="h-28 w-full rounded-lg border border-border bg-surface object-cover sm:w-28"
+                  className="h-28 w-full rounded-lg border border-[#e5ded5] bg-[#f5f3ec] object-cover sm:w-28"
                 />
               ) : (
-                <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-border bg-card px-2 text-center text-[13px] text-muted-foreground sm:w-28">
+                <div className="flex h-28 w-full items-center justify-center rounded-lg border border-dashed border-[#e5ded5] bg-[#faf8f5] px-2 text-center text-xs text-muted-foreground sm:w-28">
                   Tidak ada gambar thumbnail
                 </div>
               )}
@@ -138,7 +139,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
                 <p className="leading-snug font-medium text-foreground">
                   {wiki.preview.mapped.title}
                 </p>
-                <p className="line-clamp-4 text-base text-muted-foreground">
+                <p className="line-clamp-4 text-sm text-muted-foreground">
                   {wiki.preview.mapped.summary}
                 </p>
               </div>
@@ -147,7 +148,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
               <Button
                 type="button"
                 size="sm"
-                className="cursor-pointer rounded-full bg-brand text-on-field hover:bg-brand-strong"
+                className="cursor-pointer rounded-lg bg-[#305645] text-white hover:bg-[#264538]"
                 onClick={handleApplyWikimediaPreview}
               >
                 Terapkan ke Form
@@ -156,7 +157,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="cursor-pointer rounded-full"
+                className="cursor-pointer rounded-lg"
                 onClick={wiki.discardPreview}
               >
                 Buang Pratinjau
@@ -167,13 +168,13 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
       </div>
 
       {showWikiReminder && (
-        <div className="flex animate-in items-start gap-3 rounded-xl border border-gold/50 bg-gold/15 px-4 py-3 text-[15px] text-warning fade-in">
-          <Info className="mt-0.5 size-4 shrink-0 text-warning" />
+        <div className="flex animate-in items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 fade-in">
+          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
           <div className="flex-1">
             <p className="font-semibold">
               Lengkapi Field Berikut secara Manual
             </p>
-            <p className="mt-0.5 text-warning">
+            <p className="mt-0.5 text-amber-700">
               Wikipedia tidak dapat mengisi:{' '}
               <span className="font-medium">
                 Label Motif, Topik, Pulau, Provinsi, Daerah
@@ -185,7 +186,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
             type="button"
             aria-label="Tutup peringatan"
             onClick={() => setShowWikiReminder(false)}
-            className="ml-1 cursor-pointer rounded-lg p-0.5 text-warning transition-colors hover:bg-gold/30"
+            className="ml-1 cursor-pointer rounded-lg p-0.5 text-amber-500 transition-colors hover:bg-amber-100"
           >
             <X className="size-4" />
           </button>

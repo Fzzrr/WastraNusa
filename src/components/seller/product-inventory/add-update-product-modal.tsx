@@ -170,13 +170,16 @@ export default function AddUpdateProductModal({
         isOpen ? 'visible opacity-100' : 'invisible opacity-0',
       )}
     >
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-[#1f2a24]/45 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <form
         // Let the zod messages (Indonesian) show instead of the browser's.
         noValidate
         onSubmit={handleSubmit(onSubmit, onInvalid)}
         className={cn(
-          'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-surface transition-all duration-300',
+          'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#f7f3ec] shadow-2xl transition-all duration-300',
           isOpen ? 'translate-y-0 scale-100' : 'translate-y-4 scale-95',
         )}
       >
@@ -187,7 +190,7 @@ export default function AddUpdateProductModal({
               initialData.name
             ) : (
               <>
-                Field bertanda <span className="text-destructive">*</span> wajib
+                Field bertanda <span className="text-[#c26a3d]">*</span> wajib
                 diisi
               </>
             )
@@ -200,6 +203,7 @@ export default function AddUpdateProductModal({
         {/* Body */}
         <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto px-6 py-5 md:px-8">
           <FormSection
+            step={1}
             icon={Package}
             title="Informasi Dasar"
             description="Nama produk dan artikel budaya yang terkait"
@@ -213,7 +217,7 @@ export default function AddUpdateProductModal({
                   values.sku ? (
                     <span className="inline-flex items-center gap-1.5">
                       SKU otomatis:
-                      <span className="rounded-md bg-surface px-1.5 py-0.5 tabular-nums text-[13px] text-ink-soft">
+                      <span className="rounded-md bg-[#f4efe5] px-1.5 py-0.5 font-mono text-xs text-[#6f6a62]">
                         {values.sku}
                       </span>
                     </span>
@@ -237,6 +241,7 @@ export default function AddUpdateProductModal({
           </FormSection>
 
           <FormSection
+            step={2}
             icon={Tag}
             title="Harga & Klasifikasi"
             description="Harga dasar, berat pengiriman, dan kategori"
@@ -304,6 +309,7 @@ export default function AddUpdateProductModal({
           </FormSection>
 
           <FormSection
+            step={3}
             icon={ImageIcon}
             title="Media & Deskripsi"
             description="Foto utama dan cerita singkat produk"
@@ -345,19 +351,19 @@ export default function AddUpdateProductModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-card px-6 py-4">
+        <div className="flex items-center justify-end gap-3 border-t border-[#ebe3d6] bg-[#fffdfa] px-6 py-4">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="h-11 cursor-pointer rounded-full border-border bg-card px-6 text-ink-soft hover:bg-surface"
+            className="h-11 cursor-pointer rounded-xl border-[#e5ded5] bg-white px-6 text-[#6f6a62] hover:bg-[#f4efe5]"
           >
             Batal
           </Button>
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 min-w-44 cursor-pointer gap-2 rounded-full bg-brand px-6 text-on-field transition-all hover:bg-brand-strong"
+            className="h-11 min-w-44 cursor-pointer gap-2 rounded-xl bg-[#3a5a4a] px-6 text-white shadow-[0_6px_16px_rgba(47,75,61,0.25)] transition-all hover:-translate-y-px hover:bg-[#2f4b3d]"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

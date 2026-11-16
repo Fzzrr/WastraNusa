@@ -37,8 +37,8 @@ function ChangeBadge({ percent }: { percent: number | null }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[13px] font-medium',
-        up ? 'bg-surface text-ink' : 'bg-destructive/10 text-destructive',
+        'inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium',
+        up ? 'bg-[#e7efe4] text-[#3f6b4a]' : 'bg-[#f6e1dd] text-[#b04a3a]',
       )}
     >
       <Icon className="size-2.5" />
@@ -67,26 +67,31 @@ function KpiCard({
   return (
     <div
       className={cn(
-        'group rounded-xl p-5 ring-1',
+        'group rounded-2xl p-5 ring-1',
         enterClassName,
         hoverLiftClassName,
-        dark ? 'bg-field text-on-field ring-field' : lightCardClassName,
+        dark
+          ? 'bg-gradient-to-br from-[#3a5a4a] to-[#2f4b3d] text-white ring-[#3a5a4a]'
+          : lightCardClassName,
       )}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex min-h-7 items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <Icon
+          <span
             className={cn(
-              'size-5 shrink-0',
-              dark ? 'text-gold' : 'text-ink-soft',
+              'flex size-7 items-center justify-center rounded-lg transition-colors',
+              dark
+                ? 'bg-white/10 text-[#e8cb8d] group-hover:bg-[#e8cb8d] group-hover:text-[#2f4b3d]'
+                : 'bg-[#f4efe5] text-[#8a6a3a] group-hover:bg-[#2f5543] group-hover:text-[#f4efe2]',
             )}
-            strokeWidth={1.75}
-          />
+          >
+            <Icon className="size-3.5" />
+          </span>
           <p
             className={cn(
-              'text-[15px]',
-              dark ? 'text-on-field-soft' : 'text-ink',
+              'text-xs font-medium tracking-wider uppercase',
+              dark ? 'text-white/80' : 'text-[#5f5a52]',
             )}
           >
             {label}
@@ -96,8 +101,8 @@ function KpiCard({
       </div>
       <p
         className={cn(
-          'mt-3 text-4xl font-semibold tracking-[-0.02em] tabular-nums',
-          dark ? 'text-on-field' : 'text-ink',
+          'mt-3 text-3xl font-bold tracking-tight tabular-nums',
+          dark ? 'text-white' : 'text-[#2a3a31]',
         )}
       >
         {value}
@@ -116,11 +121,11 @@ export function KpiCards() {
         {Array.from({ length: 4 }).map((_, index) => (
           <div
             key={index}
-            className={cn('rounded-xl p-5 ring-1', lightCardClassName)}
+            className={cn('rounded-2xl p-5 ring-1', lightCardClassName)}
           >
-            <Skeleton className="h-3 w-32 bg-surface" />
-            <Skeleton className="mt-3 h-8 w-24 bg-surface" />
-            <Skeleton className="mt-4 h-[136px] w-full bg-surface" />
+            <Skeleton className="h-3 w-32 bg-[#eee2d0]" />
+            <Skeleton className="mt-3 h-8 w-24 bg-[#eee2d0]" />
+            <Skeleton className="mt-4 h-[136px] w-full bg-[#eee2d0]" />
           </div>
         ))}
       </section>
@@ -138,7 +143,7 @@ export function KpiCards() {
         value={verifiedSellers.total.toLocaleString('id-ID')}
         badge={
           verifiedSellers.newThisMonth > 0 ? (
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-[13px] font-medium text-white">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/15 px-2 py-0.5 text-xs font-medium text-white">
               <ArrowUp className="size-2.5" />
               {verifiedSellers.newThisMonth} Baru
             </span>
@@ -150,8 +155,8 @@ export function KpiCards() {
           tone="dark"
           labels={months}
           values={verifiedSellers.series}
-          color="#5f8a72"
-          highlightColor="#d9b56f"
+          color="#7f8b62"
+          highlightColor="#e8cb8d"
           tickFormatter={(v) => Math.round(v).toLocaleString('id-ID')}
           ariaLabel="Jumlah seller terverifikasi per bulan"
         />
@@ -168,7 +173,7 @@ export function KpiCards() {
           type="line"
           labels={months}
           values={monthlySales.series.map(toJuta)}
-          color="#2f5b49"
+          color="#b8613f"
           valueFormatter={fromJuta}
           ariaLabel="Penjualan per bulan (juta rupiah)"
         />
@@ -185,7 +190,7 @@ export function KpiCards() {
           type="line"
           labels={months}
           values={annualRevenue.series.map(toJuta)}
-          color="#c9a35c"
+          color="#c0a06a"
           valueFormatter={fromJuta}
           ariaLabel="Revenue 12 bulan terakhir (juta rupiah)"
         />
@@ -198,7 +203,7 @@ export function KpiCards() {
         value={
           <>
             {orders.current.toLocaleString('id-ID')}
-            <span className="ml-1.5 text-base font-medium text-ink-soft">
+            <span className="ml-1.5 text-base font-medium text-[#9a8f80]">
               Transaksi
             </span>
           </>
@@ -209,7 +214,7 @@ export function KpiCards() {
           type="bar"
           labels={months}
           values={orders.series}
-          color="#9bb5a2"
+          color="#c9bfb6"
           tickFormatter={(v) => Math.round(v).toLocaleString('id-ID')}
           ariaLabel="Jumlah transaksi per bulan"
         />

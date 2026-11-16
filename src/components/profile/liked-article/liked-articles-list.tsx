@@ -51,9 +51,9 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
         <Link
           key={article.id}
           href={`/encyclopedia/${article.slug}`}
-          className="group flex items-center gap-4 rounded-xl bg-card p-3.5 transition-all duration-300"
+          className="group flex items-center gap-4 rounded-2xl bg-white p-3.5 ring-1 ring-[#efe8dd] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-22px_rgba(89,69,38,0.45)] hover:ring-[#caa86a]/50"
         >
-          <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft">
+          <div className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#efe8db] text-[#b0a591] ring-1 ring-[#e8e2d5]">
             {article.imageUrl ? (
               <>
                 <Image
@@ -63,7 +63,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
                   sizes="80px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-white/90 text-ink-soft">
+                <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-white/90 text-[#9c5235] shadow-sm">
                   <Heart className="size-3 fill-current" />
                 </span>
               </>
@@ -72,9 +72,9 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
                 <Hexagon
                   size={24}
                   strokeWidth={1.5}
-                  className="text-ink-soft"
+                  className="text-[#c4b9a3]"
                 />
-                <span className="mt-1 absolute bottom-1 text-[13px] font-semibold text-ink-soft">
+                <span className="mt-1 absolute bottom-1 text-[8px] font-semibold tracking-wide text-[#a39882] uppercase">
                   {article.motifLabel.substring(0, 5)}
                 </span>
               </>
@@ -85,44 +85,44 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
             <div className="flex flex-wrap gap-1.5">
               <Badge
                 variant="secondary"
-                className="rounded-full border-none bg-surface px-2 py-0.5 text-[13px] font-medium text-ink-soft hover:bg-surface"
+                className="rounded-full border-none bg-[#f6e4da] px-2 py-0.5 text-xs font-medium text-[#9c5235] hover:bg-[#f6e4da]"
               >
                 {article.topic}
               </Badge>
               <Badge
                 variant="secondary"
-                className="gap-1 rounded-full border-none bg-surface px-2 py-0.5 text-[13px] font-medium text-ink hover:bg-surface"
+                className="gap-1 rounded-full border-none bg-[#e3ece5] px-2 py-0.5 text-xs font-medium text-[#2f5b49] hover:bg-[#e3ece5]"
               >
                 <MapPin className="size-2.5" />
                 {article.region}
               </Badge>
             </div>
 
-            <h3 className="w-full truncate text-[15px] leading-tight font-semibold text-ink">
+            <h3 className="w-full truncate text-[15px] leading-tight font-bold text-[#2f4f3f] transition-colors group-hover:text-[#244a39]">
               {article.title}
             </h3>
 
-            <p className="line-clamp-2 text-[13px] leading-relaxed text-ink-soft">
+            <p className="line-clamp-2 text-[12px] leading-relaxed text-[#9a8f80]">
               {article.excerpt}
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 text-[13px] font-semibold text-ink">
+            <div className="flex flex-wrap items-center gap-3 text-[12px] font-semibold text-[#4f6658]">
               {article.readMinutes ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="flex size-5 items-center justify-center rounded-full bg-brand/10 text-ink">
+                  <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
                     <Clock3 className="size-3" />
                   </span>
                   {article.readMinutes}
                 </span>
               ) : null}
               <span className="inline-flex items-center gap-1.5">
-                <span className="flex size-5 items-center justify-center rounded-full bg-brand/10 text-ink">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
                   <Heart className="size-3" />
                 </span>
                 {article.likes}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="flex size-5 items-center justify-center rounded-full bg-brand/10 text-ink">
+                <span className="flex size-5 items-center justify-center rounded-full bg-[#2f5f49]/10 text-[#2f5f49]">
                   <Eye className="size-3" />
                 </span>
                 {article.views}
@@ -133,7 +133,7 @@ export function LikedArticlesList({ articles }: LikedArticlesListProps) {
           <div className="pl-2 pr-1">
             <ChevronRight
               size={18}
-              className="text-brand transition-transform group-hover:translate-x-1"
+              className="text-[#caa86a] transition-transform group-hover:translate-x-1"
             />
           </div>
         </Link>

@@ -101,12 +101,12 @@ export function ArticleSelectField({
                 </SelectItem>
               ))}
               {isFetchingNextPage ? (
-                <p className="px-2 py-2 text-[13px] text-muted-foreground">
+                <p className="px-2 py-2 text-xs text-muted-foreground">
                   Memuat artikel berikutnya...
                 </p>
               ) : null}
               {!hasNextPage && articleOptions.length > 0 ? (
-                <p className="px-2 py-2 text-[13px] text-muted-foreground">
+                <p className="px-2 py-2 text-xs text-muted-foreground">
                   Semua artikel telah dimuat
                 </p>
               ) : null}
