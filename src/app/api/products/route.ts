@@ -1,5 +1,5 @@
 import { Gender } from '@/generated/prisma/enums';
-import { withApiPublic } from '@/lib/api-handler';
+import { getPagination, withApiPublic } from '@/lib/api-handler';
 import { jsend } from '@/lib/jsend';
 import { productService } from '@/services/product.service';
 import type { ProductCatalogSortBy } from '@/types/product';
@@ -15,8 +15,7 @@ const PRODUCT_SORT_OPTIONS: readonly ProductCatalogSortBy[] = [
 
 export const GET = withApiPublic(async ({ req }) => {
   const url = new URL(req.url);
-  const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
-  const limit = Math.max(1, Number(url.searchParams.get('limit')) || 10);
+  const { page, limit } = getPagination(req);
 
   const minPriceParam = url.searchParams.get('minPrice');
   const rawMinPrice =
