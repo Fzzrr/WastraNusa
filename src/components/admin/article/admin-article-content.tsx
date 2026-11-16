@@ -178,7 +178,7 @@ export function AdminArticleContent() {
 
         <div className="animate-in overflow-hidden rounded-xl bg-card ring-1 ring-border duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left">
+            <table className="w-full min-w-[860px] text-left">
               <thead className="bg-surface text-[13px] font-medium text-ink-soft">
                 <tr>
                   <th className="w-12 px-4 py-4">
@@ -189,7 +189,7 @@ export function AdminArticleContent() {
                       disabled={articles.length === 0}
                     />
                   </th>
-                  <th className="w-[38%] px-4 py-4">Judul Artikel</th>
+                  <th className="px-4 py-4">Judul Artikel</th>
                   <th className="px-4 py-4">Topik</th>
                   <th className="px-4 py-4">Wilayah</th>
                   <th className="px-4 py-4 text-center">Dilihat</th>

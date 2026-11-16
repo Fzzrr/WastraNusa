@@ -226,7 +226,7 @@ export function SellerDashboardContent() {
             </Card>
 
             <Card className={cn(surfaceCardClassName, 'gap-0 py-0')}>
-              <CardHeader className={sectionHeaderClassName}>
+              <CardHeader className={cn(sectionHeaderClassName, 'pb-4')}>
                 <SectionTitle icon={Package} title="Rincian per Produk" />
               </CardHeader>
               <CardContent className="px-0 py-0">

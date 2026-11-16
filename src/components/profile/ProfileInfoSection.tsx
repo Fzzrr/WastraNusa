@@ -52,7 +52,7 @@ function InfoTile({
         <p
           className={cn(
             'truncate text-base font-medium',
-            isEmpty ? 'text-ink-soft italic' : 'text-ink',
+            isEmpty ? 'font-normal text-ink-soft' : 'text-ink',
           )}
         >
           {isEmpty ? 'Belum diisi' : value}

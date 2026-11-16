@@ -233,7 +233,7 @@ export function SellerProductInventoryContent() {
             icon={AlertTriangle}
             label="Stok Menipis"
             value={isLoading ? '…' : lowStockCount.toLocaleString('id-ID')}
-            caption={`Stok 1–${LOW_STOCK_THRESHOLD} unit · ${pageScope.toLowerCase()}`}
+            caption={`Stok 1–${LOW_STOCK_THRESHOLD} unit`}
           />
           <StatTile
             index={3}

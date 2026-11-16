@@ -36,7 +36,7 @@ export function CheckoutHeader({
         <p className="mt-1 text-base text-ink-soft">{description}</p>
       </div>
 
-      <ol className="flex items-center gap-1 rounded-full bg-surface p-1">
+      <ol className="flex w-fit items-center gap-1 rounded-full bg-surface p-1">
         {STEPS.map(({ label, icon: Icon, href }, index) => {
           const number = index + 1;
           const isDone = number < step;
@@ -59,11 +59,13 @@ export function CheckoutHeader({
                   <Icon className="size-3.5" />
                 )}
               </span>
-              <span className="hidden sm:inline">{label}</span>
+              <span className={cn(!isCurrent && 'hidden sm:inline')}>
+                {label}
+              </span>
             </>
           );
           const className = cn(
-            'flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-[15px] font-semibold whitespace-nowrap transition-all',
+            'flex items-center gap-2 rounded-full py-1.5 pr-3.5 pl-1.5 text-[15px] font-semibold whitespace-nowrap transition-all',
             isCurrent
               ? 'bg-brand text-on-field'
               : isDone

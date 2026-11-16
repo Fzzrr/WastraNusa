@@ -93,8 +93,8 @@ export function ArticleRow({
               <BookOpen className="size-5" />
             )}
           </span>
-          <div className="flex min-w-0 flex-col gap-0.5">
-            <p className="line-clamp-1 font-semibold text-ink">
+          <div className="flex min-w-[130px] flex-col gap-0.5">
+            <p className="line-clamp-2 leading-snug font-semibold text-ink">
               {article.title}
             </p>
             <p className="line-clamp-1 text-[13px] text-ink-soft">
@@ -109,9 +109,9 @@ export function ArticleRow({
         </span>
       </td>
       <td className="px-4 py-3 text-[15px] text-ink-soft">
-        <div className="flex items-center gap-1.5 whitespace-nowrap">
+        <div className="flex items-center gap-1.5">
           <MapPin className="size-3.5 shrink-0 text-ink-soft" />
-          <span>{article.region}</span>
+          <span className="line-clamp-2">{article.region}</span>
         </div>
       </td>
       <td className="px-4 py-3 text-center">

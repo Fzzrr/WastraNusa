@@ -141,7 +141,7 @@ export function SellerOrderContent() {
       />
 
       <section className="flex-1 px-5 py-5 md:px-8">
-        <div className="flex flex-col gap-4 rounded-xl bg-surface p-4">
+        <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <p className="text-base text-muted-foreground">
               {isLoading ? '...' : orderData?.meta.totalItems} Pesanan
@@ -155,7 +155,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-border bg-card sm:w-[190px]">
+                <SelectTrigger className="h-9 w-full rounded-lg border-border bg-card sm:w-[220px]">
                   <SelectValue placeholder="Status Pesanan" />
                 </SelectTrigger>
                 <SelectContent>
@@ -175,7 +175,7 @@ export function SellerOrderContent() {
                   setPage(1);
                 }}
               >
-                <SelectTrigger className="h-9 w-full rounded-m border-border bg-card sm:w-[180px]">
+                <SelectTrigger className="h-9 w-full rounded-lg border-border bg-card sm:w-[200px]">
                   <SelectValue placeholder="Status Pembayaran" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,7 +190,7 @@ export function SellerOrderContent() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-xl border border-border bg-background py-0 ring-0">
+          <Card className="overflow-hidden rounded-xl bg-card py-0 ring-1 ring-border">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-surface text-[13px] font-semibold text-ink-soft">

@@ -150,7 +150,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
               {shopName || sellerName}
             </p>
             <p className="text-[13px] text-sidebar-foreground/75">
-              · Lihat profil toko
+              Lihat profil toko
             </p>
           </div>
         </Link>
