@@ -53,9 +53,9 @@ export default async function EncyclopediaDetailPage({ params }: Props) {
   }
 
   // Hand the article (incl. this user's like) to React Query so the page
-  // renders with it instead of fetching it again from the browser. This also
-  // counts the view, as the API call it replaces did. A failed prefetch just
-  // falls back to the client fetch.
+  // renders with it instead of fetching it again from the browser. Views are
+  // counted by the page itself (useRecordArticleView), not here. A failed
+  // prefetch just falls back to the client fetch.
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: articleKeys.detail(slug),

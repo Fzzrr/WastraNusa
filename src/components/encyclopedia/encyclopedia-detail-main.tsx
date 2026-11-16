@@ -15,6 +15,7 @@ import Image from '@/components/ui/image';
 // Separator removed: sections now use border-top for separation
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
+import { mutateApi } from '@/lib/api-client';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
 import {
@@ -35,7 +36,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import Link from 'next/link';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { EncyclopediaChatWidget } from './encyclopedia-chat-widget';
@@ -77,12 +78,30 @@ function HeroMeta({
   );
 }
 
+/**
+ * Counts one view per mount of the article page (kept here, not in
+ * hooks/use-article.ts, which server pages import for query keys). A ref, not state, so React's
+ * dev-only double effect doesn't count twice. Best effort: a failed count
+ * must not disturb reading.
+ */
+function useRecordArticleView(slug: string) {
+  const recorded = useRef<string | null>(null);
+  useEffect(() => {
+    if (!slug || recorded.current === slug) return;
+    recorded.current = slug;
+    mutateApi(`/api/articles/${encodeURIComponent(slug)}/view`, 'POST').catch(
+      () => {},
+    );
+  }, [slug]);
+}
+
 type EncyclopediaDetailMainProps = {
   slug: string;
 };
 
 export function EncyclopediaDetailMain({ slug }: EncyclopediaDetailMainProps) {
   const { data: article, error, isPending } = useArticleDetail(slug);
+  useRecordArticleView(slug);
   const { data: session, isPending: isSessionPending } =
     authClient.useSession();
   const toggleLikeMutation = useToggleArticleLike(slug);

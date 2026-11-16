@@ -156,6 +156,15 @@ export const articleService = {
     };
   },
 
+  /**
+   * Counts a view. Kept out of `getArticleDetail` so reading an article (server
+   * prefetch, crawlers, the product page's related article, admin edits)
+   * doesn't count as a visit; only the article page calls this.
+   */
+  recordView: async (idOrSlug: string) => {
+    await articleRepository.incrementViewCount(idOrSlug);
+  },
+
   getArticleDetail: async (
     idOrSlug: string,
     userId?: string,
@@ -170,13 +179,6 @@ export const articleService = {
       userId && article.id
         ? await articleRepository.findUserLike(article.id, userId)
         : null;
-
-    // NOTE: Consider creating a dedicated endpoint for incrementing view counts instead of mixing it with getArticleDetail.
-    articleRepository.incrementViewCount(idOrSlug).catch((error) => {
-      logger.error(`Failed to increment view count for article ${idOrSlug}`, {
-        error,
-      });
-    });
 
     return {
       ...article,

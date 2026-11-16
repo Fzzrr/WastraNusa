@@ -344,9 +344,8 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(mockRepo.incrementViewCount).not.toHaveBeenCalled();
     });
 
-    it('should return article and increment view count', async () => {
+    it('should return article without counting a view', async () => {
       mockRepo.findByIdOrSlug.mockResolvedValue(MOCK_ARTICLE);
-      mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
       mockRepo.findUserLike.mockResolvedValue(null);
 
       const result = await articleService.getArticleDetail('test-id-1');
@@ -355,6 +354,11 @@ describe('articleService', { tags: ['backend'] }, () => {
       expect(result.isLiked).toBe(false);
       expect(mockRepo.findByIdOrSlug).toHaveBeenCalledWith('test-id-1');
       expect(mockRepo.findUserLike).not.toHaveBeenCalled();
+      expect(mockRepo.incrementViewCount).not.toHaveBeenCalled();
+    });
+
+    it('recordView counts one view', async () => {
+      await articleService.recordView('test-id-1');
       expect(mockRepo.incrementViewCount).toHaveBeenCalledWith('test-id-1');
     });
 
@@ -366,7 +370,6 @@ describe('articleService', { tags: ['backend'] }, () => {
         userId: 'user-1',
         createdAt: new Date(),
       } as never);
-      mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
 
       const result = await articleService.getArticleDetail(
         'test-id-1',
@@ -393,7 +396,6 @@ describe('articleService', { tags: ['backend'] }, () => {
           },
         ],
       } as never);
-      mockRepo.incrementViewCount.mockResolvedValue(MOCK_ARTICLE as never);
       mockRepo.findUserLike.mockResolvedValue(null);
 
       const result = await articleService.getArticleDetail('test-id-1');

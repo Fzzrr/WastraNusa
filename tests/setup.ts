@@ -77,6 +77,7 @@ vi.mock('@/services/article.service', () => ({
     getArticles: vi.fn(),
     getDashboardOverview: vi.fn(),
     getArticleDetail: vi.fn(),
+    recordView: vi.fn(),
     getLikedArticles: vi.fn(),
     createArticle: vi.fn(),
     updateArticle: vi.fn(),
