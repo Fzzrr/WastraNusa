@@ -150,8 +150,8 @@ export function KpiCards() {
           tone="dark"
           labels={months}
           values={verifiedSellers.series}
-          color="#7f8b62"
-          highlightColor="#e8cb8d"
+          color="#5f8a72"
+          highlightColor="#d9b56f"
           tickFormatter={(v) => Math.round(v).toLocaleString('id-ID')}
           ariaLabel="Jumlah seller terverifikasi per bulan"
         />
@@ -168,7 +168,7 @@ export function KpiCards() {
           type="line"
           labels={months}
           values={monthlySales.series.map(toJuta)}
-          color="#b8613f"
+          color="#2f5b49"
           valueFormatter={fromJuta}
           ariaLabel="Penjualan per bulan (juta rupiah)"
         />
@@ -185,7 +185,7 @@ export function KpiCards() {
           type="line"
           labels={months}
           values={annualRevenue.series.map(toJuta)}
-          color="#c0a06a"
+          color="#c9a35c"
           valueFormatter={fromJuta}
           ariaLabel="Revenue 12 bulan terakhir (juta rupiah)"
         />
@@ -209,7 +209,7 @@ export function KpiCards() {
           type="bar"
           labels={months}
           values={orders.series}
-          color="#c9bfb6"
+          color="#9bb5a2"
           tickFormatter={(v) => Math.round(v).toLocaleString('id-ID')}
           ariaLabel="Jumlah transaksi per bulan"
         />

@@ -294,6 +294,28 @@ export const sellerProductService = {
     return mapProduct(product);
   },
 
+  setStatus: async (
+    sellerId: string,
+    idOrSlug: string,
+    status: 'active' | 'inactive',
+  ) => {
+    const ownedId = await sellerProductRepository.resolveOwnedProductId(
+      sellerId,
+      idOrSlug,
+    );
+    if (!ownedId) {
+      throw new ApiError('Produk tidak ditemukan', 404);
+    }
+
+    const product = await sellerProductRepository.setStatus(ownedId, status);
+    logger.info('Seller product status changed', {
+      productId: ownedId,
+      sellerId,
+      status,
+    });
+    return product;
+  },
+
   deleteProduct: async (sellerId: string, idOrSlug: string) => {
     const ownedId = await sellerProductRepository.resolveOwnedProductId(
       sellerId,
@@ -301,6 +323,13 @@ export const sellerProductService = {
     );
     if (!ownedId) {
       throw new ApiError('Produk tidak ditemukan', 404);
+    }
+    // Orders keep pointing at the product, so it can only be hidden.
+    if (await sellerProductRepository.hasOrders(ownedId)) {
+      throw new ApiError(
+        'Produk ini sudah pernah dipesan sehingga tidak dapat dihapus. Nonaktifkan produk agar tidak tampil di katalog.',
+        409,
+      );
     }
 
     const product = await sellerProductRepository.delete(ownedId);

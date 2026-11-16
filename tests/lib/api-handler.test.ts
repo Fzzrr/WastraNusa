@@ -196,6 +196,22 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
     expect(body.message).toBe('Terjadi kesalahan pada server');
   });
 
+  it('names an unknown field instead of returning empty data', async () => {
+    const { z } = await import('zod');
+    mockAuth.requireUser.mockResolvedValue({ id: 'user-1' } as never);
+    const handler = vi.fn(async () => {
+      z.object({ a: z.string().optional() }).strict().parse({ hacker: 1 });
+      return new Response();
+    });
+
+    const res = await withApiAuth(handler)(createRequest(), {
+      params: mockParams,
+    });
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).data.message).toBe('Field tidak dikenal: hacker');
+  });
+
   it('should return 400 with field errors on ZodError', async () => {
     const zodError = new ZodError([
       {
@@ -281,6 +297,20 @@ describe('handleApiError (via wrappers)', { tags: ['backend'] }, () => {
       expect(res.status).toBe(404);
       expect(body.status).toBe('fail');
       expect(body.data.message).toBe('Data tidak ditemukan');
+    });
+
+    it('should return 400 on P2000 (value too long for column)', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError(
+        'Value too long',
+        { code: 'P2000', clientVersion: 'test' },
+      );
+      mockAuth.requireUser.mockResolvedValue({ id: 'user-1' } as never);
+
+      const wrapped = withApiAuth(vi.fn().mockRejectedValue(prismaError));
+      const res = await wrapped(createRequest(), { params: mockParams });
+
+      expect(res.status).toBe(400);
+      expect((await res.json()).data.message).toBe('Data terlalu panjang');
     });
   });
 });

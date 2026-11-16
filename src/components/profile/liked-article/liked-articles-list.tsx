@@ -4,6 +4,7 @@ import {
 } from '@/components/profile/profile-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import type { LikedArticle } from '@/types/profile';
 import {
@@ -16,7 +17,6 @@ import {
   Hexagon,
   MapPin,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 interface LikedArticlesListProps {

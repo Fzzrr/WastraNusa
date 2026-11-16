@@ -1,6 +1,7 @@
 import { ApiError } from '@/lib/error';
 import { logger } from '@/lib/logger';
 import { cartRepository } from '@/repositories/cart.repository';
+import { productRepository } from '@/repositories/product.repository';
 import { productVariantRepository } from '@/repositories/productVariant.repository';
 
 /**
@@ -45,6 +46,19 @@ export const cartService = {
   ) => {
     if (quantity <= 0) {
       throw new ApiError('Jumlah harus lebih dari 0', 400);
+    }
+
+    // Same product rules as checkout, so the cart never holds an item that
+    // can't be bought.
+    const product = await productRepository.findProductById(productId);
+    if (!product || product.status !== 'active' || !product.sellerId) {
+      throw new ApiError('Produk tidak tersedia', 400);
+    }
+    if (product.sellerId === userId) {
+      throw new ApiError(
+        'Anda tidak dapat membeli produk dari toko sendiri',
+        400,
+      );
     }
 
     const cart = await cartRepository.findOrCreateByUser(userId);

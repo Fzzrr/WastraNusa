@@ -286,23 +286,26 @@ function SellerApplicationForm({
       <Field label="Nama Toko" required error={errors.shopName?.message}>
         <Input
           {...register('shopName')}
+          maxLength={60}
           placeholder="Contoh: Batik Nusantara"
           className={inputClassName}
         />
       </Field>
 
-      <Field label="Deskripsi Toko">
+      <Field label="Deskripsi Toko" error={errors.description?.message}>
         <textarea
           {...register('description')}
+          maxLength={500}
           rows={4}
           placeholder="Ceritakan tentang toko dan produk yang akan Anda jual..."
           className={textareaClassName}
         />
       </Field>
 
-      <Field label="Nomor Telepon">
+      <Field label="Nomor Telepon" error={errors.phoneNumber?.message}>
         <Input
           {...register('phoneNumber')}
+          maxLength={20}
           placeholder="08xxxxxxxxxx"
           className={inputClassName}
         />

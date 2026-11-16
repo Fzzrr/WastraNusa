@@ -1,8 +1,8 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ArrowRight, ImageOff, MapPin, Search } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

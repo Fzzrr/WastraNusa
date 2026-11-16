@@ -8,6 +8,7 @@ import {
   profilePrimaryButtonClassName,
 } from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { useCancelOrder, useOrderDetail } from '@/hooks/use-order';
 import { cn } from '@/lib/utils';
 import {
@@ -22,7 +23,6 @@ import {
   Truck,
   XCircle,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { toast } from 'sonner';

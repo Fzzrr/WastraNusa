@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/repositories/conversation.repository', () => ({
   conversationRepository: {
-    participantExists: vi.fn(),
+    findRoles: vi.fn(),
     findBetween: vi.fn(),
     create: vi.fn(),
     findByIdForUser: vi.fn(),
@@ -73,7 +73,9 @@ describe('conversationService', { tags: ['backend'] }, () => {
     });
 
     it('404s when the other user does not exist', async () => {
-      mockConversationRepo.participantExists.mockResolvedValue(false);
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+      ]);
 
       await expect(
         conversationService.startConversation(USER_A, 'ghost'),
@@ -82,7 +84,10 @@ describe('conversationService', { tags: ['backend'] }, () => {
     });
 
     it('returns the existing conversation instead of creating a new one', async () => {
-      mockConversationRepo.participantExists.mockResolvedValue(true);
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+        { id: USER_B, role: 'seller' },
+      ]);
       mockConversationRepo.findBetween.mockResolvedValue(
         conversationRow as never,
       );
@@ -96,6 +101,37 @@ describe('conversationService', { tags: ['backend'] }, () => {
       expect(summary.id).toBe(CONVERSATION_ID);
       expect(summary.otherParticipant.id).toBe(USER_B);
       expect(summary.unreadCount).toBe(0);
+    });
+  });
+
+  describe('startConversation between two non-sellers', () => {
+    beforeEach(() => {
+      mockConversationRepo.findRoles.mockResolvedValue([
+        { id: USER_A, role: null },
+        { id: USER_B, role: 'admin' },
+      ]);
+    });
+
+    it('refuses to open a new conversation (403)', async () => {
+      mockConversationRepo.findBetween.mockResolvedValue(null as never);
+
+      await expect(
+        conversationService.startConversation(USER_A, USER_B),
+      ).rejects.toMatchObject({ status: 403 });
+      expect(mockConversationRepo.create).not.toHaveBeenCalled();
+    });
+
+    it('still reopens one that already exists', async () => {
+      mockConversationRepo.findBetween.mockResolvedValue(
+        conversationRow as never,
+      );
+
+      const summary = await conversationService.startConversation(
+        USER_A,
+        USER_B,
+      );
+
+      expect(summary.id).toBe(CONVERSATION_ID);
     });
   });
 

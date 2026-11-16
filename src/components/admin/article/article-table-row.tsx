@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import Image from '@/components/ui/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { type EncyclopediaArticle } from '@/types/encyclopedia';
 import { BookOpen, Clock3, Eye, MapPin, Pencil, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export function ArticleRowSkeleton() {
@@ -98,7 +98,7 @@ export function ArticleRow({
               {article.title}
             </p>
             <p className="line-clamp-1 text-[13px] text-ink-soft">
-              {article.motifLabel} · {article.region}
+              {article.motifLabel}
             </p>
           </div>
         </div>
@@ -109,9 +109,9 @@ export function ArticleRow({
         </span>
       </td>
       <td className="px-4 py-3 text-[15px] text-ink-soft">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 whitespace-nowrap">
           <MapPin className="size-3.5 shrink-0 text-ink-soft" />
-          <span className="line-clamp-1">{article.region}</span>
+          <span>{article.region}</span>
         </div>
       </td>
       <td className="px-4 py-3 text-center">
@@ -157,7 +157,7 @@ export function ArticleRow({
             variant="ghost"
             aria-label="Hapus artikel"
             title="Hapus artikel"
-            className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive"
+            className="cursor-pointer rounded-full text-ink-soft hover:bg-destructive/10 hover:text-destructive"
             onClick={onDelete}
             disabled={isDeleting}
           >

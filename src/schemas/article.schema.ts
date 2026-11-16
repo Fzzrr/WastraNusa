@@ -1,6 +1,12 @@
 import { ArticleStatus, Gender } from '@/generated/prisma/enums';
 import { z } from 'zod';
 
+// http(s) only: `z.url()` alone also accepts `javascript:` and `data:`.
+const httpUrl = z.url({
+  protocol: /^https?$/,
+  error: 'Format URL tidak valid',
+});
+
 export const createArticleSchema = z.object({
   title: z.string().min(1, 'Judul artikel wajib diisi'),
   slug: z.string().optional(),
@@ -23,9 +29,7 @@ export const createArticleSchema = z.object({
     .optional(),
   featured: z.boolean().optional(),
 
-  imageURL: z
-    .union([z.string().url('Format URL tidak valid'), z.literal('')])
-    .nullish(),
+  imageURL: z.union([httpUrl, z.literal('')]).nullish(),
 
   sections: z
     .array(
@@ -34,9 +38,7 @@ export const createArticleSchema = z.object({
         content: z.string().min(1, 'Konten bagian wajib diisi'),
         imageLabel: z.string().nullish(),
         imageCaption: z.string().nullish(),
-        imageURL: z
-          .union([z.string().url('Format URL tidak valid'), z.literal('')])
-          .nullish(),
+        imageURL: z.union([httpUrl, z.literal('')]).nullish(),
         order: z.number().int(),
       }),
     )

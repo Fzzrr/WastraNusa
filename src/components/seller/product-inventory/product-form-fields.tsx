@@ -149,7 +149,7 @@ export function VariantCard({
           disabled={!canRemove}
           aria-label={`Hapus varian ${index + 1}`}
           title={canRemove ? 'Hapus varian' : 'Minimal 1 varian diperlukan'}
-          className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
+          className="cursor-pointer rounded-full text-ink-soft hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
         >
           <Trash2 className="size-4" />
         </Button>

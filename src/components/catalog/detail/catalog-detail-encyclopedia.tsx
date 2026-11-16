@@ -1,6 +1,6 @@
+import Image from '@/components/ui/image';
 import type { EncyclopediaArticleDetail } from '@/types/encyclopedia';
 import { ArrowRight, BookOpenText } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 type CatalogDetailEncyclopediaProps = {

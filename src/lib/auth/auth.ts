@@ -64,6 +64,8 @@ export const auth = betterAuth({
       });
     },
     resetPasswordTokenExpiresIn: 15 * 60, // 15 minutes
+    // A reset usually means the account may be compromised: log out everywhere.
+    revokeSessionsOnPasswordReset: true,
   },
   socialProviders: {
     google: {

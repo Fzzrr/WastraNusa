@@ -165,7 +165,7 @@ export function CatalogDetailProductSummary({
           <span
             className={cn(
               'text-[15px]',
-              isPurchaseDisabled ? 'text-destructive' : 'text-[#9a5b1e]',
+              isPurchaseDisabled ? 'text-destructive' : 'text-warning',
             )}
           >
             {stockNote}

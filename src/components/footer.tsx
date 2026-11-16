@@ -1,5 +1,5 @@
+import Image from '@/components/ui/image';
 import { Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 // Labels must match existing clothingType / island values so each link filters.
@@ -40,13 +40,15 @@ export function Footer({ year = 2026 }: FooterProps) {
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Image
-                src="/logo.png"
-                alt=""
-                width={48}
-                height={48}
-                className="object-contain"
-              />
+              <span className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-ground">
+                <Image
+                  src="/logo.png"
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="scale-125 object-contain"
+                />
+              </span>
               <span className="text-[clamp(1.75rem,3vw,2.25rem)] font-semibold tracking-[-0.02em]">
                 WastraNusa
               </span>

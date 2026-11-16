@@ -12,6 +12,8 @@ vi.mock('@/repositories/sellerProduct.repository', () => ({
     create: vi.fn(),
     update: vi.fn(),
     findVariantsInUnpaidOrders: vi.fn(),
+    setStatus: vi.fn(),
+    hasOrders: vi.fn(),
     delete: vi.fn(),
   },
 }));
@@ -72,6 +74,29 @@ describe(
         'prod-owned',
       );
       expect(mockRepo.delete).toHaveBeenCalledWith('prod-owned');
+    });
+
+    it('refuses to delete a product that has orders', async () => {
+      mockRepo.resolveOwnedProductId.mockResolvedValue('prod-owned' as never);
+      mockRepo.hasOrders.mockResolvedValue(true);
+
+      await expect(
+        sellerProductService.deleteProduct(SELLER_ID, 'prod-owned'),
+      ).rejects.toMatchObject({ status: 409 });
+      expect(mockRepo.delete).not.toHaveBeenCalled();
+    });
+
+    it('changes status only on the owned product', async () => {
+      mockRepo.resolveOwnedProductId.mockResolvedValue(null as never);
+
+      await expect(
+        sellerProductService.setStatus(SELLER_ID, 'not-mine', 'inactive'),
+      ).rejects.toMatchObject({ status: 404 });
+      expect(mockRepo.setStatus).not.toHaveBeenCalled();
+
+      mockRepo.resolveOwnedProductId.mockResolvedValue('prod-owned' as never);
+      await sellerProductService.setStatus(SELLER_ID, 'prod-owned', 'active');
+      expect(mockRepo.setStatus).toHaveBeenCalledWith('prod-owned', 'active');
     });
 
     it('404s creation when the source article is missing', async () => {

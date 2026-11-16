@@ -27,6 +27,7 @@ vi.mock('@/lib/auth/auth-api-helper', () => ({
     getUser: vi.fn(),
     requireUser: vi.fn(),
     requireAdmin: vi.fn(),
+    requireSeller: vi.fn(),
   },
 }));
 
@@ -97,7 +98,7 @@ vi.mock('@/repositories/order.repository', () => ({
     confirmPaidOrder: vi.fn(),
     findOrdersByUserId: vi.fn(),
     countOrdersByUserId: vi.fn(),
-    findExpiredPendingOrders: vi.fn(),
+    findExpiredPendingOrders: vi.fn(async () => []),
     cancelOrderAndRestoreStock: vi.fn(),
   },
 }));
@@ -106,6 +107,7 @@ vi.mock('@/services/order.service', () => ({
   getOrderPaymentExpiryDate: vi.fn(
     (createdAt: Date) => new Date(createdAt.getTime() + 30 * 60 * 1000),
   ),
+  reconcileExpiredOrders: vi.fn(async () => {}),
   orderService: {
     getUserOrders: vi.fn(),
     getUserOrderDetail: vi.fn(),
@@ -116,7 +118,7 @@ vi.mock('@/services/order.service', () => ({
 
 vi.mock('@/repositories/paymentTransaction.repository', () => ({
   paymentTransactionRepository: {
-    createPaymentTransaction: vi.fn(),
+    setPaymentUrl: vi.fn(async () => ({})),
     updatePaymentStatus: vi.fn(),
     findTransactionByExternalId: vi.fn(),
   },

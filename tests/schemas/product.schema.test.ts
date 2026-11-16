@@ -34,3 +34,34 @@ describe('createProductSchema imageURL', { tags: ['backend'] }, () => {
     ).toBe(false);
   });
 });
+
+describe('createProductSchema price', { tags: ['backend'] }, () => {
+  const withPrice = (price: number, variantPrice = price) => ({
+    ...base,
+    price,
+    variants: [{ ...base.variants[0], price: variantPrice }],
+  });
+
+  it.each([15000.5, 0, 2_000_000_000])(
+    'rejects %s as a product or variant price',
+    (price) => {
+      expect(createProductSchema.safeParse(withPrice(price)).success).toBe(
+        false,
+      );
+      expect(
+        createProductSchema.safeParse(withPrice(250000, price)).success,
+      ).toBe(false);
+    },
+  );
+});
+
+describe('image URLs', { tags: ['backend'] }, () => {
+  it.each(['javascript:alert(1)', 'data:image/png;base64,AA'])(
+    'rejects %s',
+    (imageURL) => {
+      expect(createProductSchema.safeParse({ ...base, imageURL }).success).toBe(
+        false,
+      );
+    },
+  );
+});

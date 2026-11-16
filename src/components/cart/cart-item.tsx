@@ -1,10 +1,10 @@
 'use client';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import Image from '@/components/ui/image';
 import { displayVariant } from '@/lib/checkout-session';
 import { cn, formatIDR } from '@/lib/utils';
 import { Hexagon, MapPin, Minus, Plus, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 
 import type { CartProduct } from './cart-list';
 
@@ -89,7 +89,7 @@ export function CartItem({
               <span
                 className={cn(
                   'size-1.5 rounded-full',
-                  item.stock <= 5 ? 'bg-amber-500' : 'bg-[#3f8f63]',
+                  item.stock <= 5 ? 'bg-warning' : 'bg-brand',
                 )}
               />
               {item.stock > 0 ? `Stok: ${item.stock}` : 'Stok habis'}

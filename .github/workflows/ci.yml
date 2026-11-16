@@ -15,6 +15,8 @@ env:
   POSTGRES_DB: testdb
   DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
   DIRECT_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+  # Throwaway CI database: enables the `db`-tagged repository tests.
+  TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
 
 jobs:
   ci:

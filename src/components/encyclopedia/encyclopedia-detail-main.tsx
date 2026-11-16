@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import Image from '@/components/ui/image';
 // Separator removed: sections now use border-top for separation
 import { Skeleton } from '@/components/ui/skeleton';
 import { useArticleDetail, useToggleArticleLike } from '@/hooks/use-article';
@@ -24,7 +25,6 @@ import {
   MapPin,
   UserRound,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { type ReactNode, useState } from 'react';
 import { toast } from 'sonner';

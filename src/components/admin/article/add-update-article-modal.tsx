@@ -150,6 +150,8 @@ export default function AddUpdateArticleModal({
 
       <FormProvider {...form}>
         <form
+          // Let the zod messages (Indonesian) show instead of the browser's.
+          noValidate
           onSubmit={handleSubmit(onSubmit, onInvalid)}
           className={cn(
             'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-surface transition-all duration-300',

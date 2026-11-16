@@ -1,10 +1,10 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import { displayVariant } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import type { CheckoutSelectedItem } from '@/types/checkout';
 import { Package } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 interface CheckoutSummaryProps {

@@ -3,12 +3,12 @@
 import { inputClassName } from '@/components/form-sections';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { useWikipediaSummaryImport } from '@/hooks/use-wikipedia-summary';
 import { cn } from '@/lib/utils';
 import { type CreateArticleInput } from '@/schemas/article.schema';
 import { Download, Info, Loader2, Sparkles, X } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -95,11 +95,14 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
         </div>
 
         {wiki.url.trim().length > 0 && wiki.urlHint && (
-          <p className="text-[13px] text-amber-700">{wiki.urlHint}</p>
+          <p className="text-[13px] text-warning">{wiki.urlHint}</p>
         )}
 
         {wiki.error && (
-          <Alert variant="destructive" className="border-red-200 bg-red-50/90">
+          <Alert
+            variant="destructive"
+            className="border-destructive/30 bg-destructive/10"
+          >
             <AlertTitle>Gagal Mengambil Data</AlertTitle>
             <AlertDescription>{wiki.error}</AlertDescription>
           </Alert>
@@ -111,7 +114,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
               Pratinjau — Terapkan ke Form
             </p>
             {wiki.preview.wikiType === 'disambiguation' && (
-              <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1.5 text-[13px] text-amber-800">
+              <p className="rounded-lg border border-gold/50 bg-gold/15 px-2 py-1.5 text-[13px] text-warning">
                 Halaman ini berupa disambiguasi Wikipedia; ringkasan mungkin
                 pendek — selalu sesuaikan untuk konteks WastraNusa.
               </p>
@@ -164,13 +167,13 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
       </div>
 
       {showWikiReminder && (
-        <div className="flex animate-in items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[15px] text-amber-800 fade-in">
-          <Info className="mt-0.5 size-4 shrink-0 text-amber-500" />
+        <div className="flex animate-in items-start gap-3 rounded-xl border border-gold/50 bg-gold/15 px-4 py-3 text-[15px] text-warning fade-in">
+          <Info className="mt-0.5 size-4 shrink-0 text-warning" />
           <div className="flex-1">
             <p className="font-semibold">
               Lengkapi Field Berikut secara Manual
             </p>
-            <p className="mt-0.5 text-amber-700">
+            <p className="mt-0.5 text-warning">
               Wikipedia tidak dapat mengisi:{' '}
               <span className="font-medium">
                 Label Motif, Topik, Pulau, Provinsi, Daerah
@@ -182,7 +185,7 @@ export function WikipediaImportPanel({ isOpen }: { isOpen: boolean }) {
             type="button"
             aria-label="Tutup peringatan"
             onClick={() => setShowWikiReminder(false)}
-            className="ml-1 cursor-pointer rounded-lg p-0.5 text-amber-500 transition-colors hover:bg-amber-100"
+            className="ml-1 cursor-pointer rounded-lg p-0.5 text-warning transition-colors hover:bg-gold/30"
           >
             <X className="size-4" />
           </button>

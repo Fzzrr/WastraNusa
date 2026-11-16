@@ -367,7 +367,7 @@ export function EncyclopediaChatWidget({
               className="h-12 w-full rounded-full bg-surface pr-10 pl-5 text-base text-ink placeholder:text-ink-soft focus:outline-2 focus:outline-brand/30 disabled:opacity-60"
             />
             {inputText.length > 800 && (
-              <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-[13px] font-medium text-amber-700">
+              <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-[13px] font-medium text-warning">
                 {1000 - inputText.length}
               </span>
             )}

@@ -1,4 +1,4 @@
-import type { VariantType } from '@/generated/prisma/enums';
+import type { ProductStatus, VariantType } from '@/generated/prisma/enums';
 import prisma from '@/lib/prisma';
 
 export type VariantWrite = {
@@ -146,6 +146,19 @@ export const sellerProductRepository = {
       },
       select: { name: true },
     });
+  },
+
+  setStatus: async (productId: string, status: ProductStatus) => {
+    return prisma.product.update({
+      where: { id: productId },
+      data: { status },
+      select: { id: true, status: true },
+    });
+  },
+
+  hasOrders: async (productId: string) => {
+    const count = await prisma.orderItem.count({ where: { productId } });
+    return count > 0;
   },
 
   delete: async (productId: string) => {

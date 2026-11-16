@@ -20,7 +20,7 @@ type HorizontalBarChartProps = {
   ariaLabel?: string;
 };
 
-const DEFAULT_COLORS = ['#2f4f3f', '#5b7d66', '#8a6a2a', '#a5694a', '#c2a57a'];
+const DEFAULT_COLORS = ['#2f5b49', '#5f8a72', '#9bb5a2', '#c9a35c', '#7c6a4f'];
 
 /**
  * Ranked horizontal bar chart (e.g. "Top Seller"): labels on the left, bars
@@ -52,10 +52,10 @@ export function HorizontalBarChart({
             className={cn(
               'flex h-11 items-center justify-end text-right text-xs leading-tight transition-colors',
               active === i
-                ? 'font-semibold text-[#2f4f3f]'
+                ? 'font-semibold text-brand-strong'
                 : dimmed(i)
-                  ? 'text-[#a9a298]'
-                  : 'text-[#4a4843]',
+                  ? 'text-ink-soft'
+                  : 'text-ink-soft',
             )}
           >
             {d.label}
@@ -67,7 +67,7 @@ export function HorizontalBarChart({
         {ticks.map((tick) => (
           <span
             key={tick}
-            className="absolute inset-y-0 w-px bg-[#efeae2]"
+            className="absolute inset-y-0 w-px bg-border"
             style={{ left: `${toPercent(tick)}%` }}
           />
         ))}
@@ -91,7 +91,7 @@ export function HorizontalBarChart({
             />
             {active === i && (
               <span
-                className="pointer-events-none absolute z-10 ml-2 rounded-md bg-[#2f3a33] px-2 py-1 text-xs font-semibold whitespace-nowrap text-white shadow-lg"
+                className="pointer-events-none absolute z-10 ml-2 rounded-md bg-ink px-2 py-1 text-xs font-semibold whitespace-nowrap text-white shadow-lg"
                 style={{
                   left: `${Math.min(toPercent(d.value), 70)}%`,
                 }}
@@ -108,7 +108,7 @@ export function HorizontalBarChart({
         {ticks.map((tick) => (
           <span
             key={tick}
-            className="absolute -translate-x-1/2 text-xs text-[#6f6a62] tabular-nums"
+            className="absolute -translate-x-1/2 text-xs text-ink-soft tabular-nums"
             style={{ left: `${toPercent(tick)}%` }}
           >
             {tick}

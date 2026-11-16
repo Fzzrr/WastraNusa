@@ -1,5 +1,6 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import { Input } from '@/components/ui/input';
 import { useArticles } from '@/hooks/use-article';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -19,7 +20,6 @@ import {
   ShoppingBag,
   X,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 

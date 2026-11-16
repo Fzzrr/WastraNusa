@@ -160,7 +160,7 @@ export function AdminArticleContent() {
                 variant="outline"
                 onClick={handleBulkDelete}
                 disabled={isDeleting}
-                className="h-11 animate-in cursor-pointer rounded-full border-red-200 bg-card px-4 text-destructive fade-in zoom-in-95 hover:bg-red-50 hover:text-red-700"
+                className="h-11 animate-in cursor-pointer rounded-full border-destructive/30 bg-card px-4 text-destructive fade-in zoom-in-95 hover:bg-destructive/10 hover:text-destructive"
               >
                 <Trash2 data-icon="inline-start" />
                 Hapus ({selectedSlugs.length})
@@ -189,11 +189,13 @@ export function AdminArticleContent() {
                       disabled={articles.length === 0}
                     />
                   </th>
-                  <th className="px-4 py-4">Judul Artikel</th>
+                  <th className="w-[38%] px-4 py-4">Judul Artikel</th>
                   <th className="px-4 py-4">Topik</th>
                   <th className="px-4 py-4">Wilayah</th>
                   <th className="px-4 py-4 text-center">Dilihat</th>
-                  <th className="px-4 py-4 text-center">Waktu Baca (Mnt)</th>
+                  <th className="px-4 py-4 text-center whitespace-nowrap">
+                    Baca (mnt)
+                  </th>
                   <th className="px-4 py-4 text-center">Aksi</th>
                 </tr>
               </thead>

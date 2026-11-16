@@ -1,6 +1,6 @@
+import Image from '@/components/ui/image';
 import { formatIDR } from '@/lib/utils';
 import type { ChatProduct } from '@/types/chat';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export function ChatProductRecommendations({

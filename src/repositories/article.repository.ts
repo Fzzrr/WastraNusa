@@ -329,10 +329,11 @@ export const articleRepository = {
     return prisma.$transaction(async (tx) => {
       const article = await tx.article.findUnique({
         where: getUniqueWhere(idOrSlug),
-        select: { id: true },
+        select: { id: true, status: true },
       });
 
-      if (!article) {
+      // Drafts are hidden from the public, so they can't be liked either.
+      if (!article || article.status !== 'published') {
         throw new ApiError('Artikel tidak ditemukan', 404);
       }
 

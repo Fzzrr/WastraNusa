@@ -78,9 +78,9 @@ export default function ProfileCard() {
               <div className="h-7 w-40 animate-pulse rounded-lg bg-white/15" />
             ) : (
               <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-                <h2 className="text-[clamp(1.75rem,3vw,2.5rem)] leading-tight font-semibold tracking-[-0.03em]">
+                <h1 className="text-[clamp(1.75rem,3vw,2.5rem)] leading-tight font-semibold tracking-[-0.03em]">
                   {user?.name || 'Pengguna'}
-                </h2>
+                </h1>
                 {roleBadge ? (
                   <span className="inline-flex items-center gap-1.5 text-[15px] text-gold">
                     {roleBadge.icon}

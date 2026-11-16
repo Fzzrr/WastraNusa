@@ -56,6 +56,7 @@
   --color-on-field: var(--on-field);
   --color-on-field-soft: var(--on-field-soft);
   --color-gold: var(--gold);
+  --color-warning: var(--warning);
 }
 
 :root {
@@ -70,6 +71,8 @@
   --on-field: #f3f2ef;
   --on-field-soft: #b9c7be;
   --gold: #d9b56f;
+  /* Dark ochre: the readable partner of gold, for low-stock and caution text. */
+  --warning: #8a5a1c;
 
   --background: var(--ground);
   --foreground: var(--ink);
@@ -85,7 +88,8 @@
   --muted-foreground: var(--ink-soft);
   --accent: var(--surface);
   --accent-foreground: var(--ink);
-  --destructive: oklch(0.577 0.245 27.325);
+  /* Brick red, muted to sit beside the green and stone. */
+  --destructive: #b3362b;
   --border: #dad6cc;
   --input: #d3cfc4;
   --ring: var(--brand);

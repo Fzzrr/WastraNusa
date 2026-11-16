@@ -88,7 +88,7 @@ export function AddressRegionFields() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Provinsi <span className="text-red-400">*</span>
+            Provinsi <span className="text-destructive">*</span>
           </label>
           <Controller
             control={control}
@@ -148,14 +148,14 @@ export function AddressRegionFields() {
           {!watchedProvince &&
             (touchedFields.province || submitCount > 0) &&
             errors.province && (
-              <p className="mt-1 text-[13px] text-red-500">
+              <p className="mt-1 text-[13px] text-destructive">
                 {errors.province.message}
               </p>
             )}
         </div>
         <div>
           <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kota / Kabupaten <span className="text-red-400">*</span>
+            Kota / Kabupaten <span className="text-destructive">*</span>
           </label>
           <Controller
             control={control}
@@ -218,7 +218,7 @@ export function AddressRegionFields() {
           {!watchedCity &&
             (touchedFields.city || submitCount > 0) &&
             errors.city && (
-              <p className="mt-1 text-[13px] text-red-500">
+              <p className="mt-1 text-[13px] text-destructive">
                 {errors.city.message}
               </p>
             )}
@@ -229,7 +229,7 @@ export function AddressRegionFields() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kecamatan <span className="text-red-400">*</span>
+            Kecamatan <span className="text-destructive">*</span>
           </label>
           <Controller
             control={control}
@@ -289,7 +289,7 @@ export function AddressRegionFields() {
           {!watchedDistrict &&
             (touchedFields.district || submitCount > 0) &&
             errors.district && (
-              <p className="mt-1 text-[13px] text-red-500">
+              <p className="mt-1 text-[13px] text-destructive">
                 {errors.district.message}
               </p>
             )}
@@ -306,7 +306,7 @@ export function AddressRegionFields() {
         </div>
         <div>
           <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-            Kode Pos <span className="text-red-400">*</span>
+            Kode Pos <span className="text-destructive">*</span>
           </label>
           <Input
             {...register('postalCode')}
@@ -314,7 +314,7 @@ export function AddressRegionFields() {
             className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
           />
           {errors.postalCode && (
-            <p className="mt-1 text-[13px] text-red-500">
+            <p className="mt-1 text-[13px] text-destructive">
               {errors.postalCode.message}
             </p>
           )}

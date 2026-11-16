@@ -2,6 +2,7 @@
 
 import { profilePrimaryButtonClassName } from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { displayVariant, setCheckoutSession } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -10,7 +11,6 @@ import {
   type CheckoutSessionData,
 } from '@/types/checkout';
 import { ArrowRight, MousePointerClick, Package } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

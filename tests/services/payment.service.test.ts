@@ -71,6 +71,7 @@ describe('paymentService', () => {
           totalAmount: 263000,
         }),
         [expect.objectContaining({ variantId: 'var-1', quantity: 2 })],
+        expect.any(Object),
       );
       const [orderId, , startTime, expiredAt] = vi.mocked(
         createMidtransTransaction,
@@ -81,20 +82,22 @@ describe('paymentService', () => {
         expect.any(Date),
         expect.any(Date),
       );
-      // Midtrans gets the same window the app stores and enforces.
-      expect(
-        paymentTransactionRepository.createPaymentTransaction,
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({ orderId, externalId: orderId, expiredAt }),
+      // Midtrans gets the same window the app stores and enforces, and the
+      // pending payment transaction is created together with the order.
+      const payment = vi.mocked(orderRepository.createOrderAndReserveStock).mock
+        .calls[0][2];
+      expect(payment).toEqual(
+        expect.objectContaining({
+          externalId: orderId,
+          status: 'pending',
+          amount: 263000,
+          expiredAt,
+        }),
       );
       expect(expiredAt.getTime() - startTime.getTime()).toBe(30 * 60 * 1000);
-      expect(
-        paymentTransactionRepository.createPaymentTransaction,
-      ).toHaveBeenCalledWith(
-        expect.objectContaining({
-          status: 'pending',
-          expiredAt: expect.any(Date),
-        }),
+      expect(paymentTransactionRepository.setPaymentUrl).toHaveBeenCalledWith(
+        orderId,
+        'https://checkout.midtrans.com/snap-token',
       );
     });
 
@@ -344,7 +347,67 @@ describe('paymentService', () => {
           shippingAddressId: 'addr-default',
         }),
         expect.any(Array),
+        expect.any(Object),
       );
+    });
+  });
+
+  describe('checkout guards', () => {
+    const input = {
+      items: [{ productId: 'prod-1', variantId: 'var-1', quantity: 1 }],
+      shippingAddressId: 'addr-1',
+      shippingOptionId: 'jne-reg',
+    };
+
+    beforeEach(() => {
+      vi.mocked(addressRepository.findById).mockResolvedValue({
+        id: 'addr-1',
+      } as never);
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        status: 'active',
+        price: 100000,
+        name: 'Product 1',
+        sellerId: 'seller-1',
+      } as never);
+      vi.mocked(productVariantRepository.findVariantById).mockResolvedValue({
+        id: 'var-1',
+        productId: 'prod-1',
+        name: 'M',
+        price: 15000.5,
+        stock: 5,
+      } as never);
+      vi.mocked(createMidtransTransaction).mockResolvedValue({
+        token: 'snap-token',
+        redirect_url: 'https://checkout.midtrans.com/snap-token',
+      });
+      vi.mocked(orderRepository.countOrdersByUserId).mockResolvedValue(0);
+    });
+
+    it('sends Midtrans a whole-rupiah amount for a legacy decimal price', async () => {
+      await paymentService.checkout(input, 'user-1');
+
+      const gross = vi.mocked(createMidtransTransaction).mock.calls[0][1];
+      expect(Number.isInteger(gross)).toBe(true);
+    });
+
+    it('refuses a new order while the buyer has 3 unpaid ones', async () => {
+      vi.mocked(orderRepository.countOrdersByUserId).mockResolvedValue(3);
+
+      await expect(
+        paymentService.checkout(input, 'user-1'),
+      ).rejects.toMatchObject({ status: 429 });
+      expect(orderRepository.createOrderAndReserveStock).not.toHaveBeenCalled();
+    });
+
+    it('still returns the Snap token when saving the payment URL fails', async () => {
+      vi.mocked(
+        paymentTransactionRepository.setPaymentUrl,
+      ).mockRejectedValueOnce(new Error('db down'));
+
+      const result = await paymentService.checkout(input, 'user-1');
+
+      expect(result.token).toBe('snap-token');
     });
   });
 
@@ -403,12 +466,34 @@ describe('paymentService', () => {
       ).rejects.toThrow(new ApiError('Signature key tidak valid', 403));
     });
 
+    it('keeps the order pending while Midtrans reviews a challenged payment', async () => {
+      vi.mocked(verifySignatureKey).mockResolvedValue(true);
+      vi.mocked(
+        paymentTransactionRepository.findTransactionByExternalId,
+      ).mockResolvedValue({ id: 'tx-1' } as never);
+      vi.mocked(orderRepository.findOrderById).mockResolvedValue({
+        id: 'order-123',
+      } as never);
+
+      await paymentService.handleNotification({
+        ...mockPayload,
+        transaction_status: 'capture',
+        fraud_status: 'challenge',
+      });
+
+      expect(
+        paymentTransactionRepository.updatePaymentStatus,
+      ).not.toHaveBeenCalled();
+      expect(orderService.cancelOrderBySystemId).not.toHaveBeenCalled();
+      expect(orderRepository.confirmPaidOrder).not.toHaveBeenCalled();
+    });
+
     it('should handle fraud detection', async () => {
       vi.mocked(verifySignatureKey).mockResolvedValue(true);
       const fraudPayload = {
         ...mockPayload,
         transaction_status: 'capture',
-        fraud_status: 'challenge',
+        fraud_status: 'deny',
       };
 
       vi.mocked(

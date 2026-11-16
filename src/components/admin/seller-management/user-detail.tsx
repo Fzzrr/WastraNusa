@@ -214,7 +214,7 @@ export function UserDetail({
               </Button>
               <Button
                 size="sm"
-                className="h-9 rounded-full bg-red-600 hover:bg-red-700"
+                className="h-9 rounded-full bg-destructive hover:bg-destructive/90"
                 onClick={submitReason}
                 disabled={isBusy}
               >
@@ -231,7 +231,7 @@ export function UserDetail({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-9 rounded-full border-red-200 text-destructive hover:bg-red-50 hover:text-red-700"
+                  className="h-9 rounded-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => setReasonAction('reject')}
                   disabled={isBusy}
                 >
@@ -252,7 +252,7 @@ export function UserDetail({
               <Button
                 size="sm"
                 variant="outline"
-                className="h-9 rounded-full border-red-200 text-destructive hover:bg-red-50 hover:text-red-700"
+                className="h-9 rounded-full border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 onClick={() => setReasonAction('demote')}
                 disabled={isBusy}
               >

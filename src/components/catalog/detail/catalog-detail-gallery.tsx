@@ -1,5 +1,4 @@
-import { Card } from '@/components/ui/card';
-import Image from 'next/image';
+import Image from '@/components/ui/image';
 
 type CatalogDetailGalleryProps = {
   category: string;
@@ -12,7 +11,7 @@ export function CatalogDetailGallery({
 }: CatalogDetailGalleryProps) {
   return (
     <div className="flex flex-col gap-3">
-      <Card className="group relative aspect-[4/5] w-full animate-in overflow-hidden rounded-none border-0 bg-surface p-0 duration-500 fade-in slide-in-from-bottom-2">
+      <div className="group relative aspect-[4/5] w-full animate-in overflow-hidden bg-surface duration-500 fade-in slide-in-from-bottom-2">
         {imageURL ? (
           <Image
             src={imageURL}
@@ -32,7 +31,7 @@ export function CatalogDetailGallery({
             </div>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

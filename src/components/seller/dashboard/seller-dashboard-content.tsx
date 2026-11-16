@@ -212,7 +212,7 @@ export function SellerDashboardContent() {
                 {data.weeklyRevenue.some((point) => point.value > 0) ? (
                   <BarChart
                     data={data.weeklyRevenue}
-                    color="#3a5a4a"
+                    color="#2f5b49"
                     height={220}
                     valueFormatter={formatIDR}
                     ariaLabel="Pendapatan bersih per minggu"

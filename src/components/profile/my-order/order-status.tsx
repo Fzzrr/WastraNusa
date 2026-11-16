@@ -20,9 +20,9 @@ export const ORDER_STATUS_STYLES: Record<
   'Menunggu Bayar': { icon: Clock, className: 'bg-surface text-ink-soft' },
   Dikonfirmasi: {
     icon: CheckCircle2,
-    className: 'bg-[#e6ecf3] text-[#34507a]',
+    className: 'bg-brand/10 text-brand',
   },
-  Pengemasan: { icon: PackageOpen, className: 'bg-[#efe6f3] text-[#6b4f7a]' },
+  Pengemasan: { icon: PackageOpen, className: 'bg-gold/25 text-warning' },
   Dikirim: { icon: Truck, className: 'bg-surface text-ink' },
   Diterima: { icon: PackageCheck, className: 'bg-surface text-ink' },
   Dibatalkan: {

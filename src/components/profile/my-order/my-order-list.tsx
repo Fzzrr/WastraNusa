@@ -4,10 +4,10 @@ import {
   profileOutlineButtonClassName,
 } from '@/components/profile/profile-section';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { useCancelOrder, useOrders } from '@/hooks/use-order';
 import { cn } from '@/lib/utils';
 import { CalendarDays, Eye, Hexagon, ShoppingBag, XCircle } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 

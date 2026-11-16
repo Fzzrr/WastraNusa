@@ -6,6 +6,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import Image from '@/components/ui/image';
 import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { cn } from '@/lib/utils';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
@@ -15,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 

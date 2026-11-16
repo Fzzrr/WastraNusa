@@ -169,7 +169,7 @@ export default function AddUpdateAddressModal({
               {/* Label */}
               <div>
                 <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-                  Label Alamat <span className="text-red-400">*</span>
+                  Label Alamat <span className="text-destructive">*</span>
                 </label>
                 <Input
                   {...register('label')}
@@ -177,7 +177,7 @@ export default function AddUpdateAddressModal({
                   className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                 />
                 {errors.label && (
-                  <p className="mt-1 text-[13px] text-red-500">
+                  <p className="mt-1 text-[13px] text-destructive">
                     {errors.label.message}
                   </p>
                 )}
@@ -187,7 +187,7 @@ export default function AddUpdateAddressModal({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-                    Nama Penerima <span className="text-red-400">*</span>
+                    Nama Penerima <span className="text-destructive">*</span>
                   </label>
                   <Input
                     {...register('recipientName')}
@@ -195,14 +195,14 @@ export default function AddUpdateAddressModal({
                     className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                   />
                   {errors.recipientName && (
-                    <p className="mt-1 text-[13px] text-red-500">
+                    <p className="mt-1 text-[13px] text-destructive">
                       {errors.recipientName.message}
                     </p>
                   )}
                 </div>
                 <div>
                   <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-                    Nomor Telepon <span className="text-red-400">*</span>
+                    Nomor Telepon <span className="text-destructive">*</span>
                   </label>
                   <Input
                     {...register('phone')}
@@ -210,7 +210,7 @@ export default function AddUpdateAddressModal({
                     className="h-11 border-border bg-card px-4 text-ink placeholder:text-ink-soft focus-visible:border-border focus-visible:ring-border/30"
                   />
                   {errors.phone && (
-                    <p className="mt-1 text-[13px] text-red-500">
+                    <p className="mt-1 text-[13px] text-destructive">
                       {errors.phone.message}
                     </p>
                   )}
@@ -222,7 +222,7 @@ export default function AddUpdateAddressModal({
               {/* Full Address */}
               <div>
                 <label className="mb-1.5 block text-[15px] font-medium text-ink-soft">
-                  Alamat Lengkap <span className="text-red-400">*</span>
+                  Alamat Lengkap <span className="text-destructive">*</span>
                 </label>
                 <textarea
                   {...register('fullAddress')}
@@ -231,7 +231,7 @@ export default function AddUpdateAddressModal({
                   className="w-full resize-none rounded-xl border border-border bg-card px-4 py-3 text-[15px] text-ink placeholder:text-ink-soft outline-none transition-all focus:border-border focus:ring-2 focus:ring-border/20"
                 />
                 {errors.fullAddress && (
-                  <p className="mt-1 text-[13px] text-red-500">
+                  <p className="mt-1 text-[13px] text-destructive">
                     {errors.fullAddress.message}
                   </p>
                 )}

@@ -1,6 +1,7 @@
 ﻿'use client';
 
 import { NavbarSearch } from '@/components/navbar-search';
+import Image from '@/components/ui/image';
 import {
   Sheet,
   SheetClose,
@@ -21,7 +22,6 @@ import {
   Store,
   UserRound,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Suspense, useState } from 'react';

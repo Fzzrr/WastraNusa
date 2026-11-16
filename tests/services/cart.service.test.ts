@@ -1,5 +1,6 @@
 import { ApiError } from '@/lib/error';
 import { cartRepository } from '@/repositories/cart.repository';
+import { productRepository } from '@/repositories/product.repository';
 import { productVariantRepository } from '@/repositories/productVariant.repository';
 import { cartService } from '@/services/cart.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,6 +28,11 @@ const MOCK_VARIANT = { id: 'var-1', productId: 'prod-1', stock: 5 };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(productRepository.findProductById).mockResolvedValue({
+    id: 'prod-1',
+    status: 'active',
+    sellerId: 'seller-1',
+  } as never);
 });
 
 describe('cartService', { tags: ['backend'] }, () => {
@@ -42,6 +48,21 @@ describe('cartService', { tags: ['backend'] }, () => {
   });
 
   describe('addToCart', () => {
+    it.each([
+      [{ status: 'inactive', sellerId: 'seller-1' }, 'Produk tidak tersedia'],
+      [{ status: 'active', sellerId: 'user-1' }, 'toko sendiri'],
+    ])('rejects a product the buyer cannot buy (%o)', async (product, msg) => {
+      vi.mocked(productRepository.findProductById).mockResolvedValue({
+        id: 'prod-1',
+        ...product,
+      } as never);
+
+      await expect(
+        cartService.addToCart('user-1', 'prod-1', 'var-1', 1),
+      ).rejects.toThrow(msg);
+      expect(mockRepo.addItem).not.toHaveBeenCalled();
+    });
+
     it('should throw error if quantity is 0 or less', async () => {
       await expect(
         cartService.addToCart('user-1', 'prod-1', null, 0),

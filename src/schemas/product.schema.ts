@@ -3,10 +3,20 @@ import { z } from 'zod';
 
 // Forms send '' for an empty optional URL field; store that as null.
 const optionalUrl = z
-  .union([z.url('Format URL tidak valid'), z.literal('').transform(() => null)])
+  .union([
+    // http(s) only: `z.url()` alone also accepts `javascript:` and `data:`.
+    z.url({ protocol: /^https?$/, error: 'Format URL tidak valid' }),
+    z.literal('').transform(() => null),
+  ])
   .nullish();
 
-const decimalNumberSchema = z.number().min(0, 'Nilai tidak boleh negatif');
+// Midtrans only takes whole rupiah amounts.
+const MAX_PRICE = 1_000_000_000;
+const priceSchema = z
+  .number()
+  .int('Harga harus bilangan bulat (tanpa desimal)')
+  .min(1, 'Harga minimal Rp1')
+  .max(MAX_PRICE, 'Harga maksimal Rp1.000.000.000');
 const requiredVariantPriceSchema = z
   .number({
     error: (issue) =>
@@ -14,7 +24,9 @@ const requiredVariantPriceSchema = z
         ? 'Harga varian wajib diisi'
         : 'Harga varian harus berupa angka',
   })
-  .min(0, 'Harga varian tidak boleh negatif');
+  .int('Harga varian harus bilangan bulat (tanpa desimal)')
+  .min(1, 'Harga varian minimal Rp1')
+  .max(MAX_PRICE, 'Harga varian maksimal Rp1.000.000.000');
 
 const productVariantInputSchema = z
   .object({
@@ -22,7 +34,11 @@ const productVariantInputSchema = z
     name: z.string().min(1, 'Nama varian wajib diisi'),
     type: z.nativeEnum(VariantType),
     price: requiredVariantPriceSchema,
-    stock: z.number().int().min(0, 'Stok varian tidak boleh negatif'),
+    stock: z
+      .number()
+      .int()
+      .min(0, 'Stok varian tidak boleh negatif')
+      .max(100_000, 'Stok varian maksimal 100.000'),
     sku: z.string().min(1, 'SKU varian wajib diisi'),
     imageURL: optionalUrl,
   })
@@ -37,7 +53,7 @@ const productPayloadSchema = z.object({
   name: z.string().min(1, 'Nama produk wajib diisi'),
   slug: z.string().min(1, 'Slug produk wajib diisi'),
   description: z.string().nullish(),
-  price: decimalNumberSchema,
+  price: priceSchema,
   sku: z.string().min(1, 'SKU produk wajib diisi'),
   weight: z
     .number()
@@ -62,3 +78,8 @@ export const updateProductSchema = productPayloadSchema
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
 export type ProductVariantInput = z.infer<typeof productVariantInputSchema>;
+
+/** Seller turns a product on or off in the public catalog. */
+export const productStatusSchema = z
+  .object({ status: z.enum(['active', 'inactive']) })
+  .strict();

@@ -337,28 +337,45 @@ async function cancelOrderAndRestoreStock(
 }
 
 /**
- * Cancels orders whose payment window has passed. The Midtrans `expire`
- * webhook normally does this; this catches the ones it missed.
+ * Asks Midtrans whether the order was paid and, if so, applies it like the
+ * webhook would. The webhook can be late or lost (e.g. it can't reach
+ * localhost). Throws when Midtrans can't be reached, so callers never cancel
+ * an order that may have been paid.
  */
-export async function reconcileExpiredOrders(userId?: string) {
+async function syncPaymentFromMidtrans(orderId: string) {
+  const status = await getMidtransTransactionStatus(orderId);
+  const txStatus = status?.transaction_status;
+  const paid = txStatus === 'settlement' || txStatus === 'capture';
+  if (paid) {
+    await paymentService.handleNotification(
+      midtransNotificationSchema.parse(status),
+    );
+  }
+  return { paid, txStatus };
+}
+
+// ponytail: fixed batch per request; move to a cron job if the backlog of
+// unpaid orders ever outgrows it.
+const RECONCILE_BATCH_SIZE = 10;
+
+/**
+ * Cancels orders whose payment window has passed. The Midtrans `expire`
+ * webhook normally does this; this catches the ones it missed. Scoped to one
+ * buyer or one seller so a page load only checks that person's orders.
+ */
+export async function reconcileExpiredOrders(
+  scope: { userId?: string; sellerId?: string } = {},
+) {
   const expiredOrders = await orderRepository.findExpiredPendingOrders(
     new Date(),
-    userId,
+    scope,
+    RECONCILE_BATCH_SIZE,
   );
 
   for (const order of expiredOrders) {
     try {
-      // The webhook may be late or lost (e.g. it can't reach localhost), so
-      // ask Midtrans before cancelling: the buyer may have paid already.
-      const status = await getMidtransTransactionStatus(order.id);
-      const txStatus = status?.transaction_status;
-
-      if (txStatus === 'settlement' || txStatus === 'capture') {
-        await paymentService.handleNotification(
-          midtransNotificationSchema.parse(status),
-        );
-        continue;
-      }
+      const { paid, txStatus } = await syncPaymentFromMidtrans(order.id);
+      if (paid) continue;
 
       const cancelled = await cancelOrderAndRestoreStock(order, 'expired');
       // Still open at Midtrans: close it so it can't be paid after cancelling.
@@ -385,7 +402,7 @@ export const orderService = {
     page: number = 1,
     limit: number = 10,
   ) => {
-    await reconcileExpiredOrders(userId);
+    await reconcileExpiredOrders({ userId });
 
     let filters: Prisma.OrderWhereInput = {};
 
@@ -457,7 +474,7 @@ export const orderService = {
   },
 
   getUserOrderDetail: async (userId: string, identifier: string) => {
-    await reconcileExpiredOrders(userId);
+    await reconcileExpiredOrders({ userId });
 
     const order = await orderRepository.findOrderDetailByIdentifier(
       userId,
@@ -522,7 +539,7 @@ export const orderService = {
   },
 
   cancelUserOrder: async (userId: string, identifier: string) => {
-    await reconcileExpiredOrders(userId);
+    await reconcileExpiredOrders({ userId });
 
     const order = await orderRepository.findOrderForUserByIdentifier(
       userId,
@@ -536,6 +553,24 @@ export const orderService = {
     if (!canCancelPendingOrder(order)) {
       throw new ApiError(
         'Pesanan ini tidak dapat dibatalkan karena pembayaran sudah diproses atau masa bayar telah habis',
+        400,
+      );
+    }
+
+    // The buyer may have paid while the webhook is still on its way.
+    let paid: boolean;
+    try {
+      ({ paid } = await syncPaymentFromMidtrans(order.id));
+    } catch (error) {
+      logError(error, { action: 'cancelUserOrder', orderId: order.id });
+      throw new ApiError(
+        'Status pembayaran belum dapat dicek. Silakan coba lagi nanti.',
+        503,
+      );
+    }
+    if (paid) {
+      throw new ApiError(
+        'Pembayaran pesanan ini sudah diterima sehingga tidak dapat dibatalkan',
         400,
       );
     }

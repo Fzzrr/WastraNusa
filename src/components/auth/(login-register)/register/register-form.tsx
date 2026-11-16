@@ -211,13 +211,13 @@ export function RegisterForm() {
               <FieldLabel className="text-[15px] font-medium text-ink">
                 Tanggal Lahir
               </FieldLabel>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <Controller
                   name="day"
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
+                      <SelectTrigger className="w-full rounded-xl border-border bg-card px-3 text-base text-ink data-[size=default]:h-12">
                         <SelectValue placeholder="Tanggal" />
                       </SelectTrigger>
                       <SelectContent>
@@ -236,7 +236,7 @@ export function RegisterForm() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
+                      <SelectTrigger className="w-full rounded-xl border-border bg-card px-3 text-base text-ink data-[size=default]:h-12">
                         <SelectValue placeholder="Bulan" />
                       </SelectTrigger>
                       <SelectContent>
@@ -255,7 +255,7 @@ export function RegisterForm() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="border-border bg-transparent text-ink focus:ring-border">
+                      <SelectTrigger className="w-full rounded-xl border-border bg-card px-3 text-base text-ink data-[size=default]:h-12">
                         <SelectValue placeholder="Tahun" />
                       </SelectTrigger>
                       <SelectContent>
@@ -277,14 +277,14 @@ export function RegisterForm() {
 
             {/* Gender */}
             <Field data-invalid={!!errors.gender} className="gap-1">
-              <div className="flex gap-2.5 text-[13px] text-ink mt-0.5">
+              <div className="mt-1 flex gap-5 text-[15px] text-ink">
                 {[
                   { value: 'female', label: 'Perempuan' },
                   { value: 'male', label: 'Laki-laki' },
                 ].map((gender) => (
                   <label
                     key={gender.value}
-                    className="flex items-center gap-1.5 cursor-pointer"
+                    className="flex cursor-pointer items-center gap-2"
                   >
                     <input
                       type="radio"
@@ -304,8 +304,8 @@ export function RegisterForm() {
         )}
 
         {isSuccess && (
-          <Alert className="bg-green-50 border-green-200 text-green-800">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+          <Alert className="border-brand/20 bg-brand/10 text-brand-strong">
+            <CheckCircle2 className="h-4 w-4 text-brand" />
             <AlertTitle>Berhasil!</AlertTitle>
             <AlertDescription>
               Pendaftaran berhasil! Email verifikasi telah dikirim ke kotak

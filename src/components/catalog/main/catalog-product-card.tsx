@@ -1,9 +1,9 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
 import { ImageOff, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { formatVariantPriceRange } from '../utils';
@@ -62,12 +62,12 @@ export function CatalogProductCard({ product }: CatalogProductCardProps) {
           <span className="truncate">{product.province}</span>
         </p>
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto flex flex-wrap items-baseline justify-between gap-x-3 pt-2">
           <p className="text-[15px] font-bold tracking-tight text-ink tabular-nums sm:text-base">
             {formatVariantPriceRange(product.variants, product.price)}
           </p>
           {!isOutOfStock && product.stock <= LOW_STOCK ? (
-            <p className="mt-0.5 text-[13px] text-ink-soft">
+            <p className="text-[13px] font-medium text-warning">
               Sisa {product.stock}
             </p>
           ) : null}

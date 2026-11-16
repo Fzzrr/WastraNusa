@@ -8,11 +8,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import Image from '@/components/ui/image';
 import { useProductCatalog } from '@/hooks/use-product-catalog';
 import { cn } from '@/lib/utils';
 import type { ProductInventoryItem } from '@/types/product';
 import { ArrowRight, Home, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 

@@ -106,7 +106,8 @@ describe('orderService', { tags: ['backend'] }, () => {
 
       expect(mockRepo.findExpiredPendingOrders).toHaveBeenCalledWith(
         expect.any(Date),
-        'user-1',
+        { userId: 'user-1' },
+        expect.any(Number),
       );
     });
   });
@@ -302,6 +303,56 @@ describe('orderService', { tags: ['backend'] }, () => {
       ).rejects.toThrow(
         'Pesanan ini tidak dapat dibatalkan karena pembayaran sudah diproses atau masa bayar telah habis',
       );
+    });
+  });
+
+  describe('cancelUserOrder checks Midtrans first', () => {
+    const pendingOrder = {
+      id: 'order-id-1',
+      orderStatus: 'pending',
+      paymentStatus: 'unpaid',
+      paymentTransactions: [
+        { status: 'pending', expiredAt: new Date('2099-01-01T00:00:00Z') },
+      ],
+    };
+
+    beforeEach(() => {
+      mockRepo.findOrderForUserByIdentifier.mockResolvedValue(
+        pendingOrder as never,
+      );
+    });
+
+    it('refuses to cancel an order Midtrans says is already paid', async () => {
+      const status = {
+        transaction_id: 'tx',
+        order_id: 'order-id-1',
+        gross_amount: '150000.00',
+        status_code: '200',
+        transaction_status: 'settlement',
+        signature_key: 'sig',
+        payment_type: 'qris',
+      };
+      vi.mocked(getMidtransTransactionStatus).mockResolvedValue(status);
+      const notify = vi
+        .spyOn(paymentService, 'handleNotification')
+        .mockResolvedValue();
+
+      await expect(
+        orderService.cancelUserOrder('user-1', 'ORD-1'),
+      ).rejects.toMatchObject({ status: 400 });
+      expect(notify).toHaveBeenCalledWith(status);
+      expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
+    });
+
+    it('refuses to cancel while Midtrans cannot be reached', async () => {
+      vi.mocked(getMidtransTransactionStatus).mockRejectedValue(
+        new Error('timeout'),
+      );
+
+      await expect(
+        orderService.cancelUserOrder('user-1', 'ORD-1'),
+      ).rejects.toMatchObject({ status: 503 });
+      expect(mockRepo.cancelOrderAndRestoreStock).not.toHaveBeenCalled();
     });
   });
 

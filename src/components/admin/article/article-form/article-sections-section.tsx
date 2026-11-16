@@ -70,7 +70,7 @@ export function ArticleSectionsSection() {
                 size="icon-sm"
                 aria-label={`Hapus bagian ${index + 1}`}
                 onClick={() => remove(index)}
-                className="cursor-pointer rounded-lg text-ink-soft hover:bg-red-50 hover:text-destructive"
+                className="cursor-pointer rounded-lg text-ink-soft hover:bg-destructive/10 hover:text-destructive"
               >
                 <Trash2 className="size-4" />
               </Button>

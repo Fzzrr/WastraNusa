@@ -1,3 +1,4 @@
+import { orderRepository } from '@/repositories/order.repository';
 import { sellerOrderRepository } from '@/repositories/sellerOrder.repository';
 import { sellerOrderService } from '@/services/sellerOrder.service';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -143,3 +144,18 @@ describe(
     });
   },
 );
+
+describe('getSellerOrders', { tags: ['backend'] }, () => {
+  it("only reconciles the seller's own expired orders", async () => {
+    repo.findOrdersBySeller.mockResolvedValue([]);
+    repo.countOrdersBySeller.mockResolvedValue(0);
+
+    await sellerOrderService.getSellerOrders('seller-1');
+
+    expect(orderRepository.findExpiredPendingOrders).toHaveBeenCalledWith(
+      expect.any(Date),
+      { sellerId: 'seller-1' },
+      expect.any(Number),
+    );
+  });
+});

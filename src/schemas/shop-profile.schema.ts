@@ -8,7 +8,7 @@ import { z } from 'zod';
  * the service normalizes blanks to `null` before persisting.
  */
 
-const PHONE_REGEX = /^(?:\+62|62|0)8[1-9][0-9]{6,12}$/;
+export const PHONE_REGEX = /^(?:\+62|62|0)8[1-9][0-9]{6,12}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_REGEX = /^https?:\/\/.+/;
 

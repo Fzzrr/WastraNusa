@@ -1,5 +1,5 @@
+import Image from '@/components/ui/image';
 import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 /** 404 body, shared by the root page and the public layout (which already renders Header/Footer). */

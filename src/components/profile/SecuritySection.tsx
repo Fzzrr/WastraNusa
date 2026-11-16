@@ -244,7 +244,7 @@ export default function SecuritySection() {
             subtitle={isPending ? 'Memuat...' : loginDate}
             status={
               <span className="inline-flex shrink-0 items-center gap-1.5 text-[15px] text-ink-soft">
-                <span className="size-2 rounded-full bg-[#3f8f63]" />
+                <span className="size-2 rounded-full bg-brand" />
                 Aktif
               </span>
             }

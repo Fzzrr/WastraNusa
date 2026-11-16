@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image from '@/components/ui/image';
 import Link from 'next/link';
 
 type LayoutProps = {
@@ -9,9 +9,9 @@ export default function AuthLayout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-dvh bg-ground">
       {/* Left: form panel — form sits slightly above center, left-aligned with padding */}
-      <div className="flex w-full flex-col lg:w-[60%] relative">
-        {/* Logo top-left - Absolute positioning to avoid impacting flex center */}
-        <div className="absolute left-8 top-6 z-10 md:left-10">
+      <div className="flex w-full flex-col lg:w-[60%]">
+        {/* Logo sits in the flow so a tall form (register) can never run under it. */}
+        <div className="px-8 pt-6 md:px-10">
           <Link href="/" className="flex items-center gap-2.5 w-fit">
             <Image
               src="/logo.png"
@@ -27,7 +27,7 @@ export default function AuthLayout({ children }: LayoutProps) {
         </div>
 
         {/* Form — centered vertically, left-padded like design */}
-        <div className="flex flex-1 items-center justify-center px-10">
+        <div className="flex flex-1 items-center justify-center px-6 py-8 sm:px-10">
           <div className="w-full max-w-[380px]">{children}</div>
         </div>
       </div>

@@ -1,7 +1,7 @@
+import Image from '@/components/ui/image';
 import { cn, formatIDR } from '@/lib/utils';
 import type { ChatAttachedProduct } from '@/types/chat';
 import { ShoppingBag } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 /** Compact product preview attached to a live-chat message or the composer. */

@@ -85,7 +85,7 @@ export function KpiChart({
             key={tick}
             className={cn(
               'absolute right-0 -translate-y-1/2 text-xs tabular-nums',
-              isDark ? 'text-white/60' : 'text-[#9a948a]',
+              isDark ? 'text-white/60' : 'text-ink-soft',
             )}
             style={{ top: `${(1 - fraction(tick)) * 100}%` }}
           >
@@ -106,7 +106,7 @@ export function KpiChart({
               key={tick}
               className={cn(
                 'absolute inset-x-0 h-px',
-                isDark ? 'bg-white/10' : 'bg-[#efe9df]',
+                isDark ? 'bg-white/10' : 'bg-border',
               )}
               style={{ top: `${(1 - fraction(tick)) * 100}%` }}
             />
@@ -182,9 +182,7 @@ export function KpiChart({
             <div
               className={cn(
                 'pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap shadow-lg transition-[left,top,opacity] duration-300 ease-out',
-                isDark
-                  ? 'bg-[#fffdfa] text-[#2f3a33]'
-                  : 'bg-[#2f3a33] text-white',
+                isDark ? 'bg-card text-ink' : 'bg-ink text-white',
               )}
               style={{
                 left: `${Math.min(85, Math.max(15, centerFraction(shown) * 100))}%`,
@@ -195,7 +193,7 @@ export function KpiChart({
               <p
                 className={cn(
                   'text-xs',
-                  isDark ? 'text-[#9a8f80]' : 'text-white/60',
+                  isDark ? 'text-ink-soft' : 'text-white/60',
                 )}
               >
                 {labels[shown]}
@@ -217,10 +215,10 @@ export function KpiChart({
                   active === i
                     ? isDark
                       ? 'font-semibold text-white'
-                      : 'font-semibold text-[#2f4f3f]'
+                      : 'font-semibold text-brand-strong'
                     : isDark
                       ? 'text-white/60'
-                      : 'text-[#9a948a]',
+                      : 'text-ink-soft',
                 )}
               >
                 {label}
@@ -231,8 +229,8 @@ export function KpiChart({
                 className={cn(
                   'absolute -translate-x-1/2 text-xs transition-colors',
                   active === i
-                    ? 'font-semibold text-[#2f4f3f]'
-                    : 'text-[#9a948a]',
+                    ? 'font-semibold text-brand-strong'
+                    : 'text-ink-soft',
                 )}
                 style={{ left: `${xFraction(i) * 100}%` }}
               >

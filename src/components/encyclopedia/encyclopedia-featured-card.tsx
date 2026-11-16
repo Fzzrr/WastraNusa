@@ -1,6 +1,6 @@
+import Image from '@/components/ui/image';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowRight, Clock3, Eye, ImageOff, MapPin } from 'lucide-react';
-import Image from 'next/image';
 
 interface EncyclopediaFeaturedCardProps {
   article: EncyclopediaArticle;

@@ -66,17 +66,20 @@ export const managedOrderSelect = {
 } satisfies Prisma.OrderSelect;
 
 export type OrderItemCreate = Omit<Prisma.OrderItemCreateManyOrderInput, 'id'>;
+export type PaymentTransactionCreate =
+  Prisma.PaymentTransactionCreateWithoutOrderInput;
 
 export const orderRepository = {
   /**
    * Creates the order with its items and reserves variant stock in one
-   * transaction. Each decrement only matches while `stock >= quantity`, so two
+   * transaction, together with its pending payment transaction. Each decrement only matches while `stock >= quantity`, so two
    * buyers racing for the last unit can't both succeed; a miss rolls the whole
    * checkout back.
    */
   createOrderAndReserveStock: async (
     data: Prisma.OrderUncheckedCreateInput,
     items: OrderItemCreate[],
+    payment: PaymentTransactionCreate,
   ) => {
     return prisma.$transaction(async (tx) => {
       for (const item of items) {
@@ -101,6 +104,9 @@ export const orderRepository = {
               })),
             },
           },
+          // Created with the order so it always has a payment window that
+          // the webhook and reconcileExpiredOrders can find.
+          paymentTransactions: { create: payment },
         },
       });
     });
@@ -240,10 +246,17 @@ export const orderRepository = {
     });
   },
 
-  findExpiredPendingOrders: async (now: Date, userId?: string) => {
+  findExpiredPendingOrders: async (
+    now: Date,
+    scope: { userId?: string; sellerId?: string },
+    take: number,
+  ) => {
     return prisma.order.findMany({
+      take,
+      orderBy: { createdAt: 'asc' },
       where: {
-        ...(userId ? { userId } : {}),
+        ...(scope.userId ? { userId: scope.userId } : {}),
+        ...(scope.sellerId ? { sellerId: scope.sellerId } : {}),
         orderStatus: 'pending',
         paymentStatus: 'unpaid',
         paymentTransactions: {

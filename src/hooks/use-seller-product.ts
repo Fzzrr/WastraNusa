@@ -160,3 +160,25 @@ export function useDeleteSellerProduct() {
     },
   });
 }
+
+export function useSetSellerProductStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      idOrSlug,
+      status,
+    }: {
+      idOrSlug: string;
+      status: 'active' | 'inactive';
+    }) =>
+      mutateApi<{ id: string; status: string }>(
+        `/api/seller/products/${encodeURIComponent(idOrSlug)}`,
+        'PATCH',
+        { status },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sellerProductKeys.all });
+    },
+  });
+}

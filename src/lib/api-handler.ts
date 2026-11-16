@@ -1,5 +1,5 @@
 import { Prisma } from '@/generated/prisma/client';
-import { logError } from '@/lib/logger';
+import { logError, logger } from '@/lib/logger';
 import { ZodError } from 'zod';
 
 import { AuthHelper } from './auth/auth-api-helper';
@@ -40,7 +40,17 @@ function isForeignKeyError(err: unknown) {
 
 function handleApiError(err: unknown, req: Request) {
   const action = req.method + ' ' + new URL(req.url).pathname;
-  logError(err, { action });
+  const isClientError =
+    (err instanceof ApiError && err.status < 500) ||
+    err instanceof ZodError ||
+    err instanceof SyntaxError;
+  // Expected 4xx (validation, not found, forbidden) aren't server faults;
+  // keep them out of the error level so real failures stand out.
+  if (isClientError) {
+    logger.warn((err as Error).message.slice(0, 200), { action });
+  } else {
+    logError(err, { action });
+  }
 
   if (err instanceof ApiError) {
     return jsend.fail({ message: err.message }, err.status);
@@ -52,10 +62,20 @@ function handleApiError(err: unknown, req: Request) {
   }
 
   if (err instanceof ZodError) {
-    const fieldErrors = err.flatten().fieldErrors;
+    const { fieldErrors, formErrors } = err.flatten();
     const flatErrors: Record<string, string> = {};
     for (const [key, errors] of Object.entries(fieldErrors)) {
       flatErrors[key] = (errors as string[])?.[0] || 'Nilai tidak valid';
+    }
+    // Errors on the whole body (e.g. an unknown field on a strict schema)
+    // have no field key; without this the client gets an empty `data`.
+    if (Object.keys(flatErrors).length === 0) {
+      const unknown = err.issues.find(
+        (issue) => issue.code === 'unrecognized_keys',
+      );
+      flatErrors.message = unknown
+        ? `Field tidak dikenal: ${unknown.keys.join(', ')}`
+        : formErrors[0] || 'Data tidak valid';
     }
 
     return jsend.fail(flatErrors, 400);
@@ -70,6 +90,9 @@ function handleApiError(err: unknown, req: Request) {
     }
     if (code === 'P2025') {
       return jsend.fail({ message: 'Data tidak ditemukan' }, 404);
+    }
+    if (code === 'P2000') {
+      return jsend.fail({ message: 'Data terlalu panjang' }, 400);
     }
   }
 

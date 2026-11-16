@@ -13,6 +13,7 @@ import {
   sellerProductKeys,
   useDeleteSellerProduct,
   useSellerProducts,
+  useSetSellerProductStatus,
 } from '@/hooks/use-seller-product';
 import { cn } from '@/lib/utils';
 import { type ProductInventoryItem } from '@/types/product';
@@ -85,6 +86,8 @@ export function SellerProductInventoryContent() {
     mutateAsync: deleteProductAsync,
     isPending: isDeleting,
   } = useDeleteSellerProduct();
+  const { mutate: setProductStatus, isPending: isUpdatingStatus } =
+    useSetSellerProductStatus();
   const queryClient = useQueryClient();
 
   const items = productData?.items ?? [];
@@ -123,6 +126,29 @@ export function SellerProductInventoryContent() {
         },
       });
     }
+  };
+
+  const handleToggleStatus = (product: ProductInventoryItem) => {
+    const status = product.status === 'active' ? 'inactive' : 'active';
+    setProductStatus(
+      { idOrSlug: product.id, status },
+      {
+        onSuccess: () => {
+          toast.success(
+            status === 'active'
+              ? 'Produk diaktifkan dan tampil di katalog'
+              : 'Produk dinonaktifkan dan disembunyikan dari katalog',
+          );
+        },
+        onError: (error) => {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : 'Gagal mengubah status produk',
+          );
+        },
+      },
+    );
   };
 
   const toggleSelectAll = () => {
@@ -309,7 +335,9 @@ export function SellerProductInventoryContent() {
                           isSelected={selectedIds.includes(product.id)}
                           isDeleting={isDeleting}
                           onToggleSelect={() => toggleSelectOne(product.id)}
+                          isUpdatingStatus={isUpdatingStatus}
                           onEdit={() => handleEdit(product)}
+                          onToggleStatus={() => handleToggleStatus(product)}
                           onDelete={() => handleDelete(product.id)}
                         />
                       ))}

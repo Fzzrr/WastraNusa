@@ -3,6 +3,7 @@
 import { useSellerSidebar } from '@/components/seller/seller-sidebar-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import Image from '@/components/ui/image';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { authClient } from '@/lib/auth/auth-client';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,6 @@ import {
   Store,
   UserRound,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -89,7 +89,7 @@ function SellerSidebarContent({ shopName }: { shopName: string }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3 border-b border-white/10 px-6 py-6">
-        <div className="relative size-12 shrink-0 overflow-hidden">
+        <div className="relative size-12 shrink-0 overflow-hidden rounded-full bg-ground">
           <Image
             src="/logo.png"
             alt="WastraNusa"

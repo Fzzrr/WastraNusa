@@ -19,7 +19,10 @@ import type {
 import {
   getOrderPaymentExpiryDate,
   orderService,
+  reconcileExpiredOrders,
 } from '@/services/order.service';
+
+const MAX_PENDING_ORDERS = 3;
 
 const HANDLED_TRANSACTION_STATUSES = [
   'capture',
@@ -113,6 +116,20 @@ export const paymentService = {
       throw new ApiError('Metode pengiriman tidak valid', 400);
     }
 
+    // Every unpaid order holds stock for the whole payment window, so cap how
+    // many one buyer can keep open.
+    await reconcileExpiredOrders({ userId });
+    const pendingOrders = await orderRepository.countOrdersByUserId(userId, {
+      orderStatus: 'pending',
+      paymentStatus: 'unpaid',
+    });
+    if (pendingOrders >= MAX_PENDING_ORDERS) {
+      throw new ApiError(
+        `Anda masih memiliki ${pendingOrders} pesanan yang belum dibayar. Selesaikan atau batalkan pesanan tersebut terlebih dahulu.`,
+        429,
+      );
+    }
+
     let shippingAddressId: string;
 
     if (input.shippingAddressId) {
@@ -191,10 +208,13 @@ export const paymentService = {
         quantity: item.quantity,
         productName: product.name,
         variantName: variant.name,
-        unitPrice:
+        // Rounded so prices saved before the whole-rupiah rule still give
+        // Midtrans an integer gross_amount.
+        unitPrice: Math.round(
           variant.price !== null
             ? Number(variant.price)
             : Number(product.price),
+        ),
         province: product.province,
         clothingType: product.clothingType,
         imageURL: product.imageURL,
@@ -219,7 +239,6 @@ export const paymentService = {
 
     const orderId = crypto.randomUUID();
     const orderNumber = generateOrderNumber();
-    const paymentTransactionId = crypto.randomUUID();
     const paymentStartedAt = new Date();
     const paymentExpiredAt = getOrderPaymentExpiryDate(paymentStartedAt);
 
@@ -250,6 +269,14 @@ export const paymentService = {
         customerNotes: input.customerNotes?.trim() || null,
       },
       resolvedItems,
+      {
+        id: crypto.randomUUID(),
+        externalId: orderId,
+        amount: totalAmount,
+        status: 'pending',
+        expiredAt: paymentExpiredAt,
+        createdAt: paymentStartedAt,
+      },
     );
 
     let midtransResponse;
@@ -276,16 +303,12 @@ export const paymentService = {
       throw new ApiError('Gagal membuat transaksi pembayaran', 502);
     }
 
-    await paymentTransactionRepository.createPaymentTransaction({
-      id: paymentTransactionId,
-      orderId,
-      externalId: orderId,
-      amount: totalAmount,
-      status: 'pending',
-      paymentUrl: midtransResponse.redirect_url,
-      expiredAt: paymentExpiredAt,
-      createdAt: new Date(),
-    });
+    // The buyer can still pay with the returned token if this fails.
+    await paymentTransactionRepository
+      .setPaymentUrl(orderId, midtransResponse.redirect_url)
+      .catch((error) => {
+        logger.error('Failed to save Midtrans payment URL', { orderId, error });
+      });
 
     logger.info('Checkout completed successfully', {
       orderId,
@@ -337,6 +360,13 @@ export const paymentService = {
     const order = await orderRepository.findOrderById(order_id);
     if (!order) {
       logger.warn('Order not found for notification', { order_id });
+      return;
+    }
+
+    // `challenge` is under manual review at Midtrans; a later notification
+    // settles or denies it, so keep the order pending until then.
+    if (transaction_status === 'capture' && fraud_status === 'challenge') {
+      logger.warn('Transaction under fraud review', { order_id });
       return;
     }
 

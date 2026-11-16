@@ -38,7 +38,7 @@ type BadgeTone = 'green' | 'blue' | 'peach' | 'red';
 
 const badgeToneClassName: Record<BadgeTone, string> = {
   green: 'bg-surface text-ink',
-  blue: 'bg-[#e6ecf3] text-[#34507a]',
+  blue: 'bg-brand/10 text-brand',
   peach: 'bg-surface text-destructive',
   red: 'bg-destructive/10 text-destructive',
 };
@@ -230,7 +230,7 @@ function TrafficCard({
               ...point,
               tooltipLabel: WEEKDAY_FULL_ID[point.label],
             }))}
-            color="#2f5543"
+            color="#2f5b49"
             height={190}
             ariaLabel="Trafik artikel 7 hari terakhir"
             valueFormatter={(value) =>

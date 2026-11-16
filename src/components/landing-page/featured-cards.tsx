@@ -1,9 +1,9 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ArrowUpRight, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 type FeaturedArticleCard = {

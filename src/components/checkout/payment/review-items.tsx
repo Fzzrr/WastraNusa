@@ -1,6 +1,7 @@
 'use client';
 
 import { ProfileSection } from '@/components/profile/profile-section';
+import Image from '@/components/ui/image';
 import { displayVariant } from '@/lib/checkout-session';
 import { formatIDR } from '@/lib/utils';
 import type {
@@ -9,7 +10,6 @@ import type {
   CheckoutShippingSelection,
 } from '@/types/checkout';
 import { Clock, Hexagon, MapPin, PackageCheck, Truck } from 'lucide-react';
-import Image from 'next/image';
 
 interface ReviewItemsProps {
   items: CheckoutSelectedItem[];

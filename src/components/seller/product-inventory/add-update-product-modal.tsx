@@ -172,6 +172,8 @@ export default function AddUpdateProductModal({
     >
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <form
+        // Let the zod messages (Indonesian) show instead of the browser's.
+        noValidate
         onSubmit={handleSubmit(onSubmit, onInvalid)}
         className={cn(
           'relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-surface transition-all duration-300',

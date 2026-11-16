@@ -166,7 +166,7 @@ export function PaymentMain() {
                   </>
                 ) : (
                   <>
-                    Bayar sekarang Sekarang
+                    Bayar sekarang
                     <ArrowRight className="size-4 transition-transform group-hover/pay:translate-x-1" />
                   </>
                 )}

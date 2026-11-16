@@ -8,10 +8,10 @@ import {
   CarouselContent,
   CarouselItem,
 } from '@/components/ui/carousel';
+import Image from '@/components/ui/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LANDING_ARTICLE_LIMIT, useArticles } from '@/hooks/use-article';
 import { ArrowRight, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 

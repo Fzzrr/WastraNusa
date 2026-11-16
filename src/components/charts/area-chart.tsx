@@ -105,7 +105,7 @@ export function AreaChart({
         {ticks.map((tick) => (
           <span
             key={tick}
-            className="absolute right-0 -translate-y-1/2 text-xs text-[#8a8378] tabular-nums"
+            className="absolute right-0 -translate-y-1/2 text-xs text-ink-soft tabular-nums"
             style={{ top: `${100 - (tick / axisMax) * 100}%` }}
           >
             {tick}
@@ -140,7 +140,7 @@ export function AreaChart({
                 x2={VIEW_W}
                 y1={yAt(tick)}
                 y2={yAt(tick)}
-                stroke="#ebe6dd"
+                stroke="#dad6cc"
                 strokeWidth={1}
                 vectorEffect="non-scaling-stroke"
               />
@@ -185,7 +185,7 @@ export function AreaChart({
               <div
                 className={cn(
                   markerTransition,
-                  'z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-[#2f3a33] px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg',
+                  'z-10 -translate-x-1/2 -translate-y-full rounded-lg bg-ink px-2.5 py-1.5 text-xs whitespace-nowrap text-white shadow-lg',
                 )}
                 style={{
                   left: `${Math.min(92, Math.max(8, (shownPoint.x / VIEW_W) * 100))}%`,
@@ -211,8 +211,8 @@ export function AreaChart({
               className={cn(
                 'absolute -translate-x-1/2 text-xs transition-colors',
                 active === i
-                  ? 'font-semibold text-[#2f4f3f]'
-                  : 'text-[#6f6a62]',
+                  ? 'font-semibold text-brand-strong'
+                  : 'text-ink-soft',
               )}
               style={{ left: `${(xAt(i) / VIEW_W) * 100}%` }}
             >

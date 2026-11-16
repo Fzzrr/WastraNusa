@@ -1,8 +1,8 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { Eye, Heart, ImageOff, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
 
 interface EncyclopediaArticleCardProps {

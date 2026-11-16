@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import Image from '@/components/ui/image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn, formatIDR } from '@/lib/utils';
 import { type ProductInventoryItem } from '@/types/product';
-import { BookOpen, Hexagon, Pencil, Trash2 } from 'lucide-react';
-import Image from 'next/image';
+import { BookOpen, Eye, EyeOff, Hexagon, Pencil, Trash2 } from 'lucide-react';
 
 export const LOW_STOCK_THRESHOLD = 5;
 
@@ -15,7 +15,7 @@ const STATUS_STYLES: Record<
   active: {
     label: 'Aktif',
     className: 'bg-surface text-ink',
-    dot: 'bg-[#3f8f63]',
+    dot: 'bg-brand',
   },
   inactive: {
     label: 'Nonaktif',
@@ -64,16 +64,24 @@ export function ProductRow({
   isSelected,
   isDeleting,
   onToggleSelect,
+  isUpdatingStatus,
   onEdit,
+  onToggleStatus,
   onDelete,
 }: {
   product: ProductInventoryItem;
   isSelected: boolean;
   isDeleting: boolean;
+  isUpdatingStatus: boolean;
   onToggleSelect: () => void;
   onEdit: () => void;
+  onToggleStatus: () => void;
   onDelete: () => void;
 }) {
+  const isActive = product.status === 'active';
+  const statusAction = isActive
+    ? 'Nonaktifkan produk (sembunyikan dari katalog)'
+    : 'Aktifkan produk';
   const status = STATUS_STYLES[product.status] ?? STATUS_STYLES.inactive;
   const isLowStock = product.stock > 0 && product.stock <= LOW_STOCK_THRESHOLD;
 
@@ -155,8 +163,8 @@ export function ProductRow({
               product.stock <= 0
                 ? 'bg-destructive'
                 : isLowStock
-                  ? 'animate-pulse bg-amber-500'
-                  : 'bg-[#3f8f63]',
+                  ? 'animate-pulse bg-warning'
+                  : 'bg-brand',
             )}
           />
           {product.stock}
@@ -182,9 +190,20 @@ export function ProductRow({
           <Button
             size="icon-sm"
             variant="ghost"
+            aria-label={statusAction}
+            title={statusAction}
+            className="cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink"
+            onClick={onToggleStatus}
+            disabled={isUpdatingStatus}
+          >
+            {isActive ? <EyeOff /> : <Eye />}
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost"
             aria-label="Hapus produk"
             title="Hapus produk"
-            className="cursor-pointer rounded-full text-ink-soft hover:bg-red-50 hover:text-destructive"
+            className="cursor-pointer rounded-full text-ink-soft hover:bg-destructive/10 hover:text-destructive"
             onClick={onDelete}
             disabled={isDeleting}
           >

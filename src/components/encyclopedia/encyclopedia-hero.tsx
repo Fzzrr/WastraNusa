@@ -1,8 +1,8 @@
 'use client';
 
+import Image from '@/components/ui/image';
 import type { EncyclopediaArticle } from '@/types/encyclopedia';
 import { ArrowRight, MapPin } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { type ReactNode, useEffect, useState } from 'react';
 

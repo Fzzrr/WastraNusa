@@ -1,3 +1,4 @@
+import { isSeller } from '@/lib/auth/roles';
 import eventBus, { SSE_EVENTS, getUserEvent } from '@/lib/chat/event-bus';
 import { ApiError } from '@/lib/error';
 import { conversationRepository } from '@/repositories/conversation.repository';
@@ -96,9 +97,8 @@ export const conversationService = {
       );
     }
 
-    const otherExists =
-      await conversationRepository.participantExists(otherUserId);
-    if (!otherExists) {
+    const users = await conversationRepository.findRoles([userId, otherUserId]);
+    if (!users.some((user) => user.id === otherUserId)) {
       throw new ApiError('Pengguna tidak ditemukan', 404);
     }
 
@@ -106,6 +106,10 @@ export const conversationService = {
       userId,
       otherUserId,
     );
+    // Live chat is buyer ↔ seller; it isn't a way to message any user.
+    if (!existing && !users.some((user) => isSeller(user.role))) {
+      throw new ApiError('Percakapan hanya dapat dimulai dengan penjual', 403);
+    }
     const conversation =
       existing ?? (await conversationRepository.create(userId, otherUserId));
 
