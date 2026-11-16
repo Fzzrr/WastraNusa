@@ -84,29 +84,23 @@ export function CartMain() {
   }, [flushPendingQuantityUpdates]);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      flushPendingQuantityUpdates({ keepalive: true });
-    };
-
-    const handlePageHide = () => {
-      flushPendingQuantityUpdates({ keepalive: true });
-    };
-
-    const handleVisibilityChange = () => {
+    // Tab closing, navigating away, or going to the background: send now.
+    const flushOnLeave = () => {
       if (document.visibilityState === 'hidden') {
         flushPendingQuantityUpdates({ keepalive: true });
       }
     };
+    const flushOnExit = () => flushPendingQuantityUpdates({ keepalive: true });
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handlePageHide);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', flushOnExit);
+    window.addEventListener('pagehide', flushOnExit);
+    document.addEventListener('visibilitychange', flushOnLeave);
 
     return () => {
       flushPendingQuantityUpdates();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handlePageHide);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', flushOnExit);
+      window.removeEventListener('pagehide', flushOnExit);
+      document.removeEventListener('visibilitychange', flushOnLeave);
     };
   }, [flushPendingQuantityUpdates]);
 

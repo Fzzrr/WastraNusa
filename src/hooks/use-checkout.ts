@@ -1,6 +1,6 @@
 'use client';
 
-import { parseJSend } from '@/lib/api-client';
+import { mutateApi } from '@/lib/api-client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface CheckoutItemInput {
@@ -30,21 +30,13 @@ export const checkoutKeys = {
   checkout: () => [...checkoutKeys.all, 'mutation'] as const,
 };
 
-async function checkoutApi(data: CheckoutInput): Promise<CheckoutResponse> {
-  const response = await fetch('/api/checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return parseJSend<CheckoutResponse>(response);
-}
-
 export function useCheckout() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: checkoutKeys.checkout(),
-    mutationFn: (data: CheckoutInput) => checkoutApi(data),
+    mutationFn: (data: CheckoutInput) =>
+      mutateApi<CheckoutResponse>('/api/checkout', 'POST', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['cart'] });

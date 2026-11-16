@@ -3,18 +3,20 @@
 import { parseJSend } from '@/lib/api-client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+type OrderUiStatus =
+  | 'Dikirim'
+  | 'Diterima'
+  | 'Dibatalkan'
+  | 'Menunggu Bayar'
+  | 'Dikonfirmasi'
+  | 'Pengemasan';
+
 export interface OrderItem {
   orderId: string;
   id: string;
   date: string;
   totalPrice: string;
-  status:
-    | 'Dikirim'
-    | 'Diterima'
-    | 'Dibatalkan'
-    | 'Menunggu Bayar'
-    | 'Dikonfirmasi'
-    | 'Pengemasan';
+  status: OrderUiStatus;
   paymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded';
   paymentStatusLabel: string;
   paymentDeadlineAt: string | null;
@@ -34,13 +36,7 @@ export interface OrderDetail {
   orderId: string;
   orderNumber: string;
   orderDate: string;
-  orderStatus:
-    | 'Dikirim'
-    | 'Diterima'
-    | 'Dibatalkan'
-    | 'Menunggu Bayar'
-    | 'Dikonfirmasi'
-    | 'Pengemasan';
+  orderStatus: OrderUiStatus;
   paymentStatus: 'unpaid' | 'paid' | 'failed' | 'refunded';
   paymentStatusLabel: string;
   paymentMethod: string | null;
@@ -107,6 +103,10 @@ export const orderKeys = {
   cancel: () => [...orderKeys.all, 'cancel'] as const,
 };
 
+const ORDER_ERROR = 'Gagal mengambil data pesanan';
+const orderPath = (identifier: string) =>
+  `/api/orders/${encodeURIComponent(identifier)}`;
+
 async function fetchOrders(
   status?: string,
   page: number = 1,
@@ -119,28 +119,22 @@ async function fetchOrders(
   queryParams.set('page', page.toString());
   queryParams.set('limit', limit.toString());
 
-  const response = await fetch(`/api/orders?${queryParams.toString()}`);
-  return parseJSend<PaginatedOrders>(response, 'Gagal mengambil data pesanan');
+  return parseJSend(await fetch(`/api/orders?${queryParams}`), ORDER_ERROR);
 }
 
 async function fetchOrderDetail(identifier: string): Promise<OrderDetail> {
-  const response = await fetch(`/api/orders/${encodeURIComponent(identifier)}`);
-  return parseJSend<OrderDetail>(response, 'Gagal mengambil data pesanan');
+  return parseJSend(await fetch(orderPath(identifier)), ORDER_ERROR);
 }
 
 async function cancelOrder(identifier: string): Promise<OrderDetail> {
-  const response = await fetch(
-    `/api/orders/${encodeURIComponent(identifier)}`,
-    {
+  return parseJSend(
+    await fetch(orderPath(identifier), {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'cancel' }),
-    },
+    }),
+    ORDER_ERROR,
   );
-
-  return parseJSend<OrderDetail>(response, 'Gagal mengambil data pesanan');
 }
 
 export function useOrders(
