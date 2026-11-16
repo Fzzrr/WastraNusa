@@ -3,10 +3,7 @@ import { ROLES } from '@/lib/auth/roles';
 import prisma from '@/lib/prisma';
 
 export type SellerManagementRoleFilter =
-  | 'user'
-  | 'seller'
-  | 'pending'
-  | 'rejected';
+  'user' | 'seller' | 'pending' | 'rejected';
 export type SellerManagementSort = 'newest' | 'oldest' | 'name';
 
 const SORT_ORDER: Record<

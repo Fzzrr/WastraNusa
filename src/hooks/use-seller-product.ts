@@ -65,14 +65,12 @@ export function fetchArticleOptionsPage(
     meta: { page: number; hasNextPage: boolean };
   }>(`/api/articles?page=${page}&limit=${limit}`).then(
     (result): ArticleOptionsPage => ({
-      items: result.items.map(
-        (item): ArticleOptionItem => ({
-          id: item.id,
-          title: item.title,
-          island: item.island ?? '',
-          province: item.province ?? '',
-        }),
-      ),
+      items: result.items.map((item): ArticleOptionItem => ({
+        id: item.id,
+        title: item.title,
+        island: item.island ?? '',
+        province: item.province ?? '',
+      })),
       meta: {
         page: result.meta.page,
         hasNextPage: result.meta.hasNextPage,
