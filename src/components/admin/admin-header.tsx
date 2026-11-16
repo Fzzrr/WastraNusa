@@ -1,6 +1,6 @@
 'use client';
 
-import { useAdminSidebar } from '@/components/admin/admin-sidebar-context';
+import { usePanelSidebar } from '@/components/panel-shell';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Menu } from 'lucide-react';
@@ -26,7 +26,7 @@ export function AdminHeader({
   /** `plain` drops the white bar and uses a larger green title. */
   variant?: 'default' | 'plain';
 }) {
-  const { setOpen } = useAdminSidebar();
+  const { setOpen } = usePanelSidebar();
   const isPlain = variant === 'plain';
 
   return (
