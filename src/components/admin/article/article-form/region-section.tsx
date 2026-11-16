@@ -47,6 +47,7 @@ export function RegionSection() {
   }, [watchedProvince]);
   return (
     <FormSection
+      step={2}
       icon={MapPin}
       title="Asal Daerah"
       description="Tentukan daerah asal wastra"
@@ -70,7 +71,7 @@ export function RegionSection() {
                 value={field.value ?? ''}
               >
                 <SelectTrigger className={selectTriggerClassName}>
-                  <MapIcon className="size-4 text-ink-soft" />
+                  <MapIcon className="size-4 text-[#b08a5e]" />
                   <SelectValue placeholder="Pilih Pulau" />
                 </SelectTrigger>
                 <SelectContent
@@ -106,7 +107,7 @@ export function RegionSection() {
                 disabled={!watchedIsland}
               >
                 <SelectTrigger className={selectTriggerClassName}>
-                  <MapPinned className="size-4 text-ink-soft" />
+                  <MapPinned className="size-4 text-[#b08a5e]" />
                   <SelectValue
                     placeholder={
                       watchedIsland ? 'Pilih Provinsi' : 'Pilih Provinsi'
@@ -142,7 +143,7 @@ export function RegionSection() {
                 disabled={!watchedProvince}
               >
                 <SelectTrigger className={selectTriggerClassName}>
-                  <MapPin className="size-4 text-ink-soft" />
+                  <MapPin className="size-4 text-[#b08a5e]" />
                   <SelectValue
                     placeholder={watchedProvince ? 'Pilih Daerah' : 'Daerah'}
                   />

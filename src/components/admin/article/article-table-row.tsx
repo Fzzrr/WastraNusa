@@ -9,44 +9,41 @@ import Link from 'next/link';
 
 export function ArticleRowSkeleton() {
   return (
-    <tr className="border-t border-border">
+    <tr className="border-t border-[#ece7de]">
       <td className="px-4 py-3">
-        <Skeleton className="size-4 rounded-sm bg-surface" />
+        <Skeleton className="size-4 rounded-sm bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <Skeleton className="size-12 rounded-xl bg-surface" />
+          <Skeleton className="size-12 rounded-xl bg-[#eee2d0]" />
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-5 w-48 bg-surface" />
-            <Skeleton className="h-4 w-32 bg-surface" />
+            <Skeleton className="h-5 w-48 bg-[#eee2d0]" />
+            <Skeleton className="h-4 w-32 bg-[#eee2d0]" />
           </div>
         </div>
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-6 w-16 rounded-full bg-surface" />
+        <Skeleton className="h-6 w-16 rounded-full bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-24 bg-surface" />
+        <Skeleton className="h-4 w-24 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="h-4 w-20 bg-surface" />
+        <Skeleton className="h-4 w-20 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
-        <Skeleton className="ml-auto h-4 w-12 bg-surface" />
+        <Skeleton className="ml-auto h-4 w-12 bg-[#eee2d0]" />
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-center gap-2">
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-          <Skeleton className="size-8 rounded-lg bg-surface" />
-          <Skeleton className="size-8 rounded-lg bg-surface" />
+          <Skeleton className="size-8 rounded-lg bg-[#eee2d0]" />
+          <Skeleton className="size-8 rounded-lg bg-[#eee2d0]" />
+          <Skeleton className="size-8 rounded-lg bg-[#eee2d0]" />
         </div>
       </td>
     </tr>
   );
 }
-
-const iconButtonClassName =
-  'cursor-pointer rounded-full text-ink-soft hover:bg-surface hover:text-ink';
 
 export function ArticleRow({
   article,
@@ -67,8 +64,8 @@ export function ArticleRow({
     <tr
       onClick={onEdit}
       className={cn(
-        'group cursor-pointer border-t border-border transition-colors',
-        isSelected ? 'bg-surface' : 'hover:bg-surface',
+        'group cursor-pointer border-t border-[#efe8dd] transition-colors',
+        isSelected ? 'bg-[#f4efe5]' : 'hover:bg-[#faf7f2]',
       )}
     >
       <td className="px-4 py-3" onClick={(event) => event.stopPropagation()}>
@@ -80,7 +77,7 @@ export function ArticleRow({
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-surface text-ink-soft ring-1 ring-border">
+          <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f4efe5] text-[#b08a5e] ring-1 ring-[#ebe3d6]">
             {article.imageURL ? (
               <Image
                 src={article.imageURL}
@@ -93,35 +90,35 @@ export function ArticleRow({
               <BookOpen className="size-5" />
             )}
           </span>
-          <div className="flex min-w-[130px] flex-col gap-0.5">
-            <p className="line-clamp-2 leading-snug font-semibold text-ink">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <p className="line-clamp-1 font-semibold text-[#2f3a33] transition-colors group-hover:text-[#2f5543]">
               {article.title}
             </p>
-            <p className="line-clamp-1 text-[13px] text-ink-soft">
-              {article.motifLabel}
+            <p className="line-clamp-1 text-xs text-[#9a8f80]">
+              {article.motifLabel} · {article.region}
             </p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3">
-        <span className="inline-flex rounded-full bg-surface px-2.5 py-1 text-[13px] font-medium whitespace-nowrap text-ink">
+        <span className="inline-flex rounded-full bg-[#f5ead3] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-[#826428]">
           {article.topic}
         </span>
       </td>
-      <td className="px-4 py-3 text-[15px] text-ink-soft">
+      <td className="px-4 py-3 text-sm text-[#6f6a62]">
         <div className="flex items-center gap-1.5">
-          <MapPin className="size-3.5 shrink-0 text-ink-soft" />
-          <span className="line-clamp-2">{article.region}</span>
+          <MapPin className="size-3.5 shrink-0 text-[#b08a5e]" />
+          <span className="line-clamp-1">{article.region}</span>
         </div>
       </td>
       <td className="px-4 py-3 text-center">
-        <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink tabular-nums">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#e7efe4] px-2.5 py-1 text-xs font-semibold text-[#2f5543] tabular-nums">
           <Eye className="size-3.5" />
           {article.views}
         </span>
       </td>
       <td className="px-4 py-3 text-center">
-        <span className="inline-flex items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-[13px] font-semibold text-ink-soft tabular-nums">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#f1ede6] px-2.5 py-1 text-xs font-semibold text-[#6f6a62] tabular-nums">
           <Clock3 className="size-3.5" />
           {article.readMinutes}
         </span>
@@ -132,7 +129,7 @@ export function ArticleRow({
             asChild
             size="icon-sm"
             variant="ghost"
-            className={iconButtonClassName}
+            className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#e7efe4] hover:text-[#2f5543]"
           >
             <Link
               href={`/encyclopedia/${article.slug}`}
@@ -147,7 +144,7 @@ export function ArticleRow({
             variant="ghost"
             aria-label="Edit artikel"
             title="Edit artikel"
-            className={iconButtonClassName}
+            className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-[#f5ead3] hover:text-[#826428]"
             onClick={onEdit}
           >
             <Pencil />
@@ -157,7 +154,7 @@ export function ArticleRow({
             variant="ghost"
             aria-label="Hapus artikel"
             title="Hapus artikel"
-            className="cursor-pointer rounded-full text-ink-soft hover:bg-destructive/10 hover:text-destructive"
+            className="cursor-pointer rounded-lg text-[#6f6a62] hover:bg-red-50 hover:text-red-600"
             onClick={onDelete}
             disabled={isDeleting}
           >

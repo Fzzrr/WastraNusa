@@ -134,10 +134,10 @@ export function AdminArticleContent() {
       <AdminHeader
         title="Manajemen Artikel"
         subtitle={
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[15px]">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
             <AdminBrandChip />
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1 text-ink-soft ring-1 ring-border">
-              <BookOpen className="size-3.5 text-ink-soft" />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#fffdfa] px-3 py-1 text-[#6f6a62] ring-1 ring-[#ebe3d6]">
+              <BookOpen className="size-3.5 text-[#b08a5e]" />
               Kelola Konten Edukasi Wastra Nusantara
             </span>
           </div>
@@ -147,9 +147,9 @@ export function AdminArticleContent() {
 
       <section className="flex flex-1 flex-col gap-5 px-4 py-6 md:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-2 rounded-xl bg-card px-4 py-2.5 text-[15px] text-ink-soft ring-1 ring-border">
-            <FileText className="size-4 text-ink-soft" />
-            <span className="font-semibold text-ink tabular-nums">
+          <span className="inline-flex items-center gap-2 rounded-xl bg-[#fffdfa] px-4 py-2.5 text-sm text-[#6f6a62] ring-1 ring-[#ebe3d6]">
+            <FileText className="size-4 text-[#b08a5e]" />
+            <span className="font-semibold text-[#2f4f3f] tabular-nums">
               {isLoading ? '…' : articlesData?.meta.totalItems}
             </span>
             Artikel
@@ -160,7 +160,7 @@ export function AdminArticleContent() {
                 variant="outline"
                 onClick={handleBulkDelete}
                 disabled={isDeleting}
-                className="h-11 animate-in cursor-pointer rounded-full border-destructive/30 bg-card px-4 text-destructive fade-in zoom-in-95 hover:bg-destructive/10 hover:text-destructive"
+                className="h-11 animate-in cursor-pointer rounded-xl border-red-200 bg-[#fffdfa] px-4 text-red-600 fade-in zoom-in-95 hover:bg-red-50 hover:text-red-700"
               >
                 <Trash2 data-icon="inline-start" />
                 Hapus ({selectedSlugs.length})
@@ -168,7 +168,7 @@ export function AdminArticleContent() {
             ) : null}
             <Button
               onClick={handleAdd}
-              className="h-11 cursor-pointer rounded-full bg-brand px-4 text-on-field transition-all hover:bg-brand-strong"
+              className="h-11 cursor-pointer rounded-xl bg-[#3a5a4a] px-4 text-white shadow-[0_6px_16px_rgba(47,75,61,0.25)] transition-all hover:-translate-y-px hover:bg-[#2f4b3d]"
             >
               <Plus data-icon="inline-start" />
               Tambah Artikel
@@ -176,10 +176,10 @@ export function AdminArticleContent() {
           </div>
         </div>
 
-        <div className="animate-in overflow-hidden rounded-xl bg-card ring-1 ring-border duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
+        <div className="animate-in overflow-hidden rounded-2xl bg-[#fffdfa] shadow-[0_1px_2px_rgba(60,41,15,0.04),0_12px_32px_rgba(89,69,38,0.06)] ring-1 ring-[#ebe3d6] duration-500 fill-mode-both fade-in slide-in-from-bottom-2">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left">
-              <thead className="bg-surface text-[13px] font-medium text-ink-soft">
+            <table className="w-full min-w-[900px] text-left">
+              <thead className="bg-[#faf7f2] text-xs font-medium tracking-wider text-[#8a8378] uppercase">
                 <tr>
                   <th className="w-12 px-4 py-4">
                     <Checkbox
@@ -193,9 +193,7 @@ export function AdminArticleContent() {
                   <th className="px-4 py-4">Topik</th>
                   <th className="px-4 py-4">Wilayah</th>
                   <th className="px-4 py-4 text-center">Dilihat</th>
-                  <th className="px-4 py-4 text-center whitespace-nowrap">
-                    Baca (mnt)
-                  </th>
+                  <th className="px-4 py-4 text-center">Waktu Baca (Mnt)</th>
                   <th className="px-4 py-4 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -207,11 +205,10 @@ export function AdminArticleContent() {
                 ) : articlesData?.items.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-14">
-                      <div className="flex flex-col items-center gap-3 text-[15px] text-ink-soft">
-                        <BookOpen
-                          className="shrink-0 size-5 text-ink-soft"
-                          strokeWidth={1.75}
-                        />
+                      <div className="flex flex-col items-center gap-3 text-sm text-[#8f8377]">
+                        <span className="flex size-12 items-center justify-center rounded-full bg-[#f4efe5] text-[#b08a5e]">
+                          <BookOpen className="size-5" />
+                        </span>
                         Belum ada artikel yang tersedia.
                       </div>
                     </td>

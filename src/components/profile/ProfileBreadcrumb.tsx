@@ -45,11 +45,11 @@ export default function ProfileBreadcrumb() {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList className="text-[15px] font-medium text-ink-soft">
+      <BreadcrumbList className="text-sm font-medium text-[#607167]">
         <BreadcrumbItem>
           <BreadcrumbLink
             href="/"
-            className="flex items-center gap-1.5 hover:text-ink"
+            className="flex items-center gap-1.5 hover:text-[#2f5b49]"
           >
             <Home className="size-3.5" />
             Beranda
@@ -60,11 +60,13 @@ export default function ProfileBreadcrumb() {
           <BreadcrumbSeparator key={`separator-${item.label}-${index}`} />,
           <BreadcrumbItem key={`item-${item.label}-${index}`}>
             {item.href ? (
-              <BreadcrumbLink href={item.href} className="hover:text-ink">
+              <BreadcrumbLink href={item.href} className="hover:text-[#2f5b49]">
                 {item.label}
               </BreadcrumbLink>
             ) : (
-              <BreadcrumbPage className="text-ink">{item.label}</BreadcrumbPage>
+              <BreadcrumbPage className="text-[#2f5b49]">
+                {item.label}
+              </BreadcrumbPage>
             )}
           </BreadcrumbItem>,
         ])}

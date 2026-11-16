@@ -11,7 +11,7 @@ function visiblePages(page: number, totalPages: number) {
 }
 
 const navButtonClassName =
-  'size-8 cursor-pointer rounded-full border-border bg-card text-ink-soft hover:bg-surface';
+  'size-8 cursor-pointer rounded-lg border-[#e5ded5] bg-[#fffdfa] text-[#6f6a62] hover:bg-[#f4efe5]';
 
 /** Numbered pagination for dashboard tables. Renders nothing for one page. */
 export function TablePagination({
@@ -32,13 +32,13 @@ export function TablePagination({
   return (
     <div
       className={cn(
-        'flex items-center justify-between border-t border-border px-5 py-4',
+        'flex items-center justify-between border-t border-[#efe8dd] px-5 py-4',
         className,
       )}
     >
-      <p className="text-base text-ink-soft">
-        Halaman <span className="font-semibold text-ink">{page}</span> dari{' '}
-        {totalPages}
+      <p className="text-sm text-[#9a8f80]">
+        Halaman <span className="font-semibold text-[#2f4f3f]">{page}</span>{' '}
+        dari {totalPages}
       </p>
       <div className="flex items-center gap-2">
         <Button
@@ -56,7 +56,7 @@ export function TablePagination({
           {visiblePages(page, totalPages).map((p, i, pages) => (
             <div key={p} className="flex items-center gap-1">
               {i > 0 && p - pages[i - 1] > 1 ? (
-                <span className="px-1 text-ink-soft">…</span>
+                <span className="px-1 text-[#9a8f80]">…</span>
               ) : null}
               <Button
                 variant="outline"
@@ -64,10 +64,10 @@ export function TablePagination({
                 aria-label={`Halaman ${p}`}
                 aria-current={page === p ? 'page' : undefined}
                 className={cn(
-                  'size-8 cursor-pointer rounded-full transition-all',
+                  'size-8 cursor-pointer rounded-lg transition-all',
                   page === p
-                    ? 'border-brand bg-brand text-on-field hover:bg-brand-strong hover:text-white'
-                    : 'border-border bg-card text-ink-soft hover:bg-surface',
+                    ? 'border-[#3a5a4a] bg-[#3a5a4a] text-white shadow-[0_4px_12px_rgba(47,75,61,0.25)] hover:bg-[#3a5a4a] hover:text-white'
+                    : 'border-[#e5ded5] bg-[#fffdfa] text-[#6f6a62] hover:bg-[#f4efe5]',
                 )}
                 onClick={() => onPageChange(p)}
                 disabled={disabled}
